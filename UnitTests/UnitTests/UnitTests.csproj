@@ -55,17 +55,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Svelto.Common\Svelto.Common.csproj">
-      <Project>{6341571A-7DFB-43F5-BAAA-27357750D9E9}</Project>
-      <Name>Svelto.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Svelto.ECS\Svelto.ECS.csproj">
       <Project>{2CFF0AF0-8F4B-45CE-B5C3-B03E1B6C6A6C}</Project>
       <Name>Svelto.ECS</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Svelto.Tasks\Svelto.Tasks.csproj">
-      <Project>{37B0F69B-FD2F-414A-AAAB-FDBEFDD88889}</Project>
-      <Name>Svelto.Tasks</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
