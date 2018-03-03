@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27421.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{1B903186-1A02-44C1-8E03-A45A64F17023}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Svelto.ECS", "..\Svelto.ECS\Svelto.ECS.csproj", "{2CFF0AF0-8F4B-45CE-B5C3-B03E1B6C6A6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Svelto.ECS.Tests", "Svelto.ECS.Tests\Svelto.ECS.Tests.csproj", "{1B903186-1A02-44C1-8E03-A45A64F17023}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1B903186-1A02-44C1-8E03-A45A64F17023}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1B903186-1A02-44C1-8E03-A45A64F17023}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1B903186-1A02-44C1-8E03-A45A64F17023}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1B903186-1A02-44C1-8E03-A45A64F17023}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2CFF0AF0-8F4B-45CE-B5C3-B03E1B6C6A6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2CFF0AF0-8F4B-45CE-B5C3-B03E1B6C6A6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CFF0AF0-8F4B-45CE-B5C3-B03E1B6C6A6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CFF0AF0-8F4B-45CE-B5C3-B03E1B6C6A6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B903186-1A02-44C1-8E03-A45A64F17023}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B903186-1A02-44C1-8E03-A45A64F17023}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B903186-1A02-44C1-8E03-A45A64F17023}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B903186-1A02-44C1-8E03-A45A64F17023}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

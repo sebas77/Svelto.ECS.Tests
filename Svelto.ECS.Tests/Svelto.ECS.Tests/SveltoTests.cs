@@ -148,6 +148,19 @@ namespace UnitTests
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(id));
         }
+        
+        [TestMethod]
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestAddEntityToGroupWithDescriptorInfo(int id)
+        {
+            _entityFactory.BuildEntityInGroup(id, id, EntityDescriptorTemplate<TestDescriptor>.Default, null);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(id));
+        }
 
         [TestMethod]
         [DataRow(0)]
@@ -195,6 +208,16 @@ namespace UnitTests
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(3));
         }
         
+        [TestMethod]
+        public void QueryingNotExistingViewsInAnExistingGroupMustNotCrash()
+        {
+            _entityFactory.BuildEntityInGroup<TestDescriptor>(0, 0, null);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView2>(0));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntitiesInGroupArray<TestEntityView2>(0));
+        }
+        
         EnginesRoot                         _enginesRoot;
         IEntityFactory                      _entityFactory;
         IEntityFunctions                    _entityFunctions;
@@ -236,6 +259,14 @@ namespace UnitTests
             {
                 T view;
                 return entityViewsDB.TryQueryMetaEntityView(ID, out view);
+            }
+
+            public bool HasEntitiesInGroupArray<T>(int ID) where T:IEntityView
+            {
+                int count;
+                entityViewsDB.QueryGroupedEntityViewsAsArray<T>(ID, out count);
+
+                return count != 0;
             }
         }
     }
