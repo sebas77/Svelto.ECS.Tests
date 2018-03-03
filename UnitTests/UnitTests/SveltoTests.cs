@@ -20,129 +20,181 @@ namespace UnitTests
 
         [TestMethod]
         [ExpectedException(typeof(TypeSafeDictionaryException))]
-        public void TestExceptionThrownOnDoubleAddIntervalled()
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestExceptionThrownOnDoubleAddIntervalled(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(0, null);
+            _entityFactory.BuildEntity<TestDescriptor>(id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFactory.BuildEntity<TestDescriptor>(0, null);
+            _entityFactory.BuildEntity<TestDescriptor>(id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         
         [TestMethod]
         [ExpectedException(typeof(TypeSafeDictionaryException))]
-        public void TestExceptionThrownOnDoubleAdd()
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestExceptionThrownOnDoubleAdd(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(0, null);
-            _entityFactory.BuildEntity<TestDescriptor>(0, null);
+            _entityFactory.BuildEntity<TestDescriptor>(id, null);
+            _entityFactory.BuildEntity<TestDescriptor>(id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         
         [TestMethod]
         [ExpectedException(typeof(TypeSafeDictionaryException))]
-        public void TestExceptionThrownOnDoubleEntityViewAddIntervalled()
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestExceptionThrownOnDoubleEntityViewAddIntervalled(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(0, null);
+            _entityFactory.BuildEntity<TestDescriptor>(id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFactory.BuildEntity<TestDescriptor2>(0, null);
+            _entityFactory.BuildEntity<TestDescriptor2>(id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         
         [TestMethod]
         [ExpectedException(typeof(TypeSafeDictionaryException))]
-        public void TestExceptionThrownOnDoubleEntityViewAdd()
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestExceptionThrownOnDoubleEntityViewAdd(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(0, null);
-            _entityFactory.BuildEntity<TestDescriptor2>(0, null);
+            _entityFactory.BuildEntity<TestDescriptor>(id, null);
+            _entityFactory.BuildEntity<TestDescriptor2>(id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         
         [TestMethod]
         [ExpectedException(typeof(TypeSafeDictionaryException))]
-        public void TestTwoEntitiesWithSameIDThrowsIntervalled()
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestTwoEntitiesWithSameIDThrowsIntervalled(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor2>(0, null);
+            _entityFactory.BuildEntity<TestDescriptor2>(id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFactory.BuildEntity<TestDescriptor3>(0, null);
+            _entityFactory.BuildEntity<TestDescriptor3>(id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         
         [TestMethod]
         [ExpectedException(typeof(TypeSafeDictionaryException))]
-        public void TestTwoEntitiesWithSameIDThrows()
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestTwoEntitiesWithSameIDThrows(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor2>(0, null);
-            _entityFactory.BuildEntity<TestDescriptor3>(0, null);
+            _entityFactory.BuildEntity<TestDescriptor2>(id, null);
+            _entityFactory.BuildEntity<TestDescriptor3>(id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         
         [TestMethod]
-        public void TestMetaEntityAndEntityIsOkWithSameID()
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestMetaEntityAndEntityIsOkWithSameID(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(0, null);
-            _entityFactory.BuildMetaEntity<TestDescriptor>(0, null);
+            _entityFactory.BuildEntity<TestDescriptor>(id, null);
+            _entityFactory.BuildMetaEntity<TestDescriptor>(id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(0);
-            _neverDoThisIsJustForTheTest.HasMetaEntity<TestEntityView>(0);
+            _neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id);
+            _neverDoThisIsJustForTheTest.HasMetaEntity<TestEntityView>(id);
         }
         
         [TestMethod]
         [ExpectedException(typeof(TypeSafeDictionaryException))]
-        public void TestTwoEntitiesWithSameIDRegardlessTheGroupThrows()
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestTwoEntitiesWithSameIDRegardlessTheGroupThrows(int id)
         {
-            _entityFactory.BuildEntityInGroup<TestDescriptor2>(0, 0, null);
-            _entityFactory.BuildEntityInGroup<TestDescriptor3>(0, 1, null);
+            _entityFactory.BuildEntityInGroup<TestDescriptor2>(id, id, null);
+            _entityFactory.BuildEntityInGroup<TestDescriptor3>(id, id+1, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         
         [TestMethod]
-        public void TestRemoveEntity()
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestRemoveEntity(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(0, null);
+            _entityFactory.BuildEntity<TestDescriptor>(id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.RemoveEntity(0);
+            _entityFunctions.RemoveEntity(id);
 
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(0));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id));
         }
         
         [TestMethod]
-        public void TestAddEntityToGroup()
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestAddEntityToGroup(int id)
         {
-            _entityFactory.BuildEntityInGroup<TestDescriptor>(0, 0, null);
+            _entityFactory.BuildEntityInGroup<TestDescriptor>(id, id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(0));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(0));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(id));
         }
 
         [TestMethod]
-        public void TestRemoveEntityFromGroup()
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestRemoveEntityFromGroup(int id)
         {
-            _entityFactory.BuildEntityInGroup<TestDescriptor>(0, 0, null);
+            _entityFactory.BuildEntityInGroup<TestDescriptor>(id, id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.RemoveEntity(0);
+            _entityFunctions.RemoveEntity(id);
 
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(0));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(0));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(id));
         }
         
         [TestMethod]
-        public void TestRemoveEntityGroup()
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestRemoveEntityGroup(int id)
         {
-            _entityFactory.BuildEntityInGroup<TestDescriptor>(0, 0, null);
+            _entityFactory.BuildEntityInGroup<TestDescriptor>(id, id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.RemoveGroupAndEntities(0);
+            _entityFunctions.RemoveGroupAndEntities(id);
 
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(0));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(0));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(id));
         }
+        
+        [TestMethod]
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestRemoveSwapGroup(int id)
+        {
+            _entityFactory.BuildEntityInGroup<TestDescriptor>(id, id, null);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
+            _entityFunctions.SwapEntityGroup(id, id, 3);
+
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(id));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(3));
+        }
+        
         EnginesRoot                         _enginesRoot;
         IEntityFactory                      _entityFactory;
         IEntityFunctions                    _entityFunctions;
