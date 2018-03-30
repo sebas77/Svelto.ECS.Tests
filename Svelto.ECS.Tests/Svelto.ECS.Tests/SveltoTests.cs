@@ -1,6 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Globalization;
+using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Svelto.ECS;
+using Svelto.ECS.Internal;
 
 namespace UnitTests
 {
@@ -19,11 +21,11 @@ namespace UnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(TypeSafeDictionaryException))]
+        [ExpectedException(typeof(TypeSafeFasterListForECSException))]
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(2)]
-        public void TestExceptionThrownOnDoubleAddIntervalled(int id)
+        public void TestExceptionThrownOnDoubleAddIntervaled(int id)
         {
             _entityFactory.BuildEntity<TestDescriptor>(id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
@@ -33,7 +35,7 @@ namespace UnitTests
         }
         
         [TestMethod]
-        [ExpectedException(typeof(TypeSafeDictionaryException))]
+        [ExpectedException(typeof(TypeSafeFasterListForECSException))]
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(2)]
@@ -45,7 +47,7 @@ namespace UnitTests
         }
         
         [TestMethod]
-        [ExpectedException(typeof(TypeSafeDictionaryException))]
+        [ExpectedException(typeof(TypeSafeFasterListForECSException))]
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(2)]
@@ -59,7 +61,7 @@ namespace UnitTests
         }
         
         [TestMethod]
-        [ExpectedException(typeof(TypeSafeDictionaryException))]
+        [ExpectedException(typeof(TypeSafeFasterListForECSException))]
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(2)]
@@ -71,7 +73,7 @@ namespace UnitTests
         }
         
         [TestMethod]
-        [ExpectedException(typeof(TypeSafeDictionaryException))]
+        [ExpectedException(typeof(TypeSafeFasterListForECSException))]
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(2)]
@@ -85,7 +87,7 @@ namespace UnitTests
         }
         
         [TestMethod]
-        [ExpectedException(typeof(TypeSafeDictionaryException))]
+        [ExpectedException(typeof(TypeSafeFasterListForECSException))]
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(2)]
@@ -100,26 +102,14 @@ namespace UnitTests
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(2)]
-        public void TestMetaEntityAndEntityIsOkWithSameID(int id)
-        {
-            _entityFactory.BuildEntity<TestDescriptor>(id, null);
-            _entityFactory.BuildMetaEntity<TestDescriptor>(id, null);
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
-
-            _neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id);
-            _neverDoThisIsJustForTheTest.HasMetaEntity<TestEntityView>(id);
-        }
-        
-        [TestMethod]
-        [ExpectedException(typeof(TypeSafeDictionaryException))]
-        [DataRow(0)]
-        [DataRow(1)]
-        [DataRow(2)]
-        public void TestTwoEntitiesWithSameIDRegardlessTheGroupThrows(int id)
+        public void TestTwoEntitiesWithSameIDWorksOnDifferentGroups(int id)
         {
             _entityFactory.BuildEntityInGroup<TestDescriptor2>(id, id, null);
             _entityFactory.BuildEntityInGroup<TestDescriptor3>(id, id+1, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id+1)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyNEntityInGlobalPool<TestEntityView>(2));
         }
         
         [TestMethod]
@@ -133,7 +123,7 @@ namespace UnitTests
 
             _entityFunctions.RemoveEntity(id);
 
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntityInStandardGroup<TestEntityView>(id));
         }
         
         [TestMethod]
@@ -145,8 +135,8 @@ namespace UnitTests
             _entityFactory.BuildEntityInGroup<TestDescriptor>(id, id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(id));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
         }
         
         [TestMethod]
@@ -158,8 +148,8 @@ namespace UnitTests
             _entityFactory.BuildEntityInGroup(id, id, EntityDescriptorTemplate<TestDescriptor>.Default, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(id));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
         }
 
         [TestMethod]
@@ -171,10 +161,10 @@ namespace UnitTests
             _entityFactory.BuildEntityInGroup<TestDescriptor>(id, id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.RemoveEntity(id);
+            _entityFunctions.RemoveEntity(id, id);
 
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(id));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
         }
         
         [TestMethod]
@@ -188,8 +178,8 @@ namespace UnitTests
 
             _entityFunctions.RemoveGroupAndEntities(id);
 
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(id));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
         }
         
         [TestMethod]
@@ -203,19 +193,19 @@ namespace UnitTests
 
             _entityFunctions.SwapEntityGroup(id, id, 3);
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(id));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView>(3));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(3));
         }
         
         [TestMethod]
-        public void QueryingNotExistingViewsInAnExistingGroupMustNotCrash()
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void QueryingNotExistingViewsInAnExistingGroupMustNotCrash(int id)
         {
-            _entityFactory.BuildEntityInGroup<TestDescriptor>(0, 0, null);
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntitiesInGroup<TestEntityView2>(0));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntitiesInGroupArray<TestEntityView2>(0));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView2>(id));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroupArray<TestEntityView2>(id));
         }
         
         EnginesRoot                         _enginesRoot;
@@ -230,7 +220,7 @@ namespace UnitTests
         class TestDescriptor2 : GenericEntityDescriptor<TestEntityView>
         {}
         
-        class TestDescriptor3 : GenericEntityDescriptor<TestEntityView2>
+        class TestDescriptor3 : GenericEntityDescriptor<TestEntityView>
         {}
 
         class TestEntityView : EntityView
@@ -244,27 +234,30 @@ namespace UnitTests
             public IEntityViewsDB entityViewsDB { get; set; }
             public void Ready() {}
 
-            public bool HasEntity<T>(int ID) where T : EntityView
+            public bool HasAnyNEntityInGlobalPool<T>(int amount) where T : EntityView
             {
-                T view;
-                return entityViewsDB.TryQueryEntityView(ID, out view);
-            }
-            
-            public bool HasEntitiesInGroup<T>(int ID) where T : EntityView
-            {
-                return entityViewsDB.QueryGroupedEntityViews<T>(ID).Count != 0;
+                return entityViewsDB.QueryEntityViews<T>().Count == amount;
             }
 
-            public bool HasMetaEntity<T>(int ID) where T : EntityView
+            public bool HasEntity<T>(EGID ID) where T : EntityView
             {
-                T view;
-                return entityViewsDB.TryQueryMetaEntityView(ID, out view);
+                return entityViewsDB.QueryEntityView<T>(ID) != null;
             }
 
-            public bool HasEntitiesInGroupArray<T>(int ID) where T:IEntityView
+            public bool HasEntityInStandardGroup<T>(int ID) where T : EntityView
+            {
+                return entityViewsDB.QueryEntityView<T>(ID) != null;
+            }
+
+            public bool HasAnyEntityInGroup<T>(int groupID) where T : EntityView
+            {
+                return entityViewsDB.QueryGroupedEntityViews<T>(groupID).Count != 0;
+            }
+
+            public bool HasAnyEntityInGroupArray<T>(int groupID) where T:IEntityView
             {
                 int count;
-                entityViewsDB.QueryGroupedEntityViewsAsArray<T>(ID, out count);
+                entityViewsDB.QueryGroupedEntityViewsAsArray<T>(groupID, out count);
 
                 return count != 0;
             }
