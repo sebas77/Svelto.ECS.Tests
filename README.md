@@ -1,3 +1,3 @@
 # Svelto.ECS.Tests
 
-Unity is not necessary for this test suite, I am using MSTest. Working either in Visual Studio and Jetbrains rider.
+Unity is not necessary for this test suite, I am using MSTest. Working either in Visual Studio and Jetbrains rider. You need to install the MSTest.TestFramework and MSTest.TestAdapter packages with nuget
