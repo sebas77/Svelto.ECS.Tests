@@ -140,21 +140,6 @@ namespace UnitTests
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(2)]
-        public void TestCacheWorks(int id)
-        {
-            _entityFactory.BuildEntity<TestDescriptor>(id, id, new[] {new TestIt(2)});
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            
-            Assert.AreNotEqual(EntityView<TestEntityView>.FieldCache.list.Count, 0);
-
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
-        }
-        
-        [TestMethod]
-        [DataRow(0)]
-        [DataRow(1)]
-        [DataRow(2)]
         public void TestBuildEntityWithImplementor(int id)
         {
             _entityFactory.BuildEntity<TestDescriptor>(id, id, new[] {new TestIt(2)});
@@ -203,9 +188,10 @@ namespace UnitTests
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView2>(id));
-            TestEntityView2 entityView;
-            _neverDoThisIsJustForTheTest.entityViewsDB.TryQueryEntityView(new EGID(id, id), out entityView);
-            Assert.AreEqual(entityView.TestIt.value, 2);
+
+            uint index;
+            var testEntityView2 = _neverDoThisIsJustForTheTest.entityViewsDB.QueryEntities<TestEntityView2>(new EGID(id, id), out index)[index];
+            Assert.AreEqual(testEntityView2.TestIt.value, 2);
         }
         
         [TestMethod]
@@ -214,7 +200,7 @@ namespace UnitTests
         [DataRow(2)]
         public void TestBuildEntityToGroupWithDescriptorInfo(int id)
         {
-            _entityFactory.BuildEntity(id, id, EntityDescriptorTemplate<TestDescriptor>.Default, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity(id, id, EntityDescriptorTemplate<TestDescriptor>.Info.entityViewsToBuild, new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
@@ -265,6 +251,7 @@ namespace UnitTests
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(3));
+            //check egid is correct
         }
         
         [TestMethod]
@@ -292,10 +279,22 @@ namespace UnitTests
         class TestDescriptor3 : GenericEntityDescriptor<TestEntityView>
         {}
         
+        class TestDescriptors : GenericEntityDescriptor<TestEntityView>
+        {}
+        
+        class TestDescriptor2s : GenericEntityDescriptor<TestEntityView>
+        {}
+        
+        class TestDescriptor3s : GenericEntityDescriptor<TestEntityView>
+        {}
+        
         class TestDescriptor4 : GenericEntityDescriptor<TestEntityView2>
         {}
         
         class TestDescriptor5 : GenericEntityDescriptor<TestEntityView2, TestEntityView>
+        {}
+        
+        class TestDescriptor6 : GenericEntityDescriptor<TestEntityView2, TestEntityViewS>
         {}
 
         class TestEntityView : EntityView
@@ -303,7 +302,13 @@ namespace UnitTests
             public ITestIt TestIt;
         }
         
-        struct TestEntityView2 : IEntityData
+        class TestEntityViewS : IEntityStruct
+        {
+            public ITestIt TestIt;
+            public EGID ID { get; set; }
+        }
+        
+        struct TestEntityView2 : IEntityStruct
         {
             public ITestIt TestIt;
             public EGID ID { get; set; }
@@ -339,15 +344,17 @@ namespace UnitTests
                 return entityViewsDB.QueryEntityViews<T>().Count != 0;
             }
 
-            public bool HasAnyEntityInGroup<T>(int groupID) where T : IEntityData
-            {
-                return entityViewsDB.QueryEntityViews<T>(groupID).Count != 0;
-            }
-
-            public bool HasAnyEntityInGroupArray<T>(int groupID) where T:IEntityData
+            public bool HasAnyEntityInGroup<T>(int groupID) where T : IEntityStruct
             {
                 int count;
-                entityViewsDB.QueryEntityViewsCacheFriendly<T>(groupID, out count);
+                entityViewsDB.QueryEntities<T>(groupID, out count);
+                return count > 0;
+            }
+
+            public bool HasAnyEntityInGroupArray<T>(int groupID) where T:IEntityStruct
+            {
+                int count;
+                entityViewsDB.QueryEntities<T>(groupID, out count);
 
                 return count != 0;
             }
