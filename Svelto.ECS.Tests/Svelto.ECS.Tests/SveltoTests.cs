@@ -13,9 +13,16 @@ namespace UnitTests
             _simpleSubmissionEntityViewScheduler = new SimpleSubmissionEntityViewScheduler();
             _enginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
             _neverDoThisIsJustForTheTest = new TestEngine();
+
             _enginesRoot.AddEngine(_neverDoThisIsJustForTheTest);
+
             _entityFactory = _enginesRoot.GenerateEntityFactory();
             _entityFunctions = _enginesRoot.GenerateEntityFunctions();
+        }
+
+        public void TestRemoveEntityThrowExceptionIfNotGoundInGroup()
+        {
+
         }
 
         [TestMethod]
@@ -94,20 +101,6 @@ namespace UnitTests
             _entityFactory.BuildEntity<TestDescriptor2>(id, null);
             _entityFactory.BuildEntity<TestDescriptor3>(id, null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
-        }
-        
-        [TestMethod]
-        [DataRow(0)]
-        [DataRow(1)]
-        [DataRow(2)]
-        public void TestMetaEntityAndEntityIsOkWithSameID(int id)
-        {
-            _entityFactory.BuildEntity<TestDescriptor>(id, null);
-            _entityFactory.BuildMetaEntity<TestDescriptor>(id, null);
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
-
-            _neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(id);
-            _neverDoThisIsJustForTheTest.HasMetaEntity<TestEntityView>(id);
         }
         
         [TestMethod]
@@ -253,12 +246,6 @@ namespace UnitTests
             public bool HasEntitiesInGroup<T>(int ID) where T : EntityView
             {
                 return entityViewsDB.QueryGroupedEntityViews<T>(ID).Count != 0;
-            }
-
-            public bool HasMetaEntity<T>(int ID) where T : EntityView
-            {
-                T view;
-                return entityViewsDB.TryQueryMetaEntityView(ID, out view);
             }
 
             public bool HasEntitiesInGroupArray<T>(int ID) where T:IEntityView
