@@ -270,7 +270,7 @@ namespace UnitTests
         [DataRow(2)]
         public void TestBuildEntityToGroupWithDescriptorInfo(int id)
         {
-            _entityFactory.BuildEntity(id, id, EntityDescriptorTemplate<TestDescriptor>.Info.entityViewsToBuild, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity(id, id, EntityDescriptorTemplate<TestDescriptor>.descriptor.entitiesToBuild, new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
@@ -386,7 +386,7 @@ namespace UnitTests
             public EGID ID { get; set; }
         }
 
-        struct TestEntityViewStruct : IEntityView
+        struct TestEntityViewStruct : IEntityViewStruct
         {
             public ITestIt TestIt;
 
