@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Svelto.ECS", "..\Svelto.ECS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Svelto.ECS.Tests", "Svelto.ECS.Tests\Svelto.ECS.Tests.csproj", "{1B903186-1A02-44C1-8E03-A45A64F17023}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DictionaryTest", "DictionaryTest\DictionaryTest.csproj", "{BA9D60EB-C4B6-4FB4-8C1E-ED542C97F31D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DictionaryTest", "DictionaryTest\DictionaryTest.csproj", "{BA9D60EB-C4B6-4FB4-8C1E-ED542C97F31D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECSAllocationTest", "ECSAllocationTest\ECSAllocationTest.csproj", "{DEE343B1-C0FA-40E2-A1AC-6BA605BCD5D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{BA9D60EB-C4B6-4FB4-8C1E-ED542C97F31D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA9D60EB-C4B6-4FB4-8C1E-ED542C97F31D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA9D60EB-C4B6-4FB4-8C1E-ED542C97F31D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEE343B1-C0FA-40E2-A1AC-6BA605BCD5D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEE343B1-C0FA-40E2-A1AC-6BA605BCD5D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEE343B1-C0FA-40E2-A1AC-6BA605BCD5D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEE343B1-C0FA-40E2-A1AC-6BA605BCD5D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
