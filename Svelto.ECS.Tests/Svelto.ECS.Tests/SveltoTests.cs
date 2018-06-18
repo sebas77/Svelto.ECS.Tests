@@ -156,7 +156,7 @@ namespace UnitTests
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
 
-            var entityView = _neverDoThisIsJustForTheTest.entityViewsDB.QueryEntityView<TestEntityView>(new EGID(id, id));
+            var entityView = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntityView<TestEntityView>(new EGID(id, id));
             Assert.AreEqual(entityView.TestIt.value, 2);
         }
         
@@ -216,7 +216,7 @@ namespace UnitTests
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityStruct>(id));
             uint index;
             Assert.IsTrue(
-                _neverDoThisIsJustForTheTest.entityViewsDB.
+                _neverDoThisIsJustForTheTest.entitiesDB.
                     QueryEntitiesAndIndex<TestEntityStruct>(new EGID(id, id),
                     out index)[index].TestIt ==  3);
         }
@@ -237,7 +237,7 @@ namespace UnitTests
             Assert.IsTrue(_neverDoThisIsJustForTheTest.
                 HasAnyEntityInGroup<TestEntityViewStruct>(id));
             int count;
-            Assert.AreSame(_neverDoThisIsJustForTheTest.entityViewsDB.
+            Assert.AreSame(_neverDoThisIsJustForTheTest.entitiesDB.
                               QueryEntities<TestEntityViewStruct>(id, out count)
                 [0].TestIt, testIt);
         }
@@ -257,7 +257,7 @@ namespace UnitTests
                 HasAnyEntityInGroup<TestEntityViewStruct>(id));
 
             uint index;
-            var testEntityView2 = _neverDoThisIsJustForTheTest.entityViewsDB.
+            var testEntityView2 = _neverDoThisIsJustForTheTest.entitiesDB.
                 QueryEntitiesAndIndex<TestEntityViewStruct>
                     (new EGID(id, id), out index)[index];
 
@@ -408,32 +408,32 @@ namespace UnitTests
             public float value { get; }
         }
 
-        class TestEngine: IQueryingEntityViewEngine
+        class TestEngine: IQueryingEntitiesEngine
         {
-            public IEntityViewsDB entityViewsDB { get; set; }
+            public IEntitiesDB entitiesDB { get; set; }
             public void Ready() {}
 
             public bool HasEntity<T>(EGID ID) where T : EntityView
             {
-                return entityViewsDB.QueryEntityView<T>(ID) != null;
+                return entitiesDB.QueryEntityView<T>(ID) != null;
             }
 
             public bool HasEntityInStandardGroup<T>(int ID) where T : EntityView
             {
-                return entityViewsDB.QueryEntityViews<T>().Count != 0;
+                return entitiesDB.QueryEntityViews<T>().Count != 0;
             }
 
             public bool HasAnyEntityInGroup<T>(int groupID) where T : IEntityStruct
             {
                 int count;
-                entityViewsDB.QueryEntities<T>(groupID, out count);
+                entitiesDB.QueryEntities<T>(groupID, out count);
                 return count > 0;
             }
 
             public bool HasAnyEntityInGroupArray<T>(int groupID) where T:IEntityStruct
             {
                 int count;
-                entityViewsDB.QueryEntities<T>(groupID, out count);
+                entitiesDB.QueryEntities<T>(groupID, out count);
 
                 return count != 0;
             }
