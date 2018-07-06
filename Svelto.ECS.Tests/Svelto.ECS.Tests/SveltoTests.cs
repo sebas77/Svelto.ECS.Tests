@@ -110,8 +110,8 @@ namespace UnitTests
         [DataRow(2)]
         public void TestTwoEntitiesWithSameIDWorksOnDifferentGroups(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor2>(id, id, new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor3>(id, id+1, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor2>(new EGID(id, id), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor3>(new EGID(id, id+1), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id+1)));
@@ -137,7 +137,7 @@ namespace UnitTests
         [DataRow(2)]
         public void TestBuildEntity(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(id, id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
@@ -150,7 +150,7 @@ namespace UnitTests
         [DataRow(2)]
         public void TestBuildEntityWithImplementor(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(id, id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
@@ -166,7 +166,7 @@ namespace UnitTests
         [DataRow(2)]
         public void TestBuildEntityViewStruct(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor4>(id, id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor4>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
@@ -178,7 +178,7 @@ namespace UnitTests
         [DataRow(2)]
         public void TestBuildEntitytruct(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor7>(id, id, null);
+            _entityFactory.BuildEntity<TestDescriptor7>(new EGID(id, id), null);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityStruct>(id));
@@ -193,7 +193,7 @@ namespace UnitTests
         {
             try
             {
-                _entityFactory.BuildEntity<TestDescriptor6>(id, id, null);
+                _entityFactory.BuildEntity<TestDescriptor6>(new EGID(id, id), null);
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
             }
             catch (Exception e)
@@ -209,7 +209,7 @@ namespace UnitTests
         [DataRow(2)]
         public void TestBuildEntitytructWithInitializer(int id)
         {
-            var init = _entityFactory.BuildEntity<TestDescriptor7>(id, id, null);
+            var init = _entityFactory.BuildEntity<TestDescriptor7>(new EGID(id, id), null);
             init.Init(new TestEntityStruct(3));
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
             
@@ -229,7 +229,7 @@ namespace UnitTests
         {
             TestIt testIt = new TestIt(2);
             _entityFactory.BuildEntity<TestDescriptor5>
-                (id, id, new[] { testIt });
+                (new EGID(id, id), new[] { testIt });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
@@ -249,7 +249,7 @@ namespace UnitTests
         public void TestBuildEntityWithViewStructWithImplementorAndTestQueryEntitiesAndIndex(int id)
         {
             var testIt = new TestIt(2);
-            _entityFactory.BuildEntity<TestDescriptor4>(id, id, 
+            _entityFactory.BuildEntity<TestDescriptor4>(new EGID(id, id), 
                 new[] {testIt});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
@@ -270,7 +270,7 @@ namespace UnitTests
         [DataRow(2)]
         public void TestBuildEntityToGroupWithDescriptorInfo(int id)
         {
-            _entityFactory.BuildEntity(id, id, EntityDescriptorTemplate<TestDescriptor>.descriptor.entitiesToBuild, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity(new EGID(id, id), EntityDescriptorTemplate<TestDescriptor>.descriptor.entitiesToBuild, new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
@@ -283,13 +283,16 @@ namespace UnitTests
         [DataRow(2)]
         public void TestRemoveEntityFromGroup(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(id, id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), 
+                new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             _entityFunctions.RemoveEntity(id, id);
 
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>
+                (new EGID(id, id)));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup
+                <TestEntityView>(id));
         }
         
         [TestMethod]
@@ -298,7 +301,7 @@ namespace UnitTests
         [DataRow(2)]
         public void TestRemoveEntityGroup(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(id, id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             _entityFunctions.RemoveGroupAndEntities(id);
@@ -306,14 +309,32 @@ namespace UnitTests
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
         }
-        
+
+        [TestMethod]
+        [DataRow(0)]
+      //  [DataRow(1)]
+      //  [DataRow(2)]
+        public void TestRemoveAndAddAgainEntity(int id)
+        {
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] { new TestIt(2) });
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            _entityFunctions.RemoveEntity(id, id);
+
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] { new TestIt(2) });
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
+        }
+
         [TestMethod]
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(2)]
         public void TestRemoveSwapGroup(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(id, id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             _entityFunctions.SwapEntityGroup(id, id, 3);
@@ -415,7 +436,7 @@ namespace UnitTests
 
             public bool HasEntity<T>(EGID ID) where T : EntityView
             {
-                return entitiesDB.QueryEntityView<T>(ID) != null;
+                return entitiesDB.Exists<T>(ID);
             }
 
             public bool HasEntityInStandardGroup<T>(int ID) where T : EntityView
