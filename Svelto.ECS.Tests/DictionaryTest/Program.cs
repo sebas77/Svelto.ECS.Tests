@@ -24,7 +24,7 @@ namespace Svelto.DataStructures
         }
         static void Main(string[] args)
         {
-        //    Tests();
+       //     Tests();
             Profiling();
         }
 
@@ -53,16 +53,17 @@ namespace Svelto.DataStructures
                     throw new Exception();
 
             System.Console.WriteLine("test passed");
-
-            for (int i = 1; i < dictionarysize; i += 2)
-                if (test[i].i != numbers[i])
-                    throw new Exception();
-
-            System.Console.WriteLine("test passed");
-
-
+            
+            test.Trim();
+            
             for (int i = 0; i < dictionarysize; i++)
                 test[i] = new Test(numbers[i]);
+            
+            System.Console.WriteLine("test passed");            
+
+            for (int i = 1; i < dictionarysize - 1; i += 2)
+                if (test[i].i != numbers[i])
+                    throw new Exception();
 
             for (int i = 0; i < dictionarysize; i++)
                 if (test[i].i != numbers[i])
@@ -75,6 +76,8 @@ namespace Svelto.DataStructures
                     throw new Exception();
 
             System.Console.WriteLine("test passed");
+            
+            test.Trim();
 
             for (int i = dictionarysize - 1; i >= 0; i -= 3)
                 test[i] = new Test(numbers[i]);
@@ -96,6 +99,8 @@ namespace Svelto.DataStructures
             for (int i = 0; i < dictionarysize; i++)
                 if (test.Remove(i) == true)
                     throw new Exception();
+            
+            test.Trim();
 
             System.Console.WriteLine("test passed");
 

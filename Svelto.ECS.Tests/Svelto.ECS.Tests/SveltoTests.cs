@@ -40,7 +40,6 @@ namespace UnitTests
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         
-
         [TestMethod]
         [ExpectedException(typeof(FasterDictionaryException))]
         [DataRow(0)]
@@ -114,8 +113,8 @@ namespace UnitTests
             _entityFactory.BuildEntity<TestDescriptor2>(new EGID(id, id), new[] {new TestIt(2)});
             _entityFactory.BuildEntity<TestDescriptor3>(new EGID(id, id+1), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id+1)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id+1)));
         }
         
         [TestMethod]
@@ -141,8 +140,8 @@ namespace UnitTests
             _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
         }
         
         [TestMethod]
@@ -151,14 +150,19 @@ namespace UnitTests
         [DataRow(2)]
         public void TestBuildEntityWithImplementor(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor5>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
 
-            var entityView = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntityView<TestEntityView>(new EGID(id, id));
+            var entityView = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntityView
+                <TestEntityView>(new EGID(id, id));
             Assert.AreEqual(entityView.TestIt.value, 2);
+
+            uint index;
+            Assert.AreEqual(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewStruct>
+                                (new EGID(id, id), out index)[index].TestIt.value, 2);
         }
         
         [TestMethod]
@@ -208,7 +212,7 @@ namespace UnitTests
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(2)]
-        public void TestBuildEntitytructWithInitializer(int id)
+        public void TestBuildEntityStructWithInitializer(int id)
         {
             var init = _entityFactory.BuildEntity<TestDescriptor7>(new EGID(id, id), null);
             init.Init(new TestEntityStruct(3));
@@ -219,7 +223,7 @@ namespace UnitTests
             Assert.IsTrue(
                 _neverDoThisIsJustForTheTest.entitiesDB.
                     QueryEntitiesAndIndex<TestEntityStruct>(new EGID(id, id),
-                    out index)[index].value ==  3);
+                    out index)[index].value == 3);
         }
 
         [TestMethod]
@@ -274,8 +278,8 @@ namespace UnitTests
             _entityFactory.BuildEntity(new EGID(id, id), EntityDescriptorTemplate<TestDescriptor>.descriptor.entitiesToBuild, new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
         }
 
         [TestMethod]
@@ -325,8 +329,8 @@ namespace UnitTests
             _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
         }
 
         [TestMethod]
@@ -340,24 +344,24 @@ namespace UnitTests
 
             _entityFunctions.SwapEntityGroup(id, id, 3);
 
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(3));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, 3)));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(3));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, 3)));
 
             uint index;
-            Assert.AreEqual(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityView>(new EGID(id, 3), out index)[index].ID.entityID, id);
-            Assert.AreEqual(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityView>(new EGID(id, 3), out index)[index].ID.groupID, 3);
+            Assert.AreEqual(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewStruct>(new EGID(id, 3), out index)[index].ID.entityID, id);
+            Assert.AreEqual(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewStruct>(new EGID(id, 3), out index)[index].ID.groupID, 3);
             
             _entityFunctions.SwapEntityGroup(id, 3, id);
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, id)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(3));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>(new EGID(id, 3)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(3));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, 3)));
 
-            Assert.AreEqual(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityView>(new EGID(id, id), out index)[index].ID.entityID, id);
-            Assert.AreEqual(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityView>(new EGID(id, id), out index)[index].ID.groupID, id);
+            Assert.AreEqual(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewStruct>(new EGID(id, id), out index)[index].ID.entityID, id);
+            Assert.AreEqual(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewStruct>(new EGID(id, id), out index)[index].ID.groupID, id);
         }
 
         [TestMethod]
@@ -478,7 +482,7 @@ namespace UnitTests
 
             public TestEntityStruct(int value):this()
             {
-                value = value;
+                this.value = value;
             }
 
             public EGID ID { get; set; }
@@ -511,7 +515,7 @@ namespace UnitTests
             public IEntitiesDB entitiesDB { get; set; }
             public void Ready() {}
 
-            public bool HasEntity<T>(EGID ID) where T : EntityView
+            public bool HasEntity<T>(EGID ID) where T : IEntityViewStruct
             {
                 return entitiesDB.Exists<T>(ID);
             }
