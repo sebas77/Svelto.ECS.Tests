@@ -126,7 +126,7 @@ namespace UnitTests
             _entityFactory.BuildEntity<TestDescriptor>(id, new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.RemoveEntity(id);
+            _entityFunctions.RemoveEntity<TestDescriptor>(id);
 
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntityInStandardGroup<TestEntityView>(id));
         }
@@ -275,11 +275,28 @@ namespace UnitTests
         [DataRow(2)]
         public void TestBuildEntityToGroupWithDescriptorInfo(int id)
         {
-            _entityFactory.BuildEntity(new EGID(id, id), EntityDescriptorTemplate<TestDescriptor>.descriptor.entitiesToBuild, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity(new EGID(id, id),
+                                       EntityDescriptorTemplate<TestDescriptor>.descriptor,
+                                       new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
+        }
+        
+        [TestMethod]
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestBuildEntityInAddFunction(int id)
+        {
+            _enginesRoot.AddEngine(new TestEngineAdd(_entityFactory));
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityStruct>(new EGID(100)));
         }
 
         [TestMethod]
@@ -292,7 +309,7 @@ namespace UnitTests
                 new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.RemoveEntity(id, id);
+            _entityFunctions.RemoveEntity<TestDescriptor>(id, id);
 
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityView>
                 (new EGID(id, id)));
@@ -324,7 +341,7 @@ namespace UnitTests
             _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.RemoveEntity(id, id);
+            _entityFunctions.RemoveEntity<TestDescriptor>(id, id);
 
             _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
@@ -342,7 +359,7 @@ namespace UnitTests
             _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.SwapEntityGroup(id, id, 3);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(id, id, 3);
 
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
@@ -353,7 +370,7 @@ namespace UnitTests
             Assert.AreEqual(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewStruct>(new EGID(id, 3), out index)[index].ID.entityID, id);
             Assert.AreEqual(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewStruct>(new EGID(id, 3), out index)[index].ID.groupID, 3);
             
-            _entityFunctions.SwapEntityGroup(id, 3, id);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(id, 3, id);
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
@@ -405,10 +422,10 @@ namespace UnitTests
                 }
             }
 
-            _entityFunctions.RemoveEntity(new EGID(id, 0));
-            _entityFunctions.RemoveEntity(new EGID(id2, 1));
-            _entityFunctions.RemoveEntity(new EGID(id3, 2));
-            _entityFunctions.RemoveEntity(new EGID(id4, 3));
+            _entityFunctions.RemoveEntity<TestDescriptor8>(new EGID(id, 0));
+            _entityFunctions.RemoveEntity<TestDescriptor8>(new EGID(id2, 1));
+            _entityFunctions.RemoveEntity<TestDescriptor8>(new EGID(id3, 2));
+            _entityFunctions.RemoveEntity<TestDescriptor8>(new EGID(id4, 3));
 
             _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities((ref TestEntityViewStruct entity)
                 =>
@@ -510,12 +527,32 @@ namespace UnitTests
             public float value { get; set; }
         }
 
+        class TestEngineAdd : SingleEntityEngine<TestEntityViewStruct>
+        {
+            public TestEngineAdd(IEntityFactory entityFactory)
+            {
+                _entityFactory = entityFactory;
+            }
+
+            protected override void Add(ref TestEntityViewStruct entityView)
+            {
+                _entityFactory.BuildEntity<TestDescriptor7>(100, null);
+            }
+
+            protected override void Remove(ref TestEntityViewStruct entityView)
+            {
+                throw new NotImplementedException();
+            }
+
+            IEntityFactory _entityFactory;
+        }
+
         class TestEngine: IQueryingEntitiesEngine
         {
             public IEntitiesDB entitiesDB { get; set; }
             public void Ready() {}
 
-            public bool HasEntity<T>(EGID ID) where T : IEntityViewStruct
+            public bool HasEntity<T>(EGID ID) where T : IEntityStruct
             {
                 return entitiesDB.Exists<T>(ID);
             }
