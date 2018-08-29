@@ -19,7 +19,7 @@ namespace ECSAllocationTest
 
             while (true)
             {
-                factory.BuildEntity<TestAllocation>(i++, null);
+                factory.BuildEntity<TestAllocation>(new EGID(i++, 0), null);
 
                 await Task.Delay(100);
             }

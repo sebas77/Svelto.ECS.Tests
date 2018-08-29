@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Svelto.ECS;
-using Svelto.DataStructures;
 using Svelto.DataStructures.Experimental;
 
 namespace UnitTests
 {
+    //test the exception no implementors passed    
+    
     [TestClass]
     public class TestAddAndRemove
     {
@@ -33,10 +33,10 @@ namespace UnitTests
         [DataRow(2)]
         public void TestExceptionTwoEntitiesCannotHaveTheSameIDInTheSameGroupInterleaved(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFactory.BuildEntity<TestDescriptor>(id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         
@@ -47,8 +47,8 @@ namespace UnitTests
         [DataRow(2)]
         public void TestExceptionTwoEntitiesCannotHaveTheSameIDInTheSameGroup(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(id, new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         
@@ -59,10 +59,10 @@ namespace UnitTests
         [DataRow(2)]
         public void TestExceptionTwoDifferentEntitiesCannotHaveTheSameIDInTheSameGroupInterleaved(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFactory.BuildEntity<TestDescriptor2>(id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor2>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         
@@ -73,8 +73,8 @@ namespace UnitTests
         [DataRow(2)]
         public void TestExceptionTwoDifferentEntitiesCannotHaveTheSameIDInTheSameGroup(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(id, new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor2>(id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor2>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         
@@ -85,10 +85,10 @@ namespace UnitTests
         [DataRow(2)]
         public void TestTwoEntitiesWithSameIDThrowsIntervalled(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor2>(id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor2>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFactory.BuildEntity<TestDescriptor3>(id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor3>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         
@@ -99,8 +99,8 @@ namespace UnitTests
         [DataRow(2)]
         public void TestTwoEntitiesWithSameIDThrows(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor2>(id, new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor3>(id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor2>(new EGID(id, id), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor3>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         
@@ -123,12 +123,12 @@ namespace UnitTests
         [DataRow(2)]
         public void TestRemoveEntity(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(id, new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.RemoveEntity<TestDescriptor>(id);
+            _entityFunctions.RemoveEntity<TestDescriptor>(new EGID(id, id));
 
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntityInStandardGroup<TestEntityView>(id));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityView>(id));
         }
         
         [TestMethod]
@@ -296,7 +296,7 @@ namespace UnitTests
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityStruct>(new EGID(100)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityStruct>(new EGID(100, 0)));
         }
 
         [TestMethod]
@@ -393,17 +393,11 @@ namespace UnitTests
             _entityFactory.BuildEntity<TestDescriptor8>(new EGID(id4, 3), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities((ref TestEntityViewStruct entity)
-                =>
-            {
-                entity.TestIt.value = entity.ID.entityID;
-            });
+            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities((ref TestEntityViewStruct entity, IEntitiesDB db)
+                => entity.TestIt.value = entity.ID.entityID);
 
-            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities((ref TestEntityStruct entity)
-                =>
-            {
-                entity.value = entity.ID.entityID;
-            });
+            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities((ref TestEntityStruct entity, IEntitiesDB db)
+                => entity.value = entity.ID.entityID);
 
             int count;
             int count2;
@@ -427,17 +421,11 @@ namespace UnitTests
             _entityFunctions.RemoveEntity<TestDescriptor8>(new EGID(id3, 2));
             _entityFunctions.RemoveEntity<TestDescriptor8>(new EGID(id4, 3));
 
-            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities((ref TestEntityViewStruct entity)
-                =>
-            {
-                Assert.Fail();
-            });
+            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities((ref TestEntityViewStruct entity, IEntitiesDB db)
+                => Assert.Fail());
 
-            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities((ref TestEntityStruct entity)
-                =>
-            {
-                Assert.Fail();
-            });
+            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities((ref TestEntityStruct entity, IEntitiesDB db)
+                => Assert.Fail());
         }
 
         [TestMethod]
@@ -536,7 +524,7 @@ namespace UnitTests
 
             protected override void Add(ref TestEntityViewStruct entityView)
             {
-                _entityFactory.BuildEntity<TestDescriptor7>(100, null);
+                _entityFactory.BuildEntity<TestDescriptor7>(new EGID(100,0), null);
             }
 
             protected override void Remove(ref TestEntityViewStruct entityView)
@@ -555,11 +543,6 @@ namespace UnitTests
             public bool HasEntity<T>(EGID ID) where T : IEntityStruct
             {
                 return entitiesDB.Exists<T>(ID);
-            }
-
-            public bool HasEntityInStandardGroup<T>(int ID) where T : EntityView
-            {
-                return entitiesDB.QueryEntityViews<T>().Count != 0;
             }
 
             public bool HasAnyEntityInGroup<T>(int groupID) where T : IEntityStruct

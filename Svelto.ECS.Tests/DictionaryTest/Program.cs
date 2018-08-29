@@ -249,7 +249,7 @@ namespace Svelto.DataStructures
             {
                 Test JapaneseCalendar;
                 int count;
-                var buffer = fasterDictionary.GetFasterValuesBuffer(out count);
+                var buffer = fasterDictionary.GetValuesArray(out count);
                 for (int j = 0; j < count; j++)
                 {
                     JapaneseCalendar = buffer[j];
