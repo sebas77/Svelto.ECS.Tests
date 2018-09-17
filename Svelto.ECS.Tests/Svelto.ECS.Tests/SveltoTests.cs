@@ -39,7 +39,69 @@ namespace UnitTests
             _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
-        
+
+        [TestMethod]
+        public void TestMegaEntitySwap()
+        {
+            for (int i = 0; i < 29; i++)
+            {
+                EGID egid = new EGID(i, 1);
+                _entityFactory.BuildEntity<TestDescriptor>(egid, new[] { new TestIt(2) });
+            }
+
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            SwapMinNeededForException(_entityFunctions);
+
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            
+            bool allFound = true;
+            bool mustNotBeFound = false;
+
+            for (int i = 0; i < 29; i++)
+                allFound &= _neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(i, 2));
+
+            for (int i = 0; i < 29; i++)
+                mustNotBeFound |= _neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(i, 1));
+
+            
+            Assert.IsTrue(allFound);
+            Assert.IsTrue(mustNotBeFound == false);
+        }
+
+        void SwapMinNeededForException(IEntityFunctions entityFunctions)
+        {
+            entityFunctions.SwapEntityGroup<TestDescriptor>(18, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(19, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(20, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(21, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(22, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(17, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(16, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(15, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(14, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(13, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(11, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(9, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(6, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(5, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(4, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(3, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(2, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(0, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(24, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(25, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(26, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(27, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(28, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(23, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(8, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(7, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(1, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(12, 1, 2);
+            entityFunctions.SwapEntityGroup<TestDescriptor>(10, 1, 2);
+        }
+
         [TestMethod]
         [ExpectedException(typeof(FasterDictionaryException))]
         [DataRow(0)]
@@ -83,7 +145,7 @@ namespace UnitTests
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(2)]
-        public void TestTwoEntitiesWithSameIDThrowsIntervalled(int id)
+        public void TestTwoEntitiesWithSameIdThrowsIntervaled(int id)
         {
             _entityFactory.BuildEntity<TestDescriptor2>(new EGID(id, id), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
@@ -360,6 +422,7 @@ namespace UnitTests
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             _entityFunctions.SwapEntityGroup<TestDescriptor>(id, id, 3);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
@@ -371,6 +434,7 @@ namespace UnitTests
             Assert.AreEqual(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewStruct>(new EGID(id, 3), out index)[index].ID.groupID, 3);
             
             _entityFunctions.SwapEntityGroup<TestDescriptor>(id, 3, id);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
@@ -407,7 +471,7 @@ namespace UnitTests
                 var buffer2 = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(i, out count2);
 
                 Assert.AreEqual(count, 1);
-                Assert.AreEqual(count, count2);
+                Assert.AreEqual(count2, 1);
 
                 for (int j = 0; j < count; j++)
                 {
@@ -420,6 +484,7 @@ namespace UnitTests
             _entityFunctions.RemoveEntity<TestDescriptor8>(new EGID(id2, 1));
             _entityFunctions.RemoveEntity<TestDescriptor8>(new EGID(id3, 2));
             _entityFunctions.RemoveEntity<TestDescriptor8>(new EGID(id4, 3));
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities((ref TestEntityViewStruct entity, IEntitiesDB db)
                 => Assert.Fail());
