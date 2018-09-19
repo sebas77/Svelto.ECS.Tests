@@ -10,11 +10,6 @@ namespace Svelto.DataStructures
         struct Test
         {
             public int v;
-            private int c;
-            private int v1;
-            private int c1;
-            private int v2;
-            private int c2;
             public int i;
 
             public Test(int i) : this()
@@ -26,107 +21,6 @@ namespace Svelto.DataStructures
         {
        //     Tests();
             Profiling();
-        }
-
-        static void Tests()
-        {
-            FasterDictionary<int, Test> test = new FasterDictionary<int, Test>();
-
-            int dictionarysize = 10000000;
-
-            int[] numbers = new int[dictionarysize];
-
-            for (int i = 1; i < dictionarysize; i++)
-                numbers[i] = (numbers[i - 1] + i * HashHelpers.ExpandPrime(dictionarysize));
-
-            for (int i = 0; i < dictionarysize; i++)
-                test[i] = new Test(numbers[i]);
-
-            for (int i = 0; i < dictionarysize; i++)
-                if (test[i].i != numbers[i])
-                    throw new Exception();
-
-            System.Console.WriteLine("test passed");
-
-            for (int i = 0; i < dictionarysize; i += 2)
-                if (test.Remove(i) == false)
-                    throw new Exception();
-
-            System.Console.WriteLine("test passed");
-            
-            test.Trim();
-            
-            for (int i = 0; i < dictionarysize; i++)
-                test[i] = new Test(numbers[i]);
-            
-            System.Console.WriteLine("test passed");            
-
-            for (int i = 1; i < dictionarysize - 1; i += 2)
-                if (test[i].i != numbers[i])
-                    throw new Exception();
-
-            for (int i = 0; i < dictionarysize; i++)
-                if (test[i].i != numbers[i])
-                    throw new Exception();
-
-            System.Console.WriteLine("test passed");
-
-            for (int i = dictionarysize - 1; i >= 0; i -= 3)
-                if (test.Remove(i) == false)
-                    throw new Exception();
-
-            System.Console.WriteLine("test passed");
-            
-            test.Trim();
-
-            for (int i = dictionarysize - 1; i >= 0; i -= 3)
-                test[i] = new Test(numbers[i]);
-
-            System.Console.WriteLine("test passed");
-
-            for (int i = 0; i < dictionarysize; i++)
-                if (test[i].i != numbers[i])
-                    throw new Exception();
-
-            System.Console.WriteLine("test passed");
-
-            for (int i = 0; i < dictionarysize; i ++)
-                if (test.Remove(i) == false)
-                    throw new Exception();
-
-            System.Console.WriteLine("test passed");
-
-            for (int i = 0; i < dictionarysize; i++)
-                if (test.Remove(i) == true)
-                    throw new Exception();
-            
-            test.Trim();
-
-            System.Console.WriteLine("test passed");
-
-            test.Clear();
-            for (int i = 0; i < dictionarysize; i++) test[numbers[i]] = new Test(i);
-
-            for (int i = 0; i < dictionarysize; i++)
-            {
-                Test JapaneseCalendar = test[numbers[i]];
-                if (JapaneseCalendar.i != i)
-                    throw new Exception("read back test failed");
-            }
-
-            System.Console.WriteLine("test passed");
-
-            test = new FasterDictionary<int, Test>();
-            for (int i = 0; i < dictionarysize; i++) test[numbers[i]] = new Test(i);
-
-            for (int i = 0; i < dictionarysize; i++)
-            {
-                Test JapaneseCalendar = test[numbers[i]];
-                if (JapaneseCalendar.i != i)
-                    throw new Exception("read back test failed");
-            }
-
-            System.Console.WriteLine("test passed");
         }
 
         private static void Profiling()
@@ -143,12 +37,13 @@ namespace Svelto.DataStructures
             System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
 
             System.Console.WriteLine("insert");
+            for (int i = 0; i < dictionarysize; i++) dictionary[numbers[i]] = new Test(i);
             watch.Reset();
             watch.Start();
             for (int i = 0; i < dictionarysize; i++) dictionary[numbers[i]] = new Test(i);
             watch.Stop();
             System.Console.WriteLine(watch.ElapsedMilliseconds);
-
+            for (int i = 0; i < dictionarysize; i++) fasterDictionary[numbers[i]] = new Test(i);
             watch.Reset();
             watch.Start();
             for (int i = 0; i < dictionarysize; i++) fasterDictionary[numbers[i]] = new Test(i); 
