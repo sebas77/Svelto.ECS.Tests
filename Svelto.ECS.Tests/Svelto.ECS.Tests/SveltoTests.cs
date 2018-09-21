@@ -577,6 +577,40 @@ namespace UnitTests
             
             Assert.IsTrue(exists);
         }
+        
+        [TestMethod]
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void TestCreationAndRemovaOfDynamicEntityDescriptors(int id)
+        {
+            var ded = new DynamicEntityDescriptorInfo<TestDescriptor>(new FasterList<IEntityBuilder> 
+                                                                          { new EntityBuilder<TestEntityStruct>() });
+            
+            _entityFactory.BuildEntity(new EGID(id, id), ded, new[] {new TestIt(2)});
+            
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            var hasit = _neverDoThisIsJustForTheTest.HasEntity<TestEntityStruct>(new EGID(id, id));
+            
+            Assert.IsTrue(hasit);
+            
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(new EGID(id, id), 3);
+            
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            
+            hasit = _neverDoThisIsJustForTheTest.HasEntity<TestEntityStruct>(new EGID(id, 3));
+            
+            Assert.IsTrue(hasit);
+            
+            _entityFunctions.RemoveEntity<TestDescriptor>(new EGID(id, 3));
+            
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            
+            hasit = _neverDoThisIsJustForTheTest.HasEntity<TestEntityStruct>(new EGID(id, 3));
+            
+            Assert.IsFalse(hasit);
+        }
 
         [TestMethod]
         [ExpectedException(typeof(FasterDictionaryException))]
