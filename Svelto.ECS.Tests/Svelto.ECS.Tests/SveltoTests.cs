@@ -582,10 +582,10 @@ namespace UnitTests
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(2)]
-        public void TestCreationAndRemovaOfDynamicEntityDescriptors(int id)
+        public void TestCreationAndRemovalOfDynamicEntityDescriptors(int id)
         {
             var ded = new DynamicEntityDescriptorInfo<TestDescriptor>(new FasterList<IEntityBuilder> 
-                                                                          { new EntityBuilder<TestEntityStruct>() });
+                { new EntityBuilder<TestEntityStruct>() });
             
             _entityFactory.BuildEntity(new EGID(id, id), ded, new[] {new TestIt(2)});
             
@@ -863,8 +863,8 @@ namespace UnitTests
         {
             _enginesRoot.AddEngine(new TestEngineAdd(_entityFactory));
             _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, id), new[] {new TestIt(2)});
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
-
+            _simpleSubmissionEntityViewScheduler.SubmitEntities(); //submit the entities
+            _simpleSubmissionEntityViewScheduler.SubmitEntities(); //now submit the entities added by the engines
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, id)));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(id));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityStruct>(new EGID(100, 0)));

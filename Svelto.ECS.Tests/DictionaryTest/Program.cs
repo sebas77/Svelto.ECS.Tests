@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Svelto.DataStructures.Experimental;
 
 namespace Svelto.DataStructures
 {
-
     class Program
     {
         struct Test
@@ -19,8 +19,61 @@ namespace Svelto.DataStructures
         }
         static void Main(string[] args)
         {
-       //     Tests();
-            Profiling();
+            Tests();
+            //Profiling();
+        }
+
+        static void Tests()
+        {
+            System.Console.WriteLine("it's happening");
+            ThreadPool.QueueUserWorkItem(Test2);
+
+            System.Console.ReadKey();
+        }
+
+        static void Test2(object state)
+        {
+            Random rand = new Random();
+            
+            FasterDictionary<int, int>[] dic = new FasterDictionary<int, int>[10];
+
+            for (int i = 0; i < 10; i++)
+            {
+                dic[i] = new FasterDictionary<int, int>();
+            }
+
+            long iterations = 0;
+            
+            while (true)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    var next = rand.Next();
+                    if (next % 3 == 0)
+                    {
+                        var key = next % 30000;
+                        dic[i][key] = next;
+                        if (dic[i].ContainsKey(key) == false)
+                            throw new Exception("asd");
+                    }
+                }
+                
+                for (int i = 0; i < 10; i++)
+                {
+                    var next = rand.Next();
+                    if (next % 3 == 0)
+                    {
+                        var key = next % 30000;
+                        dic[i].Remove(key);
+                        if (dic[i].ContainsKey(key) == true)
+                            throw new Exception("asd");
+                    }
+                }
+
+                iterations++;
+                
+                Console.WriteLine(iterations);
+            }
         }
 
         private static void Profiling()
