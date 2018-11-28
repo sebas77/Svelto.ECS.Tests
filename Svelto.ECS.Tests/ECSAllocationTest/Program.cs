@@ -13,13 +13,14 @@ namespace ECSAllocationTest
 
         private static async Task CheckAllocations()
         {
+            var exclusiveGroup = new ExclusiveGroup();
             var enginesRoot = new EnginesRoot(new SimpleSubmissionEntityViewScheduler());
             var factory = enginesRoot.GenerateEntityFactory();
             int i = 0;
 
             while (true)
             {
-                factory.BuildEntity<TestAllocation>(new EGID(i++, 0), null);
+                factory.BuildEntity<TestAllocation>(new EGID(i++, exclusiveGroup), null);
 
                 await Task.Delay(100);
             }

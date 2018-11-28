@@ -19,8 +19,8 @@ namespace Svelto.DataStructures
         }
         static void Main(string[] args)
         {
-            Tests();
-            //Profiling();
+            //Tests();
+            Profiling();
         }
 
         static void Tests()
