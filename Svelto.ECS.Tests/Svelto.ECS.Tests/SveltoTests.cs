@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Svelto.DataStructures;
 using Svelto.ECS;
 using Svelto.DataStructures.Experimental;
+using Svelto.ECS.Hybrid;
 
 namespace UnitTests
 {
@@ -1167,9 +1168,10 @@ namespace UnitTests
         class TestDescriptor9 : GenericEntityDescriptor<TestInvalidEntityView>
         { }
 
-        class TestEntityView : EntityView
+        class TestEntityView : IEntityViewStruct
         {
             public ITestIt TestIt;
+            public EGID ID { get; set; }
         }
         
         class TestInvalidEntityStruct : IEntityStruct
@@ -1260,7 +1262,8 @@ namespace UnitTests
         }
     }
 
-    internal class TestInvalidEntityView : EntityView
+    internal class TestInvalidEntityView : IEntityViewStruct
     {
+        public EGID ID { get; set; }
     }
 }

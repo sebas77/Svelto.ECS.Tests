@@ -29,6 +29,7 @@
     <DefineConstants>TRACE;DEBUG;DISABLE_DBC</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,6 +38,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework">
@@ -57,13 +59,17 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Svelto.ECS\Svelto.ECS.csproj">
-      <Project>{2CFF0AF0-8F4B-45CE-B5C3-B03E1B6C6A6C}</Project>
-      <Name>Svelto.ECS</Name>
-    </ProjectReference>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <ProjectReference Include="..\Svelto.ECS\Svelto.Common\Svelto.Common.csproj">
+      <Project>{5A165DD8-A5BE-4C73-A9F8-7153348DFE66}</Project>
+      <Name>Svelto.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Svelto.ECS\Svelto.ECS\Svelto.ECS.csproj">
+      <Project>{2cff0af0-8f4b-45ce-b5c3-b03e1b6c6a6c}</Project>
+      <Name>Svelto.ECS</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
