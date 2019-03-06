@@ -650,9 +650,13 @@ namespace UnitTests
         public void TestExceptionTwoDifferentEntitiesCannotHaveTheSameIDInTheSameGroupInterleaved(int id)
         {
             _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, group0), new[] {new TestIt(2)});
+
+
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             _entityFactory.BuildEntity<TestDescriptor2>(new EGID(id, group0), new[] {new TestIt(2)});
+
+
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
         }
         

@@ -62,9 +62,13 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Svelto.ECS\Svelto.Common\Svelto.Common.csproj">
+    <ProjectReference Include="..\Svelto.Common\Svelto.Common.csproj">
       <Project>{5A165DD8-A5BE-4C73-A9F8-7153348DFE66}</Project>
       <Name>Svelto.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Svelto.ECS\Svelto.ECS.csproj">
+      <Project>{fa56e2ca-2f6f-487e-a64d-e30b37777bc1}</Project>
+      <Name>Svelto.ECS</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
