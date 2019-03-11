@@ -139,11 +139,18 @@ namespace UnitTests
         [DataRow(2)]
         public void TestExceptionTwoEntitiesCannotHaveTheSameIDInTheSameGroupInterleaved(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, group1), new[] {new TestIt(2)});
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            try
+            {
+                _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, group1), new[] {new TestIt(2)});
+                _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, group1), new[] {new TestIt(2)});
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+                _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, group1), new[] {new TestIt(2)});
+                _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            }
+            catch (Exception e)
+            {
+                throw e.InnerException;
+            }
         }
 
         [TestMethod]
@@ -649,15 +656,22 @@ namespace UnitTests
         [DataRow(2)]
         public void TestExceptionTwoDifferentEntitiesCannotHaveTheSameIDInTheSameGroupInterleaved(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, group0), new[] {new TestIt(2)});
+            try
+            {
+                _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, group0), new[] {new TestIt(2)});
 
 
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+                _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFactory.BuildEntity<TestDescriptor2>(new EGID(id, group0), new[] {new TestIt(2)});
+                _entityFactory.BuildEntity<TestDescriptor2>(new EGID(id, group0), new[] {new TestIt(2)});
 
 
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+                _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            }
+            catch (Exception e)
+            {
+                throw e.InnerException;
+            }
         }
         
         [TestMethod]
@@ -689,11 +703,18 @@ namespace UnitTests
         [DataRow(2)]
         public void TestTwoEntitiesWithSameIdThrowsIntervaled(int id)
         {
-            _entityFactory.BuildEntity<TestDescriptor2>(new EGID(id, group0), new[] {new TestIt(2)});
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            try
+            {
+                _entityFactory.BuildEntity<TestDescriptor2>(new EGID(id, group0), new[] {new TestIt(2)});
+                _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFactory.BuildEntity<TestDescriptor3>(new EGID(id, group0), new[] {new TestIt(2)});
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+                _entityFactory.BuildEntity<TestDescriptor3>(new EGID(id, group0), new[] {new TestIt(2)});
+                _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            }
+            catch (Exception e)
+            {
+                throw e.InnerException;
+            }
         }
         
         [TestMethod]
@@ -1009,11 +1030,18 @@ namespace UnitTests
             _entityFactory.BuildEntity<TestDescriptor8>(new EGID(id4, groupR4 + 3), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities((ref TestEntityViewStruct entity, IEntitiesDB db)
-                => entity.TestIt.value = entity.ID.entityID);
+            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityViewStruct>((entity, groupCount, db) =>
+            {
+                for (int i = 0; i < groupCount; i++)
+                    entity[i].TestIt.value = entity[i].ID.entityID;
+            });
 
-            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities((ref TestEntityStruct entity, IEntitiesDB db)
-                => entity.value = entity.ID.entityID);
+            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityStruct>((entity, groupCount, db) =>
+            {
+                for (int i = 0; i < groupCount; i++)
+                    entity[i].value = entity[i].ID.entityID;
+            });
+
 
             int count;
             int count2;
@@ -1038,11 +1066,15 @@ namespace UnitTests
             _entityFunctions.RemoveEntity<TestDescriptor8>(new EGID(id4, groupR4 + 3));
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities((ref TestEntityViewStruct entity, IEntitiesDB db)
-                => Assert.Fail());
+            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityViewStruct>((entity, groupCount, db) =>
+            {
+                Assert.Fail();
+            });
 
-            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities((ref TestEntityStruct entity, IEntitiesDB db)
-                => Assert.Fail());
+            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityStruct>((entity, groupCount, db) =>
+            {
+                Assert.Fail();
+            });
         }
 
         [TestMethod]
@@ -1226,7 +1258,7 @@ namespace UnitTests
                 _entityFactory = entityFactory;
             }
 
-            protected override void Add(ref TestEntityViewStruct entityView)
+            protected override void Add(ref TestEntityViewStruct entityView, ExclusiveGroup.ExclusiveGroupStruct? previousGroup)
             {
                 _entityFactory.BuildEntity<TestDescriptor7>(new EGID(100, group0), null);
             }
