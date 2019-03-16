@@ -7,7 +7,7 @@ namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
-        class DoubleBufferedEntitiesToAdd<T> where T : FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>>, new()
+        class DoubleBufferedEntitiesToAdd<T> where T : FasterDictionary<uint, Dictionary<Type, ITypeSafeDictionary>>, new()
         {
             readonly T _entityViewsToAddBufferA = new T();
             readonly T _entityViewsToAddBufferB = new T();
@@ -28,6 +28,10 @@ namespace Svelto.ECS
                 current = toSwap;
             }
 
+            /// <summary>
+            /// Careful, I don't clear the whole group, because otherwise it would be recreated every time
+            /// but if a group is removed from good, this should be updated it too
+            /// </summary>
             public void ClearOther()
             {
                 foreach (var item in other)
@@ -36,11 +40,7 @@ namespace Svelto.ECS
                     {
                         subitem.Value.Clear();
                     }
-                    
-                    item.Value.Clear();
                 }
-                
-                other.Clear();
             }
         }
     }

@@ -27,10 +27,10 @@ namespace Svelto.ECS.Internal
         void AddCapacity(int size);
         void Trim();
         void Clear();
-        bool Has(int entityIdEntityId);
+        bool Has(uint entityIdEntityId);
     }
 
-    class TypeSafeDictionary<TValue> : FasterDictionary<int, TValue>, ITypeSafeDictionary where TValue : IEntityStruct
+    class TypeSafeDictionary<TValue> : FasterDictionary<uint, TValue>, ITypeSafeDictionary where TValue : IEntityStruct
     {
         static readonly Type   _type     = typeof(TValue);
         static readonly string _typeName = _type.Name;
@@ -41,12 +41,11 @@ namespace Svelto.ECS.Internal
 
         public void FillWithIndexedEntities(ITypeSafeDictionary entities)
         {
-            int count;
-            var buffer = (entities as TypeSafeDictionary<TValue>).GetValuesArray(out count);
+            var buffer = (entities as TypeSafeDictionary<TValue>).GetValuesArray(out var count);
 
             for (var i = 0; i < count; i++)
             {
-                var idEntityId = 0;
+                uint idEntityId = 0;
                 try
                 {
                     idEntityId = buffer[i].ID.entityID;
@@ -72,7 +71,7 @@ namespace Svelto.ECS.Internal
                 AddEntityViewToEngines(entityViewEnginesDB, ref values[i], null, ref profiler);
         }
 
-        public bool Has(int entityIdEntityId) { return ContainsKey(entityIdEntityId); }
+        public bool Has(uint entityIdEntityId) { return ContainsKey(entityIdEntityId); }
 
         public void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup,
             Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB,
@@ -159,7 +158,7 @@ namespace Svelto.ECS.Internal
                 }
         }
 
-        public bool ExecuteOnEntityView<W>(int entityGidEntityId, ref W value, EntityAction<TValue, W> action)
+        public bool ExecuteOnEntityView<W>(uint entityGidEntityId, ref W value, EntityAction<TValue, W> action)
         {
             if (!FindIndex(entityGidEntityId, out var findIndex)) return false;
             
@@ -168,7 +167,7 @@ namespace Svelto.ECS.Internal
             return true;
         }
 
-        public bool ExecuteOnEntityView(int entityGidEntityId, EntityAction<TValue> action)
+        public bool ExecuteOnEntityView(uint entityGidEntityId, EntityAction<TValue> action)
         {
             if (!FindIndex(entityGidEntityId, out var findIndex)) return false;
             
@@ -178,15 +177,15 @@ namespace Svelto.ECS.Internal
 
         }
 
-        public uint FindElementIndex(int entityGidEntityId)
+        public uint FindElementIndex(uint entityGidEntityId)
         {
             if (FindIndex(entityGidEntityId, out var findIndex) == false)
-                throw new Exception("Entity not found in this group");
+                throw new Exception("Entity not found in this group ".FastConcat(typeof(TValue).ToString()));
 
             return findIndex;
         }
 
-        public bool TryFindElementIndex(int entityGidEntityId, out uint index)
+        public bool TryFindElementIndex(uint entityGidEntityId, out uint index)
         {
             return FindIndex(entityGidEntityId, out index);
         }

@@ -1,51 +1,63 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+
 #pragma warning disable 660,661
 
 namespace Svelto.ECS
 {
     public struct EGID:IEquatable<EGID>,IEqualityComparer<EGID>,IComparable<EGID>
     {
-        readonly long _GID;
+        readonly ulong _GID;
         
-        public int entityID
+        public EGID(uint entityID, ExclusiveGroup.ExclusiveGroupStruct groupID) : this()
         {
-            get { return (int) (_GID & 0xFFFFFFFF); }
+            DBC.ECS.Check.Require(entityID < bit22, "the entityID value is outside the range");
+            DBC.ECS.Check.Require(groupID < bit20, "the groupID value is outside the range");
+            
+            _GID = MAKE_GLOBAL_ID(entityID, groupID, 0);
         }
-        
-        public ExclusiveGroup.ExclusiveGroupStruct groupID
+
+        const uint bit22 = 0b0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0011_1111_1111_1111_1111_1111;
+        const uint bit20 = 0b0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_1111_1111_1111_1111_1111;
+        const long bit42 = 0b0000_0000_0000_0000_0000_0011_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111;
+
+        public uint entityID
         {
-            get { return new ExclusiveGroup.ExclusiveGroupStruct((int) (_GID >> 32)); }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return (uint) (_GID & bit22); }
         }
+
+        public ExclusiveGroup.ExclusiveGroupStruct groupID =>
+            new ExclusiveGroup.ExclusiveGroupStruct((uint) ((_GID >> 22) & bit20));
+
+        public uint maskedGID => (uint) _GID >> 42;
 
         public static bool operator ==(EGID obj1, EGID obj2)
         {
-            return obj1._GID == obj2._GID;
-        }
+            return obj1.maskedGID == obj2.maskedGID;
+        }    
         
         public static bool operator !=(EGID obj1, EGID obj2)
         {
-            return obj1._GID != obj2._GID;
+            return obj1.maskedGID != obj2.maskedGID;
         }
+//            22       20        22        
+//        | realid | groupid | entityID |
         
-        public EGID(int entityID, ExclusiveGroup.ExclusiveGroupStruct groupID) : this()
+        static ulong MAKE_GLOBAL_ID(uint entityId, uint groupId, uint realId)
         {
-            _GID = MAKE_GLOBAL_ID(entityID, groupID);
-        }
-        
-        static long MAKE_GLOBAL_ID(int entityId, int groupId)
-        {
-            return (long)groupId << 32 | ((long)(uint)entityId & 0xFFFFFFFF);
+            return (((ulong)realId & bit22) << (22+20)) | (((ulong)groupId & bit20) << 22) | ((ulong)entityId & bit22);
         }
 
-        public static explicit operator int(EGID id)
+        public static explicit operator uint(EGID id)
         {
             return id.entityID;
         }
         
-        public static explicit operator long(EGID id)
+        public static explicit operator ulong(EGID id)
         {
-            return id._GID;
+            return id._GID & bit42;
         }
 
         public bool Equals(EGID other)
@@ -55,22 +67,29 @@ namespace Svelto.ECS
 
         public bool Equals(EGID x, EGID y)
         {
-            return x == y;
+            return x._GID == y._GID;
         }
 
-        public int GetHashCode(EGID obj)
-        {
-            return _GID.GetHashCode();
-        }
+        public int GetHashCode(EGID egid) { return (int) _GID.GetHashCode(); }
 
         public int CompareTo(EGID other)
         {
             return _GID.CompareTo(other._GID);
         }
         
-        internal EGID(int entityID, int groupID) : this()
+        internal EGID(uint entityID, uint groupID) : this()
         {
-            _GID = MAKE_GLOBAL_ID(entityID, groupID);
+            _GID = MAKE_GLOBAL_ID(entityID, groupID, 0);
+        }
+        
+        internal EGID(uint entityID, uint groupID, uint realid) : this()
+        {
+            _GID = MAKE_GLOBAL_ID(entityID, groupID, realid);
+        }
+        
+        internal EGID(ulong egid) : this()
+        {
+            _GID = egid;
         }
     }
 }

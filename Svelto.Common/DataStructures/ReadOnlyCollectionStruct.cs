@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Svelto.DataStructures
 {
@@ -15,6 +16,12 @@ namespace Svelto.DataStructures
         public ReadOnlyCollectionStructEnumerator<T> GetEnumerator()
         {
             return new ReadOnlyCollectionStructEnumerator<T>(_values, _count);
+        }
+        
+        public T this[int i]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _values[i];
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
@@ -75,15 +82,9 @@ namespace Svelto.DataStructures
         {
             get { return null; }
         }
-        
-        T[] _values;
-        int _count;
 
-
-        public T this[int i]
-        {
-            get { return _values[i]; }
-        }
+        readonly T[] _values;
+        readonly int _count;
     }
     
     public struct ReadOnlyCollectionStructEnumerator<T>:IEnumerator<T>
@@ -140,6 +141,6 @@ namespace Svelto.DataStructures
         readonly T[] _values;
         T            _current;
         int          _index;
-        int          _count;
+        readonly int          _count;
     }
 }

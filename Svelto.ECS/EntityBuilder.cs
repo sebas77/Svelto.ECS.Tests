@@ -27,11 +27,13 @@ namespace Svelto.ECS
 
             var castedDic = dictionary as TypeSafeDictionary<T>;
 
+            entityID = new EGID(entityID.entityID, entityID.groupID, (uint) castedDic.Count + 1);
+
             if (NEEDS_REFLECTION)
             {
                 Check.Require(implementors != null, "Implementors not found while building an EntityView");
                 Check.Require(castedDic.ContainsKey(entityID.entityID) == false,
-                              "building an entity with already used entity id! id: ".FastConcat((long) entityID)
+                              "building an entity with already used entity id! id: ".FastConcat((ulong) entityID)
                                  .FastConcat(" ", ENTITY_VIEW_NAME));
 
                 EntityView<T>.BuildEntityView(entityID, out var entityView);

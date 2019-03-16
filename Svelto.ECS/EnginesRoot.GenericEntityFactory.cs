@@ -9,9 +9,9 @@
                 _weakEngine = weakReference;
             }
 
-            public EntityStructInitializer BuildEntity<T>(int entityID,  ExclusiveGroup.ExclusiveGroupStruct groupStructId, object[] implementors) where T : IEntityDescriptor, new()
+            public EntityStructInitializer BuildEntity<T>(uint entityID,  ExclusiveGroup.ExclusiveGroupStruct groupStructId, object[] implementors) where T : IEntityDescriptor, new()
             {
-                return _weakEngine.Target.BuildEntity<T>(new EGID(entityID, (int)groupStructId), implementors);
+                return _weakEngine.Target.BuildEntity<T>(new EGID(entityID, groupStructId), implementors);
             }
 
             public EntityStructInitializer BuildEntity<T>(EGID egid, object[] implementors) where T : IEntityDescriptor, new()
@@ -24,9 +24,9 @@
                 return _weakEngine.Target.BuildEntity(egid, entityDescriptor, implementors);
             }
 
-            public EntityStructInitializer BuildEntity<T>(int entityID,  ExclusiveGroup.ExclusiveGroupStruct groupStructId, T descriptorEntity, object[] implementors)  where T:IEntityDescriptor
+            public EntityStructInitializer BuildEntity<T>(uint entityID,  ExclusiveGroup.ExclusiveGroupStruct groupStructId, T descriptorEntity, object[] implementors)  where T:IEntityDescriptor
             {
-                return _weakEngine.Target.BuildEntity(new EGID(entityID, (int)groupStructId), descriptorEntity, implementors);
+                return _weakEngine.Target.BuildEntity(new EGID(entityID, groupStructId), descriptorEntity, implementors);
             }
             
             public void PreallocateEntitySpace<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId, int size) where T : IEntityDescriptor, new()
