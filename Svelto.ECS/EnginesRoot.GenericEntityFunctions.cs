@@ -42,16 +42,12 @@ namespace Svelto.ECS
             public void RemoveEntities<T>(uint groupID) where T : IEntityDescriptor, new()
             {
                 throw new NotImplementedException();
-                //_weakReference.Target.QueueEntitySubmitOperation(
-//                    new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, -1, -1, groupID, -1, null, typeof(T)));
             }
 
             public void RemoveEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupID)
                 where T : IEntityDescriptor, new()
             {
                 throw new NotImplementedException();
-                //_weakReference.Target.QueueEntitySubmitOperation(
-                  //  new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, -1, -1, groupID, -1, null, typeof(T)));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -69,7 +65,8 @@ namespace Svelto.ECS
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void SwapEntityGroup<T>(uint entityID, ExclusiveGroup.ExclusiveGroupStruct fromGroupID, 
-                                           ExclusiveGroup.ExclusiveGroupStruct  toGroupID) where T : IEntityDescriptor, new()
+                                           ExclusiveGroup.ExclusiveGroupStruct toGroupID)
+                where T : IEntityDescriptor, new()
             {
                 SwapEntityGroup<T>(new EGID(entityID, fromGroupID), toGroupID);
             }
@@ -78,12 +75,13 @@ namespace Svelto.ECS
             public void SwapEntityGroup<T>(EGID fromID, ExclusiveGroup.ExclusiveGroupStruct toGroupID) 
                 where T : IEntityDescriptor, new()
             {
-                SwapEntityGroup<T>(fromID, new EGID(fromID.entityID, toGroupID));
+                SwapEntityGroup<T>(fromID, new EGID(fromID.entityID, (uint)toGroupID));
             }
             
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void SwapEntityGroup<T>(EGID fromID, ExclusiveGroup.ExclusiveGroupStruct toGroupID 
-                                         , ExclusiveGroup.ExclusiveGroupStruct mustBeFromGroup) where T : IEntityDescriptor, new()
+                                         , ExclusiveGroup.ExclusiveGroupStruct mustBeFromGroup)
+                where T : IEntityDescriptor, new()
             {
                 if (fromID.groupID != mustBeFromGroup)
                     throw new ECSException("Entity is not coming from the expected group");
@@ -102,7 +100,8 @@ namespace Svelto.ECS
             
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void SwapEntityGroup<T>(EGID fromID, EGID toID
-                                         , ExclusiveGroup.ExclusiveGroupStruct mustBeFromGroup) where T : IEntityDescriptor, new()
+                                         , ExclusiveGroup.ExclusiveGroupStruct mustBeFromGroup)
+                where T : IEntityDescriptor, new()
             {
                 if (fromID.groupID != mustBeFromGroup)
                     throw new ECSException("Entity is not coming from the expected group");
@@ -116,26 +115,28 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILER          
             entitySubmitOperation.trace = Environment.StackTrace;
 #endif            
-            _entitiesOperations.AddRef(ref entitySubmitOperation);
+            _entitiesOperations.Add((ulong)entitySubmitOperation.fromID, ref entitySubmitOperation);
         }
 
         void QueueEntitySubmitOperation<T>(EntitySubmitOperation entitySubmitOperation) where T:IEntityDescriptor
         {
-#if DEBUG && !PROFILER          
+#if DEBUG && !PROFILER            
             entitySubmitOperation.trace = Environment.StackTrace;
-            if (_entitiesOperationsDebug.ContainsKey((ulong)entitySubmitOperation.fromID) == true)
-                Console.LogError("Only one entity operation per submission is allowed"
-                                          .FastConcat(" entityViewType: ")
-                                          .FastConcat(typeof(T).Name)
-                                          .FastConcat(" submission type ", entitySubmitOperation.type.ToString(),
-                                                      " previous type: ",  _entitiesOperationsDebug[(ulong) entitySubmitOperation.fromID].ToString()));
+            
+            if (_entitiesOperations.TryGetValue((ulong) entitySubmitOperation.fromID, out var entitySubmitedOperation) == true)
+            {
+                if (entitySubmitedOperation != entitySubmitOperation)
+                Console.LogError("Only one entity operation per submission is allowed".FastConcat(" entityViewType: ")
+                                    .FastConcat(typeof(T).Name)
+                                    .FastConcat(" submission type ", entitySubmitOperation.type.ToString(),
+                                                " from ID: ",  entitySubmitOperation.fromID.entityID.ToString())
+                                    .FastConcat(            " previous operation type: ",
+                                                _entitiesOperations[(ulong) entitySubmitOperation.fromID].type
+                                                   .ToString()));
+            }
             else
-                _entitiesOperationsDebug[(ulong)entitySubmitOperation.fromID] = entitySubmitOperation.type;
 #endif            
-            _entitiesOperations.AddRef(ref entitySubmitOperation);
+            _entitiesOperations.Set((ulong)entitySubmitOperation.fromID, ref entitySubmitOperation);
         }
-#if DEBUG && !PROFILER        
-        readonly Svelto.DataStructures.Experimental.FasterDictionary<ulong, EntitySubmitOperationType> _entitiesOperationsDebug;
-#endif        
     }
 }

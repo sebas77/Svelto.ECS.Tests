@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using DBC.ECS;
 using Svelto.DataStructures;
 using Svelto.ECS.Hybrid;
 using Svelto.ECS.Internal;
@@ -8,13 +7,13 @@ using Svelto.Utilities;
 
 namespace Svelto.ECS
 {
-    public partial class EntityBuilder<T> : IEntityBuilder where T : IEntityStruct, new()
+    public class EntityBuilder<T> : IEntityBuilder where T : IEntityStruct, new()
     {
         public EntityBuilder()
         {
             _initializer = DEFAULT_IT;
 
-            CheckFields(ENTITY_VIEW_TYPE, NEEDS_REFLECTION, true);
+            EntityBuilderUtilities.CheckFields(ENTITY_VIEW_TYPE, NEEDS_REFLECTION);
 
             if (NEEDS_REFLECTION)
                 EntityView<T>.InitCache();
@@ -27,36 +26,32 @@ namespace Svelto.ECS
 
             var castedDic = dictionary as TypeSafeDictionary<T>;
 
-            entityID = new EGID(entityID.entityID, entityID.groupID, (uint) castedDic.Count + 1);
-
             if (NEEDS_REFLECTION)
             {
-                Check.Require(implementors != null, "Implementors not found while building an EntityView");
-                Check.Require(castedDic.ContainsKey(entityID.entityID) == false,
+                DBC.ECS.Check.Require(implementors != null, "Implementors not found while building an EntityView");
+                DBC.ECS.Check.Require(castedDic.ContainsKey(entityID.entityID) == false,
                               "building an entity with already used entity id! id: ".FastConcat((ulong) entityID)
                                  .FastConcat(" ", ENTITY_VIEW_NAME));
 
-                EntityView<T>.BuildEntityView(entityID, out var entityView);
+                EntityView<T>.BuildEntityView(out var entityView);
 
                 this.FillEntityView(ref entityView, entityViewBlazingFastReflection, implementors, implementorsByType,
                                     cachedTypes);
-
+                
                 castedDic.Add(entityID.entityID, ref entityView);
             }
             else
             {
-                _initializer.ID = entityID;
-
                 castedDic.Add(entityID.entityID, _initializer);
             }
         }
 
-        ITypeSafeDictionary IEntityBuilder.Preallocate(ref ITypeSafeDictionary dictionary, int size)
+        ITypeSafeDictionary IEntityBuilder.Preallocate(ref ITypeSafeDictionary dictionary, uint size)
         {
             return Preallocate(ref dictionary, size);
         }
 
-        public static ITypeSafeDictionary Preallocate(ref ITypeSafeDictionary dictionary, int size)
+        static ITypeSafeDictionary Preallocate(ref ITypeSafeDictionary dictionary, uint size)
         {
             if (dictionary == null)
                 dictionary = new TypeSafeDictionary<T>(size);
@@ -81,11 +76,12 @@ namespace Svelto.ECS
         static FasterList<KeyValuePair<Type, ActionCast<T>>> entityViewBlazingFastReflection =>
             EntityView<T>.cachedFields;
 
-        static readonly Type   ENTITY_VIEW_TYPE    = typeof(T);
+        internal static readonly Type   ENTITY_VIEW_TYPE    = typeof(T);
         static readonly T      DEFAULT_IT          = default;
-        static readonly Type   ENTITYINFOVIEW_TYPE = typeof(EntityInfoView);
+        static readonly Type   ENTITYINFOVIEW_TYPE = typeof(EntityStructInfoView);
         static readonly bool   NEEDS_REFLECTION    = typeof(IEntityViewStruct).IsAssignableFrom(typeof(T));
         static readonly string ENTITY_VIEW_NAME    = ENTITY_VIEW_TYPE.ToString();
+        internal static readonly bool HAS_EGID = typeof(INeedEGID).IsAssignableFrom(ENTITY_VIEW_TYPE);
 
         internal T _initializer;
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.DataStructures.Experimental;
@@ -15,16 +16,15 @@ namespace Svelto.ECS.Internal
             Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB,
             ref PlatformProfiler profiler);
 
-        void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup,
-            Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB,
+        void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, EGID? toEntityID, ITypeSafeDictionary toGroup,
+            Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> engines,
             ref PlatformProfiler profiler);
 
-        void FillWithIndexedEntities(ITypeSafeDictionary entities);
+        void AddEntitiesFromDictionary(ITypeSafeDictionary entitiesToSubmit, uint groupId);
 
-        void AddEntitiesToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB,
-            ref PlatformProfiler profiler);
+        void AddEntitiesToEngines(Dictionary<Type,FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDb, ITypeSafeDictionary realDic, ref PlatformProfiler profiler);
 
-        void AddCapacity(int size);
+        void AddCapacity(uint size);
         void Trim();
         void Clear();
         bool Has(uint entityIdEntityId);
@@ -34,70 +34,89 @@ namespace Svelto.ECS.Internal
     {
         static readonly Type   _type     = typeof(TValue);
         static readonly string _typeName = _type.Name;
-
-        public TypeSafeDictionary(int size) : base(size) { }
-
-        public TypeSafeDictionary() { }
-
-        public void FillWithIndexedEntities(ITypeSafeDictionary entities)
+        static readonly bool HasEgid = typeof(INeedEGID).IsAssignableFrom(_type);
+        
+        public TypeSafeDictionary(uint size) : base((uint) size) { }
+        public TypeSafeDictionary() {}
+        
+        public void AddEntitiesFromDictionary(ITypeSafeDictionary entitiesToSubmit, uint groupId)
         {
-            var buffer = (entities as TypeSafeDictionary<TValue>).GetValuesArray(out var count);
-
-            for (var i = 0; i < count; i++)
+            var typeSafeDictionary = entitiesToSubmit as TypeSafeDictionary<TValue>;
+            
+            foreach (var tuple in typeSafeDictionary)
             {
-                uint idEntityId = 0;
                 try
                 {
-                    idEntityId = buffer[i].ID.entityID;
-
-                    Add(idEntityId, ref buffer[i]);
+                    if (HasEgid)
+                    {
+                        var needEgid = (INeedEGID)tuple.Value;
+                        needEgid.ID = new EGID(tuple.Key, groupId);
+                        Add(tuple.Key, (TValue) needEgid);
+                    }
+                    else
+                        Add(tuple.Key, ref tuple.Value);
                 }
                 catch (Exception e)
                 {
                     throw new TypeSafeDictionaryException(
                         "trying to add an EntityView with the same ID more than once Entity: "
-                           .FastConcat(typeof(TValue).ToString()).FastConcat("id ").FastConcat(idEntityId), e);
+                           .FastConcat(typeof(TValue).ToString()).FastConcat("id ").FastConcat(tuple.Key), e);
                 }
             }
         }
 
         public void AddEntitiesToEngines(
             Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB,
-            ref PlatformProfiler profiler)
+            ITypeSafeDictionary realDic, ref PlatformProfiler profiler)
         {
-            var values = GetValuesArray(out var count);
-
-            for (var i = 0; i < count; i++)
-                AddEntityViewToEngines(entityViewEnginesDB, ref values[i], null, ref profiler);
+            foreach (var value in this)
+            {
+                var typeSafeDictionary = realDic as TypeSafeDictionary<TValue>;
+                var i = typeSafeDictionary.GetValueIndex(value.Key);
+               
+                AddEntityViewToEngines(entityViewEnginesDB, ref typeSafeDictionary._values[i], null, ref profiler);
+            }
         }
 
         public bool Has(uint entityIdEntityId) { return ContainsKey(entityIdEntityId); }
 
-        public void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup,
-            Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB,
+        public void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, EGID? toEntityID,
+            ITypeSafeDictionary toGroup,
+            Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> engines,
             ref PlatformProfiler profiler)
         {
-            var fasterValuesBuffer = GetValuesArray(out _);
             var valueIndex = GetValueIndex(fromEntityGid.entityID);
 
-            if (entityViewEnginesDB != null)
-                RemoveEntityViewFromEngines(entityViewEnginesDB, ref fasterValuesBuffer[valueIndex], ref profiler);
+            if (engines != null)
+                RemoveEntityViewFromEngines(engines, ref _values[valueIndex], ref profiler, toGroup != null);
 
             if (toGroup != null)
             {
                 var toGroupCasted = toGroup as TypeSafeDictionary<TValue>;
-                var previousGroup = fasterValuesBuffer[valueIndex].ID.groupID; 
-                fasterValuesBuffer[valueIndex].ID = toEntityID;
-                toGroupCasted.Add(toEntityID.entityID, ref fasterValuesBuffer[valueIndex]);
+                ref var entity = ref _values[valueIndex];
+                var previousGroup = fromEntityGid.groupID;
+                
+                ///
+                /// NOTE I WOULD EVENTUALLY NEED TO REUSE THE REAL ID OF THE REMOVING ELEMENT
+                /// SO THAT I CAN DECREASE THE GLOBAL GROUP COUNT
+                /// 
+                
+          //      entity.ID = EGID.UPDATE_REAL_ID_AND_GROUP(entity.ID, toEntityID.groupID, entityCount);
+                  if (HasEgid)
+                  {
+                      var needEgid = (INeedEGID)entity;
+                      needEgid.ID = toEntityID.Value;
+                      entity = (TValue) needEgid;
+                  }
+                
+                var index = toGroupCasted.Add(fromEntityGid.entityID, ref entity);
 
-                if (entityViewEnginesDB != null)
-                    AddEntityViewToEngines(entityViewEnginesDB,
-                                           ref toGroupCasted.GetValuesArray(out _)[
-                                               toGroupCasted.GetValueIndex(toEntityID.entityID)], previousGroup,
+                if (engines != null)
+                    AddEntityViewToEngines(engines, ref toGroupCasted._values[index], previousGroup,
                                            ref profiler);
             }
 
-            Remove(fromEntityGid.entityID);
+             Remove(fromEntityGid.entityID);
         }
 
         public void RemoveEntitiesFromEngines(
@@ -107,7 +126,7 @@ namespace Svelto.ECS.Internal
             var values = GetValuesArray(out var count);
 
             for (var i = 0; i < count; i++)
-                RemoveEntityViewFromEngines(entityViewEnginesDB, ref values[i], ref profiler);
+                RemoveEntityViewFromEngines(entityViewEnginesDB, ref values[i], ref profiler, false);
         }
 
         public ITypeSafeDictionary Create() { return new TypeSafeDictionary<TValue>(); }
@@ -131,14 +150,13 @@ namespace Svelto.ECS.Internal
                 catch (Exception e)
                 {
                     throw new ECSException(
-                        "Code crashed inside Add callback ".FastConcat(typeof(TValue).ToString()).FastConcat("id ")
-                           .FastConcat(entity.ID.entityID), e);
+                        "Code crashed inside Add callback ".FastConcat(typeof(TValue).ToString()), e);
                 }
         }
 
         static void RemoveEntityViewFromEngines(
             Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB, ref TValue entity,
-            ref PlatformProfiler profiler)
+            ref PlatformProfiler profiler, bool itsaswap)
         {
             if (!entityViewEnginesDB.TryGetValue(_type, out var entityViewsEngines)) return;
             
@@ -146,46 +164,30 @@ namespace Svelto.ECS.Internal
                 try
                 {
                     using (profiler.Sample((entityViewsEngines[i] as EngineInfo).name, _typeName))
-                    {
-                        (entityViewsEngines[i] as IHandleEntityStructEngine<TValue>).RemoveInternal(ref entity);
-                    }
+                        (entityViewsEngines[i] as IHandleEntityStructEngine<TValue>).RemoveInternal(
+                                                                                                    ref entity, itsaswap);
                 }
                 catch (Exception e)
                 {
                     throw new ECSException(
-                        "Code crashed inside Remove callback ".FastConcat(typeof(TValue).ToString())
-                           .FastConcat("id ").FastConcat(entity.ID.entityID), e);
+                        "Code crashed inside Remove callback ".FastConcat(typeof(TValue).ToString()), e);
                 }
         }
 
-        public bool ExecuteOnEntityView<W>(uint entityGidEntityId, ref W value, EntityAction<TValue, W> action)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal ref TValue FindElement(uint entityGidEntityId)
         {
-            if (!FindIndex(entityGidEntityId, out var findIndex)) return false;
-            
-            action(ref _values[findIndex], ref value);
-
-            return true;
-        }
-
-        public bool ExecuteOnEntityView(uint entityGidEntityId, EntityAction<TValue> action)
-        {
-            if (!FindIndex(entityGidEntityId, out var findIndex)) return false;
-            
-            action(ref _values[findIndex]);
-
-            return true;
-
-        }
-
-        public uint FindElementIndex(uint entityGidEntityId)
-        {
+#if DEBUG && !PROFILER         
             if (FindIndex(entityGidEntityId, out var findIndex) == false)
                 throw new Exception("Entity not found in this group ".FastConcat(typeof(TValue).ToString()));
-
-            return findIndex;
+#else
+            FindIndex(entityGidEntityId, out var findIndex);
+#endif
+            return ref _values[findIndex];
         }
 
-        public bool TryFindElementIndex(uint entityGidEntityId, out uint index)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal bool TryFindElementIndex(uint entityGidEntityId, out uint index)
         {
             return FindIndex(entityGidEntityId, out index);
         }

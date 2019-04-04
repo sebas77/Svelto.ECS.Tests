@@ -32,9 +32,9 @@ namespace Svelto.ECS
         internal static void InitCache()
         {}
         
-        internal static void BuildEntityView(EGID ID, out T entityView) 
+        internal static void BuildEntityView(out T entityView) 
         {
-            entityView = new T { ID = ID };
+            entityView = new T {};
         }
     }
 }

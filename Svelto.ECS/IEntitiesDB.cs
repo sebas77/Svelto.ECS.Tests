@@ -1,6 +1,10 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace Svelto.ECS
 {
-    public interface IEntitiesDB: IObsoleteInterfaceDb
+    public partial interface IEntitiesDB
     {
         /// <summary>
         /// ECS is meant to work on a set of Entities. Working on a single entity is sometime necessary, but using
@@ -11,9 +15,14 @@ namespace Svelto.ECS
         /// <param name="index"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        bool TryQueryEntitiesAndIndex<T>(uint  id, uint group, out uint index, out T[] array) where T : IEntityStruct;
-        bool TryQueryEntitiesAndIndex<T>(EGID entityGid, out uint index, out T[]  array) where T : IEntityStruct;
-        bool TryQueryEntitiesAndIndex<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index, out T[] array) where T : IEntityStruct;
+        bool TryQueryEntitiesAndIndex<T>(uint id, uint group, out uint index, out T[] array)
+            where T : struct, IEntityStruct;
+
+        bool TryQueryEntitiesAndIndex<T>(EGID entityGid, out uint index, out T[] array) where T : struct, IEntityStruct;
+
+        bool TryQueryEntitiesAndIndex
+            <T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index, out T[] array)
+            where T : struct, IEntityStruct;
 
         /// <summary>
         /// ECS is meant to work on a set of Entities. Working on a single entity is sometime necessary, but using
@@ -24,18 +33,23 @@ namespace Svelto.ECS
         /// <param name="index"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        T[] QueryEntitiesAndIndex<T>(EGID entityGid, out uint index) where T : IEntityStruct;
-        T[] QueryEntitiesAndIndex<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index) where T : IEntityStruct;
-        T[] QueryEntitiesAndIndex<T>(uint id, uint group, out uint index) where T : IEntityStruct;
+        T[] QueryEntitiesAndIndex<T>(EGID entityGid, out uint index) where T : struct, IEntityStruct;
+
+        T[] QueryEntitiesAndIndex<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index)
+            where T : struct, IEntityStruct;
+
+        T[] QueryEntitiesAndIndex<T>(uint id, uint group, out uint index) where T : struct, IEntityStruct;
 
         /// <summary>
-        ///
+        /// QueryUniqueEntity is a contract method that explicitly declare the intention to have just on entity in a
+        /// specific group, usually used for GUI elements
         /// </summary>
         /// <param name="group"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        ref T QueryUniqueEntity<T>(ExclusiveGroup.ExclusiveGroupStruct group) where T : IEntityStruct;
-        ref T QueryUniqueEntity<T>(uint group) where T : IEntityStruct;
+        ref T QueryUniqueEntity<T>(ExclusiveGroup.ExclusiveGroupStruct group) where T : struct, IEntityStruct;
+
+        ref T QueryUniqueEntity<T>(uint group) where T : struct, IEntityStruct;
 
         /// <summary>
         ///
@@ -43,9 +57,10 @@ namespace Svelto.ECS
         /// <param name="entityGid"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        ref T  QueryEntity<T>(EGID    entityGid) where T : IEntityStruct;
-        ref T  QueryEntity<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group) where T : IEntityStruct;
-        ref T  QueryEntity<T>(uint id, uint group) where T : IEntityStruct;
+        ref T QueryEntity<T>(EGID entityGid) where T : struct, IEntityStruct;
+
+        ref T QueryEntity<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group) where T : struct, IEntityStruct;
+        ref T QueryEntity<T>(uint id, uint group) where T : struct, IEntityStruct;
 
         /// <summary>
         /// Fast and raw (therefore not safe) return of entities buffer
@@ -55,25 +70,31 @@ namespace Svelto.ECS
         /// <param name="count"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        T[] QueryEntities<T>(uint group, out uint count) where T : IEntityStruct;
+        T[] QueryEntities<T>(uint group, out uint count) where T : struct, IEntityStruct;
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="groupStruct"></param>
-        /// <param name="count"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        T[] QueryEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct, out uint count) where T : IEntityStruct;
+        T[] QueryEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct, out uint count)
+            where T : struct, IEntityStruct;
 
-        (T1[], T2[]) QueryEntities<T1, T2>(uint group, out uint count) where T1 : IEntityStruct where T2 : IEntityStruct;
+        (T1[], T2[]) QueryEntities<T1, T2>(uint group, out uint count)
+            where T1 :struct,  IEntityStruct where T2 :struct,  IEntityStruct;
+
         (T1[], T2[]) QueryEntities<T1, T2>(ExclusiveGroup.ExclusiveGroupStruct groupStruct, out uint count)
-            where T1 : IEntityStruct where T2 : IEntityStruct;
+            where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct;
 
         (T1[], T2[], T3[]) QueryEntities<T1, T2, T3>(uint group, out uint count)
-            where T1 : IEntityStruct where T2 : IEntityStruct where T3 : IEntityStruct;
+            where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct where T3 : struct, IEntityStruct;
+
         (T1[], T2[], T3[]) QueryEntities<T1, T2, T3>(ExclusiveGroup.ExclusiveGroupStruct groupStruct, out uint count)
-            where T1 : IEntityStruct where T2 : IEntityStruct where T3 : IEntityStruct;
+            where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct where T3 : struct, IEntityStruct;
+
+        EntityCollection<T> QueryEntities<T>(uint group) where T : struct, IEntityStruct;
+
+        EntityCollection<T> QueryEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct)
+            where T : struct, IEntityStruct;
+
+        EntityCollections<T> QueryEntities<T>(ExclusiveGroup[] groups) where T : struct, IEntityStruct;
+        EntityCollections<T1, T2> QueryEntities<T1, T2>(ExclusiveGroup[] groups)
+            where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct;
 
         /// <summary>
         /// this version returns a mapped version of the entity array so that is possible to find the
@@ -84,22 +105,11 @@ namespace Svelto.ECS
         /// <param name="mapper"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        EGIDMapper<T> QueryMappedEntities<T>(uint groupID) where T : IEntityStruct;
-        EGIDMapper<T> QueryMappedEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId) where T : IEntityStruct;
-        /// <summary>
-        /// Execute an action on entities. Be sure that the action is not capturing variables
-        /// otherwise you will allocate memory which will have a great impact on the execution performance.
-        /// ExecuteOnEntities can be used to iterate safely over entities, several checks are in place
-        /// to be sure that everything will be done correctly.
-        /// Cache friendliness is guaranteed if only Entity Structs are used, but
-        /// </summary>
-        /// <param name="egid"></param>
-        /// <param name="action"></param>
-        /// <typeparam name="T"></typeparam>
-        void ExecuteOnEntities<T>(uint groupID, EntitiesAction<T> action) where T : IEntityStruct;
-        void ExecuteOnEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId, EntitiesAction<T> action) where T : IEntityStruct;
-        void ExecuteOnEntities<T, W>(uint groupID, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct;
-        void ExecuteOnEntities<T, W>(ExclusiveGroup.ExclusiveGroupStruct groupStructId, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct;
+        EGIDMapper<T> QueryMappedEntities<T>(uint groupID) where T : struct, IEntityStruct;
+
+        EGIDMapper<T> QueryMappedEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId)
+            where T : struct, IEntityStruct;
+
         /// <summary>
         /// Execute an action on ALL the entities regardless the group. This function doesn't guarantee cache
         /// friendliness even if just EntityStructs are used.
@@ -108,10 +118,12 @@ namespace Svelto.ECS
         /// <param name="damageableGroups"></param>
         /// <param name="action"></param>
         /// <typeparam name="T"></typeparam>
-        void ExecuteOnAllEntities<T>(System.Action<T[], uint, IEntitiesDB> action) where T : IEntityStruct;
-        void ExecuteOnAllEntities<T, W>(ref W value, System.Action<T[], uint, IEntitiesDB, W> action) where T : IEntityStruct;
-        void ExecuteOnAllEntities<T>(ExclusiveGroup[] groups, EntitiesAction<T> action) where T : IEntityStruct;
-        void ExecuteOnAllEntities<T, W>(ExclusiveGroup[] groups, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct;
+        void ExecuteOnAllEntities<T>(Action<T[], ExclusiveGroup.ExclusiveGroupStruct, uint, IEntitiesDB> action)
+            where T : struct, IEntityStruct;
+
+        void ExecuteOnAllEntities<T, W>(ref W value,
+            Action<T[], ExclusiveGroup.ExclusiveGroupStruct, uint, IEntitiesDB, W> action)
+            where T : struct, IEntityStruct;
 
         /// <summary>
         ///
@@ -119,9 +131,10 @@ namespace Svelto.ECS
         /// <param name="egid"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        bool Exists<T>(EGID egid) where T : IEntityStruct;
-        bool Exists<T>(uint id, uint groupid) where T : IEntityStruct;
-        bool Exists (ExclusiveGroup.ExclusiveGroupStruct gid);
+        bool Exists<T>(EGID egid) where T : struct, IEntityStruct;
+
+        bool Exists<T>(uint id, uint groupid) where T : struct, IEntityStruct;
+        bool Exists(ExclusiveGroup.ExclusiveGroupStruct gid);
 
         /// <summary>
         ///
@@ -129,8 +142,9 @@ namespace Svelto.ECS
         /// <param name="group"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        bool HasAny<T>(uint group) where T:IEntityStruct;
-        bool HasAny<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct) where T:IEntityStruct;
+        bool HasAny<T>(uint group) where T : struct, IEntityStruct;
+
+        bool HasAny<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct) where T : struct, IEntityStruct;
 
         /// <summary>
         ///
@@ -138,35 +152,15 @@ namespace Svelto.ECS
         /// <param name="groupStruct"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        uint Count<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct)  where T:IEntityStruct;
-        uint Count<T>(uint groupStruct)  where T:IEntityStruct;
+        uint Count<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct) where T : struct, IEntityStruct;
+
+        uint Count<T>(uint groupStruct) where T : struct, IEntityStruct;
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="egid"></param>
         /// <typeparam name="T"></typeparam>
-        void PublishEntityChange<T>(EGID egid)  where T : unmanaged, IEntityStruct;
-    }
-
-    public delegate void EntityAction<T, W>(ref T target, ref W       value);
-    public delegate void EntityAction<T>(ref    T target);
-
-    public delegate void AllEntitiesAction<T, W>(ref T target, ref W value, IEntitiesDB entitiesDb);
-    public delegate void AllEntitiesAction<T>(ref T target, IEntitiesDB entitiesDb);
-
-    public delegate void EntitiesAction<T, W>(ref T target, ref W value, EntityActionData extraParams);
-    public delegate void EntitiesAction<T>(ref T target, EntityActionData extraParams);
-
-    public struct EntityActionData
-    {
-        public readonly IEntitiesDB entitiesDB;
-        public readonly uint entityIndex;
-
-        public EntityActionData(IEntitiesDB entitiesDb, uint index)
-        {
-            this.entitiesDB = entitiesDb;
-            entityIndex = index;
-        }
+        void PublishEntityChange<T>(EGID egid) where T : unmanaged, IEntityStruct;
     }
 }

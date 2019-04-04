@@ -36,6 +36,14 @@ public static class ExtensionMethods
         vector1.y = y;
         vector1.z = z;
     }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Zero(ref this ECSVector3 vector1)
+    {
+        vector1.x = 0;
+        vector1.y = 0;
+        vector1.z = 0;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Set(ref this ECSQuaternion quaternion, float x, float y, float z, float w)

@@ -20,10 +20,7 @@ namespace Svelto.ECS
         /// </summary>
         public EnginesRoot(IEntitySubmissionScheduler entityViewScheduler)
         {
-#if DEBUG && !PROFILER            
-            _entitiesOperationsDebug = new FasterDictionary<ulong, EntitySubmitOperationType>();
-#endif            
-            _entitiesOperations = new FasterList<EntitySubmitOperation>();
+            _entitiesOperations = new FasterDictionary<ulong, EntitySubmitOperation>();
             _entityEngines = new Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>();
             _enginesSet = new HashSet<IEngine>();
             _disposableEngines = new FasterList<IDisposable>();
@@ -31,7 +28,7 @@ namespace Svelto.ECS
 
             _groupEntityDB = new FasterDictionary<uint, Dictionary<Type, ITypeSafeDictionary>>();
             _groupsPerEntity = new Dictionary<Type, FasterDictionary<uint, ITypeSafeDictionary>>();
-            _groupedEntityToAdd = new DoubleBufferedEntitiesToAdd<FasterDictionary<uint, Dictionary<Type, ITypeSafeDictionary>>>();
+            _groupedEntityToAdd = new DoubleBufferedEntitiesToAdd();
 
             _entitiesStream = new EntitiesStream();
             _entitiesDB = new EntitiesDB(_groupEntityDB, _groupsPerEntity, _entitiesStream);
@@ -128,14 +125,15 @@ namespace Svelto.ECS
         //for each group id, save a dictionary indexed by entity type of entities indexed by id
         //ITypeSafeDictionary = Key = entityID, Value = EntityStruct
         readonly FasterDictionary<uint, Dictionary<Type, ITypeSafeDictionary>> _groupEntityDB;
-        readonly EntitiesDB                                                    _entitiesDB;
         //for each entity view type, return the groups (dictionary of entities indexed by entity id) where they are
         //found indexed by group id
-                   //EntityViewType           //groupID  //entityID, EntityStruct
-        readonly Dictionary<Type, FasterDictionary<uint, ITypeSafeDictionary>> _groupsPerEntity; 
-        readonly EntitiesStream                                                _entitiesStream;
+                    //EntityViewType           //groupID  //entityID, EntityStruct
+        readonly Dictionary<Type, FasterDictionary<uint, ITypeSafeDictionary>> _groupsPerEntity;
+        
+        readonly EntitiesStream _entitiesStream;
+        readonly EntitiesDB     _entitiesDB;
         
         static readonly Type OBJECT_TYPE           = typeof(object);
-        static readonly Type ENTITY_INFO_VIEW_TYPE = typeof(EntityInfoView);
+        static readonly Type ENTITY_INFO_VIEW_TYPE = typeof(EntityStructInfoView);
     }
 }

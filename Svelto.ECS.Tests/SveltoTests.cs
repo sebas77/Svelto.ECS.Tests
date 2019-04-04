@@ -50,12 +50,12 @@ namespace UnitTests
         {
             FasterDictionary<int, Test> test = new FasterDictionary<int, Test>();
 
-            int dictionarysize = 10000;
+            uint dictionarysize = 10000;
 
             int[] numbers = new int[dictionarysize];
 
             for (int i = 1; i < dictionarysize; i++)
-                numbers[i] = numbers[i - 1] + i * HashHelpers.ExpandPrime(dictionarysize);
+                numbers[i] = numbers[i - 1] + i * HashHelpers.ExpandPrime((int) dictionarysize);
 
             for (int i = 0; i < dictionarysize; i++)
                 test[i] = new Test(numbers[i]);
@@ -81,13 +81,13 @@ namespace UnitTests
                 if (test[i].i != numbers[i])
                     throw new Exception();
 
-            for (int i = dictionarysize - 1; i >= 0; i -= 3)
+            for (int i = (int) (dictionarysize - 1); i >= 0; i -= 3)
                 if (test.Remove(i) == false)
                     throw new Exception();
 
             test.Trim();
 
-            for (int i = dictionarysize - 1; i >= 0; i -= 3)
+            for (int i = (int) (dictionarysize - 1); i >= 0; i -= 3)
                 test[i] = new Test(numbers[i]);
 
             for (int i = 0; i < dictionarysize; i++)
@@ -220,144 +220,144 @@ namespace UnitTests
         {
             unchecked
             {
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)5000, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4999, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4998, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4997, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(5000, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4999, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4998, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4997, group1),  new[] {new TestIt(2)});
         
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4996, group2),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4995, group2),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4996, group2),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4995, group2),  new[] {new TestIt(2)});
 
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4994, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4993, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4992, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4994, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4993, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4992, group1),  new[] {new TestIt(2)});
 
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4991, group2),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4991, group2),  new[] {new TestIt(2)});
 
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4990, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4988, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4990, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4988, group1),  new[] {new TestIt(2)});
 
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4987, group2),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4986, group2),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4987, group2),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4986, group2),  new[] {new TestIt(2)});
 
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4985, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4985, group1),  new[] {new TestIt(2)});
 
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4984, group2),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4980, group2),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4984, group2),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4980, group2),  new[] {new TestIt(2)});
 
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4977, group2),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4977, group2),  new[] {new TestIt(2)});
 
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4976, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4976, group1),  new[] {new TestIt(2)});
 
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4974, group2),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4974, group2),  new[] {new TestIt(2)});
 
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4971, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4970, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4971, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4970, group1),  new[] {new TestIt(2)});
 
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4967, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4966, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4965, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4964, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4963, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4962, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4961, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4960, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4959, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4958, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4957, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4967, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4966, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4965, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4964, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4963, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4962, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4961, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4960, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4959, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4958, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4957, group1),  new[] {new TestIt(2)});
 
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4955, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4954, group1),  new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4953, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4955, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4954, group1),  new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4953, group1),  new[] {new TestIt(2)});
             
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
             
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4996    , group2    , group1);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4995    , group2    , group1);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4991    , group2    , group1);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4986    , group2    , group1);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4984    , group2    , group1);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4980    , group2    , group1);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4977    , group2    , group1);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4974    , group2    , group1);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)5000    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4999    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4998    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4997    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4994    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4993    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4992    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4990    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4988    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4985    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4976    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4971    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4970    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4967    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4966    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4965    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4964    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4963    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4962    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4961    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4960    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4959    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4958    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4957    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4955    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4954    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4953    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4974    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4977    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4980    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4984    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4986    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4991    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4995    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4996    , group1    , group6);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)5000    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4999    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4998    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4997    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4994    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4993    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4992    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4990    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4988    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4985    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4976    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4971    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4970    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4967    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4966    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4965    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4964    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4963    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4962    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4961    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4960    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4959    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4958    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4957    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4955    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4954    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4953    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4996    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4995    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4991    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4986    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4984    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4980    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4977    , group6    , group7);         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4974    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4996    , group2    , group1);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4995    , group2    , group1);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4991    , group2    , group1);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4986    , group2    , group1);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4984    , group2    , group1);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4980    , group2    , group1);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4977    , group2    , group1);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4974    , group2    , group1);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(5000    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4999    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4998    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4997    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4994    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4993    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4992    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4990    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4988    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4985    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4976    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4971    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4970    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4967    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4966    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4965    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4964    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4963    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4962    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4961    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4960    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4959    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4958    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4957    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4955    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4954    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4953    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4974    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4977    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4980    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4984    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4986    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4991    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4995    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4996    , group1    , group6);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(5000    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4999    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4998    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4997    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4994    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4993    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4992    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4990    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4988    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4985    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4976    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4971    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4970    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4967    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4966    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4965    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4964    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4963    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4962    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4961    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4960    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4959    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4958    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4957    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4955    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4954    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4953    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4996    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4995    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4991    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4986    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4984    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4980    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4977    , group6    , group7);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4974    , group6    , group7);         
             
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            EGID egid = new EGID((uint)4958, group7);
+            EGID egid = new EGID(4958, group7);
             bool exists = _neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(egid);
             Assert.IsTrue(exists); 
         
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4961    , group7    , group8);         
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4961    , group7    , group8);         
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             exists = _neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(egid);
@@ -371,236 +371,233 @@ namespace UnitTests
         [TestCase]
         public void TestMegaEntitySwap3()
         {
-            unchecked
-            {
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)5000, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4999, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4998, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4997, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4996, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4995, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4994, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4993, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4992, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4991, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4990, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4989, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4988, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4987, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4986, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4985, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4984, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4983, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4982, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4981, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4980, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4979, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4978, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4977, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4976, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4975, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4974, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4973, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4972, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4971, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4970, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4969, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4968, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4967, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4966, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4965, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4964, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4963, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4962, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4961, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4960, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4959, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4958, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4957, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4956, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4955, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4954, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4953, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4952, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4951, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4950, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4949, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4948, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4947, group2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4946, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4945, group1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestDescriptor>(new EGID((uint)4944, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(5000, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4999, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4998, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4997, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4996, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4995, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4994, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4993, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4992, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4991, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4990, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4989, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4988, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4987, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4986, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4985, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4984, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4983, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4982, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4981, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4980, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4979, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4978, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4977, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4976, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4975, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4974, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4973, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4972, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4971, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4970, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4969, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4968, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4967, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4966, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4965, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4964, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4963, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4962, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4961, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4960, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4959, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4958, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4957, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4956, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4955, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4954, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4953, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4952, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4951, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4950, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4949, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4948, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4947, group2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4946, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4945, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestDescriptor>(new EGID(4944, group1), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4987, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4986, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4982, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4977, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4975, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4974, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4971, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4968, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4965, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4964, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4960, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4959, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4947, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)5000, group1, group2);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4999, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4998, group1, group2);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4997, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4996, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4995, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4994, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4993, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4992, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4991, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4990, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4989, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4988, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4985, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4984, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4983, group1, group2);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4981, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4980, group1, group2);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4979, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4976, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4973, group1, group2);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4970, group1, group2);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4967, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4966, group1, group2);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4962, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4961, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4958, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4957, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4956, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4955, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4954, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4953, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4952, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4951, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4950, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4949, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4948, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4946, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4945, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4944, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4963, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4972, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)5000, group2, group0);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4998, group2, group0);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4980, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4973, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4970, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4966, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4947, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4959, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4960, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4964, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4965, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4968, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4971, group1, group2);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4974, group1, group2);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4975, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4977, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4982, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4986, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4987, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4999, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4997, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4996, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4995, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4994, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4993, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4992, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4991, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4990, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4989, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4988, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4985, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4984, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4981, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4979, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4976, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4967, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4962, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4961, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4958, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4957, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4956, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4955, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4954, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4953, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4952, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4951, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4950, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4949, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4948, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4946, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4945, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4944, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4969, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4971, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4966, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4970, group1, group2);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4973, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4980, group1, group2);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4972, group1, group2);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4963, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4987, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4986, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4982, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4977, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4975, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4968, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4965, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4964, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4960, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4959, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4947, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4983, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4974, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4970, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4980, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4972, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4971, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4969, group1, group2);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4963, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4973, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4966, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4978, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4969, group2, group1);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4972, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4980, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4983, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4974, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4970, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4971, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4969, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4978, group1, group6);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4970, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4972, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4980, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4983, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4974, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4978, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4969, group6, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4988, group7, group8);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4988, group8, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4971, group7, group8);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4971, group8, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4992, group7, group8);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4992, group8, group7);
-            _entityFunctions.SwapEntityGroup<TestDescriptor>((uint)4967, group7, group8);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4987, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4986, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4982, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4977, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4975, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4974, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4971, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4968, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4965, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4964, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4960, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4959, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4947, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(5000, group1, group2);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4999, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4998, group1, group2);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4997, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4996, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4995, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4994, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4993, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4992, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4991, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4990, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4989, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4988, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4985, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4984, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4983, group1, group2);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4981, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4980, group1, group2);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4979, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4976, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4973, group1, group2);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4970, group1, group2);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4967, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4966, group1, group2);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4962, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4961, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4958, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4957, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4956, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4955, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4954, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4953, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4952, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4951, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4950, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4949, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4948, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4946, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4945, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4944, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4963, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4972, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(5000, group2, group0);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4998, group2, group0);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4980, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4973, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4970, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4966, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4947, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4959, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4960, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4964, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4965, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4968, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4971, group1, group2);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4974, group1, group2);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4975, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4977, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4982, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4986, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4987, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4999, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4997, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4996, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4995, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4994, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4993, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4992, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4991, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4990, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4989, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4988, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4985, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4984, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4981, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4979, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4976, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4967, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4962, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4961, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4958, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4957, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4956, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4955, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4954, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4953, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4952, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4951, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4950, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4949, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4948, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4946, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4945, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4944, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4969, group2, group1);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4971, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4966, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4970, group1, group2);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4973, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4980, group1, group2);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4972, group1, group2);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4963, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4987, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4986, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4982, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4977, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4975, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4968, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4965, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4964, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4960, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4959, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4947, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4983, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4974, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4970, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4980, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4972, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4971, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4969, group1, group2);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4963, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4973, group6, group7);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4966, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4978, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4969, group2, group1);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4972, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4980, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4983, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4974, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4970, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4971, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4969, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4978, group1, group6);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4970, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4972, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4980, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4983, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4974, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4978, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4969, group6, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4988, group7, group8);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4988, group8, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4971, group7, group8);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4971, group8, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4992, group7, group8);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4992, group8, group7);
+            _entityFunctions.SwapEntityGroup<TestDescriptor>(4967, group7, group8);
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            EGID egid   = new EGID((uint)4985, group7);
+            EGID egid   = new EGID(4985, group7);
             bool exists = _neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(egid);
             
             Assert.IsTrue(exists);
-                            
-            }
-
         }
         
         [TestCase((uint)0)][TestCase((uint)1)][TestCase((uint)2)]
@@ -983,13 +980,13 @@ namespace UnitTests
             _entityFactory.BuildEntity<TestDescriptor5>(new EGID(id4, groupR4 + 3), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityViewStruct>((entity, groupCount, db) =>
+            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityViewStruct>((entity, group, groupCount, db) =>
             {
                 for (int i = 0; i < groupCount; i++)
                     entity[i].TestIt.value = entity[i].ID.entityID;
             });
 
-            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityStruct>((entity, groupCount, db) =>
+            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityStruct>((entity, group, groupCount, db) =>
             {
                 for (int i = 0; i < groupCount; i++)
                     entity[i].value = entity[i].ID.entityID;
@@ -1019,12 +1016,12 @@ namespace UnitTests
             _entityFunctions.RemoveEntity<TestDescriptor5>(new EGID(id4, groupR4 + 3));
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityViewStruct>((entity, groupCount, db) =>
+            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityViewStruct>((entity, group,  groupCount, db) =>
             {
                 Assert.Fail();
             });
 
-            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityStruct>((entity, groupCount, db) =>
+            _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityStruct>((entity, group,  groupCount, db) =>
             {
                 Assert.Fail();
             });
@@ -1214,7 +1211,7 @@ namespace UnitTests
                 _entityFactory.BuildEntity<TestDescriptor7>(new EGID(100, group0), null);
             }
 
-            protected override void Remove(ref TestEntityViewStruct entityView)
+            protected override void Remove(ref TestEntityViewStruct entityView, bool itsaSwap)
             {
                 throw new NotImplementedException();
             }
@@ -1227,19 +1224,19 @@ namespace UnitTests
             public IEntitiesDB entitiesDB { get; set; }
             public void Ready() {}
 
-            public bool HasEntity<T>(EGID ID) where T : IEntityStruct
+            public bool HasEntity<T>(EGID ID) where T : struct, IEntityStruct
             {
                 return entitiesDB.Exists<T>(ID);
             }
 
-            public bool HasAnyEntityInGroup<T>(ExclusiveGroup groupID) where T : IEntityStruct
+            public bool HasAnyEntityInGroup<T>(ExclusiveGroup groupID) where T : struct, IEntityStruct
             {
                 uint count;
                 entitiesDB.QueryEntities<T>(groupID, out count);
                 return count > 0;
             }
 
-            public bool HasAnyEntityInGroupArray<T>(ExclusiveGroup groupID) where T:IEntityStruct
+            public bool HasAnyEntityInGroupArray<T>(ExclusiveGroup groupID) where T: struct, IEntityStruct
             {
                 uint count;
                 entitiesDB.QueryEntities<T>(groupID, out count);

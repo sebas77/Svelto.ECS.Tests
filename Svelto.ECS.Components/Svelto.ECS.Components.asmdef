@@ -1,7 +1,8 @@
 {
-    "name": "Svelto.ECS",
+    "name": "Svelto.ECS.Components.Unity",
     "references": [
-        "Svelto.Common"
+        "Unity.Mathematics",
+        "Svelto.ECS"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],
@@ -11,5 +12,11 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [
+        {
+            "name": "com.unity.mathematics",
+            "expression": "0.0.9",
+            "define": "UNITY_MATHEMATICS"
+        }
+    ]
 }

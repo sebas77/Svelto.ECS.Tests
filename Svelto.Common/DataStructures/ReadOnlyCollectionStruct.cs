@@ -7,7 +7,7 @@ namespace Svelto.DataStructures
 {
     public struct ReadOnlyCollectionStruct<T> : ICollection<T>, IEnumerable<T>, IEnumerable
     {
-        public ReadOnlyCollectionStruct(T[] values, int count)
+        public ReadOnlyCollectionStruct(T[] values, uint count)
         {
             _values = values;
             _count = count;
@@ -66,7 +66,7 @@ namespace Svelto.DataStructures
 
         public int Count
         {
-            get { return _count;  }
+            get { return (int) _count;  }
         }
 
         public bool IsReadOnly
@@ -84,12 +84,12 @@ namespace Svelto.DataStructures
         }
 
         readonly T[] _values;
-        readonly int _count;
+        readonly uint _count;
     }
     
     public struct ReadOnlyCollectionStructEnumerator<T>:IEnumerator<T>
     {
-        public ReadOnlyCollectionStructEnumerator(T[] values, int count) : this()
+        public ReadOnlyCollectionStructEnumerator(T[] values, uint count) : this()
         {
             _index  = 0;
             _values = values;
@@ -141,6 +141,6 @@ namespace Svelto.DataStructures
         readonly T[] _values;
         T            _current;
         int          _index;
-        readonly int          _count;
+        readonly uint          _count;
     }
 }

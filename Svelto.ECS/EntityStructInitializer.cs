@@ -11,27 +11,26 @@ namespace Svelto.ECS
             _group = @group;
             ID      = id;
         }
-        
-        public EGID ID { get; }
 
-        public void Init<T>(ref T initializer) where T: struct, IEntityStruct
+        public void Init<T>(T initializer) where T: struct, IEntityStruct
         {
-            if (_group.TryGetValue(typeof(T), out var typeSafeDictionary) == true)
+            if (_group.TryGetValue(EntityBuilder<T>.ENTITY_VIEW_TYPE, out var typeSafeDictionary) == true)
             {
                 var dictionary = typeSafeDictionary as TypeSafeDictionary<T>;
-                
-                initializer.ID = ID;
+
+                if (EntityBuilder<T>.HAS_EGID)
+                {
+                    var needEgid = ((INeedEGID) initializer);
+                    needEgid.ID = ID;
+                    initializer = (T) needEgid;
+                }
 
                 if (dictionary.TryFindElementIndex(ID.entityID, out var findElementIndex))
                     dictionary.GetValuesArray(out _)[findElementIndex] = initializer;
             }
         }
         
-        public void Init<T>(T initializer) where T: struct, IEntityStruct
-        {
-            Init(ref initializer);
-        }
-
+        readonly EGID ID;
         readonly Dictionary<Type, ITypeSafeDictionary> _group;
     }
 }

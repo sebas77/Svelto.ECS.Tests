@@ -1,7 +1,7 @@
 #if UNITY_2018_3_OR_NEWER
 using UnityEngine;
 
-namespace Svelto.ECS.Components.Unity
+namespace Svelto.ECS.Components.Unity.Unity
 {
     public static class ExtensionMethods
     {

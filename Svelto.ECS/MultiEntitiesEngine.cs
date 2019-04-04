@@ -10,23 +10,25 @@ namespace Svelto.ECS
         public void AddInternal(ref U entityView, ExclusiveGroup.ExclusiveGroupStruct? previousGroup)
         { Add(ref entityView, previousGroup); }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RemoveInternal(ref U entityView)
-        { Remove(ref entityView); }
+        public void RemoveInternal(ref U entityView, bool itsaSwap)
+        { Remove(ref entityView, itsaSwap); }
         
         protected abstract void Add(ref U entityView, ExclusiveGroup.ExclusiveGroupStruct? previousGroup);
-        protected abstract void Remove(ref U entityView);
+        protected abstract void Remove(ref U entityView, bool itsaSwap);
     }
     
     public abstract class MultiEntitiesEngine<T, U, V> : MultiEntitiesEngine<T, U>, IHandleEntityStructEngine<V>
         where V :  IEntityStruct where U :  IEntityStruct where T :  IEntityStruct
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddInternal(ref V entityView, ExclusiveGroup.ExclusiveGroupStruct? previousGroup)
         { Add(ref entityView, previousGroup); }
-        public void RemoveInternal(ref V entityView)
-        { Remove(ref entityView); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void RemoveInternal(ref V entityView, bool itsaSwap)
+        { Remove(ref  entityView, itsaSwap); }
         
         protected abstract void Add(ref V entityView, ExclusiveGroup.ExclusiveGroupStruct? previousGroup);
-        protected abstract void Remove(ref V entityView);
+        protected abstract void Remove(ref V entityView, bool itsaSwap);
     }
 
     /// <summary>
@@ -36,12 +38,14 @@ namespace Svelto.ECS
     public abstract class MultiEntitiesEngine<T, U, V, W> : MultiEntitiesEngine<T, U, V>, IHandleEntityStructEngine<W>
         where W :  IEntityStruct where V :  IEntityStruct where U :  IEntityStruct where T : IEntityStruct
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddInternal(ref W entityView, ExclusiveGroup.ExclusiveGroupStruct? previousGroup)
-        { Add(ref entityView, previousGroup); }
-        public void RemoveInternal(ref W entityView)
-        { Remove(ref entityView); }
+        { Add(ref  entityView, previousGroup); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void RemoveInternal(ref W entityView, bool itsaSwap)
+        { Remove(ref  entityView, itsaSwap); }
         
         protected abstract void Add(ref W entityView, ExclusiveGroup.ExclusiveGroupStruct? previousGroup);
-        protected abstract void Remove(ref W entityView);
+        protected abstract void Remove(ref W entityView, bool itsaSwap);
     }
 }
