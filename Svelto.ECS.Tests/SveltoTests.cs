@@ -603,7 +603,7 @@ namespace UnitTests
         [TestCase((uint)0)][TestCase((uint)1)][TestCase((uint)2)]
         public void TestCreationAndRemovalOfDynamicEntityDescriptors(uint id)
         {
-            var ded = new DynamicEntityDescriptorInfo<TestDescriptor>(new IEntityBuilder[] 
+            var ded = new DynamicEntityDescriptor<TestDescriptor>(new IEntityBuilder[] 
                 { new EntityBuilder<TestEntityStruct>() });
             
             _entityFactory.BuildEntity(new EGID(id, group0), ded, new[] {new TestIt(2)});
@@ -800,25 +800,6 @@ namespace UnitTests
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityStruct>(group1));
-        }
-
-        [TestCase((uint)0)][TestCase((uint)1)][TestCase((uint)2)]
-        public void TestBuildInvalidEntitytructMustThrow(uint id)
-        {
-            bool crashed = false;
-
-            try
-            {
-                _entityFactory.BuildEntity<TestDescriptor6>(new EGID(id, group1), null);
-                _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            }
-            catch 
-            {
-                crashed = true;
-            }
-
-            
-            Assert.IsTrue(crashed);
         }
 
         [TestCase((uint)0)][TestCase((uint)1)][TestCase((uint)2)]
@@ -1060,18 +1041,6 @@ namespace UnitTests
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityStruct>(new EGID(1, group1)));
         }
 
-        [TestCase]
-        public void TestInvalidEntityView()
-        {
-            Assert.Throws<TypeInitializationException>(() =>
-                                                       {
-                                                           _entityFactory
-                                                              .BuildEntity<TestDescriptor9>(new EGID(1, group0),
-                                                                                            new[] {new TestIt(2)});
-                                                           _simpleSubmissionEntityViewScheduler.SubmitEntities();
-                                                       });
-        }
-
         EnginesRoot                         _enginesRoot;
         IEntityFactory                      _entityFactory;
         IEntityFunctions                    _entityFunctions;
@@ -1142,26 +1111,11 @@ namespace UnitTests
         class TestDescriptor4 : GenericEntityDescriptor<TestEntityViewStruct>
         {}
         
-        class TestDescriptor6 : GenericEntityDescriptor<TestInvalidEntityStruct>
-        {}
-
         class TestDescriptor7 : GenericEntityDescriptor<TestEntityStruct>
         { }
 
         class TestDescriptor5 : GenericEntityDescriptor<TestEntityViewStruct, TestEntityStruct>
         { }
-
-        class TestDescriptor9 : GenericEntityDescriptor<TestInvalidEntityView>
-        { }
-
-        class TestInvalidEntityStruct : IEntityStruct
-        {
-#pragma warning disable 649
-            public ITestIt TestIt;
-#pragma warning restore 649
-
-            public EGID ID { get; set; }
-        }
 
         struct TestEntityStruct : IEntityStruct
         {
@@ -1199,19 +1153,19 @@ namespace UnitTests
             public float value { get; set; }
         }
 
-        class TestEngineAdd : SingleEntityEngine<TestEntityViewStruct>
+        class TestEngineAdd : IReactOnAddAndRemove<TestEntityViewStruct>
         {
             public TestEngineAdd(IEntityFactory entityFactory)
             {
                 _entityFactory = entityFactory;
             }
 
-            protected override void Add(ref TestEntityViewStruct entityView, ExclusiveGroup.ExclusiveGroupStruct? previousGroup)
+            public void Add(ref TestEntityViewStruct entityView)
             {
                 _entityFactory.BuildEntity<TestDescriptor7>(new EGID(100, group0), null);
             }
 
-            protected override void Remove(ref TestEntityViewStruct entityView, bool itsaSwap)
+            public void Remove(ref TestEntityViewStruct entityView)
             {
                 throw new NotImplementedException();
             }
@@ -1244,10 +1198,5 @@ namespace UnitTests
                 return count != 0;
             }
         }
-    }
-
-    internal class TestInvalidEntityView : IEntityViewStruct
-    {
-        public EGID ID { get; set; }
     }
 }

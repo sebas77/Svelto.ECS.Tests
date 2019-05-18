@@ -7,7 +7,7 @@ using Svelto.Utilities;
 
 namespace Svelto.ECS
 {
-    public class EntityBuilder<T> : IEntityBuilder where T : IEntityStruct, new()
+    public class EntityBuilder<T> : IEntityBuilder where T : struct, IEntityStruct
     {
         public EntityBuilder()
         {
@@ -56,7 +56,7 @@ namespace Svelto.ECS
             if (dictionary == null)
                 dictionary = new TypeSafeDictionary<T>(size);
             else
-                dictionary.AddCapacity(size);
+                dictionary.SetCapacity(size);
 
             return dictionary;
         }
@@ -78,7 +78,6 @@ namespace Svelto.ECS
 
         internal static readonly Type   ENTITY_VIEW_TYPE    = typeof(T);
         static readonly T      DEFAULT_IT          = default;
-        static readonly Type   ENTITYINFOVIEW_TYPE = typeof(EntityStructInfoView);
         static readonly bool   NEEDS_REFLECTION    = typeof(IEntityViewStruct).IsAssignableFrom(typeof(T));
         static readonly string ENTITY_VIEW_NAME    = ENTITY_VIEW_TYPE.ToString();
         internal static readonly bool HAS_EGID = typeof(INeedEGID).IsAssignableFrom(ENTITY_VIEW_TYPE);

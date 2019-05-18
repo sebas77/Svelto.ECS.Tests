@@ -1,10 +1,8 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace Svelto.ECS
 {
-    public partial interface IEntitiesDB
+    public interface IEntitiesDB
     {
         /// <summary>
         /// ECS is meant to work on a set of Entities. Working on a single entity is sometime necessary, but using
@@ -15,11 +13,7 @@ namespace Svelto.ECS
         /// <param name="index"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        bool TryQueryEntitiesAndIndex<T>(uint id, uint group, out uint index, out T[] array)
-            where T : struct, IEntityStruct;
-
         bool TryQueryEntitiesAndIndex<T>(EGID entityGid, out uint index, out T[] array) where T : struct, IEntityStruct;
-
         bool TryQueryEntitiesAndIndex
             <T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index, out T[] array)
             where T : struct, IEntityStruct;
@@ -34,11 +28,8 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         T[] QueryEntitiesAndIndex<T>(EGID entityGid, out uint index) where T : struct, IEntityStruct;
-
         T[] QueryEntitiesAndIndex<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index)
             where T : struct, IEntityStruct;
-
-        T[] QueryEntitiesAndIndex<T>(uint id, uint group, out uint index) where T : struct, IEntityStruct;
 
         /// <summary>
         /// QueryUniqueEntity is a contract method that explicitly declare the intention to have just on entity in a
@@ -49,8 +40,6 @@ namespace Svelto.ECS
         /// <returns></returns>
         ref T QueryUniqueEntity<T>(ExclusiveGroup.ExclusiveGroupStruct group) where T : struct, IEntityStruct;
 
-        ref T QueryUniqueEntity<T>(uint group) where T : struct, IEntityStruct;
-
         /// <summary>
         ///
         /// </summary>
@@ -58,9 +47,7 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         ref T QueryEntity<T>(EGID entityGid) where T : struct, IEntityStruct;
-
         ref T QueryEntity<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group) where T : struct, IEntityStruct;
-        ref T QueryEntity<T>(uint id, uint group) where T : struct, IEntityStruct;
 
         /// <summary>
         /// Fast and raw (therefore not safe) return of entities buffer
@@ -70,25 +57,13 @@ namespace Svelto.ECS
         /// <param name="count"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        T[] QueryEntities<T>(uint group, out uint count) where T : struct, IEntityStruct;
-
         T[] QueryEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct, out uint count)
             where T : struct, IEntityStruct;
-
-        (T1[], T2[]) QueryEntities<T1, T2>(uint group, out uint count)
-            where T1 :struct,  IEntityStruct where T2 :struct,  IEntityStruct;
-
         (T1[], T2[]) QueryEntities<T1, T2>(ExclusiveGroup.ExclusiveGroupStruct groupStruct, out uint count)
             where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct;
-
-        (T1[], T2[], T3[]) QueryEntities<T1, T2, T3>(uint group, out uint count)
-            where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct where T3 : struct, IEntityStruct;
-
         (T1[], T2[], T3[]) QueryEntities<T1, T2, T3>(ExclusiveGroup.ExclusiveGroupStruct groupStruct, out uint count)
             where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct where T3 : struct, IEntityStruct;
-
-        EntityCollection<T> QueryEntities<T>(uint group) where T : struct, IEntityStruct;
-
+        
         EntityCollection<T> QueryEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct)
             where T : struct, IEntityStruct;
 
@@ -105,8 +80,6 @@ namespace Svelto.ECS
         /// <param name="mapper"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        EGIDMapper<T> QueryMappedEntities<T>(uint groupID) where T : struct, IEntityStruct;
-
         EGIDMapper<T> QueryMappedEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId)
             where T : struct, IEntityStruct;
 
@@ -132,8 +105,6 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         bool Exists<T>(EGID egid) where T : struct, IEntityStruct;
-
-        bool Exists<T>(uint id, uint groupid) where T : struct, IEntityStruct;
         bool Exists(ExclusiveGroup.ExclusiveGroupStruct gid);
 
         /// <summary>
@@ -142,8 +113,6 @@ namespace Svelto.ECS
         /// <param name="group"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        bool HasAny<T>(uint group) where T : struct, IEntityStruct;
-
         bool HasAny<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct) where T : struct, IEntityStruct;
 
         /// <summary>
@@ -153,8 +122,6 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         uint Count<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct) where T : struct, IEntityStruct;
-
-        uint Count<T>(uint groupStruct) where T : struct, IEntityStruct;
 
         /// <summary>
         ///

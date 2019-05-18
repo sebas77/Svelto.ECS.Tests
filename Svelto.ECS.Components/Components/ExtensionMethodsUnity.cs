@@ -1,9 +1,8 @@
 #if UNITY_2018_3_OR_NEWER
+using Svelto.ECS.Components;
 using UnityEngine;
 
-namespace Svelto.ECS.Components.Unity.Unity
-{
-    public static class ExtensionMethods
+    public static partial class ExtensionMethods
     {
         public static Vector2    ToVector2(in this    ECSVector2 vector) { return new Vector2(vector.x, vector.y); }
         public static ECSVector2 ToECSVector2(in this Vector2    vector) { return new ECSVector2(vector.x, vector.y); }
@@ -41,5 +40,5 @@ namespace Svelto.ECS.Components.Unity.Unity
             ecsVector3.z = vector3.z;
         }
     }
-}
+
 #endif

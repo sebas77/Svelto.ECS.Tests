@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using Svelto.ECS.Components;
 
-public static class ExtensionMethods
+public static partial class ExtensionMethods
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float SqrMagnitude(in this ECSVector2 a) { return a.x * a.x + a.y * a.y; }
@@ -92,10 +92,9 @@ public static class ExtensionMethods
         float wz = rotation.w * z;
 
         return new ECSVector3((1F - (yy + zz)) * point.x + (xy - wz) * point.y + (xz + wy) * point.z,
-                              (xy + wz) * point.x + (1F - (xx + zz)) * point.y + (yz - wx) * point.z,
-                              (xz - wy) * point.x + (yz + wx) * point.y + (1F - (xx + yy)) * point.z);
+            (xy + wz) * point.x + (1F - (xx + zz)) * point.y + (yz - wx) * point.z,
+            (xz - wy) * point.x + (yz + wx) * point.y + (1F - (xx + yy)) * point.z);
     }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Swap(ref this ECSVector3 vector, ref ECSVector3 vectorS)
     {
@@ -119,7 +118,7 @@ public static class ExtensionMethods
         vector1.y -= vector2.y;
         vector1.z -= vector2.z;
     }
-
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ref ECSVector3 Mul(ref this ECSVector3 vector1, float value)
     {
