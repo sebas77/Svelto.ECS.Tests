@@ -898,8 +898,7 @@ namespace UnitTests
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, group1)));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(group1));
             
-
-            _entityFunctions.RemoveGroupAndEntities(id);
+            _entityFunctions.RemoveGroupAndEntities(group1);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, group1)));
@@ -1040,6 +1039,90 @@ namespace UnitTests
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityStruct>(new EGID(1, group0)));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityStruct>(new EGID(1, group1)));
         }
+        
+        [TestCase]
+        public void TestQueryEntitiesWithMultipleParamsTwoStructs()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                var init = _entityFactory.BuildEntity<TestDescriptor6>(new EGID((uint) i, group0));
+                init.Init(new TestEntityStruct((uint) (i)));
+                init.Init(new TestEntityStruct2((uint) (i + 100)));
+            }
+
+            for (int i = 0; i < 100; i++)
+            {
+                var init = _entityFactory.BuildEntity<TestDescriptor6>(new EGID((uint) i, group1));
+                init.Init(new TestEntityStruct((uint) (i + 200)));
+                init.Init(new TestEntityStruct2((uint) (i + 300)));
+            }
+
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            var iterators =
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct, TestEntityStruct2>(new[]
+                {
+                    group0,
+                    group1
+                });
+
+            uint index = 0;
+
+            foreach (var iterator in iterators)
+            {
+                if (iterator.Item1.ID.groupID == group0)
+                {
+                    Assert.IsTrue(iterator.Item1.value == index);
+                    Assert.IsTrue(iterator.Item2.value == index + 100);
+                }
+                else
+                {
+                    Assert.IsTrue(iterator.Item1.value == index + 200);
+                    Assert.IsTrue(iterator.Item2.value == index + 300);
+                }
+                
+                index = ++index % 100;
+            }
+        }
+        
+        [TestCase]
+        public void TestQueryEntitiesWithMultipleParamsOneStruct()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                var init = _entityFactory.BuildEntity<TestDescriptor6>(new EGID((uint) i, group0));
+                init.Init(new TestEntityStruct((uint) (i)));
+                init.Init(new TestEntityStruct2((uint) (i + 100)));
+            }
+
+            for (int i = 0; i < 100; i++)
+            {
+                var init = _entityFactory.BuildEntity<TestDescriptor6>(new EGID((uint) i, group1));
+                init.Init(new TestEntityStruct((uint) (i + 200)));
+                init.Init(new TestEntityStruct2((uint) (i + 300)));
+            }
+
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            var iterators =
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>(new[]
+                {
+                    group0,
+                    group1
+                });
+
+            uint index = 0;
+
+            foreach (var iterator in iterators)
+            {
+                if (iterator.ID.groupID == group0)
+                    Assert.IsTrue(iterator.value == index);
+                else
+                    Assert.IsTrue(iterator.value == (index + 200));
+                
+                index = ++index % 100;
+            }
+        }
 
         EnginesRoot                         _enginesRoot;
         IEntityFactory                      _entityFactory;
@@ -1116,8 +1199,11 @@ namespace UnitTests
 
         class TestDescriptor5 : GenericEntityDescriptor<TestEntityViewStruct, TestEntityStruct>
         { }
+        
+        class TestDescriptor6 : GenericEntityDescriptor<TestEntityStruct, TestEntityStruct2>
+        { }
 
-        struct TestEntityStruct : IEntityStruct
+        struct TestEntityStruct : IEntityStruct, INeedEGID
         {
             public uint value;
 
@@ -1127,6 +1213,16 @@ namespace UnitTests
             }
 
             public EGID ID { get; set; }
+        }
+        
+        struct TestEntityStruct2 : IEntityStruct
+        {
+            public uint value;
+
+            public TestEntityStruct2(uint value):this()
+            {
+                this.value = value;
+            }
         }
 
         struct TestEntityViewStruct : IEntityViewStruct
