@@ -1,36 +1,46 @@
 ﻿using System;
-using System.Collections.Generic;
+using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public struct EntityStructInitializer
+    public ref struct EntityStructInitializer
     {
-        public EntityStructInitializer(EGID id, Dictionary<Type, ITypeSafeDictionary> @group)
+        public EntityStructInitializer(EGID id, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> group)
         {
-            _group = @group;
-            ID      = id;
+            _group = group;
+            _ID = id;
         }
 
-        public void Init<T>(T initializer) where T: struct, IEntityStruct
+        public void Init<T>(T initializer) where T : struct, IEntityStruct
         {
-            if (_group.TryGetValue(EntityBuilder<T>.ENTITY_VIEW_TYPE, out var typeSafeDictionary) == true)
+            if (!_group.TryGetValue(new RefWrapper<Type>(EntityBuilder<T>.ENTITY_VIEW_TYPE),
+                out var typeSafeDictionary))
+                return;
+
+            var dictionary = (TypeSafeDictionary<T>) typeSafeDictionary;
+
+            if (EntityBuilder<T>.HAS_EGID) ((INeedEGID) initializer).ID = _ID;
+
+            if (dictionary.TryFindIndex(_ID.entityID, out var findElementIndex))
+                dictionary.GetDirectValue(findElementIndex) = initializer;
+        }
+
+        public T Get<T>() where T : struct, IEntityStruct
+        {
+            if (_group != null && _group.TryGetValue(new RefWrapper<Type>(EntityBuilder<T>.ENTITY_VIEW_TYPE),
+                    out var typeSafeDictionary))
             {
-                var dictionary = typeSafeDictionary as TypeSafeDictionary<T>;
+                var dictionary = (TypeSafeDictionary<T>) typeSafeDictionary;
 
-                if (EntityBuilder<T>.HAS_EGID)
-                {
-                    var needEgid = ((INeedEGID) initializer);
-                    needEgid.ID = ID;
-                    initializer = (T) needEgid;
-                }
-
-                if (dictionary.TryFindIndex(ID.entityID, out var findElementIndex))
-                    dictionary.GetDirectValue(findElementIndex) = initializer;
+                if (dictionary.TryFindIndex(_ID.entityID, out var findElementIndex))
+                    return dictionary.GetDirectValue(findElementIndex);
             }
+
+            return new T();
         }
-        
-        readonly EGID ID;
-        readonly Dictionary<Type, ITypeSafeDictionary> _group;
+
+        readonly EGID                                                    _ID;
+        readonly FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> _group;
     }
 }

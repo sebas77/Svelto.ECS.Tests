@@ -4,6 +4,7 @@ using Svelto.DataStructures;
 using Svelto.ECS;
 using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Hybrid;
+using Assert = NUnit.Framework.Assert;
 
 namespace UnitTests
 {
@@ -135,7 +136,7 @@ namespace UnitTests
         [TestCase((uint)0)][TestCase((uint)1)][TestCase((uint)2)]
         public void TestExceptionTwoEntitiesCannotHaveTheSameIDInTheSameGroupInterleaved(uint id)
         {
-            try
+            void CheckFunction()
             {
                 _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, group1), new[] {new TestIt(2)});
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
@@ -143,13 +144,8 @@ namespace UnitTests
                 _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, group1), new[] {new TestIt(2)});
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
             }
-            catch (Exception e)
-            {
-                Assert.That(e.InnerException is TypeSafeDictionaryException);
-                return;
-            }
             
-            Assert.Fail();
+            Assert.Throws(typeof(ECSException), CheckFunction);
         }
 
         [TestCase]
@@ -653,7 +649,7 @@ namespace UnitTests
         [TestCase((uint)0)][TestCase((uint)1)][TestCase((uint)2)]
         public void TestExceptionTwoDifferentEntitiesCannotHaveTheSameIDInTheSameGroupInterleaved(uint id)
         {
-            try
+            void CheckFunction()
             {
                 _entityFactory.BuildEntity<TestDescriptor>(new EGID(id, group0), new[] {new TestIt(2)});
 
@@ -665,14 +661,8 @@ namespace UnitTests
 
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
             }
-            catch (Exception e)
-            {
-                Assert.That(e.InnerException is TypeSafeDictionaryException);
-
-                return;
-            }
             
-            Assert.Fail();
+            Assert.That(CheckFunction, Throws.TypeOf<ECSException>());
         }
         
         [TestCase((uint)0)][TestCase((uint)1)][TestCase((uint)2)]
@@ -698,22 +688,16 @@ namespace UnitTests
         [TestCase((uint)0)][TestCase((uint)1)][TestCase((uint)2)]
         public void TestTwoEntitiesWithSameIdThrowsIntervaled(uint id)
         {
-            try
+            void CheckFunction()
             {
-                _entityFactory.BuildEntity<TestDescriptor2>(new EGID(id, group0), new[] {new TestIt(2)});
+                _entityFactory.BuildEntity<TestDescriptor7>(new EGID(id, group0));
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
                 _entityFactory.BuildEntity<TestDescriptor3>(new EGID(id, group0), new[] {new TestIt(2)});
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
             }
-            catch (Exception e)
-            {
-                Assert.That(e.InnerException is TypeSafeDictionaryException);
-
-                return;
-            }
             
-            Assert.Fail();
+            Assert.That(CheckFunction, Throws.TypeOf<ECSException>());
         }
         
         [TestCase((uint)0)][TestCase((uint)1)][TestCase((uint)2)]
@@ -723,7 +707,7 @@ namespace UnitTests
 
             try
             {
-                _entityFactory.BuildEntity<TestDescriptor2>(new EGID(id, group0), new[] {new TestIt(2)});
+                _entityFactory.BuildEntity<TestDescriptor7>(new EGID(id, group0), new[] {new TestIt(2)});
                 _entityFactory.BuildEntity<TestDescriptor3>(new EGID(id, group0), new[] {new TestIt(2)});
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
             }
@@ -1256,12 +1240,12 @@ namespace UnitTests
                 _entityFactory = entityFactory;
             }
 
-            public void Add(ref TestEntityViewStruct entityView)
+            public void Add(ref TestEntityViewStruct entityView, EGID egid)
             {
                 _entityFactory.BuildEntity<TestDescriptor7>(new EGID(100, group0), null);
             }
 
-            public void Remove(ref TestEntityViewStruct entityView)
+            public void Remove(ref TestEntityViewStruct entityView, EGID egid)
             {
                 throw new NotImplementedException();
             }

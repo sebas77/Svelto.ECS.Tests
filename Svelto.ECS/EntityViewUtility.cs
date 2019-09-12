@@ -29,7 +29,7 @@ namespace Svelto.ECS
                                            , ref  T              entityView
                                            , FasterList<KeyValuePair<Type, ActionCast<T>>>
                                                  entityViewBlazingFastReflection
-                                           , object[] implementors,
+                                           , IEnumerable<object> implementors,
 #if DEBUG && !PROFILER
                                              Dictionary<Type, ECSTuple<object, int>> implementorsByType
 #else
@@ -40,13 +40,10 @@ namespace Svelto.ECS
         {
             //efficient way to collect the fields of every EntityViewType
             var setters =
-                FasterList<KeyValuePair<Type, ActionCast<T>>>
-                   .NoVirt.ToArrayFast(entityViewBlazingFastReflection, out var count);
+                FasterList<KeyValuePair<Type, ActionCast<T>>>.NoVirt.ToArrayFast(entityViewBlazingFastReflection, out var count);
 
-            for (var index = 0; index < implementors.Length; index++)
+            foreach (var implementor in implementors)
             {
-                var implementor = implementors[index];
-
                 if (implementor != null)
                 {
                     var type = implementor.GetType();
@@ -73,7 +70,7 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILER
                 else
                 {
-                    Svelto.Console.Log(NULL_IMPLEMENTOR_ERROR.FastConcat(" entityView ",
+                    Console.Log(NULL_IMPLEMENTOR_ERROR.FastConcat(" entityView ",
                                                                          entityBuilder.GetEntityType().ToString()));
                 }
 #endif

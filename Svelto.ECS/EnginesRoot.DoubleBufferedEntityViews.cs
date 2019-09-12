@@ -1,7 +1,7 @@
-﻿﻿using Svelto.DataStructures.Experimental;
-using EntitiesDB =
-    Svelto.DataStructures.Experimental.FasterDictionary<uint, System.Collections.Generic.Dictionary<System.Type,
-        Svelto.ECS.Internal.ITypeSafeDictionary>>;
+﻿using System;
+using Svelto.DataStructures;
+using Svelto.DataStructures.Experimental;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
@@ -12,50 +12,51 @@ namespace Svelto.ECS
             internal void Swap()
             {
                 Swap(ref current, ref other);
-                Swap(ref currentEntitiesCreatedPerGroup, ref otherEntitiesCreatedPerGroup);
+                Swap(ref currentDense, ref otherDense);
             }
 
-            void Swap<T>(ref T item1, ref T item2)
+            static void Swap<T>(ref T item1, ref T item2)
             {
-                T toSwap = item2; item2 = item1; item1 = toSwap;
+                var toSwap = item2;
+                item2 = item1;
+                item1 = toSwap;
             }
 
-            public void ClearOther()
+            internal void ClearOther()
             {
-                //do not clear the groups created so far, they will be reused
-                foreach (var groups in other)
-                {
-                    //do not remove the dictionaries of entities per type created so far, they will be reused
+                foreach (var groups in otherDense)
                     foreach (var entitiesPerType in groups.Value)
-                    {
-                       //clear the dictionary of entities create do far (it won't allocate though)
-                        entitiesPerType.Value.Clear();
-                    }
-                }
+                        entitiesPerType.Value.FastClear();
 
-                otherEntitiesCreatedPerGroup.Clear();
+                other.FastClear();
+                otherDense.FastClear();
             }
-            
-            internal FasterDictionary<uint, uint> currentEntitiesCreatedPerGroup;
-            internal FasterDictionary<uint, uint> otherEntitiesCreatedPerGroup;
-            
-            internal EntitiesDB current;
-            internal EntitiesDB other;
 
-            readonly EntitiesDB _entityViewsToAddBufferA = new EntitiesDB();
-            readonly EntitiesDB _entityViewsToAddBufferB = new EntitiesDB();
-
-            readonly FasterDictionary<uint, uint> _entitiesCreatedPerGroupA = new FasterDictionary<uint, uint>();
-            readonly FasterDictionary<uint, uint> _entitiesCreatedPerGroupB = new FasterDictionary<uint, uint>();
+            FasterSparseList<FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>> current;
+            FasterSparseList<FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>> other;
             
-            public DoubleBufferedEntitiesToAdd()
+            FasterDenseList<FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>> currentDense;
+            FasterDenseList<FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>> otherDense;
+
+            readonly FasterDenseList<FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>
+              _entityViewsToAddBufferA = new FasterDenseList<FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>();
+
+            readonly FasterDenseList<FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>
+              _entityViewsToAddBufferB = new FasterDenseList<FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>();
+
+            internal DoubleBufferedEntitiesToAdd()
             {
-                currentEntitiesCreatedPerGroup = _entitiesCreatedPerGroupA;
-                otherEntitiesCreatedPerGroup = _entitiesCreatedPerGroupB;
+                currentDense = _entityViewsToAddBufferA;
+                otherDense = _entityViewsToAddBufferB;
                 
-                current = _entityViewsToAddBufferA;
-                other = _entityViewsToAddBufferB;
+                current = currentDense.SparseSet();
+                other = otherDense.SparseSet();
             }
+
+            internal FasterSparseList<FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>> entitiesMapToSubmit =>
+                current;
+            internal FasterDenseList<FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>> entitiesListToSubmit =>
+                otherDense;
         }
     }
 }

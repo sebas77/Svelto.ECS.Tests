@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Svelto.ECS.Internal;
+
 #pragma warning disable 660,661
 
 namespace Svelto.ECS
@@ -23,36 +25,45 @@ namespace Svelto.ECS
         {
             _group = ExclusiveGroupStruct.Generate();
         }
-        
+
         public ExclusiveGroup(string recognizeAs)
         {
             _group = ExclusiveGroupStruct.Generate();
-            
+
             _serialisedGroups.Add(recognizeAs, _group);
         }
-        
+
         public ExclusiveGroup(ushort range)
         {
             _group = new ExclusiveGroupStruct(range);
+#if DEBUG
+            _range = range;
+#endif
         }
-        
+
         public static implicit operator ExclusiveGroupStruct(ExclusiveGroup group)
         {
             return group._group;
         }
-        
-        public static explicit operator uint(ExclusiveGroup group) 
+
+        public static explicit operator uint(ExclusiveGroup group)
         {
             return group._group;
         }
 
         public static ExclusiveGroupStruct operator+(ExclusiveGroup a, uint b)
         {
+#if DEBUG
+            if (a._range == 0)
+                throw new ECSException("adding values to a not ranged ExclusiveGroup");
+            if (b >= a._range)
+                throw new ECSException("Using out of range group");
+#endif            
             return a._group + b;
         }
 
         readonly ExclusiveGroupStruct _group;
-        
+
         //I use this as parameter because it must not be possible to pass null Exclusive Groups.
         public struct ExclusiveGroupStruct : IEquatable<ExclusiveGroupStruct>, IComparable<ExclusiveGroupStruct>,
                                 IEqualityComparer<ExclusiveGroupStruct>
@@ -107,17 +118,29 @@ namespace Svelto.ECS
                 DBC.ECS.Check.Require(_globalId + range < ushort.MaxValue, "too many exclusive groups created");
                 _globalId += range;
             }
-            
+
             internal ExclusiveGroupStruct(uint groupID)
             {
                 _id = groupID;
+            }
+
+            public ExclusiveGroupStruct(byte[] data, uint pos)
+            {
+                _id = (uint)(
+                    data[pos++]
+                    | data[pos++] << 8
+                    | data[pos++] << 16
+                    | data[pos++] << 24
+                );
+                
+                DBC.ECS.Check.Ensure(_id < _globalId, "Invalid group ID deserialiased");
             }
 
             public static implicit operator uint(ExclusiveGroupStruct groupStruct)
             {
                 return groupStruct._id;
             }
-            
+
             public static ExclusiveGroupStruct operator+(ExclusiveGroupStruct a, uint b)
             {
                 var group = new ExclusiveGroupStruct();
@@ -127,19 +150,32 @@ namespace Svelto.ECS
                 return group;
             }
 
-            uint         _id;
+            uint        _id;
             static uint _globalId;
         }
 
+/// <summary>
+/// todo: this is wrong must change
+/// </summary>
+/// <param name="holderGroupName"></param>
+/// <returns></returns>
+/// <exception cref="Exception"></exception>
         public static ExclusiveGroupStruct Search(string holderGroupName)
         {
             if (_serialisedGroups.ContainsKey(holderGroupName) == false)
                 throw new Exception("Serialized Group Not Found ".FastConcat(holderGroupName));
-            
+
             return _serialisedGroups[holderGroupName];
         }
 
-        static readonly Dictionary<string, ExclusiveGroupStruct> _serialisedGroups = new Dictionary<string, 
-            ExclusiveGroupStruct>(); 
+/// <summary>
+/// todo:  this is wrong must change
+///
+/// </summary>
+        static readonly Dictionary<string, ExclusiveGroupStruct> _serialisedGroups = new Dictionary<string,
+            ExclusiveGroupStruct>();
+#if DEBUG
+        readonly ushort _range;
+#endif        
     }
 }
