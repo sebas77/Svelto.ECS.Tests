@@ -1,23 +1,27 @@
+using Svelto.DataStructures;
+
 namespace Svelto.ECS
 {
     class GenericEntityStreamConsumerFactory : IEntityStreamConsumerFactory
     {
         public GenericEntityStreamConsumerFactory(EnginesRoot weakReference)
         {
-            _enginesRoot = weakReference;
+            _enginesRoot = new WeakReference<EnginesRoot>(weakReference);
         }
 
         public Consumer<T> GenerateConsumer<T>(string name, int capacity) where T : unmanaged, IEntityStruct
         {
-            return _enginesRoot.GenerateConsumer<T>(name, capacity);
+            return _enginesRoot.Target.GenerateConsumer<T>(name, capacity);
         }
 
         public Consumer<T> GenerateConsumer<T>(ExclusiveGroup group, string name, int capacity) where T : unmanaged, IEntityStruct
         {
-            return _enginesRoot.GenerateConsumer<T>(group, name, capacity);
+            return _enginesRoot.Target.GenerateConsumer<T>(group, name, capacity);
         }
 
-        readonly EnginesRoot _enginesRoot;
+//enginesRoot is a weakreference because GenericEntityStreamConsumerFactory can be injected inside
+//engines of other enginesRoot
+        readonly WeakReference<EnginesRoot> _enginesRoot;
     }
     
     public interface IEntityStreamConsumerFactory

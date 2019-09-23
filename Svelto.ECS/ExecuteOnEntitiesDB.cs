@@ -1,5 +1,5 @@
 using System;
-using Svelto.DataStructures.Experimental;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS.Internal
 {

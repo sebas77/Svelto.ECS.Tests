@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Svelto.DataStructures.Experimental;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS.Internal
 {
@@ -21,15 +21,18 @@ namespace Svelto.ECS.Internal
         static FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> FetchEntityGroup(uint groupID,
             EnginesRoot.DoubleBufferedEntitiesToAdd groupEntityViewsByType)
         {
-            if (groupEntityViewsByType.entitiesMapToSubmit
-                    .TryRecycleValue<FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>(groupID,
-                    out FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> group) == false)
+            if (groupEntityViewsByType.current.TryGetValue(groupID, out var group) == false)
             {
                 group = new FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>();
-
-                groupEntityViewsByType.entitiesMapToSubmit.Add(groupID, group);
+                
+                groupEntityViewsByType.current.Add(groupID, group);
             }
 
+            if (groupEntityViewsByType.currentEntitiesCreatedPerGroup.TryGetValue(groupID, out var value) == false)
+                groupEntityViewsByType.currentEntitiesCreatedPerGroup[groupID] = 0;
+            else
+                groupEntityViewsByType.currentEntitiesCreatedPerGroup[groupID] = value+1;
+            
             return group;
         }
 

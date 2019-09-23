@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Svelto.ECS.Internal;
 
 #pragma warning disable 660,661
 
@@ -19,6 +18,15 @@ namespace Svelto.ECS
     /// }
     /// </summary>
     ///
+
+    ///use this like:
+    /// public class TriggersGroup : ExclusiveGroup<TriggersGroup> {}
+    public class ExclusiveGroup<T>:ExclusiveGroup
+    {
+        public static ExclusiveGroup Group = new ExclusiveGroup();
+        public static string name = typeof(T).FullName;
+    }
+
     public class ExclusiveGroup
     {
         public ExclusiveGroup()
@@ -154,12 +162,6 @@ namespace Svelto.ECS
             static uint _globalId;
         }
 
-/// <summary>
-/// todo: this is wrong must change
-/// </summary>
-/// <param name="holderGroupName"></param>
-/// <returns></returns>
-/// <exception cref="Exception"></exception>
         public static ExclusiveGroupStruct Search(string holderGroupName)
         {
             if (_serialisedGroups.ContainsKey(holderGroupName) == false)
@@ -168,10 +170,6 @@ namespace Svelto.ECS
             return _serialisedGroups[holderGroupName];
         }
 
-/// <summary>
-/// todo:  this is wrong must change
-///
-/// </summary>
         static readonly Dictionary<string, ExclusiveGroupStruct> _serialisedGroups = new Dictionary<string,
             ExclusiveGroupStruct>();
 #if DEBUG

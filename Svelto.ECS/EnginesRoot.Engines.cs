@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
-using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
 
@@ -133,7 +132,7 @@ namespace Svelto.ECS
         readonly FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> _reactiveEnginesSwap;
         readonly FasterList<IDisposable>                                 _disposableEngines;
         
-        internal readonly FasterList<IEngine> _enginesSet;
-        readonly          HashSet<Type>       _enginesTypeSet;
+        readonly FasterList<IEngine> _enginesSet;
+        readonly HashSet<Type>       _enginesTypeSet;
     }
 }

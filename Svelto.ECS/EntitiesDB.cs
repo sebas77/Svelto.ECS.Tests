@@ -5,7 +5,6 @@
 using System;
 using System.Runtime.CompilerServices;
 using Svelto.DataStructures;
-using Svelto.DataStructures.Experimental;
 
 namespace Svelto.ECS.Internal
 {
@@ -66,6 +65,11 @@ namespace Svelto.ECS.Internal
             return new EntityCollection<T>(QueryEntities<T>(groupStruct, out var count), count);
         }
 
+        public EntityCollection<T1, T2> QueryEntities<T1, T2>(ExclusiveGroup.ExclusiveGroupStruct groupStruct) where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct
+        {
+            return new EntityCollection<T1, T2>(QueryEntities<T1, T2>(groupStruct, out var count), count);
+        }
+
         public EntityCollections<T> QueryEntities<T>(ExclusiveGroup[] groups) where T : struct, IEntityStruct
         {
             return new EntityCollections<T>(this, groups);
@@ -119,16 +123,26 @@ namespace Svelto.ECS.Internal
         public EGIDMapper<T> QueryMappedEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId)
             where T : struct, IEntityStruct
         {
-            uint groupId = groupStructId;
-            if (SafeQueryEntityDictionary(groupId, out TypeSafeDictionary<T> typeSafeDictionary) == false)
-                throw new EntityGroupNotFoundException(groupId, typeof(T));
+            if (SafeQueryEntityDictionary(groupStructId, out TypeSafeDictionary<T> typeSafeDictionary) == false)
+                throw new EntityGroupNotFoundException(groupStructId, typeof(T));
 
             EGIDMapper<T> mapper;
             mapper.map = typeSafeDictionary;
 
-            typeSafeDictionary.GetValuesArray(out _);
-
             return mapper;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryQueryMappedEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId, out EGIDMapper<T> mapper)
+            where T : struct, IEntityStruct
+        {
+            mapper = default;
+            if (SafeQueryEntityDictionary(groupStructId, out TypeSafeDictionary<T> typeSafeDictionary) == false)
+                return false;
+
+            mapper.map = typeSafeDictionary;
+
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -196,7 +210,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PublishEntityChange<T>(EGID egid) where T : unmanaged, IEntityStruct
         {
-            _entityStream.PublishEntity(ref QueryEntity<T>(egid));
+            _entityStream.PublishEntity(ref QueryEntity<T>(egid), egid);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

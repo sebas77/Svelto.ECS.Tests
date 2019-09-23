@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Collections.Generic;
-using Svelto.DataStructures.Experimental;
+using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS

@@ -4,7 +4,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
-using Svelto.DataStructures.Experimental;
 using Svelto.Utilities;
 
 namespace Svelto.ECS.Internal
@@ -42,10 +41,10 @@ namespace Svelto.ECS.Internal
         static readonly Type       _type     = typeof(TValue);
         static readonly          string     _typeName = _type.Name;
         static readonly          bool       _hasEgid  = typeof(INeedEGID).IsAssignableFrom(_type);
-        
-        public delegate void ActionCast(ref TValue target, EGID egid);
-        static readonly          ActionCast Setter    = MakeSetter();
-        public static ActionCast MakeSetter()
+
+        internal delegate void ActionCast(ref TValue target, EGID egid);
+        public static readonly          ActionCast Setter    = MakeSetter();
+        static ActionCast MakeSetter()
         {
             if (_hasEgid)
             {
@@ -67,7 +66,7 @@ namespace Svelto.ECS.Internal
 
         public TypeSafeDictionary(uint size) : base(size) {}
         public TypeSafeDictionary() {}
-        
+
         public void AddEntitiesFromDictionary(ITypeSafeDictionary entitiesToSubmit, uint groupId)
         {
             var typeSafeDictionary = entitiesToSubmit as TypeSafeDictionary<TValue>;
@@ -84,7 +83,7 @@ namespace Svelto.ECS.Internal
                 {
                     throw new TypeSafeDictionaryException(
                         "trying to add an EntityView with the same ID more than once Entity: "
-                            .FastConcat(typeof(TValue).ToString()).FastConcat("id ").FastConcat(tuple.Key), e);
+                            .FastConcat(typeof(TValue).ToString()).FastConcat(", group ").FastConcat(groupId).FastConcat(", id ").FastConcat(tuple.Key), e);
                 }
             }
         }
@@ -95,7 +94,7 @@ namespace Svelto.ECS.Internal
         {
             var typeSafeDictionary = realDic as TypeSafeDictionary<TValue>;
 
-            foreach (KeyValuePairFast<uint, TValue> value in this)
+            foreach (var value in this)
                 AddEntityViewToEngines(entityViewEnginesDB, ref typeSafeDictionary.GetValueByRef(value.Key), null,
                     in profiler, new EGID(value.Key, group));
         }
@@ -104,7 +103,7 @@ namespace Svelto.ECS.Internal
             FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityViewEnginesDB,
             in PlatformProfiler profiler, ExclusiveGroup.ExclusiveGroupStruct @group)
         {
-            foreach (KeyValuePairFast<uint, TValue> value in this)
+            foreach (var value in this)
                 RemoveEntityViewFromEngines(entityViewEnginesDB, ref GetValueByRef(value.Key), null, in profiler,
                     new EGID(value.Key, group));
         }
@@ -121,19 +120,14 @@ namespace Svelto.ECS.Internal
 
         public void AddEntityToDictionary(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup)
         {
-            var valueIndex = GetValueIndex(fromEntityGid.entityID);
+            var valueIndex = GetIndex(fromEntityGid.entityID);
 
             if (toGroup != null)
             {
                 var toGroupCasted = toGroup as TypeSafeDictionary<TValue>;
-                ref var entity = ref _values[valueIndex];
+                ref var entity = ref valuesArray[valueIndex];
 
-                if (_hasEgid)
-                {
-                    var needEgid = (INeedEGID) entity;
-                    needEgid.ID = toEntityID;
-                    entity = (TValue) needEgid;
-                }
+                if (_hasEgid) Setter(ref entity, toEntityID);
 
                 toGroupCasted.Add(fromEntityGid.entityID, ref entity);
             }
@@ -142,31 +136,26 @@ namespace Svelto.ECS.Internal
         public void MoveEntityFromEngines(EGID fromEntityGid, EGID? toEntityID, ITypeSafeDictionary toGroup,
             FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> engines, in PlatformProfiler profiler)
         {
-            var valueIndex = GetValueIndex(fromEntityGid.entityID);
+            var valueIndex = GetIndex(fromEntityGid.entityID);
 
             if (toGroup != null)
             {
-                RemoveEntityViewFromEngines(engines, ref _values[valueIndex], fromEntityGid.groupID, in profiler,
+                RemoveEntityViewFromEngines(engines, ref valuesArray[valueIndex], fromEntityGid.groupID, in profiler,
                     fromEntityGid);
 
                 var toGroupCasted = toGroup as TypeSafeDictionary<TValue>;
-                ref var entity = ref _values[valueIndex];
+                ref var entity = ref valuesArray[valueIndex];
                 var previousGroup = fromEntityGid.groupID;
 
-                if (_hasEgid)
-                {
-                    var needEgid = (INeedEGID) entity;
-                    needEgid.ID = toEntityID.Value;
-                    entity = (TValue) needEgid;
-                }
+                if (_hasEgid) Setter(ref entity, toEntityID.Value);
 
-                var index = toGroupCasted.GetValueIndex(toEntityID.Value.entityID);
+                var index = toGroupCasted.GetIndex(toEntityID.Value.entityID);
 
-                AddEntityViewToEngines(engines, ref toGroupCasted._values[index], previousGroup,
-                    in profiler, fromEntityGid);
+                AddEntityViewToEngines(engines, ref toGroupCasted.valuesArray[index], previousGroup,
+                    in profiler, toEntityID.Value);
             }
             else
-                RemoveEntityViewFromEngines(engines, ref _values[valueIndex], null, in profiler, fromEntityGid);
+                RemoveEntityViewFromEngines(engines, ref valuesArray[valueIndex], null, in profiler, fromEntityGid);
         }
 
         public ITypeSafeDictionary Create()
@@ -250,18 +239,6 @@ namespace Svelto.ECS.Internal
                             "Code crashed inside Remove callback ".FastConcat(typeof(TValue).ToString()), e);
                     }
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ref TValue FindElement(uint entityGidEntityId)
-        {
-#if DEBUG && !PROFILER
-            if (TryFindIndex(entityGidEntityId, out var findIndex) == false)
-                throw new Exception("Entity not found in this group ".FastConcat(typeof(TValue).ToString()));
-#else
-            TryFindIndex(entityGidEntityId, out var findIndex);
-#endif
-            return ref _values[findIndex];
         }
     }
 }

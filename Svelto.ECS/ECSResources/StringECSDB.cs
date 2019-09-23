@@ -26,5 +26,10 @@ namespace Svelto.ECS.Experimental
         {
             return other.id == id;
         }
+
+        public override string ToString()
+        {
+            return ResourcesECSDB<string>.FromECS(id);
+        }
     }
 }

@@ -32,10 +32,10 @@ namespace Svelto.ECS
             return (_streams[typeof(T)] as EntityStream<T>).GenerateConsumer(group, name, capacity);
         }
 
-        internal void PublishEntity<T>(ref T entity) where T : unmanaged, IEntityStruct
+        internal void PublishEntity<T>(ref T entity, EGID egid) where T : unmanaged, IEntityStruct
         {
             if (_streams.TryGetValue(typeof(T), out var typeSafeStream))
-                (typeSafeStream as EntityStream<T>).PublishEntity(ref entity);
+                (typeSafeStream as EntityStream<T>).PublishEntity(ref entity, egid);
             else
                 Console.LogWarningDebug("No Consumers are waiting for this entity to change ", typeof(T));
         }
@@ -54,15 +54,13 @@ namespace Svelto.ECS
 
     class EntityStream<T> : ITypeSafeStream where T : unmanaged, IEntityStruct
     {
-        public void PublishEntity(ref T entity)
+        public void PublishEntity(ref T entity, EGID egid)
         {
             for (int i = 0; i < _consumers.Count; i++)
             {
                 if (_consumers[i]._hasGroup)
                 {
-                    INeedEGID needEGID = (INeedEGID) entity;
-                    ExclusiveGroup.ExclusiveGroupStruct groupId = needEGID.ID.groupID;
-                    if (EntityBuilder<T>.HAS_EGID && groupId == _consumers[i]._group)
+                    if (egid.groupID == _consumers[i]._group)
                     {
                         _consumers[i].Enqueue(ref entity);
                     }

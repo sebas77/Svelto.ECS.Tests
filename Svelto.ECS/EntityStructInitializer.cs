@@ -1,5 +1,5 @@
 ﻿using System;
-using Svelto.DataStructures.Experimental;
+using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
@@ -38,6 +38,20 @@ namespace Svelto.ECS
             }
 
             return new T();
+        }
+        
+        public bool Has<T>() where T : struct, IEntityStruct
+        {
+            if (_group != null && _group.TryGetValue(new RefWrapper<Type>(EntityBuilder<T>.ENTITY_VIEW_TYPE),
+                    out var typeSafeDictionary))
+            {
+                var dictionary = (TypeSafeDictionary<T>) typeSafeDictionary;
+
+                if (dictionary.TryFindIndex(_ID.entityID, out _))
+                    return true;
+            }
+
+            return false;
         }
 
         readonly EGID                                                    _ID;

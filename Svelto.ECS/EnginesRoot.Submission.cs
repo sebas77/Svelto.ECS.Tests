@@ -1,7 +1,6 @@
 ﻿using System;
 using Svelto.Common;
 using Svelto.DataStructures;
-using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
 
@@ -63,7 +62,7 @@ namespace Svelto.ECS
                 
                 _groupedEntityToAdd.Swap();
 
-                if (_groupedEntityToAdd.entitiesListToSubmit.Count > 0)
+                if (_groupedEntityToAdd.otherEntitiesCreatedPerGroup.Count > 0)
                 {
                     using (profiler.Sample("Add operations"))
                     {
@@ -88,16 +87,16 @@ namespace Svelto.ECS
         void AddEntityViewsToTheDBAndSuitableEngines(in PlatformProfiler profiler)
         {
             //each group is indexed by entity view type. for each type there is a dictionary indexed by entityID
-            foreach (var groupOfEntitiesToSubmit in _groupedEntityToAdd.entitiesListToSubmit)
+            foreach (var groupOfEntitiesToSubmit in _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
             {
                 var groupID = groupOfEntitiesToSubmit.Key;
-
+                
                 //if the group doesn't exist in the current DB let's create it first
                 if (_groupEntityDB.TryGetValue(groupID, out var groupDB) == false)
                     groupDB = _groupEntityDB[groupID] = new FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>();
 
                 //add the entityViews in the group
-                foreach (var entityViewsToSubmit in groupOfEntitiesToSubmit.Value)
+                foreach (var entityViewsToSubmit in _groupedEntityToAdd.other[groupID])
                 {
                     var type = entityViewsToSubmit.Key;
                     var typeSafeDictionary = entityViewsToSubmit.Value;
@@ -120,16 +119,17 @@ namespace Svelto.ECS
             //created by the entity built
             using (profiler.Sample("Add entities to engines"))
             {
-                foreach (var groupToSubmit in  _groupedEntityToAdd.entitiesListToSubmit)
+                foreach (var groupToSubmit in  _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
                 {
                     var groupID = groupToSubmit.Key;
+
                     var groupDB = _groupEntityDB[groupID];
 
-                    foreach (var entityViewsPerType in groupToSubmit.Value)
+                    foreach (var entityViewsToSubmit in _groupedEntityToAdd.other[groupID])
                     {
-                        var realDic = groupDB[new RefWrapper<Type>(entityViewsPerType.Key)];
+                        var realDic = groupDB[new RefWrapper<Type>(entityViewsToSubmit.Key)];
 
-                        entityViewsPerType.Value.AddEntitiesToEngines(_reactiveEnginesAddRemove, realDic, in profiler,
+                        entityViewsToSubmit.Value.AddEntitiesToEngines(_reactiveEnginesAddRemove, realDic, in profiler,
                             new ExclusiveGroup.ExclusiveGroupStruct(groupToSubmit.Key));
                     }
                 }

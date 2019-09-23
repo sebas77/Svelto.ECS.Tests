@@ -1,16 +1,23 @@
+using System;
 using System.Runtime.CompilerServices;
-using Svelto.ECS.Internal;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
     public struct EGIDMapper<T> where T : struct, IEntityStruct
     {
-        internal TypeSafeDictionary<T> map;
+        internal FasterDictionary<uint, T> map;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Entity(uint entityID)
         {
-            return ref map.FindElement(entityID);
+#if DEBUG && !PROFILER
+                if (map.TryFindIndex(entityID, out var findIndex) == false)
+                    throw new Exception("Entity not found in this group ".FastConcat(typeof(T).ToString()));
+#else
+                map.TryFindIndex(entityID, out var findIndex);
+#endif
+                return ref map.valuesArray[findIndex];
         }
         
         public bool TryQueryEntity(uint entityID, out T value)

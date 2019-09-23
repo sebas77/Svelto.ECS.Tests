@@ -1,7 +1,6 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Svelto.ECS.Internal;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
@@ -13,11 +12,9 @@ namespace Svelto.ECS
         /// </summary>
         sealed class GenericEntityFunctions : IEntityFunctions
         {
-            readonly EnginesRoot _weakReference;
-
             internal GenericEntityFunctions(EnginesRoot weakReference)
             {
-                _weakReference = weakReference;
+                _enginesRoot = new WeakReference<EnginesRoot>(weakReference);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -30,9 +27,9 @@ namespace Svelto.ECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void RemoveEntity<T>(EGID entityEGID) where T : IEntityDescriptor, new()
             {
-                _weakReference.CheckRemoveEntityID(entityEGID);
+                _enginesRoot.Target.CheckRemoveEntityID(entityEGID);
 
-                _weakReference.QueueEntitySubmitOperation<T>(
+                _enginesRoot.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityEGID, entityEGID,
                         EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
             }
@@ -40,9 +37,9 @@ namespace Svelto.ECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void RemoveGroupAndEntities(ExclusiveGroup.ExclusiveGroupStruct groupID)
             {
-                _weakReference.RemoveGroupID(groupID);
+                _enginesRoot.Target.RemoveGroupID(groupID);
 
-                _weakReference.QueueEntitySubmitOperation(
+                _enginesRoot.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, new EGID(0, groupID), new EGID()));
             }
 
@@ -87,14 +84,17 @@ namespace Svelto.ECS
             public void SwapEntityGroup<T>(EGID fromID, EGID toID)
                 where T : IEntityDescriptor, new()
             {
-                _weakReference.CheckRemoveEntityID(fromID);
-                _weakReference.CheckAddEntityID(toID);
+                _enginesRoot.Target.CheckRemoveEntityID(fromID);
+                _enginesRoot.Target.CheckAddEntityID(toID);
 
-                _weakReference.QueueEntitySubmitOperation<T>(
+                _enginesRoot.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Swap,
                         fromID, toID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
             }
-
+            
+            //enginesRoot is a weakreference because GenericEntityStreamConsumerFactory can be injected inside
+//engines of other enginesRoot
+            readonly DataStructures.WeakReference<EnginesRoot> _enginesRoot;
         }
 
         void QueueEntitySubmitOperation(EntitySubmitOperation entitySubmitOperation)

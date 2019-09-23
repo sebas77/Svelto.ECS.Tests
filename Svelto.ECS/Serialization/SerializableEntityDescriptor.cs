@@ -2,7 +2,6 @@ using System;
 using System.Reflection;
 using System.Text;
 using Svelto.DataStructures;
-using Svelto.DataStructures.Experimental;
 using Svelto.Utilities;
 
 namespace Svelto.ECS.Serialization

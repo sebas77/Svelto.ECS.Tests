@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
-using Svelto.DataStructures.Experimental;
+using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
@@ -18,10 +18,9 @@ namespace Svelto.ECS
         {
             using (var profiler = new PlatformProfiler("Final Dispose"))
             {
-                foreach (KeyValuePairFast<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>> groups in
-                    _groupEntityDB)
+                foreach (var groups in _groupEntityDB)
                 {
-                    foreach (KeyValuePairFast<RefWrapper<Type>, ITypeSafeDictionary> entityList in groups.Value)
+                    foreach (var entityList in groups.Value)
                     {
                         try
                         {
@@ -50,6 +49,7 @@ namespace Svelto.ECS
 
                 _disposableEngines.Clear();
                 _enginesSet.Clear();
+                _enginesTypeSet.Clear();
                 _reactiveEnginesSwap.Clear();
                 _reactiveEnginesAddRemove.Clear();
 

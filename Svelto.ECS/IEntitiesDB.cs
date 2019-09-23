@@ -4,7 +4,7 @@ namespace Svelto.ECS
 {
     public delegate void ExecuteOnAllEntitiesAction<T, W>(T[] entities, ExclusiveGroup.ExclusiveGroupStruct group,
         uint count, IEntitiesDB db, ref W value);
-    
+
     public interface IEntitiesDB
     {
         ///////////////////////////////////////////////////
@@ -35,6 +35,8 @@ namespace Svelto.ECS
         /// <returns></returns>
         EntityCollection<T> QueryEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct)
             where T : struct, IEntityStruct;
+        EntityCollection<T1, T2> QueryEntities<T1, T2>(ExclusiveGroup.ExclusiveGroupStruct groupStruct)
+            where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct;
 
         /// <summary>
         /// return entities found in multiple groups, that can be iterated through the EntityCollection iterator
@@ -70,7 +72,7 @@ namespace Svelto.ECS
         /// <typeparam name="W"></typeparam>
         void ExecuteOnAllEntities<T, W>(ref W value, ExecuteOnAllEntitiesAction<T, W> action)
             where T : struct, IEntityStruct;
-        
+
         void ExecuteOnAllEntities<T, W>(W value, Action<T[], ExclusiveGroup.ExclusiveGroupStruct, uint, IEntitiesDB, W> action)
             where T : struct, IEntityStruct;
 
@@ -144,6 +146,8 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         EGIDMapper<T> QueryMappedEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId)
+            where T : struct, IEntityStruct;
+        bool TryQueryMappedEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId, out EGIDMapper<T> mapper)
             where T : struct, IEntityStruct;
 
         ///////////////////////////////////////////////////

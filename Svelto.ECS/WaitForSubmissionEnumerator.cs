@@ -5,9 +5,15 @@ namespace Svelto.ECS
 {
     public class WaitForSubmissionEnumerator : IEnumerator
     {
+        class SubmissionEntityDescriptor : GenericEntityDescriptor<SubmissionSignalStruct>
+        {
+            internal static readonly ExclusiveGroup SubmissionGroup = new ExclusiveGroup();
+        }
+
         readonly IEntityFactory   _entityFactory;
         readonly IEntitiesDB      _entitiesDB;
         readonly IEntityFunctions _entityFunctions;
+
         int                       _state;
 
         public WaitForSubmissionEnumerator(IEntityFunctions entityFunctions, IEntityFactory entityFactory,
@@ -48,11 +54,6 @@ namespace Svelto.ECS
         }
 
         public object Current { get; }
-
-        class SubmissionEntityDescriptor : GenericEntityDescriptor<SubmissionSignalStruct>
-        {
-            internal static readonly ExclusiveGroup SubmissionGroup = new ExclusiveGroup();
-        }
 
         struct SubmissionSignalStruct : IEntityStruct
         {}
