@@ -2,7 +2,6 @@
 using NUnit.Framework;
 using Svelto.DataStructures;
 using Svelto.ECS;
-using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Hybrid;
 using Assert = NUnit.Framework.Assert;
 
