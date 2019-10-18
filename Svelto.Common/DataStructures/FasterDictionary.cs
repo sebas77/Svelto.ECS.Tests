@@ -43,7 +43,6 @@ namespace Svelto.DataStructures
             return _values;
         }
         
-        
         public TValue[] valuesArray  
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -55,23 +54,19 @@ namespace Svelto.DataStructures
         public bool IsReadOnly => false;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Add(TKey key, TValue value) { Add(key, ref value); }
+        void IDictionary<TKey, TValue>.Add(TKey key, TValue value) { Add(key, in value); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public uint Add(TKey key, ref TValue value)
+        public void Add(TKey key, in TValue value)
         {
-            if (AddValue(key, ref value) == false)
+            if (AddValue(key, in value, out _) == false)
                 throw new FasterDictionaryException("Key already present");
-
-            return _freeValueCellIndex - 1;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public uint Set(TKey key, ref TValue value)
+        public void Set(TKey key, in TValue value)
         {
-            AddValue(key, ref value);
-
-            return _freeValueCellIndex - 1;
+            AddValue(key, in value, out _);
         }
 
         public void Add(KeyValuePair<TKey, TValue> item) { throw new NotImplementedException(); }
@@ -96,7 +91,7 @@ namespace Svelto.DataStructures
             Array.Clear(_buckets, 0, _buckets.Length);
             Array.Clear(_valuesInfo, 0, _valuesInfo.Length);
         }
-
+        
         public bool Contains(KeyValuePair<TKey, TValue> item) { throw new NotImplementedException(); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -136,6 +131,21 @@ namespace Svelto.DataStructures
             return false;
         }
         
+        //todo: can be optimized
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref TValue GetOrCreate(TKey key)
+        {
+            if (TryFindIndex(key, out var findIndex))
+            {
+                return ref _values[findIndex];
+            }
+            
+            AddValue(key, default, out findIndex);
+            
+            return ref _values[findIndex];
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetValueByRef(TKey key)
         {
             if (TryFindIndex(key, out var findIndex))
@@ -164,11 +174,14 @@ namespace Svelto.DataStructures
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _values[GetIndex(key)];
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => AddValue(key, ref value);
+            set => AddValue(key, in value, out _);
         }
         
-        bool AddValue(TKey key, ref TValue value)
+        bool AddValue(TKey key, in TValue value, out uint indexSet)
         {
+            int  hash        = key.GetHashCode();
+            uint bucketIndex = Reduce((uint) hash, (uint) _buckets.Length);
+            
             if (_freeValueCellIndex == _values.Length)
             {
                 var expandPrime = HashHelpers.ExpandPrime((int) _freeValueCellIndex);
@@ -176,9 +189,6 @@ namespace Svelto.DataStructures
                 Array.Resize(ref _values, expandPrime);
                 Array.Resize(ref _valuesInfo, expandPrime);
             }
-            
-            int  hash        = key.GetHashCode();
-            uint bucketIndex = Reduce((uint) hash, (uint) _buckets.Length);
 
             //buckets value -1 means it's empty
             var valueIndex = _buckets[bucketIndex] - 1;
@@ -199,6 +209,7 @@ namespace Svelto.DataStructures
                         {
                             //the key already exists, simply replace the value!
                             _values[currentValueIndex] = value;
+                            indexSet = (uint) currentValueIndex;
                             return false;
                         }
 
@@ -225,6 +236,7 @@ namespace Svelto.DataStructures
             _buckets[bucketIndex] = (int) (_freeValueCellIndex + 1);
 
             _values[_freeValueCellIndex] = value;
+            indexSet = (uint) _freeValueCellIndex;
 
             _freeValueCellIndex++;
 

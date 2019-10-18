@@ -8,29 +8,41 @@ namespace Svelto.ECS
     /// to swap and remove specialized entities from abstract engines
     /// </summary>
     /// <typeparam name="TType"></typeparam>
-    public abstract class ExtendibleEntityDescriptor<TType>:IExtendibleEntityDescriptor where TType : IEntityDescriptor, new()
+    public class ExtendibleEntityDescriptor<TType> : IEntityDescriptor where TType : IEntityDescriptor, new()
     {
         static ExtendibleEntityDescriptor()
         {
             if (typeof(ISerializableEntityDescriptor).IsAssignableFrom(typeof(TType)))
-                throw new Exception($"SerializableEntityDescriptors cannot be used as base entity descriptor: {typeof(TType)}");
+                throw new Exception(
+                    $"SerializableEntityDescriptors cannot be used as base entity descriptor: {typeof(TType)}");
         }
 
-        protected ExtendibleEntityDescriptor(IEntityBuilder[] extraEntities)
+        public ExtendibleEntityDescriptor(IEntityBuilder[] extraEntities)
         {
             _dynamicDescriptor = new DynamicEntityDescriptor<TType>(extraEntities);
         }
 
-        protected ExtendibleEntityDescriptor()
+        public ExtendibleEntityDescriptor()
         {
             _dynamicDescriptor = new DynamicEntityDescriptor<TType>(true);
         }
 
+        public ExtendibleEntityDescriptor<TType> ExtendWith<T>() where T : IEntityDescriptor, new()
+        {
+            _dynamicDescriptor.ExtendWith<T>();
+
+            return this;
+        }
+
+        public ExtendibleEntityDescriptor<TType> ExtendWith(IEntityBuilder[] extraEntities)
+        {
+            _dynamicDescriptor.ExtendWith(extraEntities);
+
+            return this;
+        }
+
         public IEntityBuilder[] entitiesToBuild => _dynamicDescriptor.entitiesToBuild;
 
-        readonly DynamicEntityDescriptor<TType> _dynamicDescriptor;
+        DynamicEntityDescriptor<TType> _dynamicDescriptor;
     }
-
-    public interface IExtendibleEntityDescriptor:IEntityDescriptor
-    {}
 }

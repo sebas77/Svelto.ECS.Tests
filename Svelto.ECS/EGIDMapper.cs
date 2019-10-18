@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Svelto.DataStructures;
 
 namespace Svelto.ECS
@@ -30,6 +31,20 @@ namespace Svelto.ECS
 
             value = default;
             return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public UnsafeStructRef<T> EntityUnsafeRef(uint entityID)
+        {
+#if DEBUG && !PROFILER
+            if (map.TryFindIndex(entityID, out var findIndex) == false)
+                throw new Exception("Entity not found in this group ".FastConcat(typeof(T).ToString()));
+#else
+                map.TryFindIndex(entityID, out var findIndex);
+#endif
+            var alloc = GCHandle.Alloc(map.valuesArray, GCHandleType.Pinned);
+            
+            return new UnsafeStructRef<T>(ref map.valuesArray[findIndex], alloc);
         }
     }
 }

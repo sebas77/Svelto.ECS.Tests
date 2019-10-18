@@ -5,10 +5,6 @@ namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
-        /// <summary>
-        /// todo: EnginesRoot was a weakreference to give the change to inject
-        /// IEntityFactory from other engines root. It probably should be reverted
-        /// </summary>
         class GenericEntityFactory : IEntityFactory
         {
             public GenericEntityFactory(EnginesRoot weakReference)
@@ -34,7 +30,7 @@ namespace Svelto.ECS
             public EntityStructInitializer BuildEntity<T>(EGID egid, T entityDescriptor, IEnumerable<object> implementors) 
                 where T : IEntityDescriptor
             {
-                return _enginesRoot.Target.BuildEntity(egid, entityDescriptor.entitiesToBuild, implementors);
+                 return _enginesRoot.Target.BuildEntity(egid, entityDescriptor.entitiesToBuild, implementors);
             }
 
             public EntityStructInitializer BuildEntity<T>(uint entityID,

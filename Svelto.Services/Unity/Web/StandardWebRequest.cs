@@ -84,13 +84,13 @@ namespace Svelto.Services
                         {
                             result = Result.Success;
                             
-                            Svelto.Console.LogWarningDebug("web request completed");
+                            Svelto.Console.LogDebug("web request completed");
 
                             yield break;
                         }
                         else
                         {
-                            Svelto.Console.LogWarningDebug("web request completed with failure ", URL);
+                            Svelto.Console.LogDebug("web request completed with failure ", URL);
 
                             try
                             {
@@ -113,7 +113,7 @@ namespace Svelto.Services
 
                         while (wait.MoveNext() == true) yield return Yield.It;
 
-                        Svelto.Console.LogWarningDebug("web request retry");
+                        Svelto.Console.LogDebug("web request retry");
 
                         continue; //retry on client error
                     }

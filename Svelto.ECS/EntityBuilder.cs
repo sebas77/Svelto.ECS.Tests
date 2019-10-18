@@ -90,7 +90,7 @@ namespace Svelto.ECS
                 this.FillEntityView(ref entityView, entityViewBlazingFastReflection, implementors,
                     EntityView.implementorsByType, EntityView.cachedTypes);
 
-                castedDic.Add(egid.entityID, ref entityView);
+                castedDic.Add(egid.entityID, entityView);
             }
             else
             {
@@ -136,7 +136,7 @@ namespace Svelto.ECS
             EntityView.cachedFields;
 
         internal static readonly Type ENTITY_VIEW_TYPE;
-        internal static readonly bool HAS_EGID;
+        public static readonly bool HAS_EGID;
 
         static readonly T      DEFAULT_IT;
         static readonly bool   NEEDS_REFLECTION;

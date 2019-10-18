@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Svelto.ServiceLayer.Experimental;
 
 namespace Svelto.ServiceLayer.Experimental
 {
@@ -18,7 +17,7 @@ namespace Svelto.ServiceLayer.Experimental
 
         protected ServiceEventContainer()
         {
-            //call all the AddRelation in the implementation if you wish            
+            //call all the AddRelation in the implementation if you wish
         }
 
         public void ListenTo<TListener, TDelegate>(TDelegate callBack)
@@ -30,13 +29,13 @@ namespace Svelto.ServiceLayer.Experimental
             _listeners.Add(listener);
         }
 
-        void AddRelation<TInterface, TConcrete>() where TInterface : IServiceEventListenerBase
+        protected void AddRelation<TInterface, TConcrete>() where TInterface : IServiceEventListenerBase
             where TConcrete : TInterface
         {
             _registeredTypes.Add(typeof(TInterface), typeof(TConcrete));
         }
 
-        readonly List<IServiceEventListenerBase> _listeners       = new List<IServiceEventListenerBase>();
-        readonly Dictionary<Type, Type>          _registeredTypes = new Dictionary<Type, Type>();
+        readonly List<IServiceEventListenerBase> _listeners = new List<IServiceEventListenerBase>();
+        readonly Dictionary<Type, Type> _registeredTypes = new Dictionary<Type, Type>();
     }
 }

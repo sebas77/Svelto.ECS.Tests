@@ -37,6 +37,10 @@ namespace Svelto.ECS
             where T : struct, IEntityStruct;
         EntityCollection<T1, T2> QueryEntities<T1, T2>(ExclusiveGroup.ExclusiveGroupStruct groupStruct)
             where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct;
+        EntityCollection<T1, T2, T3> QueryEntities<T1, T2, T3>(ExclusiveGroup.ExclusiveGroupStruct groupStruct)
+            where T1 : struct, IEntityStruct 
+            where T2 : struct, IEntityStruct
+            where T3 : struct, IEntityStruct;
 
         /// <summary>
         /// return entities found in multiple groups, that can be iterated through the EntityCollection iterator
@@ -161,6 +165,7 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         bool Exists<T>(EGID egid) where T : struct, IEntityStruct;
+        bool Exists<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group) where T : struct, IEntityStruct;
         bool Exists(ExclusiveGroup.ExclusiveGroupStruct gid);
 
         /// <summary>
@@ -184,5 +189,13 @@ namespace Svelto.ECS
         /// <param name="egid"></param>
         /// <typeparam name="T"></typeparam>
         void PublishEntityChange<T>(EGID egid) where T : unmanaged, IEntityStruct;
+
+        /// <summary>
+        /// Pre query a group to be used multiple times
+        /// </summary>
+        /// <param name="groupID"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
+        EntityGroup QueryGroup(ExclusiveGroup.ExclusiveGroupStruct groupID);
     }
 }

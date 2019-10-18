@@ -41,12 +41,12 @@ namespace Svelto.ECS
             _disposableEngines = new FasterList<IDisposable>();
             _transientEntitiesOperations = new FasterList<EntitySubmitOperation>();
 
-            _groupEntityDB = new FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>();
+            _groupEntityViewsDB = new FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>();
             _groupsPerEntity = new FasterDictionary<RefWrapper<Type>, FasterDictionary<uint, ITypeSafeDictionary>>();
             _groupedEntityToAdd = new DoubleBufferedEntitiesToAdd();
 
             _entitiesStream = new EntitiesStream();
-            _entitiesDB = new EntitiesDB(_groupEntityDB, _groupsPerEntity, _entitiesStream);
+            _entitiesDB = new EntitiesDB(_groupEntityViewsDB, _groupsPerEntity, _entitiesStream);
 
             _scheduler = entityViewScheduler;
             _scheduler.onTick = new EntitiesSubmitter(this);

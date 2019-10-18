@@ -100,6 +100,54 @@ namespace Svelto.ECS
         }
     }
     
+    public struct EntityCollection<T1, T2, T3>
+    {
+        public EntityCollection(in (T1[], T2[], T3[]) array, uint count)
+        {
+            _array = array;
+            _count = count;
+        }
+
+        public EntityIterator GetEnumerator()
+        {
+            return new EntityIterator(_array, _count);
+        }
+
+        readonly (T1[], T2[], T3[]) _array;
+        readonly uint         _count;
+
+        public struct EntityIterator : IEnumerator<ValueRef<T1, T2, T3>>
+        {
+            public EntityIterator((T1[], T2[], T3[]) array, uint count) : this()
+            {
+                _array = array;
+                _count = count;
+                _index = -1;
+            }
+
+            public bool MoveNext()
+            {
+                return ++_index < _count;
+            }
+
+            public void Reset()
+            {
+                _index = -1;
+            }
+
+            public ValueRef<T1, T2, T3> Current => new ValueRef<T1, T2, T3>(_array, (uint) _index);
+
+            ValueRef<T1, T2, T3> IEnumerator<ValueRef<T1, T2, T3>>.Current => throw new NotImplementedException();
+            object IEnumerator.                                    Current => throw new NotImplementedException();
+
+            public void Dispose()  {}
+
+            readonly (T1[], T2[], T3[]) _array;
+            readonly uint               _count;
+            int                         _index;
+        }
+    }
+    
     public struct EntityCollections<T> where T : struct, IEntityStruct
     {
         public EntityCollections(IEntitiesDB db, ExclusiveGroup[] groups) : this()
@@ -141,7 +189,7 @@ namespace Svelto.ECS
             {
                 _index = -1;
                 _indexGroup = -1;
-                _array = _db.QueryEntities<T>(_groups[0], out _count);
+                _count = 0;
             }
 
             public ref T Current => ref _array[_index];
@@ -254,7 +302,25 @@ namespace Svelto.ECS
             index = i;
         }
 
-        public ref T1 Item1 => ref array.Item1[index];
-        public ref T2 Item2 => ref array.Item2[index];
+        public ref T1 entityStructA => ref array.Item1[index];
+        public ref T2 entityStructB => ref array.Item2[index];
+    }
+    
+    public struct ValueRef<T1, T2, T3>
+    {
+        readonly (T1[], T2[], T3[]) array;
+
+        readonly uint index;
+
+        public ValueRef(in (T1[], T2[], T3[]) entity1, uint i)
+        {
+            array = entity1;
+            index = i;
+        }
+
+        public ref T1 entityStructA => ref array.Item1[index];
+        public ref T2 entityStructB => ref array.Item2[index];
+        public ref T3 entityStructC => ref array.Item3[index];
+
     }
 }

@@ -10,7 +10,8 @@ namespace Svelto.ECS.Internal
 {
     partial class EntitiesDB : IEntitiesDB
     {
-        internal EntitiesDB(FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>> groupEntityViewsDB,
+        internal EntitiesDB(
+            FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>> groupEntityViewsDB,
             FasterDictionary<RefWrapper<Type>, FasterDictionary<uint, ITypeSafeDictionary>> groupsPerEntity,
             EntitiesStream entityStream)
         {
@@ -65,9 +66,16 @@ namespace Svelto.ECS.Internal
             return new EntityCollection<T>(QueryEntities<T>(groupStruct, out var count), count);
         }
 
-        public EntityCollection<T1, T2> QueryEntities<T1, T2>(ExclusiveGroup.ExclusiveGroupStruct groupStruct) where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct
+        public EntityCollection<T1, T2> QueryEntities<T1, T2>(ExclusiveGroup.ExclusiveGroupStruct groupStruct)
+            where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct
         {
             return new EntityCollection<T1, T2>(QueryEntities<T1, T2>(groupStruct, out var count), count);
+        }
+
+        public EntityCollection<T1, T2, T3> QueryEntities<T1, T2, T3>(ExclusiveGroup.ExclusiveGroupStruct groupStruct)
+            where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct where T3 : struct, IEntityStruct
+        {
+            return new EntityCollection<T1, T2, T3>(QueryEntities<T1, T2, T3>(groupStruct, out var count), count);
         }
 
         public EntityCollections<T> QueryEntities<T>(ExclusiveGroup[] groups) where T : struct, IEntityStruct
@@ -91,9 +99,10 @@ namespace Svelto.ECS.Internal
 
             if (count != countCheck)
             {
-                throw new ECSException("Entity views count do not match in group. Entity 1: '"
+                throw new ECSException("Entity views count do not match in group. Entity 1: ' count: "
+                    .FastConcat(countCheck)
                     .FastConcat(typeof(T1).ToString())
-                    .FastConcat("'. Entity 2: '"
+                    .FastConcat("'. Entity 2: ' count: ".FastConcat(countCheck)
                         .FastConcat(typeof(T2).ToString())
                         .FastConcat("'")));
             }
@@ -113,8 +122,11 @@ namespace Svelto.ECS.Internal
 
             if (count != countCheck1 || count != countCheck2)
                 throw new ECSException("Entity views count do not match in group. Entity 1: "
-                    .FastConcat(typeof(T1).ToString()).FastConcat(" Entity 2: ".FastConcat(typeof(T2).ToString())
-                        .FastConcat(" Entity 3: ".FastConcat(typeof(T3).ToString()))));
+                    .FastConcat(typeof(T1).ToString()).FastConcat(" count: ").FastConcat(countCheck1).FastConcat(
+                        " Entity 2: ".FastConcat(typeof(T2).ToString())
+                            .FastConcat(" count: ").FastConcat(countCheck2)
+                            .FastConcat(" Entity 3: ".FastConcat(typeof(T3).ToString())).FastConcat(" count: ")
+                            .FastConcat(count)));
 
             return (T1entities, T2entities, T3entities);
         }
@@ -133,7 +145,8 @@ namespace Svelto.ECS.Internal
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryQueryMappedEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId, out EGIDMapper<T> mapper)
+        public bool TryQueryMappedEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId,
+            out EGIDMapper<T> mapper)
             where T : struct, IEntityStruct
         {
             mapper = default;
@@ -186,6 +199,14 @@ namespace Svelto.ECS.Internal
 
             return casted != null && casted.ContainsKey(entityGID.entityID);
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Exists<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group) where T : struct, IEntityStruct
+        {
+            if (SafeQueryEntityDictionary(group, out TypeSafeDictionary<T> casted) == false) return false;
+
+            return casted != null && casted.ContainsKey(id);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Exists(ExclusiveGroup.ExclusiveGroupStruct gid)
@@ -211,6 +232,16 @@ namespace Svelto.ECS.Internal
         public void PublishEntityChange<T>(EGID egid) where T : unmanaged, IEntityStruct
         {
             _entityStream.PublishEntity(ref QueryEntity<T>(egid), egid);
+        }
+
+        public EntityGroup QueryGroup(ExclusiveGroup.ExclusiveGroupStruct groupID)
+        {
+            if (_groupEntityViewsDB.TryGetValue(groupID, out var entitiesInGroupPerType) == false)
+            {
+                throw new Exception("group not found");
+            }
+
+            return new EntityGroup(entitiesInGroupPerType, groupID);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

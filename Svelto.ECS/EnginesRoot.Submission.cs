@@ -14,71 +14,82 @@ namespace Svelto.ECS
         {
             using (var profiler = new PlatformProfiler("Svelto.ECS - Entities Submission"))
             {
-                if (_entitiesOperations.Count > 0)
+                int iterations = 0;
+                do
                 {
-                    using (profiler.Sample("Remove and Swap operations"))
-                    {
-                        _transientEntitiesOperations.FastClear();
-                        var entitySubmitOperations = _entitiesOperations.GetValuesArray(out var count);
-                        _transientEntitiesOperations.AddRange(entitySubmitOperations, count);
-                        _entitiesOperations.FastClear();
+                    SingleSubmission(profiler);
+                } while ((_groupedEntityToAdd.currentEntitiesCreatedPerGroup.Count > 0 ||
+                          _entitiesOperations.Count > 0) && ++iterations < 5);
 
-                        var entitiesOperations = _transientEntitiesOperations.ToArrayFast();
-                        for (var i = 0; i < _transientEntitiesOperations.Count; i++)
-                        {
-                            try
-                            {
-                                switch (entitiesOperations[i].type)
-                                {
-                                    case EntitySubmitOperationType.Swap:
-                                        MoveEntityFromAndToEngines(entitiesOperations[i].builders,
-                                            entitiesOperations[i].fromID,
-                                            entitiesOperations[i].toID);
-                                        break;
-                                    case EntitySubmitOperationType.Remove:
-                                        MoveEntityFromAndToEngines(entitiesOperations[i].builders,
-                                            entitiesOperations[i].fromID, null);
-                                        break;
-                                    case EntitySubmitOperationType.RemoveGroup:
-                                            RemoveGroupAndEntitiesFromDB(
-                                                entitiesOperations[i].fromID.groupID, profiler);
-                                        break;
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                var str = "Crash while executing Entity Operation "
-                                    .FastConcat(entitiesOperations[i].type.ToString());
-
-                                throw new ECSException(str.FastConcat(" ")
 #if DEBUG && !PROFILER
-                                        .FastConcat(entitiesOperations[i].trace.ToString())
+                if (iterations == 5)
+                    throw new ECSException("possible circular submission detected");
 #endif
-                                    , e);
-                            }
-                        }
-                    }
-                }
-                
-                _groupedEntityToAdd.Swap();
+            }
+        }
 
-                if (_groupedEntityToAdd.otherEntitiesCreatedPerGroup.Count > 0)
+        void SingleSubmission(in PlatformProfiler profiler)
+        {
+            if (_entitiesOperations.Count > 0)
+            {
+                using (profiler.Sample("Remove and Swap operations"))
                 {
-                    using (profiler.Sample("Add operations"))
+                    _transientEntitiesOperations.FastClear();
+                    var entitySubmitOperations = _entitiesOperations.GetValuesArray(out var count);
+                    _transientEntitiesOperations.AddRange(entitySubmitOperations, count);
+                    _entitiesOperations.FastClear();
+
+                    var entitiesOperations = _transientEntitiesOperations.ToArrayFast();
+                    for (var i = 0; i < _transientEntitiesOperations.Count; i++)
                     {
                         try
                         {
-                            //Note: if N entities of the same type are added on the same frame the Add callback is called
-                            //N times on the same frame. if the Add callback builds a new entity, that entity will not
-                            //be available in the database until the N callbacks are done. Solving this could be
-                            //complicated as callback and database update must be interleaved.
-                            AddEntityViewsToTheDBAndSuitableEngines(profiler);
+                            switch (entitiesOperations[i].type)
+                            {
+                                case EntitySubmitOperationType.Swap:
+                                    MoveEntityFromAndToEngines(entitiesOperations[i].builders,
+                                        entitiesOperations[i].fromID,
+                                        entitiesOperations[i].toID);
+                                    break;
+                                case EntitySubmitOperationType.Remove:
+                                    MoveEntityFromAndToEngines(entitiesOperations[i].builders,
+                                        entitiesOperations[i].fromID, null);
+                                    break;
+                                case EntitySubmitOperationType.RemoveGroup:
+                                    RemoveGroupAndEntitiesFromDB(
+                                        entitiesOperations[i].fromID.groupID, profiler);
+                                    break;
+                            }
                         }
-                        finally
+                        catch (Exception e)
                         {
-                            //other can be cleared now, but let's avoid deleting the dictionary every time
-                            _groupedEntityToAdd.ClearOther();
+                            var str = "Crash while executing Entity Operation "
+                                .FastConcat(entitiesOperations[i].type.ToString());
+
+                            throw new ECSException(str.FastConcat(" ")
+#if DEBUG && !PROFILER
+                                    .FastConcat(entitiesOperations[i].trace.ToString())
+#endif
+                                , e);
                         }
+                    }
+                }
+            }
+
+            _groupedEntityToAdd.Swap();
+
+            if (_groupedEntityToAdd.otherEntitiesCreatedPerGroup.Count > 0)
+            {
+                using (profiler.Sample("Add operations"))
+                {
+                    try
+                    {
+                        AddEntityViewsToTheDBAndSuitableEngines(profiler);
+                    }
+                    finally
+                    {
+                        //other can be cleared now, but let's avoid deleting the dictionary every time
+                        _groupedEntityToAdd.ClearOther();
                     }
                 }
             }
@@ -90,10 +101,11 @@ namespace Svelto.ECS
             foreach (var groupOfEntitiesToSubmit in _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
             {
                 var groupID = groupOfEntitiesToSubmit.Key;
-                
+
                 //if the group doesn't exist in the current DB let's create it first
-                if (_groupEntityDB.TryGetValue(groupID, out var groupDB) == false)
-                    groupDB = _groupEntityDB[groupID] = new FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>();
+                if (_groupEntityViewsDB.TryGetValue(groupID, out var groupDB) == false)
+                    groupDB = _groupEntityViewsDB[groupID] =
+                        new FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>();
 
                 //add the entityViews in the group
                 foreach (var entityViewsToSubmit in _groupedEntityToAdd.other[groupID])
@@ -119,11 +131,11 @@ namespace Svelto.ECS
             //created by the entity built
             using (profiler.Sample("Add entities to engines"))
             {
-                foreach (var groupToSubmit in  _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
+                foreach (var groupToSubmit in _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
                 {
                     var groupID = groupToSubmit.Key;
 
-                    var groupDB = _groupEntityDB[groupID];
+                    var groupDB = _groupEntityViewsDB[groupID];
 
                     foreach (var entityViewsToSubmit in _groupedEntityToAdd.other[groupID])
                     {

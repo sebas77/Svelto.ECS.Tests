@@ -17,14 +17,14 @@ namespace Svelto.ECS
     /// </summary>
     class EntitiesStream : IDisposable
     {
-        internal Consumer<T> GenerateConsumer<T>(string name, int capacity) where T : unmanaged, IEntityStruct
+        internal Consumer<T> GenerateConsumer<T>(string name, uint capacity) where T : unmanaged, IEntityStruct
         {
             if (_streams.ContainsKey(typeof(T)) == false) _streams[typeof(T)] = new EntityStream<T>();
 
             return (_streams[typeof(T)] as EntityStream<T>).GenerateConsumer(name, capacity);
         }
 
-        public Consumer<T> GenerateConsumer<T>(ExclusiveGroup group, string name, int capacity)
+        public Consumer<T> GenerateConsumer<T>(ExclusiveGroup group, string name, uint capacity)
             where T : unmanaged, IEntityStruct
         {
             if (_streams.ContainsKey(typeof(T)) == false) _streams[typeof(T)] = new EntityStream<T>();
@@ -37,7 +37,7 @@ namespace Svelto.ECS
             if (_streams.TryGetValue(typeof(T), out var typeSafeStream))
                 (typeSafeStream as EntityStream<T>).PublishEntity(ref entity, egid);
             else
-                Console.LogWarningDebug("No Consumers are waiting for this entity to change ", typeof(T));
+                Console.LogDebug("No Consumers are waiting for this entity to change ", typeof(T));
         }
 
         readonly ConcurrentDictionary<Type, ITypeSafeStream> _streams =
@@ -62,17 +62,17 @@ namespace Svelto.ECS
                 {
                     if (egid.groupID == _consumers[i]._group)
                     {
-                        _consumers[i].Enqueue(ref entity);
+                        _consumers[i].Enqueue(entity, egid);
                     }
                 }
                 else
                 {
-                    _consumers[i].Enqueue(ref entity);
+                    _consumers[i].Enqueue(entity, egid);
                 }
             }
         }
 
-        public Consumer<T> GenerateConsumer(string name, int capacity)
+        public Consumer<T> GenerateConsumer(string name, uint capacity)
         {
             var consumer = new Consumer<T>(name, capacity, this);
 
@@ -81,7 +81,7 @@ namespace Svelto.ECS
             return consumer;
         }
 
-        public Consumer<T> GenerateConsumer(ExclusiveGroup group, string name, int capacity)
+        public Consumer<T> GenerateConsumer(ExclusiveGroup group, string name, uint capacity)
         {
             var consumer = new Consumer<T>(group, name, capacity, this);
 
@@ -100,12 +100,12 @@ namespace Svelto.ECS
 
     public struct Consumer<T> : IDisposable where T : unmanaged, IEntityStruct
     {
-        internal Consumer(string name, int capacity, EntityStream<T> stream):this() 
+        internal Consumer(string name, uint capacity, EntityStream<T> stream):this() 
         {
 #if DEBUG && !PROFILER            
             _name = name;
 #endif
-            _ringBuffer = new RingBuffer<T>(capacity, 
+            _ringBuffer = new RingBuffer<ValueTuple<T, EGID>>((int) capacity, 
 #if DEBUG && !PROFILER
                 _name
 #else
@@ -116,23 +116,41 @@ namespace Svelto.ECS
             _stream = stream;
         }
 
-        internal Consumer(ExclusiveGroup group, string name, int capacity, EntityStream<T> stream) : this(name,
+        internal Consumer(ExclusiveGroup group, string name, uint capacity, EntityStream<T> stream) : this(name,
             capacity, stream)
         {
             _group = group;
             _hasGroup = true;
         }
 
-        internal void Enqueue(ref T entity)
+        internal void Enqueue(in T entity, in EGID egid)
         {
-            _ringBuffer.Enqueue(ref entity);
+            _ringBuffer.Enqueue((entity, egid));
         }
 
-        public bool TryDequeue(out T entity) { return _ringBuffer.TryDequeue(out entity); }
+        public bool TryDequeue(out T entity)
+        {
+            var tryDequeue = _ringBuffer.TryDequeue(out var values);
+
+            entity = values.Item1;
+            
+            return tryDequeue;
+        }
+
+        public bool TryDequeue(out T entity, out EGID id)
+        {
+            var tryDequeue = _ringBuffer.TryDequeue(out var values);
+
+            entity = values.Item1;
+            id = values.Item2;
+            
+            return tryDequeue;
+        }
         public void Flush() { _ringBuffer.Reset(); }
         public void Dispose() { _stream.RemoveConsumer(this); }
+        public uint Count() { return (uint) _ringBuffer.Count; }
 
-        readonly          RingBuffer<T>   _ringBuffer;
+        readonly          RingBuffer<ValueTuple<T, EGID>>   _ringBuffer;
         readonly          EntityStream<T> _stream;
         
         internal readonly ExclusiveGroup  _group;

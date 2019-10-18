@@ -1,4 +1,4 @@
-using Svelto.ECS.Internal;
+using Svelto.Common;
 
 namespace Svelto.ECS.Serialization
 {
@@ -17,23 +17,35 @@ namespace Svelto.ECS.Serialization
                 if (field.FieldType.ContainsCustomAttribute(typeof(DoNotSerializeAttribute)) && field.IsPrivate == false)
                     throw new ECSException("field cannot be serialised ".FastConcat(_type.FullName));
             }
-            
+
             if (_type.GetProperties().Length > (EntityBuilder<T>.HAS_EGID ? 1 : 0))
                 throw new ECSException("serializable entity struct must be property less ".FastConcat(_type.FullName));
         }
 
-        public void Serialize(in T value, byte[] data, ref uint dataPos)
+        public bool Serialize(in T value, ISerializationData serializationData)
         {
-            DefaultSerializerUtils.CopyToByteArray(value, data, dataPos);
+            using (_pp.Sample("DefaultSerializer.Serialize"))
+            {
+                DefaultSerializerUtils.CopyToByteArray(value, serializationData.data.ToArrayFast(), serializationData.dataPos);
 
-            dataPos += SIZEOFT;
+                serializationData.dataPos += SIZEOFT;
+
+                return true;
+            }
         }
 
-        public void Deserialize(ref T value, byte[] data, ref uint dataPos)
+        public bool Deserialize(ref T value, ISerializationData serializationData)
         {
-            value = DefaultSerializerUtils.CopyFromByteArray<T>(data, dataPos);
+            using (_pp.Sample("DefaultSerializer.Serialize"))
+            {
+                value = DefaultSerializerUtils.CopyFromByteArray<T>(serializationData.data.ToArrayFast(), serializationData.dataPos);
 
-            dataPos += SIZEOFT;
+                serializationData.dataPos += SIZEOFT;
+
+                return true;
+            }
         }
+
+        PlatformProfiler _pp = new PlatformProfiler();
     }
 }

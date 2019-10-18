@@ -31,16 +31,15 @@ namespace Svelto.ECS.Internal
         void SetCapacity(uint size);
         void Trim();
         void Clear();
-        void FastClear();
         bool Has(uint entityIdEntityId);
     }
 
     class TypeSafeDictionary<TValue> : FasterDictionary<uint, TValue>,
         ITypeSafeDictionary where TValue : struct, IEntityStruct
     {
-        static readonly Type       _type     = typeof(TValue);
-        static readonly          string     _typeName = _type.Name;
-        static readonly          bool       _hasEgid  = typeof(INeedEGID).IsAssignableFrom(_type);
+        static readonly Type   _type     = typeof(TValue);
+        static readonly string _typeName = _type.Name;
+        static readonly bool   _hasEgid  = typeof(INeedEGID).IsAssignableFrom(_type);
 
         internal delegate void ActionCast(ref TValue target, EGID egid);
         public static readonly          ActionCast Setter    = MakeSetter();
@@ -77,7 +76,7 @@ namespace Svelto.ECS.Internal
                 {
                     if (_hasEgid) Setter(ref tuple.Value, new EGID(tuple.Key, groupId));
 
-                    Add(tuple.Key, ref tuple.Value);
+                    Add(tuple.Key, tuple.Value);
                 }
                 catch (Exception e)
                 {
@@ -129,7 +128,7 @@ namespace Svelto.ECS.Internal
 
                 if (_hasEgid) Setter(ref entity, toEntityID);
 
-                toGroupCasted.Add(fromEntityGid.entityID, ref entity);
+                toGroupCasted.Add(fromEntityGid.entityID, entity);
             }
         }
 
@@ -137,14 +136,15 @@ namespace Svelto.ECS.Internal
             FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> engines, in PlatformProfiler profiler)
         {
             var valueIndex = GetIndex(fromEntityGid.entityID);
+            
+            ref var entity = ref valuesArray[valueIndex];
 
             if (toGroup != null)
             {
-                RemoveEntityViewFromEngines(engines, ref valuesArray[valueIndex], fromEntityGid.groupID, in profiler,
+                RemoveEntityViewFromEngines(engines, ref entity, fromEntityGid.groupID, in profiler,
                     fromEntityGid);
 
                 var toGroupCasted = toGroup as TypeSafeDictionary<TValue>;
-                ref var entity = ref valuesArray[valueIndex];
                 var previousGroup = fromEntityGid.groupID;
 
                 if (_hasEgid) Setter(ref entity, toEntityID.Value);
@@ -155,7 +155,7 @@ namespace Svelto.ECS.Internal
                     in profiler, toEntityID.Value);
             }
             else
-                RemoveEntityViewFromEngines(engines, ref valuesArray[valueIndex], null, in profiler, fromEntityGid);
+                RemoveEntityViewFromEngines(engines, ref entity, null, in profiler, fromEntityGid);
         }
 
         public ITypeSafeDictionary Create()
@@ -206,10 +206,10 @@ namespace Svelto.ECS.Internal
         }
 
         static void RemoveEntityViewFromEngines(
-            FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityViewEnginesDB, ref TValue entity,
+            FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> @group, ref TValue entity,
             ExclusiveGroup.ExclusiveGroupStruct? previousGroup, in PlatformProfiler profiler, EGID egid)
         {
-            if (!entityViewEnginesDB.TryGetValue(new RefWrapper<Type>(_type), out var entityViewsEngines)) return;
+            if (!@group.TryGetValue(new RefWrapper<Type>(_type), out var entityViewsEngines)) return;
 
             if (previousGroup == null)
             {
@@ -225,6 +225,7 @@ namespace Svelto.ECS.Internal
                             "Code crashed inside Remove callback ".FastConcat(typeof(TValue).ToString()), e);
                     }
             }
+#if SEEMS_UNNECESSARY            
             else
             {
                 for (var i = 0; i < entityViewsEngines.Count; i++)
@@ -239,6 +240,7 @@ namespace Svelto.ECS.Internal
                             "Code crashed inside Remove callback ".FastConcat(typeof(TValue).ToString()), e);
                     }
             }
+#endif
         }
     }
 }

@@ -94,7 +94,7 @@ namespace Svelto.ECS
             
             //enginesRoot is a weakreference because GenericEntityStreamConsumerFactory can be injected inside
 //engines of other enginesRoot
-            readonly DataStructures.WeakReference<EnginesRoot> _enginesRoot;
+            readonly WeakReference<EnginesRoot> _enginesRoot;
         }
 
         void QueueEntitySubmitOperation(EntitySubmitOperation entitySubmitOperation)
@@ -102,7 +102,7 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILER
             entitySubmitOperation.trace = new StackFrame(1, true);
 #endif
-            _entitiesOperations.Add((ulong) entitySubmitOperation.fromID, ref entitySubmitOperation);
+            _entitiesOperations.Add((ulong) entitySubmitOperation.fromID, entitySubmitOperation);
         }
 
         void QueueEntitySubmitOperation<T>(EntitySubmitOperation entitySubmitOperation) where T : IEntityDescriptor
@@ -124,7 +124,7 @@ namespace Svelto.ECS
             }
             else
 #endif
-                _entitiesOperations.Set((ulong) entitySubmitOperation.fromID, ref entitySubmitOperation);
+                _entitiesOperations.Set((ulong) entitySubmitOperation.fromID, entitySubmitOperation);
         }
     }
 }

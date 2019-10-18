@@ -54,15 +54,14 @@ namespace Svelto.ECS.Serialization
             }
 
             /////
-            _entitiesToSerialize = new FasterList<ISerializableEntityBuilder>(); 
+            _entitiesToSerialize = new FasterList<ISerializableEntityBuilder>();
             _entitiesToSerializeMap = new FasterDictionary<RefWrapper<Type>, ISerializableEntityBuilder>();
             foreach (IEntityBuilder e in defaultEntities)
             {
                 if (e is ISerializableEntityBuilder serializableEntityBuilder)
                 {
                     var entityType = serializableEntityBuilder.GetEntityType();
-                    _entitiesToSerializeMap[new RefWrapper<Type>(entityType)] =
-                        serializableEntityBuilder;
+                    _entitiesToSerializeMap[new RefWrapper<Type>(entityType)] = serializableEntityBuilder;
                     _entitiesToSerialize.Add(serializableEntityBuilder);
                 }
             }
@@ -98,7 +97,7 @@ namespace Svelto.ECS.Serialization
             return (indexSerial, indexDynamic);
         }
 
-        public T Get<T>() where T : unmanaged, IEntityStruct
+        T ISerializableEntityDescriptor.Get<T>()
         {
             return ((SerializableEntityBuilder<T>) _entitiesToSerializeMap[new RefWrapper<Type>(typeof(T))])
                 ._lastSerialisedValue;
@@ -106,7 +105,7 @@ namespace Svelto.ECS.Serialization
 
         public void FillInitializer(ref EntityStructInitializer initializer)
         {
-            foreach (var eb in entitiesToSerialize)
+            foreach (ISerializableEntityBuilder eb in entitiesToSerialize)
             {
                 eb.Set(ref initializer);
             }
@@ -115,11 +114,11 @@ namespace Svelto.ECS.Serialization
         public IEntityBuilder[] entitiesToBuild => _entitiesToBuild;
         public uint hash => _hash;
         public FasterReadOnlyList<ISerializableEntityBuilder> entitiesToSerialize => new FasterReadOnlyList<ISerializableEntityBuilder>(_entitiesToSerialize);
-        
-        static readonly IEntityBuilder[]                                            _entitiesToBuild;
+
+        static readonly IEntityBuilder[]                                               _entitiesToBuild;
         static readonly FasterDictionary<RefWrapper<Type>, ISerializableEntityBuilder> _entitiesToSerializeMap;
-        static readonly FasterList<ISerializableEntityBuilder> _entitiesToSerialize;
-        
+        static readonly FasterList<ISerializableEntityBuilder>                         _entitiesToSerialize;
+
         static readonly uint _hash;
         static readonly Type _serializableStructType = typeof(SerializableEntityStruct);
         static readonly Type _type                   = typeof(TType);

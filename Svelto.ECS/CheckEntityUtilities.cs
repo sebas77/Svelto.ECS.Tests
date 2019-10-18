@@ -1,7 +1,9 @@
-﻿using System.Diagnostics;
+﻿#if DEBUG && !PROFILER
 using System.Collections.Generic;
 using Svelto.DataStructures;
-using Svelto.ECS.Internal;
+#else
+using System.Diagnostics;
+#endif
 
 namespace Svelto.ECS
 {
@@ -55,8 +57,6 @@ namespace Svelto.ECS
         
         void RemoveGroupID(ExclusiveGroup.ExclusiveGroupStruct groupID)
         {
-            Console.Log("remove group".FastConcat(groupID));
-            
             _idCheckers.Remove(groupID);
         }
 

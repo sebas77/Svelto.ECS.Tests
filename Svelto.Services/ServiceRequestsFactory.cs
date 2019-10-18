@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Svelto.ServiceLayer
 {
-    public class ServiceRequestsFactory : IServiceRequestsFactory
+    public abstract class ServiceRequestsFactory : IServiceRequestsFactory
     {
         public RequestInterface Create<RequestInterface>() where RequestInterface : class, IServiceRequest
         {

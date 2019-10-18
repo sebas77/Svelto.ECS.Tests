@@ -14,9 +14,8 @@ namespace Svelto.ECS
 
         public void Init<T>(T initializer) where T : struct, IEntityStruct
         {
-            if (!_group.TryGetValue(new RefWrapper<Type>(EntityBuilder<T>.ENTITY_VIEW_TYPE),
-                out var typeSafeDictionary))
-                return;
+            if (_group.TryGetValue(new RefWrapper<Type>(EntityBuilder<T>.ENTITY_VIEW_TYPE),
+                    out var typeSafeDictionary) == false) return;
 
             var dictionary = (TypeSafeDictionary<T>) typeSafeDictionary;
 
@@ -39,7 +38,7 @@ namespace Svelto.ECS
 
             return new T();
         }
-        
+
         public bool Has<T>() where T : struct, IEntityStruct
         {
             if (_group != null && _group.TryGetValue(new RefWrapper<Type>(EntityBuilder<T>.ENTITY_VIEW_TYPE),

@@ -6,13 +6,9 @@ namespace Svelto.ECS.Unity
     public static class SveltoGUIHelper
     {
         public static T CreateFromPrefab<T>(ref uint startIndex, Transform contextHolder, IEntityFactory factory,
-            ExclusiveGroup group)
-            where T : MonoBehaviour, IEntityDescriptorHolder
+            ExclusiveGroup group, string groupNamePostfix = null) where T : MonoBehaviour, IEntityDescriptorHolder
         {
-            var holder = Create<T>(
-                new EGID(startIndex++, group),
-                contextHolder,
-                factory);
+            var holder = Create<T>(new EGID(startIndex++, group), contextHolder, factory);
             var childs = contextHolder.GetComponentsInChildren<IEntityDescriptorHolder>(true);
 
             foreach (var child in childs)
@@ -26,7 +22,8 @@ namespace Svelto.ECS.Unity
                         child,
                         factory,
                         group,
-                        childImplementors);
+                        childImplementors,
+                        groupNamePostfix);
                 }
             }
 
@@ -58,7 +55,7 @@ namespace Svelto.ECS.Unity
         }
 
         public static uint CreateAll<T>(uint startIndex, ExclusiveGroup group,
-            Transform contextHolder, IEntityFactory factory) where T : MonoBehaviour, IEntityDescriptorHolder
+            Transform contextHolder, IEntityFactory factory, string groupNamePostfix = null) where T : MonoBehaviour, IEntityDescriptorHolder
         {
             var holders = contextHolder.GetComponentsInChildren<T>(true);
 
@@ -66,24 +63,23 @@ namespace Svelto.ECS.Unity
             {
                 var implementors = holder.GetComponents<IImplementor>();
 
-                startIndex = InternalBuildAll(
-                    startIndex,
-                    holder,
-                    factory,
-                    group,
-                    implementors);
+                startIndex = InternalBuildAll(startIndex, holder, factory, group, implementors, groupNamePostfix);
             }
 
             return startIndex;
         }
 
         static uint InternalBuildAll(uint startIndex, IEntityDescriptorHolder descriptorHolder,
-            IEntityFactory factory, ExclusiveGroup group, IImplementor[] implementors)
+            IEntityFactory factory, ExclusiveGroup group, IImplementor[] implementors, string groupNamePostfix)
         {
             ExclusiveGroup.ExclusiveGroupStruct realGroup = group;
 
             if (string.IsNullOrEmpty(descriptorHolder.groupName) == false)
-                realGroup = ExclusiveGroup.Search(descriptorHolder.groupName);
+            {
+                realGroup = ExclusiveGroup.Search(!string.IsNullOrEmpty(groupNamePostfix)
+                    ? $"{descriptorHolder.groupName}{groupNamePostfix}"
+                    : descriptorHolder.groupName);
+            }
 
             EGID egid;
             var holderId = descriptorHolder.id;
@@ -92,10 +88,7 @@ namespace Svelto.ECS.Unity
             else
                 egid = new EGID(holderId, realGroup);
 
-            var init = factory.BuildEntity(
-                egid,
-                descriptorHolder.GetDescriptor(),
-                implementors);
+            var init = factory.BuildEntity(egid, descriptorHolder.GetDescriptor(), implementors);
 
             init.Init(new EntityHierarchyStruct(group));
 

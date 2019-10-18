@@ -5,7 +5,9 @@ using System.Collections.Generic;
 
 namespace Svelto.ECS
 {
+    //todo: add debug map
     [Serialization.DoNotSerialize]
+    [Serializable]
     public struct EGID:IEquatable<EGID>,IEqualityComparer<EGID>,IComparable<EGID>
     {
         public uint entityID => (uint) (_GID & 0xFFFFFFFF);
