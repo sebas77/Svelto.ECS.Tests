@@ -1053,15 +1053,15 @@ namespace UnitTests
 
             foreach (var iterator in iterators)
             {
-                if (iterator.Item1.ID.groupID == group0)
+                if (iterator.entityStructA.ID.groupID == group0)
                 {
-                    Assert.IsTrue(iterator.Item1.value == index);
-                    Assert.IsTrue(iterator.Item2.value == index + 100);
+                    Assert.IsTrue(iterator.entityStructA.value == index);
+                    Assert.IsTrue(iterator.entityStructB.value == index + 100);
                 }
                 else
                 {
-                    Assert.IsTrue(iterator.Item1.value == index + 200);
-                    Assert.IsTrue(iterator.Item2.value == index + 300);
+                    Assert.IsTrue(iterator.entityStructA.value == index + 200);
+                    Assert.IsTrue(iterator.entityStructB.value == index + 300);
                 }
                 
                 index = ++index % 100;
