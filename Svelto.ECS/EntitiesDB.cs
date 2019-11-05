@@ -107,7 +107,6 @@ namespace Svelto.ECS.Internal
                         .FastConcat("'")));
             }
 
-
             return (T1entities, T2entities);
         }
 

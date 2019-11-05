@@ -17,7 +17,7 @@ namespace Svelto.ECS.Serialization
             foreach (ISerializer<T> s in _serializers)
             {
                 serializationData.data.ExpandBy(s.size);
-                if (s.Serialize(value, serializationData))
+                if (s.SerializeSafe(value, serializationData))
                     return true;
             }
 
@@ -28,7 +28,7 @@ namespace Svelto.ECS.Serialization
         {
             foreach (ISerializer<T> s in _serializers)
             {
-                if (s.Deserialize(ref value, serializationData))
+                if (s.DeserializeSafe(ref value, serializationData))
                     return true;
             }
 

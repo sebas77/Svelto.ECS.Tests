@@ -60,7 +60,7 @@ namespace Svelto.ECS.Serialization
 
                 serializationData.data.ExpandBy(serializer.size);
                 using (_pp.Sample("serializer.Serialize"))
-                    serializer.Serialize(val, serializationData);
+                    serializer.SerializeSafe(val, serializationData);
             }
         }
 
@@ -82,7 +82,7 @@ namespace Svelto.ECS.Serialization
                 ref T val = ref values[index];
 
                 using (_pp.Sample("serializer.Deserialize"))
-                    serializer.Deserialize(ref val, serializationData);
+                    serializer.DeserializeSafe(ref val, serializationData);
             }
         }
 
@@ -96,7 +96,7 @@ namespace Svelto.ECS.Serialization
                 _lastSerialisedValue = initializer.Get<T>();
 
                 using (_pp.Sample("serializer.Deserialize"))
-                    _valueSerialized = serializer.Deserialize(ref _lastSerialisedValue, serializationData);
+                    _valueSerialized = serializer.DeserializeSafe(ref _lastSerialisedValue, serializationData);
             }
         }
 

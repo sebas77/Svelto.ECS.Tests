@@ -260,9 +260,7 @@ namespace Svelto.ECS
             {
                 //todo: this must be unit tested properly
                 _groupsPerEntity[refWrapper].Remove(entityGID.groupID);
-                //I don't remove the group if empty on purpose, in case it needs to be reused however I trim it to save
-                //memory
-                fromTypeSafeDictionary.Trim();
+                //I don't remove the group if empty on purpose, in case it needs to be reused
             }
         }
 

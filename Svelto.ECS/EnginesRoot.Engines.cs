@@ -59,7 +59,7 @@ namespace Svelto.ECS
             DBC.ECS.Check.Require(
                 _enginesTypeSet.Contains(refWrapper) == false ||
                 type.ContainsCustomAttribute(typeof(AllowMultipleAttribute)) == true,
-                "The same engine has been added more than once "
+                "The same engine has been added more than once, if intentional, use [AllowMultiple] class attribute "
                     .FastConcat(engine.ToString()));
             try
             {

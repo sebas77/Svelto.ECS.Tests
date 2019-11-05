@@ -13,31 +13,33 @@ namespace Svelto.ECS
             }
 
             public EntityStructInitializer BuildEntity<T>(uint entityID,
-                ExclusiveGroup.ExclusiveGroupStruct groupStructId, IEnumerable<object> implementors  = null) 
+                ExclusiveGroup.ExclusiveGroupStruct groupStructId, IEnumerable<object> implementors = null)
                 where T : IEntityDescriptor, new()
             {
-                return _enginesRoot.Target.BuildEntity(new EGID(entityID, groupStructId), 
+                return _enginesRoot.Target.BuildEntity(new EGID(entityID, groupStructId),
                     EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, implementors);
             }
 
-            public EntityStructInitializer BuildEntity<T>(EGID egid, IEnumerable<object> implementors = null) 
+            public EntityStructInitializer BuildEntity<T>(EGID egid, IEnumerable<object> implementors = null)
                 where T : IEntityDescriptor, new()
             {
                 return _enginesRoot.Target.BuildEntity(egid,
                     EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, implementors);
             }
 
-            public EntityStructInitializer BuildEntity<T>(EGID egid, T entityDescriptor, IEnumerable<object> implementors) 
+            public EntityStructInitializer BuildEntity<T>(EGID egid, T entityDescriptor,
+                IEnumerable<object> implementors)
                 where T : IEntityDescriptor
             {
-                 return _enginesRoot.Target.BuildEntity(egid, entityDescriptor.entitiesToBuild, implementors);
+                return _enginesRoot.Target.BuildEntity(egid, entityDescriptor.entitiesToBuild, implementors);
             }
 
             public EntityStructInitializer BuildEntity<T>(uint entityID,
-                ExclusiveGroup.ExclusiveGroupStruct groupStructId, T descriptorEntity, IEnumerable<object> implementors) 
+                ExclusiveGroup.ExclusiveGroupStruct groupStructId, T descriptorEntity, IEnumerable<object> implementors)
                 where T : IEntityDescriptor
             {
-                return _enginesRoot.Target.BuildEntity(new EGID(entityID, groupStructId), descriptorEntity.entitiesToBuild,
+                return _enginesRoot.Target.BuildEntity(new EGID(entityID, groupStructId),
+                    descriptorEntity.entitiesToBuild,
                     implementors);
             }
 
@@ -47,7 +49,7 @@ namespace Svelto.ECS
                 _enginesRoot.Target.Preallocate<T>(groupStructId, size);
             }
 
-        //enginesRoot is a weakreference because GenericEntityStreamConsumerFactory can be injected inside
+            //enginesRoot is a weakreference because GenericEntityStreamConsumerFactory can be injected inside
 //engines of other enginesRoot
             readonly WeakReference<EnginesRoot> _enginesRoot;
         }

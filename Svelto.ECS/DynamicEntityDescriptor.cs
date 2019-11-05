@@ -31,18 +31,18 @@ namespace Svelto.ECS
             );
         }
 
-        public DynamicEntityDescriptor(IEntityBuilder[] extraEntities) : this()
+        public DynamicEntityDescriptor(IEntityBuilder[] extraEntityBuilders) : this()
         {
-            var extraEntitiesLength = extraEntities.Length;
+            var extraEntitiesLength = extraEntityBuilders.Length;
 
-            _entitiesToBuild = Construct(extraEntitiesLength, extraEntities,
+            _entitiesToBuild = Construct(extraEntitiesLength, extraEntityBuilders,
                 EntityDescriptorTemplate<TType>.descriptor.entitiesToBuild);
         }
 
-        public DynamicEntityDescriptor(FasterList<IEntityBuilder> extraEntitiesList) : this()
+        public DynamicEntityDescriptor(FasterList<IEntityBuilder> extraEntityBuilders) : this()
         {
-            var extraEntities = extraEntitiesList.ToArrayFast();
-            var extraEntitiesLength = extraEntitiesList.Count;
+            var extraEntities = extraEntityBuilders.ToArrayFast();
+            var extraEntitiesLength = extraEntityBuilders.Count;
 
             _entitiesToBuild = Construct(extraEntitiesLength, extraEntities,
                 EntityDescriptorTemplate<TType>.descriptor.entitiesToBuild);

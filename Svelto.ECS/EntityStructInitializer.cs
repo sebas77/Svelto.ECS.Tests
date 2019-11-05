@@ -19,7 +19,8 @@ namespace Svelto.ECS
 
             var dictionary = (TypeSafeDictionary<T>) typeSafeDictionary;
 
-            if (EntityBuilder<T>.HAS_EGID) ((INeedEGID) initializer).ID = _ID;
+            if (EntityBuilder<T>.HAS_EGID) 
+                ((INeedEGID) initializer).ID = _ID;
 
             if (dictionary.TryFindIndex(_ID.entityID, out var findElementIndex))
                 dictionary.GetDirectValue(findElementIndex) = initializer;

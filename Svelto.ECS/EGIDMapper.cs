@@ -21,7 +21,7 @@ namespace Svelto.ECS
                 return ref map.valuesArray[findIndex];
         }
         
-        public bool TryQueryEntity(uint entityID, out T value)
+        public bool TryGetEntity(uint entityID, out T value)
         {
             if (map.TryFindIndex(entityID, out var index))
             {
@@ -48,3 +48,4 @@ namespace Svelto.ECS
         }
     }
 }
+
