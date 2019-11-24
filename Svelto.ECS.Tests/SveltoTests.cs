@@ -8,7 +8,7 @@ using Assert = NUnit.Framework.Assert;
 namespace UnitTests
 {
     [TestFixture]
-    public class TestAddAndRemove
+    public class TestSveltoECS
     {
         static readonly ExclusiveGroup group1 = new ExclusiveGroup();
         static readonly ExclusiveGroup group2 = new ExclusiveGroup();

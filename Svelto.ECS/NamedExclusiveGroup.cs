@@ -21,10 +21,18 @@ namespace Svelto.ECS
 
     ///use this like:
     /// public class TriggersGroup : ExclusiveGroup<TriggersGroup> {}
-    public class ExclusiveGroup<T>:ExclusiveGroup
+    public abstract class NamedExclusiveGroup<T>:ExclusiveGroup
     {
         public static ExclusiveGroup Group = new ExclusiveGroup();
         public static string name = typeof(T).FullName;
+
+        public NamedExclusiveGroup() { }
+
+        public NamedExclusiveGroup(string recognizeAs) : base(recognizeAs)
+        {}
+
+        public NamedExclusiveGroup(ushort range) : base(range)
+        {}
     }
 
     public class ExclusiveGroup

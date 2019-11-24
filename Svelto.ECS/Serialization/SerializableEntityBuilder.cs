@@ -9,11 +9,7 @@ namespace Svelto.ECS.Serialization
     {
         public static readonly uint SIZE = UnsafeUtils.SizeOf<T>();
 
-        internal T _lastSerialisedValue; // TODO: I have to think this through
-        bool _valueSerialized;
-
-        static SerializableEntityBuilder()
-        {}
+        static SerializableEntityBuilder() { }
 
         public SerializableEntityBuilder()
         {
@@ -41,63 +37,51 @@ namespace Svelto.ECS.Serialization
         }
 
         public void Serialize(uint entityID, ITypeSafeDictionary dictionary,
-            ISerializationData serializationData, SerializationType serializationType)
+                              ISerializationData serializationData, SerializationType  serializationType)
         {
-            using (_pp.Sample("SerializeEntityStruct"))
+            ISerializer<T> serializer = _serializers[(int) serializationType];
+
+            var safeDictionary = (TypeSafeDictionary<T>) dictionary;
+            if (safeDictionary.TryFindIndex(entityID, out uint index) == false)
             {
-                ISerializer<T> serializer = _serializers[(int)serializationType];
-
-                var safeDictionary = (TypeSafeDictionary<T>) dictionary;
-                if (safeDictionary.TryFindIndex(entityID, out uint index) == false)
-                {
-                    throw new ECSException("Entity Serialization failed");
-                }
-
-                T[] values = safeDictionary.GetValuesArray(out _);
-                ref T val = ref values[index];
-
-                serializationData.dataPos = (uint) serializationData.data.Count;
-
-                serializationData.data.ExpandBy(serializer.size);
-                using (_pp.Sample("serializer.Serialize"))
-                    serializer.SerializeSafe(val, serializationData);
+                throw new ECSException("Entity Serialization failed");
             }
+
+            T[]   values = safeDictionary.GetValuesArray(out _);
+            ref T val    = ref values[index];
+
+            serializationData.dataPos = (uint) serializationData.data.Count;
+            serializationData.data.ExpandBy(serializer.size);
+
+            serializer.SerializeSafe(val, serializationData);
         }
 
         public void Deserialize(uint entityID, ITypeSafeDictionary dictionary,
-            ISerializationData serializationData, SerializationType serializationType)
+                                ISerializationData serializationData,  SerializationType  serializationType)
         {
-            using (_pp.Sample("Deserialize"))
+            ISerializer<T> serializer = _serializers[(int) serializationType];
+
+            // Handle the case when an entity struct is gone
+            var safeDictionary = (TypeSafeDictionary<T>) dictionary;
+            if (safeDictionary.TryFindIndex(entityID, out uint index) == false)
             {
-                ISerializer<T> serializer = _serializers[(int) serializationType];
-
-                // Handle the case when an entity struct is gone
-                var safeDictionary = (TypeSafeDictionary<T>) dictionary;
-                if (safeDictionary.TryFindIndex(entityID, out uint index) == false)
-                {
-                    throw new ECSException("Entity Deserialization failed");
-                }
-
-                T[] values = safeDictionary.GetValuesArray(out _);
-                ref T val = ref values[index];
-
-                using (_pp.Sample("serializer.Deserialize"))
-                    serializer.DeserializeSafe(ref val, serializationData);
+                throw new ECSException("Entity Deserialization failed");
             }
+
+            T[]   values = safeDictionary.GetValuesArray(out _);
+            ref T val    = ref values[index];
+
+            serializer.DeserializeSafe(ref val, serializationData);
         }
 
-        public void Deserialize(ISerializationData serializationData
-            , in EntityStructInitializer initializer, SerializationType serializationType)
+        public void Deserialize(ISerializationData serializationData, in EntityStructInitializer initializer,
+                                SerializationType  serializationType)
         {
-            using (_pp.Sample("Deserialize initializer"))
-            {
-                ISerializer<T> serializer = _serializers[(int) serializationType];
+            ISerializer<T> serializer = _serializers[(int) serializationType];
 
-                _lastSerialisedValue = initializer.Get<T>();
+            _lastSerialisedValue = initializer.Get<T>();
 
-                using (_pp.Sample("serializer.Deserialize"))
-                    _valueSerialized = serializer.DeserializeSafe(ref _lastSerialisedValue, serializationData);
-            }
+            _valueSerialized = serializer.DeserializeSafe(ref _lastSerialisedValue, serializationData);
         }
 
         public void Set(ref EntityStructInitializer initializer)
@@ -107,7 +91,7 @@ namespace Svelto.ECS.Serialization
         }
 
         readonly ISerializer<T>[] _serializers;
-
-        PlatformProfiler _pp = new PlatformProfiler();
+        internal T                _lastSerialisedValue; // TODO: I have to think this through
+        bool                      _valueSerialized;
     }
 }

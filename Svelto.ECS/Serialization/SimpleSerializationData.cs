@@ -27,7 +27,6 @@ namespace Svelto.ECS
         }
 
         public virtual void BeginNextEntityStruct()
-        {
-        }
+        {}
     }
 }

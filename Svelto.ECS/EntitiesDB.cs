@@ -289,7 +289,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static ReadOnlyCollectionStruct<T> RetrieveEmptyEntityViewList<T>()
         {
-            var arrayFast = FasterList<T>.DefaultList.ToArrayFast();
+            var arrayFast = FasterList<T>.DefaultEmptyList.ToArrayFast();
 
             return new ReadOnlyCollectionStruct<T>(arrayFast, 0);
         }
@@ -297,7 +297,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static T[] RetrieveEmptyEntityViewArray<T>()
         {
-            return FasterList<T>.DefaultList.ToArrayFast();
+            return FasterList<T>.DefaultEmptyList.ToArrayFast();
         }
 
         //grouped set of entity views, this is the standard way to handle entity views entity views are grouped per
