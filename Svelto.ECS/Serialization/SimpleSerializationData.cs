@@ -12,18 +12,23 @@ namespace Svelto.ECS
             data = d;
         }
 
-        public virtual void ResetWithNewData(FasterList<byte> newData)
+        public void ResetWithNewData(FasterList<byte> newData)
         {
             dataPos = 0;
 
             data = newData;
         }
 
-        public virtual void ResetToReuse()
+        public void Reuse()
         {
             dataPos = 0;
 
             data.ResetToReuse();
+        }
+        
+        public void Reset()
+        {
+            dataPos = 0;
         }
 
         public virtual void BeginNextEntityStruct()

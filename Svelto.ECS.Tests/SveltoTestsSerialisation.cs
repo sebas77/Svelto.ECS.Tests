@@ -28,9 +28,11 @@ namespace UnitTests
         {
             var init = _entityFactory.BuildEntity<SerializableEntityDescriptor>(0, NamedGroup1.Group);
             init.Init(new EntityStructSerialized() { value = 5 });
+            init.Init(new EntityStructSerialized2() { value = 4 });
             init.Init(new EntityStructPartiallySerialized() { value1 = 3 });
             init = _entityFactory.BuildEntity<SerializableEntityDescriptor>(1, NamedGroup1.Group);
             init.Init(new EntityStructSerialized() { value           = 4 });
+            init.Init(new EntityStructSerialized2() { value = 3 });
             init.Init(new EntityStructPartiallySerialized() { value1 = 2 });
             
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
@@ -45,6 +47,8 @@ namespace UnitTests
             
             _entityFunctions.RemoveGroupAndEntities(NamedGroup1.Group);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            
+            simpleSerializationData.Reset();
 
             generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData,
                                                           SerializationType.Storage);
@@ -71,9 +75,9 @@ namespace UnitTests
                 static readonly IEntityBuilder[] _entitiesToBuild = {
                         new EntityBuilder<EntityStructNotSerialized>(),    
                         new SerializableEntityBuilder<EntityStructSerialized>(),
-                        new SerializableEntityBuilder<EntityStructSerialized>
-                            ((SerializationType.Storage, new DefaultSerializer<EntityStructSerialized>()) ,
-                             (SerializationType.Network, new DefaultSerializer<EntityStructSerialized>())),
+                        new SerializableEntityBuilder<EntityStructSerialized2>
+                            ((SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>()) ,
+                             (SerializationType.Network, new DefaultSerializer<EntityStructSerialized2>())),
                         new SerializableEntityBuilder<EntityStructPartiallySerialized>
                             ((SerializationType.Storage, new PartialSerializer <EntityStructPartiallySerialized>())
                         )
@@ -110,6 +114,11 @@ namespace UnitTests
         }
 
         struct EntityStructSerialized : IEntityStruct
+        {
+            public int value;
+        }
+        
+        struct EntityStructSerialized2 : IEntityStruct
         {
             public int value;
         }
