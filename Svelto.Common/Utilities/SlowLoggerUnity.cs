@@ -17,9 +17,9 @@ namespace Svelto.Utilities
 
             _stringBuilder = new ThreadLocal<StringBuilder>(ValueFactory);
         }
-        
+
         public void Log(string txt, LogType type = LogType.Log, Exception e = null,
-                        Dictionary<string, string> data = null)
+            Dictionary<string, string> data = null)
         {
             var dataString = string.Empty;
             if (data != null)
@@ -33,17 +33,12 @@ namespace Svelto.Utilities
                 case LogType.Warning:
                     Debug.LogWarning(txt);
                     break;
-                case LogType.Error:                
+                case LogType.Error:
                 case LogType.Exception:
                     string stack;
-                    if (e != null)
-                    {
-                        txt = txt.FastConcat(e.Message);
-                        stack = ExtractFormattedStackTrace(new StackTrace(e, true));
-                    }
-                    else
-                        stack = ExtractFormattedStackTraceWithoutException(new StackTrace(3, true));
-                    
+                    txt = txt.FastConcat(e.Message);
+                    stack = ExtractFormattedStackTrace(new StackTrace(e, true));
+
                     Debug.LogError("<color=orange> ".FastConcat(txt, "</color> ", Environment.NewLine, stack)
                         .FastConcat(Environment.NewLine, dataString));
                     break;
@@ -52,14 +47,14 @@ namespace Svelto.Utilities
 
         public void OnLoggerAdded()
         {
-            projectFolder = Application.dataPath.Replace("Assets", "");    
-            
+            projectFolder = Application.dataPath.Replace("Assets", "");
+
             Application.SetStackTraceLogType(UnityEngine.LogType.Error, StackTraceLogType.None);
             Application.SetStackTraceLogType(UnityEngine.LogType.Exception, StackTraceLogType.None);
-#if !UNITY_EDITOR || PROFILER            
+#if !UNITY_EDITOR || PROFILER
             Application.SetStackTraceLogType(UnityEngine.LogType.Warning, StackTraceLogType.None);
             Application.SetStackTraceLogType(UnityEngine.LogType.Log, StackTraceLogType.None);
-#endif            
+#endif
             Console.Log("Slow Unity Logger added");
         }
 
@@ -71,13 +66,14 @@ namespace Svelto.Utilities
         string ExtractFormattedStackTrace(StackTrace stackTrace)
         {
             _stringBuilder.Value.Length = 0;
-            
+
             var frame = new StackTrace(true);
-            
+
             for (var index1 = 0; index1 < stackTrace.FrameCount; ++index1)
             {
                 FormatStack(stackTrace, index1, _stringBuilder.Value);
             }
+
             for (var index1 = 4; index1 < frame.FrameCount; ++index1)
             {
                 FormatStack(frame, index1, _stringBuilder.Value);
@@ -85,22 +81,10 @@ namespace Svelto.Utilities
 
             return _stringBuilder.ToString();
         }
-        
-        string ExtractFormattedStackTraceWithoutException(StackTrace stackTrace)
-        {
-            _stringBuilder.Value.Length = 0;
-            
-            for (var index1 = 0; index1 < stackTrace.FrameCount; ++index1)
-            {
-                FormatStack(stackTrace, index1, _stringBuilder.Value);
-            }
-
-            return _stringBuilder.ToString();
-        }
 
         void FormatStack(StackTrace stackTrace, int index1, StringBuilder stringBuilder)
         {
-            var frame  = stackTrace.GetFrame(index1);
+            var frame = stackTrace.GetFrame(index1);
             var method = frame.GetMethod();
             if (method != null)
             {
@@ -108,7 +92,7 @@ namespace Svelto.Utilities
                 if (declaringType != null)
                 {
                     var str1 = declaringType.Namespace;
-                    if (str1 != null && str1.Length != 0)
+                    if (!string.IsNullOrEmpty(str1))
                     {
                         stringBuilder.Append(str1);
                         stringBuilder.Append(".");
@@ -118,9 +102,9 @@ namespace Svelto.Utilities
                     stringBuilder.Append(":");
                     stringBuilder.Append(method.Name);
                     stringBuilder.Append("(");
-                    var index2     = 0;
+                    var index2 = 0;
                     var parameters = method.GetParameters();
-                    var flag       = true;
+                    var flag = true;
                     for (; index2 < parameters.Length; ++index2)
                     {
                         if (!flag)
@@ -148,9 +132,9 @@ namespace Svelto.Utilities
 #if UNITY_EDITOR
                         str2 = str2.Replace(@"\", "/");
                         if (!string.IsNullOrEmpty(projectFolder) && str2.StartsWith(projectFolder))
-                            
-                        str2 = str2.Substring(projectFolder.Length, str2.Length - projectFolder.Length);
-#endif                        
+
+                            str2 = str2.Substring(projectFolder.Length, str2.Length - projectFolder.Length);
+#endif
                         stringBuilder.Append(str2);
                         stringBuilder.Append(":");
                         stringBuilder.Append(frame.GetFileLineNumber().ToString());
@@ -163,9 +147,8 @@ namespace Svelto.Utilities
         }
 
         readonly ThreadLocal<StringBuilder> _stringBuilder;
-        
+
         static string projectFolder;
     }
-   
 }
 #endif

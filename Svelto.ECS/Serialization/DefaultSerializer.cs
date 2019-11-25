@@ -24,28 +24,20 @@ namespace Svelto.ECS.Serialization
 
         public bool Serialize(in T value, ISerializationData serializationData)
         {
-            using (_pp.Sample("DefaultSerializer.Serialize"))
-            {
-                DefaultSerializerUtils.CopyToByteArray(value, serializationData.data.ToArrayFast(), serializationData.dataPos);
+            DefaultSerializerUtils.CopyToByteArray(value, serializationData.data.ToArrayFast(), serializationData.dataPos);
 
-                serializationData.dataPos += SIZEOFT;
+            serializationData.dataPos += SIZEOFT;
 
-                return true;
-            }
+            return true;
         }
 
         public bool Deserialize(ref T value, ISerializationData serializationData)
         {
-            using (_pp.Sample("DefaultSerializer.Serialize"))
-            {
-                value = DefaultSerializerUtils.CopyFromByteArray<T>(serializationData.data.ToArrayFast(), serializationData.dataPos);
+            value = DefaultSerializerUtils.CopyFromByteArray<T>(serializationData.data.ToArrayFast(), serializationData.dataPos);
 
-                serializationData.dataPos += SIZEOFT;
+            serializationData.dataPos += SIZEOFT;
 
-                return true;
-            }
+            return true;
         }
-
-        PlatformProfiler _pp = new PlatformProfiler();
     }
 }

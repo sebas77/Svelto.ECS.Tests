@@ -102,7 +102,7 @@ namespace Svelto.ECS.Internal
                 throw new ECSException("Entity views count do not match in group. Entity 1: ' count: "
                     .FastConcat(countCheck)
                     .FastConcat(typeof(T1).ToString())
-                    .FastConcat("'. Entity 2: ' count: ".FastConcat(countCheck)
+                    .FastConcat("'. Entity 2: ' count: ".FastConcat(count)
                         .FastConcat(typeof(T2).ToString())
                         .FastConcat("'")));
             }
@@ -198,7 +198,7 @@ namespace Svelto.ECS.Internal
 
             return casted != null && casted.ContainsKey(entityGID.entityID);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Exists<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group) where T : struct, IEntityStruct
         {
@@ -287,17 +287,9 @@ namespace Svelto.ECS.Internal
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static ReadOnlyCollectionStruct<T> RetrieveEmptyEntityViewList<T>()
-        {
-            var arrayFast = FasterList<T>.DefaultEmptyList.ToArrayFast();
-
-            return new ReadOnlyCollectionStruct<T>(arrayFast, 0);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static T[] RetrieveEmptyEntityViewArray<T>()
         {
-            return FasterList<T>.DefaultEmptyList.ToArrayFast();
+            return EmptyList<T>.emptyArray;
         }
 
         //grouped set of entity views, this is the standard way to handle entity views entity views are grouped per
@@ -310,5 +302,10 @@ namespace Svelto.ECS.Internal
         //may change in future
         readonly FasterDictionary<RefWrapper<Type>, FasterDictionary<uint, ITypeSafeDictionary>> _groupsPerEntity;
         readonly EntitiesStream                                                                  _entityStream;
+
+        static class EmptyList<T>
+        {
+            internal static readonly T[] emptyArray = new T[0];
+        }
     }
 }

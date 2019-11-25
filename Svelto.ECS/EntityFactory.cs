@@ -72,16 +72,15 @@ namespace Svelto.ECS.Internal
 #endif
             for (var index = 0; index < count; ++index)
             {
-                var entityViewBuilder = entityBuilders[index];
-                var entityViewType = entityViewBuilder.GetEntityType();
+                var entityStructBuilder = entityBuilders[index];
+                var entityViewType = entityStructBuilder.GetEntityType();
 
-                BuildEntity(entityID, group, entityViewType, entityViewBuilder, implementors);
+                BuildEntity(entityID, group, entityViewType, entityStructBuilder, implementors);
             }
         }
 
         static void BuildEntity(EGID entityID, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> group,
-            Type entityViewType,
-            IEntityBuilder entityBuilder, IEnumerable<object> implementors)
+            Type entityViewType, IEntityBuilder entityBuilder, IEnumerable<object> implementors)
         {
             var entityViewsPoolWillBeCreated =
                 group.TryGetValue(new RefWrapper<Type>(entityViewType), out var safeDictionary) == false;

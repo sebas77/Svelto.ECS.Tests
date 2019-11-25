@@ -24,7 +24,7 @@ namespace Svelto.ECS
     public abstract class NamedExclusiveGroup<T>:ExclusiveGroup
     {
         public static ExclusiveGroup Group = new ExclusiveGroup();
-        public static string name = typeof(T).FullName;
+        public static string         name  = typeof(T).FullName;
 
         public NamedExclusiveGroup() { }
 

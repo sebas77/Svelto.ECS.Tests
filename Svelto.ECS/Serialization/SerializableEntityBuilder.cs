@@ -9,7 +9,8 @@ namespace Svelto.ECS.Serialization
     {
         public static readonly uint SIZE = UnsafeUtils.SizeOf<T>();
 
-        static SerializableEntityBuilder() { }
+        static SerializableEntityBuilder()
+        {}
 
         public SerializableEntityBuilder()
         {
@@ -37,9 +38,9 @@ namespace Svelto.ECS.Serialization
         }
 
         public void Serialize(uint entityID, ITypeSafeDictionary dictionary,
-                              ISerializationData serializationData, SerializationType  serializationType)
+            ISerializationData serializationData, SerializationType serializationType)
         {
-            ISerializer<T> serializer = _serializers[(int) serializationType];
+            ISerializer<T> serializer = _serializers[(int)serializationType];
 
             var safeDictionary = (TypeSafeDictionary<T>) dictionary;
             if (safeDictionary.TryFindIndex(entityID, out uint index) == false)
@@ -47,17 +48,17 @@ namespace Svelto.ECS.Serialization
                 throw new ECSException("Entity Serialization failed");
             }
 
-            T[]   values = safeDictionary.GetValuesArray(out _);
-            ref T val    = ref values[index];
+            T[] values = safeDictionary.GetValuesArray(out _);
+            ref T val = ref values[index];
 
             serializationData.dataPos = (uint) serializationData.data.Count;
-            serializationData.data.ExpandBy(serializer.size);
 
+            serializationData.data.ExpandBy(serializer.size);
             serializer.SerializeSafe(val, serializationData);
         }
 
         public void Deserialize(uint entityID, ITypeSafeDictionary dictionary,
-                                ISerializationData serializationData,  SerializationType  serializationType)
+            ISerializationData serializationData, SerializationType serializationType)
         {
             ISerializer<T> serializer = _serializers[(int) serializationType];
 
@@ -68,14 +69,14 @@ namespace Svelto.ECS.Serialization
                 throw new ECSException("Entity Deserialization failed");
             }
 
-            T[]   values = safeDictionary.GetValuesArray(out _);
-            ref T val    = ref values[index];
+            T[] values = safeDictionary.GetValuesArray(out _);
+            ref T val = ref values[index];
 
             serializer.DeserializeSafe(ref val, serializationData);
         }
 
-        public void Deserialize(ISerializationData serializationData, in EntityStructInitializer initializer,
-                                SerializationType  serializationType)
+        public void Deserialize(ISerializationData serializationData
+            , in EntityStructInitializer initializer, SerializationType serializationType)
         {
             ISerializer<T> serializer = _serializers[(int) serializationType];
 

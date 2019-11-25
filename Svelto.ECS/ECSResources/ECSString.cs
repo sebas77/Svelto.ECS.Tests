@@ -5,11 +5,11 @@ namespace Svelto.ECS.Experimental
     [Serialization.DoNotSerialize]
     public struct ECSString:IEquatable<ECSString>
     {
-        internal uint id;
+        uint id;
 
-        ECSString(uint toEcs)
+        public ECSString(string newText)
         {
-            id = toEcs;
+            id = ResourcesECSDB<string>.ToECS(newText);
         }
 
         public static implicit operator string(ECSString ecsString)
@@ -17,9 +17,12 @@ namespace Svelto.ECS.Experimental
             return ResourcesECSDB<string>.FromECS(ecsString.id);
         }
         
-        public static implicit operator ECSString(string text)
+        public void Set(string newText)
         {
-            return new ECSString(ResourcesECSDB<string>.ToECS(text));
+            if (id != 0)
+                ResourcesECSDB<string>.resources(id) = newText;
+            else
+                id = ResourcesECSDB<string>.ToECS(newText);
         }
 
         public bool Equals(ECSString other)

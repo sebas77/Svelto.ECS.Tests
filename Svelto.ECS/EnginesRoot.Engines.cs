@@ -51,6 +51,11 @@ namespace Svelto.ECS
             _scheduler = entityViewScheduler;
             _scheduler.onTick = new EntitiesSubmitter(this);
         }
+        
+        public EnginesRoot(IEntitySubmissionScheduler entityViewScheduler, bool isDeserializationOnly):this(entityViewScheduler)
+        {
+            _isDeserializationOnly = isDeserializationOnly;
+        }
 
         public void AddEngine(IEngine engine)
         {

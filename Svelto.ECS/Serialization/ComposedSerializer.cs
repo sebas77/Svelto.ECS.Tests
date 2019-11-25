@@ -1,3 +1,5 @@
+using System;
+
 namespace Svelto.ECS.Serialization
 {
     public class ComposedSerializer<T, X, Y> : ISerializer<T>
@@ -21,7 +23,7 @@ namespace Svelto.ECS.Serialization
                     return true;
             }
 
-            return false;
+            throw new Exception($"ComposedSerializer for {typeof(T)} did not serialize any data!");
         }
 
         public bool Deserialize(ref T value, ISerializationData serializationData)
@@ -32,7 +34,7 @@ namespace Svelto.ECS.Serialization
                     return true;
             }
 
-            return false;
+            throw new Exception($"ComposedSerializer for {typeof(T)} did not deserialize any data!");
         }
 
         public uint size => 0;

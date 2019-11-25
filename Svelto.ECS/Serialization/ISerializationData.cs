@@ -7,7 +7,7 @@ namespace Svelto.ECS
         uint dataPos { get; set; }
         FasterList<byte> data { get; }
 
-        void Reuse();
+        void ReuseAsNew();
         void Reset();
         void BeginNextEntityStruct();
     }

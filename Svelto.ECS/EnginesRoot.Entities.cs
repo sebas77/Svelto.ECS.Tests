@@ -22,15 +22,8 @@ namespace Svelto.ECS
                 {
                     foreach (var entityList in groups.Value)
                     {
-                        try
-                        {
                             entityList.Value.RemoveEntitiesFromEngines(_reactiveEnginesAddRemove,
                                 profiler, new ExclusiveGroup.ExclusiveGroupStruct(groups.Key));
-                        }
-                        catch (Exception e)
-                        {
-                            Console.LogException(e);
-                        }
                     }
                 }
 
@@ -38,14 +31,7 @@ namespace Svelto.ECS
                 _groupsPerEntity.Clear();
 
                 foreach (var engine in _disposableEngines)
-                    try
-                    {
                         engine.Dispose();
-                    }
-                    catch (Exception e)
-                    {
-                        Console.LogException(e);
-                    }
 
                 _disposableEngines.Clear();
                 _enginesSet.Clear();
@@ -265,7 +251,6 @@ namespace Svelto.ECS
         }
 
         /// <summary>
-        /// Todo: I probably don't want to remove the group, but I need to understand what to do with empty groups
         /// Todo: I should keep the group, but I need to mark the group as deleted for the Exist function to work
         /// </summary>
         /// <param name="groupID"></param>
@@ -298,11 +283,6 @@ namespace Svelto.ECS
         {
             return _entitiesStream.GenerateConsumer<T>(group, name, capacity);
         }
-
-        const string INVALID_DYNAMIC_DESCRIPTOR_ERROR =
-            "Found an entity requesting an invalid dynamic descriptor, this " +
-            "can happen only if you are building different entities with the " +
-            "same ID in the same group! The operation will continue using" + "the base descriptor only ";
 
         //one datastructure rule them all:
         //split by group

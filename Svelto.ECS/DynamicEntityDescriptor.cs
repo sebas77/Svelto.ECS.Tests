@@ -120,6 +120,7 @@ namespace Svelto.ECS
             return index;
         }
 
+
         public IEntityBuilder[] entitiesToBuild => _entitiesToBuild;
 
         IEntityBuilder[] _entitiesToBuild;

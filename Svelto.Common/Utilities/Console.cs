@@ -87,33 +87,23 @@ namespace Svelto
             LogException(String.Empty, e, extraData);
         }
 
-        public static void LogException(string message, Exception e, Dictionary<string, string> extraData = null)
+        public static void LogException(string message, Exception exception, Dictionary<string, string> extraData = null)
         {
             if (extraData == null)
                 extraData = new Dictionary<string, string>();
 
             lock (_stringBuilder)
             {
-                int count = 0;
-                while (e.InnerException != null)
+                Exception tracingE = exception;
+                while (tracingE.InnerException != null)
                 {
-                    _stringBuilder.Length = 0;
+                    tracingE = tracingE.InnerException;
 
-                    extraData["OuterException".FastConcat(count)] = _stringBuilder.Append(e.GetType())
-                        .Append("-<color=orange>")
-                        .Append(e.Message).Append("</color>").ToString();
-
-                    _stringBuilder.Length = 0;
-
-                    extraData["OuterStackTrace".FastConcat(count)] = _stringBuilder.Append(e.StackTrace).ToString();
-
-                    e = e.InnerException;
-
-                    count++;
+                    Log(message, LogType.Exception, tracingE, extraData);
                 }
             }
 
-            Log(message, LogType.Exception, e, extraData);
+            throw exception;
         }
 
         public static void LogWarning(string txt)

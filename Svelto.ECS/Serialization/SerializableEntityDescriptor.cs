@@ -54,7 +54,7 @@ namespace Svelto.ECS.Serialization
             }
 
             /////
-            _entitiesToSerialize = new FasterList<ISerializableEntityBuilder>();
+            var entitiesToSerialize = new FasterList<ISerializableEntityBuilder>();
             _entitiesToSerializeMap = new FasterDictionary<RefWrapper<Type>, ISerializableEntityBuilder>();
             foreach (IEntityBuilder e in defaultEntities)
             {
@@ -62,9 +62,11 @@ namespace Svelto.ECS.Serialization
                 {
                     var entityType = serializableEntityBuilder.GetEntityType();
                     _entitiesToSerializeMap[new RefWrapper<Type>(entityType)] = serializableEntityBuilder;
-                    _entitiesToSerialize.Add(serializableEntityBuilder);
+                    entitiesToSerialize.Add(serializableEntityBuilder);
                 }
             }
+            
+            _entitiesToSerialize = entitiesToSerialize.ToArray();
         }
 
         static (int indexSerial, int indexDynamic) SetupSpecialEntityStruct(IEntityBuilder[] defaultEntities,
@@ -111,13 +113,13 @@ namespace Svelto.ECS.Serialization
             }
         }
 
-        public IEntityBuilder[] entitiesToBuild => _entitiesToBuild;
-        public uint hash => _hash;
-        public FasterReadOnlyList<ISerializableEntityBuilder> entitiesToSerialize => new FasterReadOnlyList<ISerializableEntityBuilder>(_entitiesToSerialize);
+        public IEntityBuilder[]             entitiesToBuild     => _entitiesToBuild;
+        public uint                         hash                => _hash;
+        public ISerializableEntityBuilder[] entitiesToSerialize => _entitiesToSerialize;
 
         static readonly IEntityBuilder[]                                               _entitiesToBuild;
         static readonly FasterDictionary<RefWrapper<Type>, ISerializableEntityBuilder> _entitiesToSerializeMap;
-        static readonly FasterList<ISerializableEntityBuilder>                         _entitiesToSerialize;
+        static readonly ISerializableEntityBuilder[]                                   _entitiesToSerialize;
 
         static readonly uint _hash;
         static readonly Type _serializableStructType = typeof(SerializableEntityStruct);

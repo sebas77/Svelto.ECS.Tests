@@ -2,7 +2,7 @@ using System;
 
 namespace Svelto.ECS
 {
-    public class DispatchOnSet<T> where T:struct
+    public class DispatchOnSet<T>
     {
         public DispatchOnSet(EGID senderID)
         {      
@@ -15,7 +15,7 @@ namespace Svelto.ECS
             {
                 _value = value;
 
-                if(_paused == false)
+                if (_paused == false)
                     _subscribers(_senderID, value);
             }
         }

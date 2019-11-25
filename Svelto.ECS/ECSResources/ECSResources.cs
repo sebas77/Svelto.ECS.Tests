@@ -11,7 +11,12 @@ namespace Svelto.ECS.Experimental
     
     static class ResourcesECSDB<T>
     {
-        internal static readonly FasterList<T> _resources = new FasterList<T>();
+        static readonly FasterList<T> _resources = new FasterList<T>();
+
+        internal static ref T resources(uint id)
+        {
+            return ref _resources[(int) id - 1];
+        }
 
         internal static uint ToECS(T resource)
         {
@@ -34,17 +39,9 @@ namespace Svelto.ECS.Experimental
         public static void Set<T>(ref this ECSResources<T> resource, T newText)
         {
             if (resource.id != 0)
-                ResourcesECSDB<T>._resources[(int) resource.id] = newText;
+                ResourcesECSDB<T>.resources(resource.id) = newText;
             else
                 resource.id = ResourcesECSDB<T>.ToECS(newText);
-        }
-        
-        public static void Set(ref this ECSString resource, string newText)
-        {
-            if (resource.id != 0)
-                ResourcesECSDB<string>._resources[(int) resource.id] = newText;
-            else
-                resource.id = ResourcesECSDB<string>.ToECS(newText);
         }
     }
 }

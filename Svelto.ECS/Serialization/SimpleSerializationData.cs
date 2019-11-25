@@ -19,7 +19,7 @@ namespace Svelto.ECS
             data = newData;
         }
 
-        public void Reuse()
+        public void ReuseAsNew()
         {
             dataPos = 0;
 
@@ -31,7 +31,7 @@ namespace Svelto.ECS
             dataPos = 0;
         }
 
-        public virtual void BeginNextEntityStruct()
+        public void BeginNextEntityStruct()
         {}
     }
 }

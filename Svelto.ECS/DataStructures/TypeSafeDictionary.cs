@@ -200,7 +200,7 @@ namespace Svelto.ECS.Internal
                     catch (Exception e)
                     {
                         throw new ECSException(
-                            "Code crashed inside Add callback ".FastConcat(typeof(TValue).ToString()), e);
+                            "Code crashed inside MovedTo callback ".FastConcat(typeof(TValue).ToString()), e);
                     }
             }
         }

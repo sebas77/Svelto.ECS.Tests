@@ -1,4 +1,5 @@
 ﻿using System;
+using Svelto.Common;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Serialization;
 
@@ -15,26 +16,28 @@ namespace Svelto.ECS
 
     public partial class EnginesRoot
     {
+        readonly bool _isDeserializationOnly;
+
         sealed class EntitySerialization : IEntitySerialization
         {
             public void SerializeEntity(EGID egid, ISerializationData serializationData,
-                                        SerializationType serializationType)
+                SerializationType serializationType)
             {
                 var entitiesDb = _enginesRoot._entitiesDB;
 
                 //needs to retrieve the meta data associated with the entity
                 ref var serializableEntityStruct = ref entitiesDb.QueryEntity<SerializableEntityStruct>(egid);
-                uint    descriptorHash           = serializableEntityStruct.descriptorHash;
+                uint descriptorHash = serializableEntityStruct.descriptorHash;
 
                 SerializationDescriptorMap serializationDescriptorMap = _enginesRoot.serializationDescriptorMap;
-                var entityDescriptor =
-                    serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
+                var entityDescriptor = serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
                 var entityStructsToSerialise = entityDescriptor.entitiesToSerialize;
 
-                var header = new SerializableEntityHeader(descriptorHash, egid, (byte) entityStructsToSerialise.Count);
+                var header =
+                    new SerializableEntityHeader(descriptorHash, egid, (byte) entityStructsToSerialise.Length);
                 header.Copy(serializationData);
 
-                for (int index = 0; index < entityStructsToSerialise.Count; index++)
+                for (int index = 0; index < entityStructsToSerialise.Length; index++)
                 {
                     var entityBuilder = entityStructsToSerialise[index];
 
@@ -43,8 +46,8 @@ namespace Svelto.ECS
                 }
             }
 
-            public EntityStructInitializer DeserializeNewEntity(EGID egid,
-                    ISerializationData serializationData, SerializationType  serializationType)
+            public EntityStructInitializer DeserializeNewEntity(EGID egid, ISerializationData serializationData,
+                SerializationType serializationType)
             {
                 //todo: SerializableEntityHeader may be needed to be customizable
                 var serializableEntityHeader = new SerializableEntityHeader(serializationData);
@@ -57,7 +60,10 @@ namespace Svelto.ECS
                 //default factory
                 if (factory == null)
                 {
-                    var initializer = _enginesRoot.BuildEntity(egid, entityDescriptor.entitiesToBuild);
+                    var initializer = _enginesRoot.BuildEntity(egid,
+                        _enginesRoot._isDeserializationOnly
+                            ? entityDescriptor.entitiesToSerialize
+                            : entityDescriptor.entitiesToBuild);
 
                     DeserializeEntityStructs(serializationData, entityDescriptor, initializer, serializationType);
 
@@ -68,7 +74,7 @@ namespace Svelto.ECS
 
                 //custom factory
                 return factory.BuildDeserializedEntity(egid, serializationData, entityDescriptor, serializationType,
-                                                       this);
+                    this);
             }
 
             public void DeserializeEntity(ISerializationData serializationData, SerializationType serializationType)
@@ -81,7 +87,7 @@ namespace Svelto.ECS
             }
 
             public void DeserializeEntity(EGID egid, ISerializationData serializationData,
-                                          SerializationType serializationType)
+                SerializationType serializationType)
             {
                 var serializableEntityHeader = new SerializableEntityHeader(serializationData);
 
@@ -89,13 +95,11 @@ namespace Svelto.ECS
             }
 
             public void DeserializeEntityStructs(ISerializationData serializationData,
-                    ISerializableEntityDescriptor entityDescriptor, in EntityStructInitializer    initializer,
-                    SerializationType serializationType)
+                ISerializableEntityDescriptor entityDescriptor,
+                in EntityStructInitializer initializer, SerializationType serializationType)
             {
-                for (int index = 0; index < entityDescriptor.entitiesToSerialize.Count; ++index)
+                foreach (var serializableEntityBuilder in entityDescriptor.entitiesToSerialize)
                 {
-                    var serializableEntityBuilder = entityDescriptor.entitiesToSerialize[index];
-
                     serializationData.BeginNextEntityStruct();
                     serializableEntityBuilder.Deserialize(serializationData, initializer, serializationType);
                 }
@@ -103,17 +107,18 @@ namespace Svelto.ECS
 
             public void DeserializeEntityToSwap(EGID localEgid, EGID toEgid)
             {
-                EntitiesDB entitiesDB = _enginesRoot._entitiesDB;
-                ref var    serializableEntityStruct = ref entitiesDB.QueryEntity<SerializableEntityStruct>(localEgid);
+                EntitiesDB entitiesDb = _enginesRoot._entitiesDB;
+                ref var serializableEntityStruct = ref entitiesDb.QueryEntity<SerializableEntityStruct>(localEgid);
 
                 SerializationDescriptorMap serializationDescriptorMap = _enginesRoot.serializationDescriptorMap;
-                uint descriptorHash  = serializableEntityStruct.descriptorHash;
-                var entityDescriptor =
-                    serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
+                uint descriptorHash = serializableEntityStruct.descriptorHash;
+                var entityDescriptor = serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
 
-                var entitySubmitOperation =
-                    new EntitySubmitOperation(EntitySubmitOperationType.Swap, localEgid, toEgid,
-                                              entityDescriptor.entitiesToBuild);
+                var entitySubmitOperation = new EntitySubmitOperation(
+                    EntitySubmitOperationType.Swap,
+                    localEgid,
+                    toEgid,
+                    entityDescriptor.entitiesToBuild);
 
                 _enginesRoot.CheckRemoveEntityID(localEgid);
                 _enginesRoot.CheckAddEntityID(toEgid);
@@ -123,19 +128,20 @@ namespace Svelto.ECS
 
             public void DeserializeEntityToDelete(EGID egid)
             {
-                EntitiesDB entitiesDB               = _enginesRoot._entitiesDB;
-                ref var    serializableEntityStruct = ref entitiesDB.QueryEntity<SerializableEntityStruct>(egid);
-                uint       descriptorHash           = serializableEntityStruct.descriptorHash;
+                EntitiesDB entitiesDB = _enginesRoot._entitiesDB;
+                ref var serializableEntityStruct = ref entitiesDB.QueryEntity<SerializableEntityStruct>(egid);
+                uint descriptorHash = serializableEntityStruct.descriptorHash;
 
                 SerializationDescriptorMap serializationDescriptorMap = _enginesRoot.serializationDescriptorMap;
-                var entityDescriptor =
-                    serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
+                var entityDescriptor = serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
 
                 _enginesRoot.CheckRemoveEntityID(egid);
 
-                var entitySubmitOperation =
-                    new EntitySubmitOperation(EntitySubmitOperationType.Remove, egid, egid,
-                                              entityDescriptor.entitiesToBuild);
+                var entitySubmitOperation = new EntitySubmitOperation(
+                    EntitySubmitOperationType.Remove,
+                    egid,
+                    egid,
+                    entityDescriptor.entitiesToBuild);
 
                 _enginesRoot.QueueEntitySubmitOperation(entitySubmitOperation);
             }
@@ -147,14 +153,18 @@ namespace Svelto.ECS
                 serializationDescriptorMap.RegisterSerializationFactory<T>(deserializationFactory);
             }
 
-            internal EntitySerialization(EnginesRoot enginesRoot) { _enginesRoot = enginesRoot; }
+            internal EntitySerialization(EnginesRoot enginesRoot)
+            {
+                _enginesRoot = enginesRoot;
+            }
 
             void SerializeEntityStruct(EGID entityGID, ISerializableEntityBuilder entityBuilder,
-                                       ISerializationData serializationData, SerializationType  serializationType)
+                ISerializationData serializationData, SerializationType serializationType)
             {
-                uint groupId    = entityGID.groupID;
+                uint groupId = entityGID.groupID;
                 Type entityType = entityBuilder.GetEntityType();
-                if (!_enginesRoot._entitiesDB.UnsafeQueryEntityDictionary(groupId, entityType, out var safeDictionary))
+                if (!_enginesRoot._entitiesDB.UnsafeQueryEntityDictionary(groupId, entityType,
+                    out var safeDictionary))
                 {
                     throw new Exception("Entity Serialization failed");
                 }
@@ -166,24 +176,25 @@ namespace Svelto.ECS
                 SerializableEntityHeader serializableEntityHeader, SerializationType serializationType)
             {
                 SerializationDescriptorMap descriptorMap = _enginesRoot.serializationDescriptorMap;
-                var entityDescriptor =
-                    descriptorMap.GetDescriptorFromHash(serializableEntityHeader.descriptorHash);
+                var entityDescriptor = descriptorMap.GetDescriptorFromHash(serializableEntityHeader.descriptorHash);
 
                 foreach (var serializableEntityBuilder in entityDescriptor.entitiesToSerialize)
                 {
                     _enginesRoot._entitiesDB.UnsafeQueryEntityDictionary(egid.groupID,
-                                                                         serializableEntityBuilder.GetEntityType(),
-                                                                         out var safeDictionary);
+                        serializableEntityBuilder.GetEntityType(), out var safeDictionary);
 
                     serializationData.BeginNextEntityStruct();
                     serializableEntityBuilder.Deserialize(egid.entityID, safeDictionary, serializationData,
-                                                          serializationType);
+                        serializationType);
                 }
             }
 
             readonly EnginesRoot _enginesRoot;
         }
 
-        public IEntitySerialization GenerateEntitySerializer() { return new EntitySerialization(this); }
+        public IEntitySerialization GenerateEntitySerializer()
+        {
+            return new EntitySerialization(this);
+        }
     }
 }
