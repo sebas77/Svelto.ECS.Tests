@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
-using Svelto.Utilities;
 
 namespace Svelto.ECS.Internal
 {
@@ -41,28 +37,6 @@ namespace Svelto.ECS.Internal
         static readonly string _typeName = _type.Name;
         static readonly bool   _hasEgid  = typeof(INeedEGID).IsAssignableFrom(_type);
 
-        internal delegate void ActionCast(ref TValue target, EGID egid);
-        public static readonly          ActionCast Setter    = MakeSetter();
-        static ActionCast MakeSetter()
-        {
-            if (_hasEgid)
-            {
-                Type myTypeA = typeof(TValue);
-                PropertyInfo myFieldInfo = myTypeA.GetProperty("ID");
-
-                ParameterExpression targetExp = Expression.Parameter(typeof(TValue).MakeByRefType(), "target");
-                ParameterExpression valueExp = Expression.Parameter(typeof(EGID), "value");
-                MemberExpression fieldExp = Expression.Property(targetExp, myFieldInfo);
-                BinaryExpression assignExp = Expression.Assign(fieldExp, valueExp);
-
-                var setter = Expression.Lambda<ActionCast>(assignExp, targetExp, valueExp).Compile();
-
-                return setter;
-            }
-
-            return null;
-        }
-
         public TypeSafeDictionary(uint size) : base(size) {}
         public TypeSafeDictionary() {}
 
@@ -74,7 +48,7 @@ namespace Svelto.ECS.Internal
             {
                 try
                 {
-                    if (_hasEgid) Setter(ref tuple.Value, new EGID(tuple.Key, groupId));
+                    if (_hasEgid) SetEGIDWithoutBoxing<TValue>.SetIDWithoutBoxing(ref tuple.Value, new EGID(tuple.Key, groupId));
 
                     Add(tuple.Key, tuple.Value);
                 }
@@ -126,7 +100,7 @@ namespace Svelto.ECS.Internal
                 var toGroupCasted = toGroup as TypeSafeDictionary<TValue>;
                 ref var entity = ref valuesArray[valueIndex];
 
-                if (_hasEgid) Setter(ref entity, toEntityID);
+                if (_hasEgid) SetEGIDWithoutBoxing<TValue>.SetIDWithoutBoxing(ref entity, toEntityID);
 
                 toGroupCasted.Add(fromEntityGid.entityID, entity);
             }
@@ -147,7 +121,7 @@ namespace Svelto.ECS.Internal
                 var toGroupCasted = toGroup as TypeSafeDictionary<TValue>;
                 var previousGroup = fromEntityGid.groupID;
 
-                if (_hasEgid) Setter(ref entity, toEntityID.Value);
+                if (_hasEgid) SetEGIDWithoutBoxing<TValue>.SetIDWithoutBoxing(ref entity, toEntityID.Value);
 
                 var index = toGroupCasted.GetIndex(toEntityID.Value.entityID);
 

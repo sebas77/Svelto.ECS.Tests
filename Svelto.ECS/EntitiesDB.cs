@@ -233,16 +233,6 @@ namespace Svelto.ECS.Internal
             _entityStream.PublishEntity(ref QueryEntity<T>(egid), egid);
         }
 
-        public EntityGroup QueryGroup(ExclusiveGroup.ExclusiveGroupStruct groupID)
-        {
-            if (_groupEntityViewsDB.TryGetValue(groupID, out var entitiesInGroupPerType) == false)
-            {
-                throw new Exception("group not found");
-            }
-
-            return new EntityGroup(entitiesInGroupPerType, groupID);
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         T[] QueryEntitiesAndIndexInternal<T>(EGID entityGID, out uint index) where T : struct, IEntityStruct
         {

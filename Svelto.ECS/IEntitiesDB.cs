@@ -189,13 +189,5 @@ namespace Svelto.ECS
         /// <param name="egid"></param>
         /// <typeparam name="T"></typeparam>
         void PublishEntityChange<T>(EGID egid) where T : unmanaged, IEntityStruct;
-
-        /// <summary>
-        /// Pre query a group to be used multiple times
-        /// </summary>
-        /// <param name="groupID"></param>
-        /// <param name="group"></param>
-        /// <returns></returns>
-        EntityGroup QueryGroup(ExclusiveGroup.ExclusiveGroupStruct groupID);
     }
 }

@@ -127,7 +127,7 @@ namespace Svelto
 #endif
         public static void LogDebug(string txt)
         {
-            Log("<color=orange> ".FastConcat(txt, "</color>"));
+            Log("<i><color=teal> ".FastConcat(txt, "</color></i>"), LogType.Log);
         }
 
 #if DISABLE_DEBUG
@@ -135,7 +135,7 @@ namespace Svelto
 #endif
         public static void LogDebug<T>(string txt, T extradebug)
         {
-            Log("<color=orange> ".FastConcat(txt, " - ", extradebug.ToString(), "</color>"));
+            Log("<i><color=teal> ".FastConcat(txt, " - ", extradebug.ToString(), "</color></i>"), LogType.Log);
         }
 
         /// <summary>

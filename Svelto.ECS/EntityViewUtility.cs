@@ -6,7 +6,6 @@ using Svelto.Utilities;
 
 namespace Svelto.ECS
 {
-
 #if DEBUG && !PROFILER
     struct ECSTuple<T1, T2>
     {
@@ -20,7 +19,6 @@ namespace Svelto.ECS
         }
     }
 #endif
-
 
     static class EntityViewUtility
     {
@@ -115,13 +113,13 @@ namespace Svelto.ECS
         }
 
         const string DUPLICATE_IMPLEMENTOR_ERROR =
-            "<color=orange>Svelto.ECS</color> the same component is implemented with more than one implementor. This is " +
+            "<color=teal>Svelto.ECS</color> the same component is implemented with more than one implementor. This is " +
             "considered an error and MUST be fixed. ";
 
         const string NULL_IMPLEMENTOR_ERROR =
-            "<color=orange>Svelto.ECS</color> Null implementor, please be careful about the implementors passed to avoid " +
+            "<color=teal>Svelto.ECS</color> Null implementor, please be careful about the implementors passed to avoid " +
             "performance loss ";
 
-        const string NOT_FOUND_EXCEPTION = "<color=orange>Svelto.ECS</color> Implementor not found for an EntityView. ";
+        const string NOT_FOUND_EXCEPTION = "<color=teal>Svelto.ECS</color> Implementor not found for an EntityView. ";
     }
 }
