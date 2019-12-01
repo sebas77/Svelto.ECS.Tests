@@ -116,6 +116,42 @@ namespace UnitTests
         }
         
         [TestCase]
+        public void TestSerializingWithEntityStructsWitVersioning()
+        {
+            var init = _entityFactory.BuildEntity<SerializableEntityDescriptorV0>(0, NamedGroup1.Group);
+            init.Init(new EntityStructSerialized2() { value = 4 });
+            init.Init(new EntityStructPartiallySerialized() { value1 = 3 });
+            
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            FasterList<byte> bytes = new FasterList<byte>();
+            var generateEntitySerializer = _enginesRoot.GenerateEntitySerializer();
+            var simpleSerializationData = new SimpleSerializationData(bytes);
+            generateEntitySerializer.SerializeEntity(new EGID(0, NamedGroup1.Group), 
+                                                     simpleSerializationData, SerializationType.Storage);
+
+            _enginesRoot.Dispose();
+            var newEnginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
+            _neverDoThisIsJustForTheTest = new TestEngine();
+            
+            newEnginesRoot.AddEngine(_neverDoThisIsJustForTheTest);
+            
+            simpleSerializationData.Reset();
+            generateEntitySerializer = newEnginesRoot.GenerateEntitySerializer();
+            
+            //needed for the versioning to work
+            generateEntitySerializer.RegisterSerializationFactory<SerializableEntityDescriptorV0>(new DefaultVersioningFactory<SerializableEntityDescriptorV1>(newEnginesRoot.GenerateEntityFactory()));
+
+            generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData,
+                                                          SerializationType.Storage);
+            
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(0, NamedGroup1.Group).value, Is.EqualTo(4));
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructPartiallySerialized>(0, NamedGroup1.Group).value1, Is.EqualTo(3));
+        }
+        
+        [TestCase]
         public void TestSerializingWithEntityViewStructsAndFactories()
         {
             var init = _entityFactory.BuildEntity<SerializableEntityDescriptorWithViews>(0, NamedGroup1.Group, new []{new Implementor(1)});
@@ -174,6 +210,45 @@ namespace UnitTests
                              (SerializationType.Network, new DefaultSerializer<EntityStructSerialized2>())),
                         new SerializableEntityBuilder<EntityStructPartiallySerialized>
                             ((SerializationType.Storage, new PartialSerializer <EntityStructPartiallySerialized>())
+                        )
+                };
+            }
+        }
+        
+        class SerializableEntityDescriptorV0 : SerializableEntityDescriptor<
+            SerializableEntityDescriptorV0.DefaultPatternForEntityDescriptor>
+        {
+            [HashName("DefaultPatternForEntityDescriptorV0")]
+            internal class DefaultPatternForEntityDescriptor : IEntityDescriptor
+            {
+                public IEntityBuilder[] entitiesToBuild => _entitiesToBuild;
+                
+                static readonly IEntityBuilder[] _entitiesToBuild = {
+                    new EntityBuilder<EntityStructNotSerialized>(),    
+                    new SerializableEntityBuilder<EntityStructSerialized2>
+                        ((SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>())),
+                    new SerializableEntityBuilder<EntityStructPartiallySerialized>
+                        ((SerializationType.Storage, new PartialSerializer <EntityStructPartiallySerialized>())
+                        )
+                };
+            }
+        }
+        
+        class SerializableEntityDescriptorV1 : SerializableEntityDescriptor<
+            SerializableEntityDescriptorV1.DefaultPatternForEntityDescriptor>
+        {
+            [HashName("DefaultPatternForEntityDescriptorV1")]
+            internal class DefaultPatternForEntityDescriptor : IEntityDescriptor
+            {
+                public IEntityBuilder[] entitiesToBuild => _entitiesToBuild;
+                
+                static readonly IEntityBuilder[] _entitiesToBuild = {
+                    new EntityBuilder<EntityStructNotSerialized>(),    
+                    new SerializableEntityBuilder<EntityStructSerialized>(),
+                    new SerializableEntityBuilder<EntityStructSerialized2>
+                        ((SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>())),
+                    new SerializableEntityBuilder<EntityStructPartiallySerialized>
+                        ((SerializationType.Storage, new PartialSerializer <EntityStructPartiallySerialized>())
                         )
                 };
             }
@@ -277,7 +352,7 @@ namespace UnitTests
                                                                    SerializationType             serializationType,
                                                                    IEntitySerialization          entitySerialization)
             {
-                var initializer = _factory.BuildEntity<SerializableEntityDescriptorWithViews>(new EGID(0, NamedGroup1.Group), new []{new Implementor(1)});
+                var initializer = _factory.BuildEntity<SerializableEntityDescriptorWithViews>(egid, new []{new Implementor(1)});
                 
                 entitySerialization.DeserializeEntityStructs(serializationData, entityDescriptor, initializer, SerializationType.Storage);
 
