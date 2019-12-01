@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using Svelto.DataStructures;
 using Svelto.ECS;
+using Svelto.ECS.Hybrid;
 using Svelto.ECS.Serialization;
 
 namespace UnitTests
@@ -24,7 +25,7 @@ namespace UnitTests
         }
 
         [TestCase]
-        public void TestSerializingToByteArray()
+        public void TestSerializingToByteArrayRemoveGroup()
         {
             var init = _entityFactory.BuildEntity<SerializableEntityDescriptor>(0, NamedGroup1.Group);
             init.Init(new EntityStructSerialized() { value = 5 });
@@ -56,6 +57,96 @@ namespace UnitTests
                                                           SerializationType.Storage);
             
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(0, NamedGroup1.Group).value, Is.EqualTo(5));
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(0, NamedGroup1.Group).value, Is.EqualTo(4));
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructPartiallySerialized>(0, NamedGroup1.Group).value1, Is.EqualTo(3));
+            
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(1, NamedGroup1.Group).value, Is.EqualTo(4));
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(1, NamedGroup1.Group).value, Is.EqualTo(3));
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructPartiallySerialized>(1, NamedGroup1.Group).value1, Is.EqualTo(2));
+        }
+        
+        [TestCase]
+        public void TestSerializingToByteArrayNewEnginesRoot()
+        {
+            var init = _entityFactory.BuildEntity<SerializableEntityDescriptor>(0, NamedGroup1.Group);
+            init.Init(new EntityStructSerialized() { value = 5 });
+            init.Init(new EntityStructSerialized2() { value = 4 });
+            init.Init(new EntityStructPartiallySerialized() { value1 = 3 });
+            init = _entityFactory.BuildEntity<SerializableEntityDescriptor>(1, NamedGroup1.Group);
+            init.Init(new EntityStructSerialized() { value           = 4 });
+            init.Init(new EntityStructSerialized2() { value = 3 });
+            init.Init(new EntityStructPartiallySerialized() { value1 = 2 });
+            
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            FasterList<byte> bytes = new FasterList<byte>();
+            var generateEntitySerializer = _enginesRoot.GenerateEntitySerializer();
+            var simpleSerializationData = new SimpleSerializationData(bytes);
+            generateEntitySerializer.SerializeEntity(new EGID(0, NamedGroup1.Group), 
+                                                     simpleSerializationData, SerializationType.Storage);
+            generateEntitySerializer.SerializeEntity(new EGID(1, NamedGroup1.Group), 
+                                                     simpleSerializationData, SerializationType.Storage);
+
+            _enginesRoot.Dispose();
+            var newEnginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
+            
+            newEnginesRoot.AddEngine(_neverDoThisIsJustForTheTest);
+            
+            simpleSerializationData.Reset();
+            generateEntitySerializer = newEnginesRoot.GenerateEntitySerializer();
+
+            generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData,
+                                                          SerializationType.Storage);
+            generateEntitySerializer.DeserializeNewEntity(new EGID(1, NamedGroup1.Group), simpleSerializationData,
+                                                          SerializationType.Storage);
+            
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(0, NamedGroup1.Group).value, Is.EqualTo(5));
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(0, NamedGroup1.Group).value, Is.EqualTo(4));
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructPartiallySerialized>(0, NamedGroup1.Group).value1, Is.EqualTo(3));
+            
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(1, NamedGroup1.Group).value, Is.EqualTo(4));
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(1, NamedGroup1.Group).value, Is.EqualTo(3));
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructPartiallySerialized>(1, NamedGroup1.Group).value1, Is.EqualTo(2));
+        }
+        
+        [TestCase]
+        public void TestSerializingWithEntityViewStructsAndFactories()
+        {
+            var init = _entityFactory.BuildEntity<SerializableEntityDescriptorWithViews>(0, NamedGroup1.Group);
+            init.Init(new EntityStructSerialized() { value = 5 });
+            init.Init(new EntityStructSerialized2() { value = 4 });
+            init.Init(new EntityStructPartiallySerialized() { value1 = 3 });
+            
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            FasterList<byte> bytes = new FasterList<byte>();
+            var generateEntitySerializer = _enginesRoot.GenerateEntitySerializer();
+            var simpleSerializationData = new SimpleSerializationData(bytes);
+            generateEntitySerializer.SerializeEntity(new EGID(0, NamedGroup1.Group), 
+                                                     simpleSerializationData, SerializationType.Storage);
+
+            _enginesRoot.Dispose();
+            var newEnginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
+            
+            newEnginesRoot.AddEngine(_neverDoThisIsJustForTheTest);
+            
+            simpleSerializationData.Reset();
+            generateEntitySerializer = newEnginesRoot.GenerateEntitySerializer();
+            DeserializationFactory factory = new DeserializationFactory();
+            generateEntitySerializer.RegisterSerializationFactory<SerializableEntityDescriptorWithViews>(factory);
+
+            generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData,
+                                                          SerializationType.Storage);
+            
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(0, NamedGroup1.Group).value, Is.EqualTo(5));
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(0, NamedGroup1.Group).value, Is.EqualTo(4));
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructPartiallySerialized>(0, NamedGroup1.Group).value1, Is.EqualTo(3));
         }
 
         EnginesRoot                         _enginesRoot;
@@ -80,6 +171,27 @@ namespace UnitTests
                              (SerializationType.Network, new DefaultSerializer<EntityStructSerialized2>())),
                         new SerializableEntityBuilder<EntityStructPartiallySerialized>
                             ((SerializationType.Storage, new PartialSerializer <EntityStructPartiallySerialized>())
+                        )
+                };
+            }
+        }
+        
+        class SerializableEntityDescriptorWithViews : SerializableEntityDescriptor<
+            SerializableEntityDescriptorWithViews.DefaultPatternForEntityDescriptor>
+        {
+            [HashName("DefaultPatternForEntityDescriptorWithView")]
+            internal class DefaultPatternForEntityDescriptor : IEntityDescriptor
+            {
+                public IEntityBuilder[] entitiesToBuild => _entitiesToBuild;
+                
+                static readonly IEntityBuilder[] _entitiesToBuild = {
+                    new EntityBuilder<EntityViewStructNotSerialized>(),    
+                    new SerializableEntityBuilder<EntityStructSerialized>(),
+                    new SerializableEntityBuilder<EntityStructSerialized2>
+                        ((SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>()) ,
+                         (SerializationType.Network, new DefaultSerializer<EntityStructSerialized2>())),
+                    new SerializableEntityBuilder<EntityStructPartiallySerialized>
+                        ((SerializationType.Storage, new PartialSerializer <EntityStructPartiallySerialized>())
                         )
                 };
             }
@@ -127,6 +239,32 @@ namespace UnitTests
         {
             int value;
             [PartialSerializerField] public int value1;
+        }
+        
+        struct EntityViewStructNotSerialized : IEntityViewStruct
+        {
+#pragma warning disable 649
+            public ITestIt TestIt;
+#pragma warning restore 649
+            
+            public EGID ID { get; set; }
+        }
+        
+        interface ITestIt
+        {
+            float value { get; set; }
+        }
+
+        class DeserializationFactory : IDeserializationFactory
+        {
+            public EntityStructInitializer BuildDeserializedEntity(EGID                          egid,
+                                                                   ISerializationData            serializationData,
+                                                                   ISerializableEntityDescriptor entityDescriptor,
+                                                                   SerializationType             serializationType,
+                                                                   IEntitySerialization          entitySerialization)
+            {
+                var initializer = 
+            }
         }
     }
 }
