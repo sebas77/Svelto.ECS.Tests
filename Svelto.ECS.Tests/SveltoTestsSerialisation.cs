@@ -92,6 +92,8 @@ namespace UnitTests
             _enginesRoot.Dispose();
             var newEnginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
             
+            _neverDoThisIsJustForTheTest = new TestEngine();
+            
             newEnginesRoot.AddEngine(_neverDoThisIsJustForTheTest);
             
             simpleSerializationData.Reset();
@@ -116,7 +118,7 @@ namespace UnitTests
         [TestCase]
         public void TestSerializingWithEntityViewStructsAndFactories()
         {
-            var init = _entityFactory.BuildEntity<SerializableEntityDescriptorWithViews>(0, NamedGroup1.Group);
+            var init = _entityFactory.BuildEntity<SerializableEntityDescriptorWithViews>(0, NamedGroup1.Group, new []{new Implementor(1)});
             init.Init(new EntityStructSerialized() { value = 5 });
             init.Init(new EntityStructSerialized2() { value = 4 });
             init.Init(new EntityStructPartiallySerialized() { value1 = 3 });
@@ -131,12 +133,13 @@ namespace UnitTests
 
             _enginesRoot.Dispose();
             var newEnginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
+            _neverDoThisIsJustForTheTest = new TestEngine();
             
             newEnginesRoot.AddEngine(_neverDoThisIsJustForTheTest);
             
             simpleSerializationData.Reset();
             generateEntitySerializer = newEnginesRoot.GenerateEntitySerializer();
-            DeserializationFactory factory = new DeserializationFactory();
+            DeserializationFactory factory = new DeserializationFactory(newEnginesRoot.GenerateEntityFactory());
             generateEntitySerializer.RegisterSerializationFactory<SerializableEntityDescriptorWithViews>(factory);
 
             generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData,
@@ -254,17 +257,34 @@ namespace UnitTests
         {
             float value { get; set; }
         }
+        
+        class Implementor : ITestIt
+        {
+            public Implementor(int i)
+            {
+                value = i;
+            }
 
+            public float value { get; set; }
+        }
         class DeserializationFactory : IDeserializationFactory
         {
+            readonly IEntityFactory _factory;
+
             public EntityStructInitializer BuildDeserializedEntity(EGID                          egid,
                                                                    ISerializationData            serializationData,
                                                                    ISerializableEntityDescriptor entityDescriptor,
                                                                    SerializationType             serializationType,
                                                                    IEntitySerialization          entitySerialization)
             {
-                var initializer = 
+                var initializer = _factory.BuildEntity<SerializableEntityDescriptorWithViews>(new EGID(0, NamedGroup1.Group), new []{new Implementor(1)});
+                
+                entitySerialization.DeserializeEntityStructs(serializationData, entityDescriptor, initializer, SerializationType.Storage);
+
+                return initializer;
             }
+
+            public DeserializationFactory(IEntityFactory factory) { _factory = factory; }
         }
     }
 }
