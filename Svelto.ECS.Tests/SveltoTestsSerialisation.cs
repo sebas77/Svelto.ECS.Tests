@@ -116,7 +116,7 @@ namespace UnitTests
         }
         
         [TestCase]
-        public void TestSerializingWithEntityStructsWitVersioning()
+        public void TestSerializingWithEntityStructsWithVersioning()
         {
             var init = _entityFactory.BuildEntity<SerializableEntityDescriptorV0>(0, NamedGroup1.Group);
             init.Init(new EntityStructSerialized2() { value = 4 });
