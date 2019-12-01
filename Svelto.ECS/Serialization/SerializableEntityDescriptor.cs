@@ -98,18 +98,12 @@ namespace Svelto.ECS.Serialization
 
             return (indexSerial, indexDynamic);
         }
-
-        T ISerializableEntityDescriptor.Get<T>()
+        
+        public void CopySerializedEntityStructs(in EntityStructInitializer sourceInitializer, in EntityStructInitializer destinationInitializer)
         {
-            return ((SerializableEntityBuilder<T>) _entitiesToSerializeMap[new RefWrapper<Type>(typeof(T))])
-                ._lastSerialisedValue;
-        }
-
-        public void FillInitializer(ref EntityStructInitializer initializer)
-        {
-            foreach (ISerializableEntityBuilder eb in entitiesToSerialize)
+            foreach (ISerializableEntityBuilder e in entitiesToSerialize)
             {
-                eb.Set(ref initializer);
+                e.CopySerializedEntityStructs(sourceInitializer, destinationInitializer);
             }
         }
 

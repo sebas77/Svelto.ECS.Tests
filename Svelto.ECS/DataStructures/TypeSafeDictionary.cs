@@ -67,6 +67,7 @@ namespace Svelto.ECS.Internal
         {
             var typeSafeDictionary = realDic as TypeSafeDictionary<TValue>;
 
+            //this can be optimized, should pass all the entities and not restart the process for each one
             foreach (var value in this)
                 AddEntityViewToEngines(entityViewEnginesDB, ref typeSafeDictionary.GetValueByRef(value.Key), null,
                     in profiler, new EGID(value.Key, group));

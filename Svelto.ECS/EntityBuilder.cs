@@ -128,6 +128,7 @@ namespace Svelto.ECS
             NEEDS_REFLECTION = typeof(IEntityViewStruct).IsAssignableFrom(ENTITY_VIEW_TYPE);
             HAS_EGID = typeof(INeedEGID).IsAssignableFrom(ENTITY_VIEW_TYPE);
             ENTITY_VIEW_NAME = ENTITY_VIEW_TYPE.ToString();
+            SetEGIDWithoutBoxing<T>.Warmup();
         }
 
         readonly T                        _initializer;

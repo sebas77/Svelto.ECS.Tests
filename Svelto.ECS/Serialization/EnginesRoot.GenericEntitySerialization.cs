@@ -67,8 +67,6 @@ namespace Svelto.ECS
 
                     DeserializeEntityStructs(serializationData, entityDescriptor, initializer, serializationType);
 
-                    entityDescriptor.FillInitializer(ref initializer);
-
                     return initializer;
                 }
 

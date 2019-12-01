@@ -80,19 +80,15 @@ namespace Svelto.ECS.Serialization
         {
             ISerializer<T> serializer = _serializers[(int) serializationType];
 
-            _lastSerialisedValue = initializer.Get<T>();
-
-            _valueSerialized = serializer.DeserializeSafe(ref _lastSerialisedValue, serializationData);
+            serializer.DeserializeSafe(ref initializer.GetOrCreate<T>(), serializationData);
         }
 
-        public void Set(ref EntityStructInitializer initializer)
+        public void CopySerializedEntityStructs(in EntityStructInitializer sourceInitializer,
+            in EntityStructInitializer destinationInitializer)
         {
-            if (_valueSerialized)
-                initializer.Init(_lastSerialisedValue);
+            destinationInitializer.CopyFrom(sourceInitializer.Get<T>());
         }
 
         readonly ISerializer<T>[] _serializers;
-        internal T                _lastSerialisedValue; // TODO: I have to think this through
-        bool                      _valueSerialized;
     }
 }

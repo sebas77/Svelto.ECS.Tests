@@ -29,5 +29,9 @@ namespace Svelto.ECS.Internal
 
             return null;
         }
+
+        public static void Warmup()
+        {         
+        }
     }
 }
