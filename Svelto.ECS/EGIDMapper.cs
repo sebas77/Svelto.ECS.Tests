@@ -1,11 +1,13 @@
+using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
     public struct EGIDMapper<T> where T : struct, IEntityStruct
     {
-        internal FasterDictionaryStruct<uint, T> map;
+        internal FasterDictionary<uint, T> map;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Entity(uint entityID)
@@ -16,7 +18,7 @@ namespace Svelto.ECS
 #else
                 map.TryFindIndex(entityID, out var findIndex);
 #endif
-                return ref map.unsafeValues[(int) findIndex];
+                return ref map.valuesArray[findIndex];
         }
         
         public bool TryGetEntity(uint entityID, out T value)
@@ -30,34 +32,19 @@ namespace Svelto.ECS
             value = default;
             return false;
         }
-    }
-    
-    public struct NativeEGIDMapper<T> where T : unmanaged, IEntityStruct
-    {
-        internal FasterDictionaryStruct<uint, T> map;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T Entity(uint entityID)
+        public UnsafeStructRef<T> EntityUnsafeRef(uint entityID)
         {
 #if DEBUG && !PROFILER
-                if (map.TryFindIndex(entityID, out var findIndex) == false)
-                    throw new Exception("Entity not found in this group ".FastConcat(typeof(T).ToString()));
+            if (map.TryFindIndex(entityID, out var findIndex) == false)
+                throw new Exception("Entity not found in this group ".FastConcat(typeof(T).ToString()));
 #else
-            map.TryFindIndex(entityID, out var findIndex);
+                map.TryFindIndex(entityID, out var findIndex);
 #endif
-            return ref map.unsafeValues[(int) findIndex];
-        }
-        
-        public bool TryGetEntity(uint entityID, out T value)
-        {
-            if (map.TryFindIndex(entityID, out var index))
-            {
-                value = map.GetDirectValue(index);
-                return true;
-            }
-
-            value = default;
-            return false;
+            var alloc = GCHandle.Alloc(map.valuesArray, GCHandleType.Pinned);
+            
+            return new UnsafeStructRef<T>(ref map.valuesArray[findIndex], alloc);
         }
     }
 }

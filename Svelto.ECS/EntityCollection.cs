@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace Svelto.ECS
 {
@@ -13,10 +12,6 @@ namespace Svelto.ECS
             _count = count;
         }
 
-        public uint Length => _count;
-        public T[] memory => _array;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EntityIterator GetEnumerator()
         {
             return new EntityIterator(_array, _count);
@@ -25,7 +20,7 @@ namespace Svelto.ECS
         readonly T[] _array;
         readonly uint _count;
 
-        public struct EntityIterator
+        public struct EntityIterator : IEnumerator<T>
         {
             public EntityIterator(T[] array, uint count) : this()
             {
@@ -34,7 +29,6 @@ namespace Svelto.ECS
                 _index = -1;
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool MoveNext()
             {
                 return ++_index < _count;
@@ -45,11 +39,10 @@ namespace Svelto.ECS
                 _index = -1;
             }
 
-            public ref T Current
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => ref _array[_index];
-            }
+            public ref T Current => ref _array[_index];
+
+            T IEnumerator<T>.Current => throw new NotImplementedException();
+            object IEnumerator.Current => throw new NotImplementedException();
 
             public void Dispose()  {}
 
@@ -57,46 +50,30 @@ namespace Svelto.ECS
             readonly uint _count;
             int _index;
         }
-
-        public ref T this[uint i]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref _array[(int) i];
-        }
-        
-        public ref T this[int i]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref _array[(int) i];
-        }
     }
     
     public struct EntityCollection<T1, T2>
     {
-        public EntityCollection(in (EntityCollection<T1>, EntityCollection<T2>) array)
+        public EntityCollection(in (T1[], T2[]) array, uint count)
         {
             _array = array;
-            _count = array.Item1.Length;
+            _count = count;
         }
-
-        public uint Length => _array.Item1.Length;
-        public EntityCollection<T2> Item2 => _array.Item2;
-        public EntityCollection<T1> Item1 => _array.Item1;
 
         public EntityIterator GetEnumerator()
         {
-            return new EntityIterator(_array);
+            return new EntityIterator(_array, _count);
         }
 
-        readonly (EntityCollection<T1>, EntityCollection<T2>)  _array;
+        readonly (T1[], T2[])  _array;
         readonly uint _count;
 
         public struct EntityIterator : IEnumerator<ValueRef<T1, T2>>
         {
-            public EntityIterator((EntityCollection<T1>, EntityCollection<T2>) array) : this()
+            public EntityIterator((T1[], T2[]) array, uint count) : this()
             {
                 _array = array;
-                _count = array.Item1.Length;
+                _count = count;
                 _index = -1;
             }
 
@@ -117,7 +94,7 @@ namespace Svelto.ECS
 
             public void Dispose()  {}
 
-            readonly (EntityCollection<T1>, EntityCollection<T2>)  _array;
+            readonly (T1[], T2[])  _array;
             readonly uint _count;
             int           _index;
         }
@@ -125,31 +102,26 @@ namespace Svelto.ECS
     
     public struct EntityCollection<T1, T2, T3>
     {
-        public EntityCollection(in (EntityCollection<T1>, EntityCollection<T2>, EntityCollection<T3>) array)
+        public EntityCollection(in (T1[], T2[], T3[]) array, uint count)
         {
             _array = array;
-            _count = array.Item1.Length;
+            _count = count;
         }
-
-        public EntityCollection<T2> Item2 => _array.Item2;
-        public EntityCollection<T1> Item1 => _array.Item1;
-        public EntityCollection<T3> Item3 => _array.Item3;
-        public uint Length => Item1.Length;
 
         public EntityIterator GetEnumerator()
         {
-            return new EntityIterator(_array);
+            return new EntityIterator(_array, _count);
         }
 
-        readonly (EntityCollection<T1>, EntityCollection<T2>, EntityCollection<T3>) _array;
+        readonly (T1[], T2[], T3[]) _array;
         readonly uint         _count;
 
         public struct EntityIterator : IEnumerator<ValueRef<T1, T2, T3>>
         {
-            public EntityIterator((EntityCollection<T1>, EntityCollection<T2>, EntityCollection<T3>) array) : this()
+            public EntityIterator((T1[], T2[], T3[]) array, uint count) : this()
             {
                 _array = array;
-                _count = array.Item1.Length;
+                _count = count;
                 _index = -1;
             }
 
@@ -170,7 +142,7 @@ namespace Svelto.ECS
 
             public void Dispose()  {}
 
-            readonly (EntityCollection<T1>, EntityCollection<T2>, EntityCollection<T3>) _array;
+            readonly (T1[], T2[], T3[]) _array;
             readonly uint               _count;
             int                         _index;
         }
@@ -207,7 +179,7 @@ namespace Svelto.ECS
                 while (_index + 1 >= _count && ++_indexGroup < _groups.Length)
                 {
                     _index = -1;
-                    _array = _db.QueryEntities<T>(_groups[_indexGroup]);
+                    _array = _db.QueryEntities<T>(_groups[_indexGroup], out _count);
                 }
 
                 return ++_index < _count;
@@ -220,7 +192,7 @@ namespace Svelto.ECS
                 _count = 0;
             }
 
-            public ref T Current => ref _array[(uint) _index];
+            public ref T Current => ref _array[_index];
 
             T IEnumerator<T>.Current => throw new NotImplementedException();
             object IEnumerator.Current => throw new NotImplementedException();
@@ -230,7 +202,7 @@ namespace Svelto.ECS
             readonly IEntitiesDB _db;
             readonly ExclusiveGroup[] _groups;
 
-            EntityCollection<T> _array;
+            T[] _array;
             uint _count;
             int _index;
             int _indexGroup;
@@ -268,9 +240,8 @@ namespace Svelto.ECS
                 while (_index + 1 >= _count && ++_indexGroup < _groups.Length)
                 {
                     _index = -1;
-                    var array1 = _db.QueryEntities<T1>(_groups[_indexGroup]);
-                    var array2 = _db.QueryEntities<T2>(_groups[_indexGroup]);
-                    _count = array1.Length;
+                    var array1 = _db.QueryEntities<T1>(_groups[_indexGroup], out _count);
+                    var array2 = _db.QueryEntities<T2>(_groups[_indexGroup], out var count1);
                     _array = (array1, array2);
 
 #if DEBUG && !PROFILER
@@ -287,9 +258,8 @@ namespace Svelto.ECS
                 _index = -1;
                 _indexGroup = -1;
 
-                var array1 = _db.QueryEntities<T1>(_groups[0]);
-                var array2 = _db.QueryEntities<T2>(_groups[0]);
-                _count = array1.Length;
+                var array1 = _db.QueryEntities<T1>(_groups[0], out _count);
+                var array2 = _db.QueryEntities<T2>(_groups[0], out var count1);
                 _array = (array1, array2);
 #if DEBUG && !PROFILER
                 if (_count != count1)
@@ -316,17 +286,17 @@ namespace Svelto.ECS
             uint                      _count;
             int                       _index;
             int                       _indexGroup;
-            (EntityCollection<T1>, EntityCollection<T2>)              _array;
+            (T1[], T2[])              _array;
         }
     }
     
     public struct ValueRef<T1, T2>
     {
-        readonly (EntityCollection<T1>, EntityCollection<T2>) array;
+        readonly (T1[], T2[]) array;
 
         readonly uint index;
 
-        public ValueRef(in (EntityCollection<T1>, EntityCollection<T2>) entity1, uint i)
+        public ValueRef(in (T1[], T2[]) entity1, uint i)
         {
             array = entity1;
             index = i;
@@ -338,11 +308,11 @@ namespace Svelto.ECS
     
     public struct ValueRef<T1, T2, T3>
     {
-        readonly (EntityCollection<T1>, EntityCollection<T2>, EntityCollection<T3>) array;
+        readonly (T1[], T2[], T3[]) array;
 
         readonly uint index;
 
-        public ValueRef(in (EntityCollection<T1>, EntityCollection<T2>, EntityCollection<T3>) entity1, uint i)
+        public ValueRef(in (T1[], T2[], T3[]) entity1, uint i)
         {
             array = entity1;
             index = i;

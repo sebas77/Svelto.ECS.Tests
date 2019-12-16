@@ -100,19 +100,19 @@ namespace Svelto.ECS
 
     public struct Consumer<T> : IDisposable where T : unmanaged, IEntityStruct
     {
-        internal Consumer(string name, uint capacity, EntityStream<T> stream):this()
+        internal Consumer(string name, uint capacity, EntityStream<T> stream):this() 
         {
-#if DEBUG && !PROFILER
+#if DEBUG && !PROFILER            
             _name = name;
 #endif
-            _ringBuffer = new RingBuffer<ValueTuple<T, EGID>>((int) capacity,
+            _ringBuffer = new RingBuffer<ValueTuple<T, EGID>>((int) capacity, 
 #if DEBUG && !PROFILER
                 _name
 #else
                 string.Empty
 #endif
                 );
-
+            
             _stream = stream;
         }
 
@@ -133,7 +133,7 @@ namespace Svelto.ECS
             var tryDequeue = _ringBuffer.TryDequeue(out var values);
 
             entity = values.Item1;
-
+            
             return tryDequeue;
         }
 
@@ -143,7 +143,7 @@ namespace Svelto.ECS
 
             entity = values.Item1;
             id = values.Item2;
-
+            
             return tryDequeue;
         }
         public void Flush() { _ringBuffer.Reset(); }
@@ -152,11 +152,11 @@ namespace Svelto.ECS
 
         readonly          RingBuffer<ValueTuple<T, EGID>>   _ringBuffer;
         readonly          EntityStream<T> _stream;
-
+        
         internal readonly ExclusiveGroup  _group;
         internal readonly bool            _hasGroup;
-
-#if DEBUG && !PROFILER
+        
+#if DEBUG && !PROFILER        
         readonly string _name;
 #endif
     }

@@ -1,4 +1,3 @@
-#if later
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,7 +10,7 @@ namespace Svelto.DataStructures
 
         public FasterDenseList()
         {
-            values = new FasterListStruct<T>(0);
+            values = new FasterList<T>();
         }
         
         public FasterSparseList<T> SparseSet()
@@ -23,32 +22,10 @@ namespace Svelto.DataStructures
         {
             return new FasterDenseListEnumerator<T>(this);
         }
-        
-        public bool TryGetValue(uint index, out T item)
-        {
-            if (index < Count)
-            {
-                item = values[index];
-                return true;
-            }
-
-            item = default;
-            return false;
-        }
 
         public void FastClear()
         {
             values.ResetToReuse();
-        }
-        
-        public void Clear()
-        {
-            values.Clear();
-        }
-        
-        public bool ContainsKey(uint gid)
-        {
-            return gid < Count;
         }
         
         internal bool ReuseOneSlot<U>(uint index, out U item) where U:class, T
@@ -64,13 +41,8 @@ namespace Svelto.DataStructures
         {
             return values.Push(value.item);
         }
-
-        public ref T this[uint index] => ref values[index];
-
-        public void Add(uint index, in T item)
-        {
-            values.Add(index, item);
-        }
+        
+        internal ref T this[uint index] => ref values[index];
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
@@ -81,8 +53,8 @@ namespace Svelto.DataStructures
         {
             throw new NotImplementedException();
         }
-
-        readonly FasterListStruct<T>    values;
+        
+        readonly FasterList<T>    values;
     }
 
     public struct FasterDenseListEnumerator<T>:IEnumerator<T>
@@ -118,4 +90,3 @@ namespace Svelto.DataStructures
         int                         _currentIndex;
     }
 }
-#endif

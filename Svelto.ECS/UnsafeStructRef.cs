@@ -6,7 +6,7 @@ namespace Svelto.ECS
 {
     public struct UnsafeStructRef<T>: IDisposable
     {
-        readonly IntPtr pointer;
+        readonly unsafe void* pointer;
         GCHandle _handle;
 
         public UnsafeStructRef(ref T entityStruct, GCHandle handle)
@@ -14,11 +14,11 @@ namespace Svelto.ECS
             unsafe
             {
                 _handle = handle;
-                pointer = (IntPtr) Unsafe.AsPointer(ref entityStruct);
+                pointer = Unsafe.AsPointer(ref entityStruct);
             }
         }
 
-        public unsafe ref T refvalue => ref Unsafe.AsRef<T>((void*) pointer);
+        public unsafe ref T refvalue => ref Unsafe.AsRef<T>(pointer);
 
         public void Dispose()
         {

@@ -1,12 +1,14 @@
 {
-    "name": "Svelto.ECS",
+    "name": "Svelto.Services",
     "references": [
-        "Svelto.Common"
+        "Svelto.Common",
+        "Svelto.Tasks",
+        "Utf8Json"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
-    "allowUnsafeCode": true,
+    "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,

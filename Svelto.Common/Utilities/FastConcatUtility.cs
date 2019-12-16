@@ -2,7 +2,7 @@ using System.Text;
 
 public static class FastConcatUtility
 {
-#if DEBUG && !PROFILE    
+#if DEBUG    
     static readonly StringBuilder _stringBuilder = new StringBuilder(256, 1024*1024);
 #else    
     static readonly StringBuilder _stringBuilder = new StringBuilder(256);

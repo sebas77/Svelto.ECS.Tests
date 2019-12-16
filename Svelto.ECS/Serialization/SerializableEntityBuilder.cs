@@ -1,6 +1,5 @@
 using System;
 using Svelto.Common;
-using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS.Serialization
@@ -43,14 +42,14 @@ namespace Svelto.ECS.Serialization
         {
             ISerializer<T> serializer = _serializers[(int)serializationType];
 
-            var safeDictionary = (ITypeSafeDictionary<T>) dictionary;
+            var safeDictionary = (TypeSafeDictionary<T>) dictionary;
             if (safeDictionary.TryFindIndex(entityID, out uint index) == false)
             {
                 throw new ECSException("Entity Serialization failed");
             }
 
-            var values = safeDictionary.GetValuesArray(out _);
-            ref T val = ref values[(int) index];
+            T[] values = safeDictionary.GetValuesArray(out _);
+            ref T val = ref values[index];
 
             serializationData.dataPos = (uint) serializationData.data.Count;
 
@@ -64,14 +63,14 @@ namespace Svelto.ECS.Serialization
             ISerializer<T> serializer = _serializers[(int) serializationType];
 
             // Handle the case when an entity struct is gone
-            var safeDictionary = (ITypeSafeDictionary<T>) dictionary;
+            var safeDictionary = (TypeSafeDictionary<T>) dictionary;
             if (safeDictionary.TryFindIndex(entityID, out uint index) == false)
             {
                 throw new ECSException("Entity Deserialization failed");
             }
 
-            var values = safeDictionary.GetValuesArray(out _);
-            ref T val = ref values[(int) index];
+            T[] values = safeDictionary.GetValuesArray(out _);
+            ref T val = ref values[index];
 
             serializer.DeserializeSafe(ref val, serializationData);
         }

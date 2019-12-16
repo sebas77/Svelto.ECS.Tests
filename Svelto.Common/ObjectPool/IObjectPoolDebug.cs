@@ -1,4 +1,4 @@
-#if DEBUG && !PROFILE
+#if DEBUG
 using System;
 using System.Collections.Generic;
 

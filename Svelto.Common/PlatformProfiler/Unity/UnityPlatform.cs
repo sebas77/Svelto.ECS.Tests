@@ -7,12 +7,12 @@ namespace Svelto.Common
 {
      public struct DisposableSampler : IDisposable
     {
-        ProfilerMarker _marker;
+        ProfilerMarker _auto;
 
-        public DisposableSampler(ProfilerMarker marker)
+        public DisposableSampler(ProfilerMarker auto)
         {
-            _marker = marker;
-            _marker.Begin();
+            _auto = auto;
+            _auto.Begin();
         }
 
 #if DISABLE_CHECKS
@@ -20,7 +20,7 @@ namespace Svelto.Common
 #endif
         public void Dispose()
         {
-            _marker.End();
+            _auto.End();
         }
     }
     
@@ -51,13 +51,8 @@ namespace Svelto.Common
 
     public struct PlatformProfiler: IPlatformProfiler<DisposableSampler>
     {
-        readonly ProfilerMarker? maker;
-
         public PlatformProfiler(string info)
-        {
-            maker = new ProfilerMarker(info);
-            maker.Value.Begin();
-        }
+        {}
         
         public DisposableSampler Sample(string samplerName, string samplerInfo = null)
         {
@@ -75,9 +70,7 @@ namespace Svelto.Common
         }
 
         public void Dispose()
-        {
-            maker?.End();
-        }
+        {}
     }
 }
 #endif

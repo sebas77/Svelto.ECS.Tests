@@ -1,16 +1,4 @@
-{
-    "name": "Svelto.Common",
-    "references": [],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": true,
-    "overrideReferences": true,
-    "precompiledReferences": [
-        "System.Buffers.dll",
-        "System.Memory.dll"
-    ],
-    "autoReferenced": false,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+﻿{
+	"name": "Svelto.Common",
+	"allowUnsafeCode" : true
 }
