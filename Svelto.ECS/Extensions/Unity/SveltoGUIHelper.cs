@@ -94,6 +94,41 @@ namespace Svelto.ECS.Unity
 
             return startIndex;
         }
+
+        /// <summary>
+        /// Works like CreateAll but only builds entities with holders that have the same group specfied
+        /// </summary>
+        /// <param name="startId"></param>
+        /// <param name="group">The group to match</param>
+        /// <param name="contextHolder"></param>
+        /// <param name="factory"></param>
+        /// <typeparam name="T">EntityDescriptorHolder type</typeparam>
+        /// <returns>Next available ID</returns>
+        public static uint CreateAllInMatchingGroup<T>(uint startId, ExclusiveGroup exclusiveGroup,
+            Transform contextHolder, IEntityFactory factory) where T : MonoBehaviour, IEntityDescriptorHolder
+        {
+            var holders = contextHolder.GetComponentsInChildren<T>(true);
+
+            foreach (var holder in holders)
+            {
+                if (string.IsNullOrEmpty(holder.groupName) == false)
+                {
+                    var realGroup = ExclusiveGroup.Search(holder.groupName);
+                    if (realGroup != exclusiveGroup)
+                        continue;
+                }
+                else
+                {
+                    continue;
+                }
+                
+                var implementors = holder.GetComponents<IImplementor>();
+
+                startId = InternalBuildAll(startId, holder, factory, exclusiveGroup, implementors, null);
+            }
+
+            return startId;
+        }
     }
 }
 #endif

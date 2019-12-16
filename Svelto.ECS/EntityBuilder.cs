@@ -73,10 +73,9 @@ namespace Svelto.ECS
         public void BuildEntityAndAddToList(ref ITypeSafeDictionary dictionary, EGID egid,
             IEnumerable<object> implementors)
         {
-            if (dictionary == null)
-                dictionary = new TypeSafeDictionary<T>();
+            if (dictionary == null) dictionary = new TypeSafeDictionary<T>();
 
-            var castedDic = dictionary as TypeSafeDictionary<T>;
+            var castedDic = dictionary as ITypeSafeDictionary<T>;
 
             if (NEEDS_REFLECTION)
             {

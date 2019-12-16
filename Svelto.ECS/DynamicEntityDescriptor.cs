@@ -44,7 +44,7 @@ namespace Svelto.ECS
             var extraEntities = extraEntityBuilders.ToArrayFast();
             var extraEntitiesLength = extraEntityBuilders.Count;
 
-            _entitiesToBuild = Construct(extraEntitiesLength, extraEntities,
+            _entitiesToBuild = Construct((int) extraEntitiesLength, extraEntities,
                 EntityDescriptorTemplate<TType>.descriptor.entitiesToBuild);
         }
 

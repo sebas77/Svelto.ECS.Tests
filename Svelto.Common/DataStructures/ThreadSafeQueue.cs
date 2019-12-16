@@ -110,11 +110,11 @@ namespace Svelto.DataStructures
             LockQ.EnterWriteLock();
             try
             {
-                int i = list.Count;
+                int i = (int) list.Count;
                 
                 list.ExpandBy((uint) m_Queue.Count);
 
-                var array = list.ToArrayFast();
+                var array = list.ToArrayFast(out _);
                 
                 while (m_Queue.Count > 0)
                     array[i++] = m_Queue.Dequeue();

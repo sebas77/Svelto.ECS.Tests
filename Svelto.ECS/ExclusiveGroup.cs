@@ -71,10 +71,10 @@ namespace Svelto.ECS
         {
 #if DEBUG
             if (a._range == 0)
-                throw new ECSException("adding values to a not ranged ExclusiveGroup");
+                throw new ECSException($"Adding values to a not ranged ExclusiveGroup: {(uint)a}");
             if (b >= a._range)
-                throw new ECSException("Using out of range group");
-#endif            
+                throw new ECSException($"Using out of range group: {(uint)a} + {b}");
+#endif
             return a._group + b;
         }
 
@@ -148,7 +148,7 @@ namespace Svelto.ECS
                     | data[pos++] << 16
                     | data[pos++] << 24
                 );
-                
+
                 DBC.ECS.Check.Ensure(_id < _globalId, "Invalid group ID deserialiased");
             }
 
@@ -182,7 +182,7 @@ namespace Svelto.ECS
             ExclusiveGroupStruct>();
 #if DEBUG
         readonly ushort _range;
-#endif        
+#endif
     }
 }
 

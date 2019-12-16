@@ -56,7 +56,6 @@ namespace Svelto.DataStructures
 
     public class LockFreeQueue<T>
     {
-
         SingleLinkNode<T> head;
         SingleLinkNode<T> tail;
         LockFreeLinkPool<T> trash;

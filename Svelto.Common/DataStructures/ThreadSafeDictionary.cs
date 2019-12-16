@@ -5,7 +5,7 @@ namespace Svelto.DataStructures
 {
     /// <summary>
     ///   original code: http://devplanet.com/blogs/brianr/archive/2008/09/29/thread-safe-dictionary-update.aspx
-    ///   simplified (not an IDictionary) and apdated (uses FasterList)
+    ///   simplified (not an IDictionary) and apdated (uses NewFasterList)
     /// </summary>
     /// <typeparam name = "TKey"></typeparam>
     /// <typeparam name = "TValue"></typeparam>
