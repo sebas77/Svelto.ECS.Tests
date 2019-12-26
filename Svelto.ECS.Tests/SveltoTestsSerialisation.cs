@@ -354,7 +354,7 @@ namespace UnitTests
             {
                 var initializer = _factory.BuildEntity<SerializableEntityDescriptorWithViews>(egid, new []{new Implementor(1)});
                 
-                entitySerialization.DeserializeEntityStructs(serializationData, entityDescriptor, initializer, SerializationType.Storage);
+                entitySerialization.DeserializeEntityStructs(serializationData, entityDescriptor, ref initializer, SerializationType.Storage);
 
                 return initializer;
             }
