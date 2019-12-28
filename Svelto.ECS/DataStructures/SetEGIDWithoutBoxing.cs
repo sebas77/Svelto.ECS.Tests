@@ -14,20 +14,25 @@ namespace Svelto.ECS.Internal
         {
             if (EntityBuilder<T>.HAS_EGID)
             {
-#if !ENABLE_IL2CPP
-                Type         myTypeA     = typeof(T);
+#if !ENABLE_IL2CPP                
+                Type myTypeA = typeof(T);
                 PropertyInfo myFieldInfo = myTypeA.GetProperty("ID");
 
                 ParameterExpression targetExp = Expression.Parameter(typeof(T).MakeByRefType(), "target");
-                ParameterExpression valueExp  = Expression.Parameter(typeof(EGID), "value");
-                MemberExpression    fieldExp  = Expression.Property(targetExp, myFieldInfo);
-                BinaryExpression    assignExp = Expression.Assign(fieldExp, valueExp);
+                ParameterExpression valueExp = Expression.Parameter(typeof(EGID), "value");
+                MemberExpression fieldExp = Expression.Property(targetExp, myFieldInfo);
+                BinaryExpression assignExp = Expression.Assign(fieldExp, valueExp);
 
                 var setter = Expression.Lambda<ActionCast>(assignExp, targetExp, valueExp).Compile();
 
                 return setter;
-#else
-                return new ActionCast((ref T target, EGID value) => { ((INeedEGID) target).ID = value; });
+#else        
+                return (ref T target, EGID value) =>
+                       {
+                           var needEgid = (target as INeedEGID);
+                           needEgid.ID = value;
+                           target      = (T) needEgid;
+                       };
 #endif
             }
 
@@ -35,7 +40,7 @@ namespace Svelto.ECS.Internal
         }
 
         public static void Warmup()
-        {
+        {         
         }
     }
 }

@@ -185,13 +185,13 @@ namespace Svelto.DataStructures
         {
             if (list == null) throw new ArgumentException("invalid list");
             _list = list;
-            _lockQ = new ReaderWriterLockSlim();
+            _lockQ = ReaderWriterLockSlimEx.Create();
         }
 
         public FasterListThreadSafe()
         {
             _list  = new FasterList<T>();
-            _lockQ = new ReaderWriterLockSlim();
+            _lockQ = ReaderWriterLockSlimEx.Create();
         }
 
         public int Count
@@ -400,13 +400,12 @@ namespace Svelto.DataStructures
             }
         }
 
-        public T[] ToArrayFast(out int count)
+        public T[] ToArrayFast(out uint count)
         {
             _lockQ.EnterReadLock();
             try
             {
-                count = _list.Count;
-                return _list.ToArrayFast();
+                return _list.ToArrayFast(out count);
             }
             finally
             {
@@ -426,7 +425,7 @@ namespace Svelto.DataStructures
 
         readonly FasterList<T> _list;
 
-        readonly ReaderWriterLockSlim _lockQ;
+        readonly ReaderWriterLockSlimEx _lockQ;
     }
 
     public struct FasterReadOnlyListCast<T, U> : IList<U> where U:T
@@ -725,26 +724,47 @@ namespace Svelto.DataStructures
             _count = 0;
         }
         
-        public bool ReuseOneSlot<U>(out U result) where U:class, T
+        public bool ReuseOneSlot<U>(out U result) where U:T 
         {
-            result = null;
+            if (_count >= _buffer.Length)
+            {
+                result = default(U);
+                
+                return false;
+            }
 
+            if (default(U) == null)
+            {
+                result = (U) _buffer[_count];
+
+                if (result != null)
+                {
+                    _count++;
+
+                    return true;
+                }
+                
+                return false;
+            }
+
+            _count++;
+
+            result = default(U);
+
+            return true;
+        }
+        
+        public bool ReuseOneSlot<U>() where U: T
+        {
             if (_count >= _buffer.Length)
                 return false;
 
-            result = (U)_buffer[_count];
+            _count++;
 
-            if ((result is null) == false)
-            {
-                _count++;
-
-                return true;
-            }
-
-            return false;
+            return true;
         }
         
-        public bool ReuseOneSlot<U>() where U: struct, T
+        public bool ReuseOneSlot()
         {
             if (_count >= _buffer.Length)
                 return false;
@@ -869,6 +889,13 @@ namespace Svelto.DataStructures
         {
             return _buffer;
         }
+        
+        public T[] ToArrayFast(out uint count)
+        {
+            count = this._count;
+            
+            return _buffer;
+        }
 
         public bool UnorderedRemove(T item)
         {
@@ -911,7 +938,7 @@ namespace Svelto.DataStructures
         void AllocateMore()
         {
             var newList = new T[(_buffer.Length + 1) << 1];
-            if (_count > 0) _buffer.CopyTo(newList, 0);
+            if (_count > 0) Array.Copy(_buffer, newList, _count);
             _buffer = newList;
         }
 
@@ -965,11 +992,20 @@ namespace Svelto.DataStructures
                 _count = newSize;
         }
         
-        public uint Push(in T item)
+        public uint Enqueue(in T item)
         {
             Add(_count, item);
 
             return _count - 1;
+        }
+
+        public ref readonly T Dequeue() { --_count;
+            return ref _buffer[_count];
+        }
+
+        public ref readonly T Peek()
+        {
+            return ref _buffer[_count - 1];
         }
         
         T[] _buffer;
