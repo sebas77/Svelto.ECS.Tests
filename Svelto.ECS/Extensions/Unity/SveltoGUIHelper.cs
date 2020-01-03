@@ -1,7 +1,8 @@
 #if UNITY_5 || UNITY_5_3_OR_NEWER
+using Svelto.ECS.Serialization;
 using UnityEngine;
 
-namespace Svelto.ECS.Unity
+namespace Svelto.ECS.Extensions.Unity
 {
     public static class SveltoGUIHelper
     {
@@ -18,12 +19,7 @@ namespace Svelto.ECS.Unity
                     var monoBehaviour = child as MonoBehaviour;
                     var childImplementors = monoBehaviour.GetComponents<IImplementor>();
                     startIndex = InternalBuildAll(
-                        startIndex,
-                        child,
-                        factory,
-                        group,
-                        childImplementors,
-                        groupNamePostfix);
+                        startIndex, child, factory, group, childImplementors, groupNamePostfix);
                 }
             }
 
@@ -72,13 +68,13 @@ namespace Svelto.ECS.Unity
         static uint InternalBuildAll(uint startIndex, IEntityDescriptorHolder descriptorHolder,
             IEntityFactory factory, ExclusiveGroup group, IImplementor[] implementors, string groupNamePostfix)
         {
-            ExclusiveGroup.ExclusiveGroupStruct realGroup = group;
+            ExclusiveGroupStruct realGroup = group;
 
             if (string.IsNullOrEmpty(descriptorHolder.groupName) == false)
             {
                 realGroup = ExclusiveGroup.Search(!string.IsNullOrEmpty(groupNamePostfix)
-                    ? $"{descriptorHolder.groupName}{groupNamePostfix}"
-                    : descriptorHolder.groupName);
+                                                      ? $"{descriptorHolder.groupName}{groupNamePostfix}"
+                                                      : descriptorHolder.groupName);
             }
 
             EGID egid;
@@ -93,6 +89,41 @@ namespace Svelto.ECS.Unity
             init.Init(new EntityHierarchyStruct(group));
 
             return startIndex;
+        }
+
+        /// <summary>
+        /// Works like CreateAll but only builds entities with holders that have the same group specfied
+        /// </summary>
+        /// <param name="startId"></param>
+        /// <param name="group">The group to match</param>
+        /// <param name="contextHolder"></param>
+        /// <param name="factory"></param>
+        /// <typeparam name="T">EntityDescriptorHolder type</typeparam>
+        /// <returns>Next available ID</returns>
+        public static uint CreateAllInMatchingGroup<T>(uint startId, ExclusiveGroup exclusiveGroup,
+            Transform contextHolder, IEntityFactory factory) where T : MonoBehaviour, IEntityDescriptorHolder
+        {
+            var holders = contextHolder.GetComponentsInChildren<T>(true);
+
+            foreach (var holder in holders)
+            {
+                if (string.IsNullOrEmpty(holder.groupName) == false)
+                {
+                    var realGroup = ExclusiveGroup.Search(holder.groupName);
+                    if (realGroup != exclusiveGroup)
+                        continue;
+                }
+                else
+                {
+                    continue;
+                }
+                
+                var implementors = holder.GetComponents<IImplementor>();
+
+                startId = InternalBuildAll(startId, holder, factory, exclusiveGroup, implementors, null);
+            }
+
+            return startId;
         }
     }
 }

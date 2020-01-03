@@ -1,4 +1,4 @@
-namespace Svelto.ECS.Unity
+namespace Svelto.ECS.Extensions.Unity
 {
     public interface IImplementor
     {

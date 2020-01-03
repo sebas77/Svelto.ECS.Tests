@@ -1,3 +1,4 @@
+#if later
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -45,7 +46,7 @@ namespace Svelto.DataStructures
 
         public void Add(uint key, T  item)
         {
-            var index = _denseSet.Enqueue((key, item));
+            var index = _denseSet.Push((key, item));
             
             _keys.Add(key, index);
         }
@@ -124,3 +125,4 @@ namespace Svelto.DataStructures
         int                         _currentIndex;
     }
 }
+#endif

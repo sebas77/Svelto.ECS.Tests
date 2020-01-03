@@ -33,11 +33,11 @@ namespace Svelto.ECS
                     other.FastClear();
                     return;
                 }
-                var otherValuesArray = other.valuesArray;
+                var otherValuesArray = other.unsafeValues;
                 for (int i = 0; i < otherCount; ++i)
                 {
                     var safeDictionariesCount = otherValuesArray[i].Count;
-                    var safeDictionaries = otherValuesArray[i].valuesArray;
+                    var safeDictionaries = otherValuesArray[i].unsafeValues;
                     //do not remove the dictionaries of entities per type created so far, they will be reused
                     if (safeDictionariesCount <= MaximumNumberOfItemsPerFrameBeforeToClear)
                     {

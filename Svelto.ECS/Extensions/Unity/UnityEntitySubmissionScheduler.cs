@@ -1,6 +1,5 @@
 #if UNITY_5 || UNITY_5_3_OR_NEWER
 using Object = UnityEngine.Object;
-using System;
 using System.Collections;
 using UnityEngine;
 
@@ -33,7 +32,7 @@ namespace Svelto.ECS.Schedulers.Unity
             }
 
             readonly WaitForEndOfFrame _wait = new WaitForEndOfFrame();
-            readonly IEnumerator _coroutine;
+            readonly IEnumerator       _coroutine;
             
             public EnginesRoot.EntitiesSubmitter onTick;
         }
@@ -59,7 +58,7 @@ namespace Svelto.ECS.Schedulers.Unity
             }
         }
 
-        Scheduler _scheduler;
+        Scheduler       _scheduler;
         readonly string _name;
     }
 }

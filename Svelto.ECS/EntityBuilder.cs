@@ -12,7 +12,7 @@ namespace Svelto.ECS
     {
         static class EntityView
         {
-            internal static readonly FasterList<KeyValuePair<Type, ActionCast<T>>> cachedFields;
+            internal static readonly FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>> cachedFields;
             internal static readonly Dictionary<Type, Type[]>                      cachedTypes;
 #if DEBUG && !PROFILER
             internal static readonly Dictionary<Type, ECSTuple<object, int>> implementorsByType;
@@ -21,7 +21,7 @@ namespace Svelto.ECS
 #endif
             static EntityView()
             {
-                cachedFields = new FasterList<KeyValuePair<Type, ActionCast<T>>>();
+                cachedFields = new FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>>();
 
                 var type = typeof(T);
 
@@ -34,7 +34,7 @@ namespace Svelto.ECS
 
                     var setter = FastInvoke<T>.MakeSetter(field);
 
-                    cachedFields.Add(new KeyValuePair<Type, ActionCast<T>>(field.FieldType, setter));
+                    cachedFields.Add(new KeyValuePair<Type, FastInvokeActionCast<T>>(field.FieldType, setter));
                 }
 
                 cachedTypes = new Dictionary<Type, Type[]>();
@@ -73,10 +73,10 @@ namespace Svelto.ECS
         public void BuildEntityAndAddToList(ref ITypeSafeDictionary dictionary, EGID egid,
             IEnumerable<object> implementors)
         {
-            if (dictionary == null)
-                dictionary = new TypeSafeDictionary<T>();
+            if (dictionary == null) 
+                dictionary = TypeSafeDictionaryFactory<T>.Create();
 
-            var castedDic = dictionary as TypeSafeDictionary<T>;
+            var castedDic = dictionary as ITypeSafeDictionary<T>;
 
             if (NEEDS_REFLECTION)
             {
@@ -109,7 +109,7 @@ namespace Svelto.ECS
         static ITypeSafeDictionary Preallocate(ref ITypeSafeDictionary dictionary, uint size)
         {
             if (dictionary == null)
-                dictionary = new TypeSafeDictionary<T>(size);
+                dictionary = TypeSafeDictionaryFactory<T>.Create(size);
             else
                 dictionary.SetCapacity(size);
 
@@ -133,7 +133,7 @@ namespace Svelto.ECS
 
         readonly T                        _initializer;
 
-        static FasterList<KeyValuePair<Type, ActionCast<T>>> entityViewBlazingFastReflection =>
+        static FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>> entityViewBlazingFastReflection =>
             EntityView.cachedFields;
 
         internal static readonly Type ENTITY_VIEW_TYPE;

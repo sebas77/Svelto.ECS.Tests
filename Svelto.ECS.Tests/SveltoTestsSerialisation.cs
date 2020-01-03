@@ -287,13 +287,13 @@ namespace UnitTests
 
             public bool HasAnyEntityInGroup<T>(ExclusiveGroup groupID) where T : struct, IEntityStruct
             {
-                entitiesDB.QueryEntities<T>(groupID, out var count);
+                entitiesDB.QueryEntities<T>(groupID).ToFastAccess(out var count);
                 return count > 0;
             }
 
             public bool HasAnyEntityInGroupArray<T>(ExclusiveGroup groupID) where T: struct, IEntityStruct
             {
-                entitiesDB.QueryEntities<T>(groupID, out var count);
+                entitiesDB.QueryEntities<T>(groupID).ToFastAccess(out var count);
 
                 return count != 0;
             }

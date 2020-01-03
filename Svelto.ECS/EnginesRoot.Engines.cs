@@ -33,7 +33,7 @@ namespace Svelto.ECS
         /// </summary>
         public EnginesRoot(IEntitySubmissionScheduler entityViewScheduler)
         {
-            _entitiesOperations = new FasterDictionary<ulong, EntitySubmitOperation>();
+            _entitiesOperations = new ThreadSafeDictionary<ulong, EntitySubmitOperation>();
             _reactiveEnginesAddRemove = new FasterDictionary<RefWrapper<Type>, FasterList<IEngine>>();
             _reactiveEnginesSwap = new FasterDictionary<RefWrapper<Type>, FasterList<IEngine>>();
             _enginesSet = new FasterList<IEngine>();
@@ -61,6 +61,7 @@ namespace Svelto.ECS
         {
             var type = engine.GetType();
             var refWrapper = new RefWrapper<Type>(type);
+            DBC.ECS.Check.Require(engine != null, "Engine to add is invalid or null");
             DBC.ECS.Check.Require(
                 _enginesTypeSet.Contains(refWrapper) == false ||
                 type.ContainsCustomAttribute(typeof(AllowMultipleAttribute)) == true,

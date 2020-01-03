@@ -146,6 +146,35 @@ namespace UnitTests
             
             Assert.Throws(typeof(ECSException), CheckFunction);
         }
+        
+        [TestCase]
+        public void TestGroupEntitySwap()
+        {
+            for (int i = 0; i < 29; i++)
+            {
+                EGID egid = new EGID((uint) i, group1);
+                _entityFactory.BuildEntity<TestDescriptor>(egid, new[] { new TestIt(2) });
+            }
+
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            _entityFunctions.SwapEntitiesInGroup<TestDescriptor>(group1, group2);
+
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            
+            bool allFound = true;
+            bool mustNotBeFound = false;
+
+            for (uint i = 0; i < 29; i++)
+                allFound &= _neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(i, group2));
+
+            for (int i = 0; i < 29; i++)
+                mustNotBeFound |= _neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID((uint) i, group1));
+
+            
+            Assert.IsTrue(allFound);
+            Assert.IsTrue(mustNotBeFound == false);
+        }
 
         [TestCase]
         public void TestMegaEntitySwap()
@@ -812,7 +841,7 @@ namespace UnitTests
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityStruct>(group1));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(group1));
             uint count;
-            Assert.AreSame(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(group1, out count)[0].TestIt, testIt);
+            Assert.AreSame(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(group1)[0].TestIt, testIt);
         }
         
         [TestCase((uint)0)][TestCase((uint)1)][TestCase((uint)2)]
@@ -960,8 +989,8 @@ namespace UnitTests
             uint count2;
             for (uint i = 0; i < 4; i++)
             {
-                var buffer1 = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>(groupR4 + i, out count);
-                var buffer2 = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(groupR4 + i, out count2);
+                var buffer1 = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>(groupR4 + i).ToFastAccess(out count);
+                var buffer2 = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(groupR4 + i).ToFastAccess(out count2);
 
                 Assert.AreEqual(count, 1);
                 Assert.AreEqual(count2, 1);
@@ -1246,10 +1275,9 @@ namespace UnitTests
 
             public void Remove(ref TestEntityViewStruct entityView, EGID egid)
             {
-                throw new NotImplementedException();
             }
 
-            IEntityFactory _entityFactory;
+            readonly IEntityFactory _entityFactory;
         }
 
         class TestEngine: IQueryingEntitiesEngine
@@ -1264,17 +1292,12 @@ namespace UnitTests
 
             public bool HasAnyEntityInGroup<T>(ExclusiveGroup groupID) where T : struct, IEntityStruct
             {
-                uint count;
-                entitiesDB.QueryEntities<T>(groupID, out count);
-                return count > 0;
+                return entitiesDB.QueryEntities<T>(groupID).length > 0;
             }
 
             public bool HasAnyEntityInGroupArray<T>(ExclusiveGroup groupID) where T: struct, IEntityStruct
             {
-                uint count;
-                entitiesDB.QueryEntities<T>(groupID, out count);
-
-                return count != 0;
+                return entitiesDB.QueryEntities<T>(groupID).length > 0;
             }
         }
     }

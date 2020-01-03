@@ -1,5 +1,4 @@
-﻿using System;
-using Svelto.ECS.Schedulers;
+﻿using Svelto.ECS.Schedulers;
 
 namespace Svelto.ECS
 {
@@ -15,11 +14,9 @@ namespace Svelto.ECS
         {
             set => _onTick = value;
         }
-        
-        EnginesRoot.EntitiesSubmitter _onTick;
 
-        public void Dispose()
-        {
-        }
+        public void Dispose() { }
+
+        EnginesRoot.EntitiesSubmitter _onTick;
     }
 }

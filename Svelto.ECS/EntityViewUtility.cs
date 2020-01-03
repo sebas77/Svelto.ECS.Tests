@@ -25,7 +25,7 @@ namespace Svelto.ECS
 
         public static void FillEntityView<T>(this IEntityBuilder entityBuilder
                                            , ref  T              entityView
-                                           , FasterList<KeyValuePair<Type, ActionCast<T>>>
+                                           , FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>>
                                                  entityViewBlazingFastReflection
                                            , IEnumerable<object> implementors,
 #if DEBUG && !PROFILER
@@ -38,7 +38,7 @@ namespace Svelto.ECS
         {
             //efficient way to collect the fields of every EntityViewType
             var setters =
-                FasterList<KeyValuePair<Type, ActionCast<T>>>.NoVirt.ToArrayFast(entityViewBlazingFastReflection, out var count);
+                FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>>.NoVirt.ToArrayFast(entityViewBlazingFastReflection, out var count);
 
             foreach (var implementor in implementors)
             {

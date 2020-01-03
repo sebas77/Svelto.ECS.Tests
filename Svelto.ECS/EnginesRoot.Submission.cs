@@ -56,8 +56,12 @@ namespace Svelto.ECS
                                         entitiesOperations[i].fromID, null);
                                     break;
                                 case EntitySubmitOperationType.RemoveGroup:
-                                    RemoveGroupAndEntitiesFromDB(
+                                    RemoveGroupAndEntities(
                                         entitiesOperations[i].fromID.groupID, profiler);
+                                    break;
+                                case EntitySubmitOperationType.SwapGroup:
+                                    SwapEntitiesBetweenGroups(entitiesOperations[i].fromID.groupID,
+                                        entitiesOperations[i].toID.groupID, profiler);
                                     break;
                             }
                         }
@@ -106,30 +110,21 @@ namespace Svelto.ECS
                 foreach (var groupOfEntitiesToSubmit in _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
                 {
                     var groupID = groupOfEntitiesToSubmit.Key;
-
-                    //if the group doesn't exist in the current DB let's create it first
-                    if (_groupEntityViewsDB.TryGetValue(groupID, out var groupDB) == false)
-                        groupDB = _groupEntityViewsDB[groupID] =
-                            new FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>();
+                    
+                    FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> groupDB = GetOrCreateGroup(groupID);
 
                     //add the entityViews in the group
                     foreach (var entityViewsToSubmit in _groupedEntityToAdd.other[groupID])
                     {
                         var type = entityViewsToSubmit.Key;
-                        var typeSafeDictionary = entityViewsToSubmit.Value;
-
+                        var targetTypeSafeDictionary = entityViewsToSubmit.Value;
                         var wrapper = new RefWrapper<Type>(type);
-                        if (groupDB.TryGetValue(wrapper, out var dbDic) == false)
-                            dbDic = groupDB[wrapper] = typeSafeDictionary.Create();
+
+                        ITypeSafeDictionary dbDic = GetOrCreateTypeSafeDictionary(groupID, groupDB, wrapper, 
+                            targetTypeSafeDictionary);
 
                         //Fill the DB with the entity views generate this frame.
-                        dbDic.AddEntitiesFromDictionary(typeSafeDictionary, groupID);
-
-                        if (_groupsPerEntity.TryGetValue(wrapper, out var groupedGroup) == false)
-                            groupedGroup = _groupsPerEntity[wrapper] =
-                                new FasterDictionary<uint, ITypeSafeDictionary>();
-
-                        groupedGroup[groupID] = dbDic;
+                        dbDic.AddEntitiesFromDictionary(targetTypeSafeDictionary, groupID);
                     }
                 }
             }
@@ -148,15 +143,15 @@ namespace Svelto.ECS
                     {
                         var realDic = groupDB[new RefWrapper<Type>(entityViewsToSubmit.Key)];
 
-                        entityViewsToSubmit.Value.AddEntitiesToEngines(_reactiveEnginesAddRemove, realDic, in profiler,
-                            new ExclusiveGroup.ExclusiveGroupStruct(groupToSubmit.Key));
+                        entityViewsToSubmit.Value.AddEntitiesToEngines(_reactiveEnginesAddRemove, realDic,
+                            new ExclusiveGroupStruct(groupToSubmit.Key), in profiler);
                     }
                 }
             }
         }
 
-        DoubleBufferedEntitiesToAdd                             _groupedEntityToAdd;
-        readonly IEntitySubmissionScheduler                     _scheduler;
-        readonly FasterDictionary<ulong, EntitySubmitOperation> _entitiesOperations;
+        DoubleBufferedEntitiesToAdd                                 _groupedEntityToAdd;
+        readonly IEntitySubmissionScheduler                         _scheduler;
+        readonly ThreadSafeDictionary<ulong, EntitySubmitOperation> _entitiesOperations;
     }
 }
