@@ -6,6 +6,22 @@ using System.Collections.Generic;
 namespace Svelto.ECS
 {
     /// <summary>
+    /// still experimental alternative to ExclusiveGroup, use this like:
+    /// use this like:
+    /// public class TriggersGroup : ExclusiveGroup<TriggersGroup> {}
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public abstract class NamedExclusiveGroup<T>:ExclusiveGroup
+    {
+        public static ExclusiveGroup Group = new ExclusiveGroup();
+        public static string         name  = typeof(T).FullName;
+
+        public NamedExclusiveGroup() { }
+        public NamedExclusiveGroup(string recognizeAs) : base(recognizeAs)  {}
+        public NamedExclusiveGroup(ushort range) : base(range) {}
+    }
+
+    /// <summary>
     /// Exclusive Groups guarantee that the GroupID is unique.
     ///
     /// The best way to use it is like:
@@ -17,20 +33,6 @@ namespace Svelto.ECS
     ///     public static ExclusiveGroup[] GroupOfGroups = { MyExclusiveGroup1, ...}; //for each on this!
     /// }
     /// </summary>
-    ///
-
-    ///use this like:
-    /// public class TriggersGroup : ExclusiveGroup<TriggersGroup> {}
-    public abstract class NamedExclusiveGroup<T>:ExclusiveGroup
-    {
-        public static ExclusiveGroup Group = new ExclusiveGroup();
-        public static string         name  = typeof(T).FullName;
-
-        public NamedExclusiveGroup() { }
-        public NamedExclusiveGroup(string recognizeAs) : base(recognizeAs)  {}
-        public NamedExclusiveGroup(ushort range) : base(range) {}
-    }
-
     public class ExclusiveGroup
     {
         public ExclusiveGroup()

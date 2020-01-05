@@ -12,6 +12,10 @@ namespace Svelto.ECS
     [StructLayout(LayoutKind.Explicit, Size = 8)]
     public struct EGID:IEquatable<EGID>,IEqualityComparer<EGID>,IComparable<EGID>
     {
+        [FieldOffset(0)] public readonly uint                 entityID;
+        [FieldOffset(4)] public readonly ExclusiveGroupStruct groupID;
+        [FieldOffset(0)]                 ulong                _GID;
+        
         public static bool operator ==(EGID obj1, EGID obj2)
         {
             return obj1._GID == obj2._GID;
@@ -69,9 +73,5 @@ namespace Svelto.ECS
         {
             return "id ".FastConcat(entityID).FastConcat(" group ").FastConcat(groupID);
         }
-
-        [FieldOffset(0)] public readonly uint                 entityID;
-        [FieldOffset(4)] public readonly ExclusiveGroupStruct groupID;
-        [FieldOffset(0)]                 ulong                _GID;
     }
 }

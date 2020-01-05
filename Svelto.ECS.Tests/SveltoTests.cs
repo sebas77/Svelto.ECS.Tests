@@ -18,6 +18,12 @@ namespace UnitTests
         static readonly ExclusiveGroup group8 = new ExclusiveGroup();
         static readonly ExclusiveGroup group0 = new ExclusiveGroup();
         static readonly ExclusiveGroup groupR4 = new ExclusiveGroup(4);
+        
+        class NamedGroup1 : NamedExclusiveGroup<NamedGroup1> {}
+        class NamedGroup2 : NamedExclusiveGroup<NamedGroup2> {}
+        class NamedGroup3 : NamedExclusiveGroup<NamedGroup3> {}
+        
+        static ExclusiveGroup[] groups = { NamedGroup1.Group, NamedGroup2.Group, NamedGroup3.Group};
 
         [SetUp]
         public void Init()
@@ -1017,6 +1023,50 @@ namespace UnitTests
             {
                 Assert.Fail();
             });
+        }
+        
+        [TestCase]
+        public void TestEntityCollectionsIteration()
+        {
+            var init = _entityFactory.BuildEntity<TestDescriptor7>(0, NamedGroup1.Group);
+            init.Init(new TestEntityStruct() { value = 5 });
+            init = _entityFactory.BuildEntity<TestDescriptor7>(1, NamedGroup2.Group);
+            init.Init(new TestEntityStruct() { value = 4 });
+            init = _entityFactory.BuildEntity<TestDescriptor7>(2, NamedGroup3.Group);
+            init.Init(new TestEntityStruct() { value = 1 });
+            
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            var collection = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>(groups);
+
+            var enumerator = collection.GetEnumerator();
+            enumerator.MoveNext();
+            Assert.That(enumerator.Current.value == 5, Is.True);
+            enumerator.MoveNext();
+            Assert.That(enumerator.Current.value == 4, Is.True);
+            enumerator.MoveNext();
+            Assert.That(enumerator.Current.value == 1, Is.True);
+        }
+        
+        [TestCase]
+        public void TestEntityCollectionsIterationWithDeletedGroup()
+        {
+            var init = _entityFactory.BuildEntity<TestDescriptor7>(0, NamedGroup1.Group);
+            init.Init(new TestEntityStruct() { value = 5 });
+            init = _entityFactory.BuildEntity<TestDescriptor7>(1, NamedGroup2.Group);
+            init.Init(new TestEntityStruct() { value = 4 });
+            init = _entityFactory.BuildEntity<TestDescriptor7>(2, NamedGroup3.Group);
+            init.Init(new TestEntityStruct() { value = 1 });
+            
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            _enginesRoot.GenerateEntityFunctions().RemoveGroupAndEntities(NamedGroup2.Group);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            var collection = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>(groups);
+
+            var enumerator = collection.GetEnumerator();
+            enumerator.MoveNext();
+            Assert.That(enumerator.Current.value == 5, Is.True);
+            enumerator.MoveNext();
+            Assert.That(enumerator.Current.value == 1, Is.True);
         }
 
         [TestCase]

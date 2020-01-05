@@ -132,7 +132,7 @@ namespace Svelto.ECS.Internal
         public uint Count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _implementation.Count;
+            get => _implementation.count;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

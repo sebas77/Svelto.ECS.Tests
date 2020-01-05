@@ -31,7 +31,7 @@ namespace Svelto.DataStructures
                 _lockQ.EnterReadLock();
                 try
                 {
-                    return (uint)_dict.Count;
+                    return (uint)_dict.count;
                 }
                 finally
                 {

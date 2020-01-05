@@ -93,7 +93,7 @@ namespace Svelto.DataStructures
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                DBC.Common.Check.Require(index < _count, $"out of bound index '{index}'. Size of list is '{_count}'");
+                DBC.Common.Check.Require(index < _count, "out of bound index");
                 return ref _buffer[index];
             }
         }

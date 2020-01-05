@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
@@ -18,7 +18,7 @@ namespace Svelto.ECS
                 do
                 {
                     SingleSubmission(profiler);
-                } while ((_groupedEntityToAdd.currentEntitiesCreatedPerGroup.Count > 0 ||
+                } while ((_groupedEntityToAdd.currentEntitiesCreatedPerGroup.count > 0 ||
                           _entitiesOperations.Count > 0) && ++iterations < 5);
 
 #if DEBUG && !PROFILER
@@ -82,7 +82,7 @@ namespace Svelto.ECS
 
             _groupedEntityToAdd.Swap();
 
-            if (_groupedEntityToAdd.otherEntitiesCreatedPerGroup.Count > 0)
+            if (_groupedEntityToAdd.otherEntitiesCreatedPerGroup.count > 0)
             {
                 using (profiler.Sample("Add operations"))
                 {

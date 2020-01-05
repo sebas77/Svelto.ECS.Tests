@@ -45,7 +45,7 @@ using System.Runtime.InteropServices;
             get => _values;
         }
 
-        public uint Count => _freeValueCellIndex;
+        public uint count => _freeValueCellIndex;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(TKey key, in TValue value)
@@ -446,14 +446,14 @@ using System.Runtime.InteropServices;
             {
                 _dic = dic;
                 _index = -1;
-                _count = (int) dic.Count;
+                _count = (int) dic.count;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool MoveNext()
             {
 #if DEBUG && !PROFILER
-                if (_count != _dic.Count)
+                if (_count != _dic.count)
                     throw new FasterDictionaryException("can't modify a dictionary during its iteration");
 #endif
                 if (_index < _count - 1)

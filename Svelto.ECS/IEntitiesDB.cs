@@ -1,3 +1,4 @@
+using System;
 using Svelto.DataStructures;
 
 namespace Svelto.ECS
@@ -34,7 +35,8 @@ namespace Svelto.ECS
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        EntityCollections<T> QueryEntities<T>(ExclusiveGroup[] groups) where T : struct, IEntityStruct;
+        EntityCollections<T> QueryEntities<T>(ExclusiveGroup[] groups)
+            where T : struct, IEntityStruct;
         EntityCollections<T1, T2> QueryEntities<T1, T2>(ExclusiveGroup[] groups)
             where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct;
 

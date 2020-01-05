@@ -46,7 +46,7 @@ namespace Svelto.ECS
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Buffer ToBuffer()
+        public Buffer ToBuffer()
         {
             return _array;
         }
@@ -196,9 +196,9 @@ namespace Svelto.ECS
             _array2.Dispose();
         }
 
-        public BuffersTuple<BufferT1, BufferT2> ToBuffers()
+        public BufferTuple<BufferT1, BufferT2> ToBuffers()
         {
-            var bufferTuple = new BuffersTuple<BufferT1, BufferT2>
+            var bufferTuple = new BufferTuple<BufferT1, BufferT2>
                 (_array1.ToBuffer(), _array2.ToBuffer(), length);
             return bufferTuple;
         }
@@ -293,54 +293,11 @@ namespace Svelto.ECS
             return (_array1.ToFastAccess(out _), _array2.ToFastAccess(out _), _array3.ToFastAccess(out _));
         }
         
-        public BuffersTuple<BufferT1, BufferT2, BufferT3> ToBuffers()
+        public BufferTuple<BufferT1, BufferT2, BufferT3> ToBuffers()
         {
-            var bufferTuple = new BuffersTuple<BufferT1, BufferT2, BufferT3>
+            var bufferTuple = new BufferTuple<BufferT1, BufferT2, BufferT3>
                 (_array1.ToBuffer(), _array2.ToBuffer(), _array3.ToBuffer(), length);
             return bufferTuple;
-        }
-    }
-
-    public readonly struct BuffersTuple<BufferT1, BufferT2, BufferT3>:IDisposable where BufferT1:IDisposable where BufferT2:IDisposable where BufferT3:IDisposable
-    {
-        public readonly BufferT1 buffer1;
-        public readonly BufferT2 buffer2;
-        public readonly BufferT3 buffer3;
-        public readonly uint length;
-
-        public BuffersTuple(BufferT1 bufferT1, BufferT2 bufferT2, BufferT3 bufferT3, uint length) : this()
-        {
-            this.buffer1 = bufferT1;
-            this.buffer2 = bufferT2;
-            this.buffer3 = bufferT3;
-            this.length = length;
-        }
-
-        public void Dispose()
-        {
-            buffer1.Dispose();
-            buffer2.Dispose();
-            buffer3.Dispose();
-        }
-    }
-    
-    public readonly struct BuffersTuple<BufferT1, BufferT2>:IDisposable where BufferT1:IDisposable where BufferT2:IDisposable
-    {
-        public readonly BufferT1 buffer1;
-        public readonly BufferT2 buffer2;
-        public readonly uint     length;
-
-        public BuffersTuple(BufferT1 bufferT1, BufferT2 bufferT2, uint length) : this()
-        {
-            this.buffer1 = bufferT1;
-            this.buffer2 = bufferT2;
-            this.length = length;
-        }
-
-        public void Dispose()
-        {
-            buffer1.Dispose();
-            buffer2.Dispose();
         }
     }
 
@@ -370,6 +327,7 @@ namespace Svelto.ECS
 
             public bool MoveNext()
             {
+                //attention, the while is necessary to skip empty groups
                 while (_index + 1 >= _count && ++_indexGroup < _groups.Length)
                 {
                     _index = -1;
@@ -399,7 +357,8 @@ namespace Svelto.ECS
         }
     }
 
-    public struct EntityCollections<T1, T2> where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct
+    public struct EntityCollections<T1, T2> 
+        where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct
     {
         public EntityCollections(IEntitiesDB db, ExclusiveGroup[] groups) : this()
         {
@@ -407,6 +366,7 @@ namespace Svelto.ECS
             _groups = groups;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EntityGroupsIterator GetEnumerator() { return new EntityGroupsIterator(_db, _groups); }
 
         readonly IEntitiesDB      _db;
@@ -424,6 +384,7 @@ namespace Svelto.ECS
 
             public bool MoveNext()
             {
+                //attention, the while is necessary to skip empty groups
                 while (_index + 1 >= _count && ++_indexGroup < _groups.Length)
                 {
                     _index = -1;
@@ -471,6 +432,49 @@ namespace Svelto.ECS
 
             EntityCollection<T1, ManagedBuffer<T1>> _array1; 
             EntityCollection<T2, ManagedBuffer<T2>> _array2;
+        }
+    }
+    
+    public readonly struct BufferTuple<BufferT1, BufferT2, BufferT3>:IDisposable where BufferT1:IDisposable where BufferT2:IDisposable where BufferT3:IDisposable
+    {
+        public readonly BufferT1 buffer1;
+        public readonly BufferT2 buffer2;
+        public readonly BufferT3 buffer3;
+        public readonly uint     length;
+
+        public BufferTuple(BufferT1 bufferT1, BufferT2 bufferT2, BufferT3 bufferT3, uint length) : this()
+        {
+            this.buffer1 = bufferT1;
+            this.buffer2 = bufferT2;
+            this.buffer3 = bufferT3;
+            this.length = length;
+        }
+
+        public void Dispose()
+        {
+            buffer1.Dispose();
+            buffer2.Dispose();
+            buffer3.Dispose();
+        }
+    }
+    
+    public readonly struct BufferTuple<BufferT1, BufferT2>:IDisposable where BufferT1:IDisposable where BufferT2:IDisposable
+    {
+        public readonly BufferT1 buffer1;
+        public readonly BufferT2 buffer2;
+        public readonly uint     length;
+
+        public BufferTuple(BufferT1 bufferT1, BufferT2 bufferT2, uint length) : this()
+        {
+            this.buffer1 = bufferT1;
+            this.buffer2 = bufferT2;
+            this.length = length;
+        }
+
+        public void Dispose()
+        {
+            buffer1.Dispose();
+            buffer2.Dispose();
         }
     }
 

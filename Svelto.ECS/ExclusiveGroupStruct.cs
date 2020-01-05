@@ -99,7 +99,7 @@ namespace Svelto.ECS
             return @group;
         }
 
-        [FieldOffset(0)] uint        _id;
+        [FieldOffset(0)] uint       _id;
         [FieldOffset(3)] byte _bytemask;
         static uint _globalId;
     }

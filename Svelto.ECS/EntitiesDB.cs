@@ -120,7 +120,7 @@ namespace Svelto.ECS.Internal
             if (SafeQueryEntityDictionary<T>(groupStructId, out var typeSafeDictionary) == false)
                 throw new EntityGroupNotFoundException(groupStructId, typeof(T));
 
-            return (typeSafeDictionary as ITypeSafeDictionary<T>).ToEGIDMapper();
+            return (typeSafeDictionary as ITypeSafeDictionary<T>).ToEGIDMapper(groupStructId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -130,7 +130,7 @@ namespace Svelto.ECS.Internal
             if (SafeQueryEntityDictionary<T>(groupStructId, out var typeSafeDictionary) == false)
                 throw new EntityGroupNotFoundException(groupStructId, typeof(T));
 
-            return (typeSafeDictionary as TypeSafeDictionary<T>).ToNativeEGIDMapper<T>();
+            return (typeSafeDictionary as TypeSafeDictionary<T>).ToNativeEGIDMapper<T>(groupStructId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -139,10 +139,10 @@ namespace Svelto.ECS.Internal
             where T : struct, IEntityStruct
         {
             mapper = default;
-            if (SafeQueryEntityDictionary<T>(groupStructId, out var typeSafeDictionary) == false)
+            if (SafeQueryEntityDictionary<T>(groupStructId, out var typeSafeDictionary) == false || typeSafeDictionary.Count == 0)
                 return false;
 
-            mapper = (typeSafeDictionary as ITypeSafeDictionary<T>).ToEGIDMapper();
+            mapper = (typeSafeDictionary as ITypeSafeDictionary<T>).ToEGIDMapper(groupStructId);
 
             return true;
         }
@@ -153,10 +153,10 @@ namespace Svelto.ECS.Internal
             where T : unmanaged, IEntityStruct
         {
             mapper = default;
-            if (SafeQueryEntityDictionary<T>(groupStructId, out var typeSafeDictionary) == false)
+            if (SafeQueryEntityDictionary<T>(groupStructId, out var typeSafeDictionary) == false || typeSafeDictionary.Count == 0)
                 return false;
 
-            mapper = (typeSafeDictionary as TypeSafeDictionary<T>).ToNativeEGIDMapper();
+            mapper = (typeSafeDictionary as TypeSafeDictionary<T>).ToNativeEGIDMapper(groupStructId);
 
             return true;
         }
@@ -217,7 +217,7 @@ namespace Svelto.ECS.Internal
         {
             if (_groupEntityViewsDB.TryGetValue(gid, out FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> group) == true)
             {
-                return group.Count > 0;
+                return group.count > 0;
             }
 
             return false;

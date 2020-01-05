@@ -66,7 +66,7 @@ namespace UnitTests
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(1, NamedGroup1.Group).value, Is.EqualTo(3));
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructPartiallySerialized>(1, NamedGroup1.Group).value1, Is.EqualTo(2));
         }
-        
+
         [TestCase]
         public void TestSerializingToByteArrayNewEnginesRoot()
         {

@@ -4,9 +4,18 @@ using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
-    public struct NativeEGIDMapper<T>:IDisposable where T : unmanaged, IEntityStruct
+    public readonly struct NativeEGIDMapper<T>:IDisposable where T : unmanaged, IEntityStruct
     {
-        internal NativeFasterDictionaryStruct<uint, T> map;
+        internal readonly NativeFasterDictionaryStruct<uint, T> map;
+
+        public readonly ExclusiveGroupStruct groupID;
+
+        public NativeEGIDMapper(ExclusiveGroupStruct groupStructId, NativeFasterDictionaryStruct<uint, T> toNative):this()
+        {
+            groupID = groupStructId;
+            map = toNative;
+        }
+
         public uint Length => map.Count;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
