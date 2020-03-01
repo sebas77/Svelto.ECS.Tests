@@ -95,7 +95,7 @@ namespace Svelto.DataStructures
             }
         }
         
-        public void Add(TKey key, ref TValue value)
+        public void Add(TKey key, in TValue value)
         {
             LockQ.EnterWriteLock();
             try
@@ -196,11 +196,7 @@ namespace Svelto.DataStructures
         }
 
         // This is the internal dictionary that we are wrapping
-        readonly FasterDictionary<TKey, TValue> dict;
-
-        readonly ReaderWriterLockSlimEx LockQ = ReaderWriterLockSlimEx.Create();
-
-        public void Update(TKey key, ref TValue value)
+        public void Update(TKey key, in TValue value)
         {
             LockQ.EnterWriteLock();
             try
@@ -212,5 +208,22 @@ namespace Svelto.DataStructures
                 LockQ.ExitWriteLock();
             }
         }
+
+        public void CopyValuesTo(TValue[] tasks)
+        {
+            LockQ.EnterReadLock();
+            try
+            {
+                Array.Copy(dict.valuesArray, tasks, dict.Count);
+            }
+            finally
+            {
+                LockQ.ExitReadLock();
+            }
+        }
+
+        readonly FasterDictionary<TKey, TValue> dict;
+
+        readonly ReaderWriterLockSlimEx LockQ = ReaderWriterLockSlimEx.Create();
     }
 }

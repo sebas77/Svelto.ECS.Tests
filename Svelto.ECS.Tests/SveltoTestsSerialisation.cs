@@ -315,7 +315,9 @@ namespace UnitTests
     
         struct EntityStructPartiallySerialized : IEntityStruct
         {
+#pragma warning disable 169
             int value;
+#pragma warning restore 169
             [PartialSerializerField] public int value1;
         }
         
