@@ -14,7 +14,7 @@ namespace UnitTests
         [SetUp]
         public void Init()
         {
-            _simpleSubmissionEntityViewScheduler = new SimpleSubmissionEntityViewScheduler();
+            _simpleSubmissionEntityViewScheduler = new SimpleSubmissioncheduler();
             _enginesRoot                         = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
             _neverDoThisIsJustForTheTest         = new TestEngine();
 
@@ -42,9 +42,9 @@ namespace UnitTests
             var generateEntitySerializer = _enginesRoot.GenerateEntitySerializer();
             var simpleSerializationData = new SimpleSerializationData(bytes);
             generateEntitySerializer.SerializeEntity(new EGID(0, NamedGroup1.Group), 
-                                                     simpleSerializationData, SerializationType.Storage);
+                                                     simpleSerializationData, (int) SerializationType.Storage);
             generateEntitySerializer.SerializeEntity(new EGID(1, NamedGroup1.Group), 
-                                                     simpleSerializationData, SerializationType.Storage);
+                                                     simpleSerializationData, (int) SerializationType.Storage);
             
             _entityFunctions.RemoveGroupAndEntities(NamedGroup1.Group);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
@@ -52,9 +52,9 @@ namespace UnitTests
             simpleSerializationData.Reset();
 
             generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData,
-                                                          SerializationType.Storage);
+                                                          (int) SerializationType.Storage);
             generateEntitySerializer.DeserializeNewEntity(new EGID(1, NamedGroup1.Group), simpleSerializationData,
-                                                          SerializationType.Storage);
+                                                          (int) SerializationType.Storage);
             
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
@@ -66,43 +66,40 @@ namespace UnitTests
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(1, NamedGroup1.Group).value, Is.EqualTo(3));
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructPartiallySerialized>(1, NamedGroup1.Group).value1, Is.EqualTo(2));
         }
-
+        
         [TestCase]
         public void TestSerializingToByteArrayNewEnginesRoot()
         {
             var init = _entityFactory.BuildEntity<SerializableEntityDescriptor>(0, NamedGroup1.Group);
-            init.Init(new EntityStructSerialized() { value = 5 });
-            init.Init(new EntityStructSerialized2() { value = 4 });
+            init.Init(new EntityStructSerialized() { value           = 5 });
+            init.Init(new EntityStructSerialized2() { value          = 4 });
             init.Init(new EntityStructPartiallySerialized() { value1 = 3 });
             init = _entityFactory.BuildEntity<SerializableEntityDescriptor>(1, NamedGroup1.Group);
             init.Init(new EntityStructSerialized() { value           = 4 });
-            init.Init(new EntityStructSerialized2() { value = 3 });
+            init.Init(new EntityStructSerialized2() { value          = 3 });
             init.Init(new EntityStructPartiallySerialized() { value1 = 2 });
             
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            FasterList<byte> bytes = new FasterList<byte>();
             var generateEntitySerializer = _enginesRoot.GenerateEntitySerializer();
-            var simpleSerializationData = new SimpleSerializationData(bytes);
+            var simpleSerializationData = new SimpleSerializationData(new FasterList<byte>());
             generateEntitySerializer.SerializeEntity(new EGID(0, NamedGroup1.Group), 
-                                                     simpleSerializationData, SerializationType.Storage);
+                                                     simpleSerializationData, (int) SerializationType.Storage);
             generateEntitySerializer.SerializeEntity(new EGID(1, NamedGroup1.Group), 
-                                                     simpleSerializationData, SerializationType.Storage);
-
+                                                     simpleSerializationData, (int) SerializationType.Storage);
             _enginesRoot.Dispose();
+            
             var newEnginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
-            
             _neverDoThisIsJustForTheTest = new TestEngine();
-            
             newEnginesRoot.AddEngine(_neverDoThisIsJustForTheTest);
             
             simpleSerializationData.Reset();
             generateEntitySerializer = newEnginesRoot.GenerateEntitySerializer();
 
             generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData,
-                                                          SerializationType.Storage);
+                                                          (int) SerializationType.Storage);
             generateEntitySerializer.DeserializeNewEntity(new EGID(1, NamedGroup1.Group), simpleSerializationData,
-                                                          SerializationType.Storage);
+                                                          (int) SerializationType.Storage);
             
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
@@ -128,7 +125,7 @@ namespace UnitTests
             var generateEntitySerializer = _enginesRoot.GenerateEntitySerializer();
             var simpleSerializationData = new SimpleSerializationData(bytes);
             generateEntitySerializer.SerializeEntity(new EGID(0, NamedGroup1.Group), 
-                                                     simpleSerializationData, SerializationType.Storage);
+                                                     simpleSerializationData, (int) SerializationType.Storage);
 
             _enginesRoot.Dispose();
             var newEnginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
@@ -143,7 +140,7 @@ namespace UnitTests
             generateEntitySerializer.RegisterSerializationFactory<SerializableEntityDescriptorV0>(new DefaultVersioningFactory<SerializableEntityDescriptorV1>(newEnginesRoot.GenerateEntityFactory()));
 
             generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData,
-                                                          SerializationType.Storage);
+                                                          (int) SerializationType.Storage);
             
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
@@ -165,7 +162,7 @@ namespace UnitTests
             var generateEntitySerializer = _enginesRoot.GenerateEntitySerializer();
             var simpleSerializationData = new SimpleSerializationData(bytes);
             generateEntitySerializer.SerializeEntity(new EGID(0, NamedGroup1.Group), 
-                                                     simpleSerializationData, SerializationType.Storage);
+                                                     simpleSerializationData, (int) SerializationType.Storage);
 
             _enginesRoot.Dispose();
             var newEnginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
@@ -179,7 +176,7 @@ namespace UnitTests
             generateEntitySerializer.RegisterSerializationFactory<SerializableEntityDescriptorWithViews>(factory);
 
             generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData,
-                                                          SerializationType.Storage);
+                                                          (int) SerializationType.Storage);
             
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
@@ -188,11 +185,18 @@ namespace UnitTests
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructPartiallySerialized>(0, NamedGroup1.Group).value1, Is.EqualTo(3));
         }
 
-        EnginesRoot                         _enginesRoot;
-        IEntityFactory                      _entityFactory;
-        IEntityFunctions                    _entityFunctions;
-        SimpleSubmissionEntityViewScheduler _simpleSubmissionEntityViewScheduler;
-        TestEngine                          _neverDoThisIsJustForTheTest;
+        EnginesRoot              _enginesRoot;
+        IEntityFactory           _entityFactory;
+        IEntityFunctions         _entityFunctions;
+        SimpleSubmissioncheduler _simpleSubmissionEntityViewScheduler;
+        TestEngine               _neverDoThisIsJustForTheTest;
+        
+        //todo: this should not be at framework level
+        public enum SerializationType
+        {
+            Network,
+            Storage,
+        }
 
         class SerializableEntityDescriptor : SerializableEntityDescriptor<
                 SerializableEntityDescriptor.DefaultPatternForEntityDescriptor>
@@ -200,16 +204,16 @@ namespace UnitTests
             [HashName("DefaultPatternForEntityDescriptor")]
             internal class DefaultPatternForEntityDescriptor : IEntityDescriptor
             {
-                public IEntityBuilder[] entitiesToBuild => _entitiesToBuild;
+                public IEntityComponentBuilder[] componentsToBuild => ComponentsToBuild;
                 
-                static readonly IEntityBuilder[] _entitiesToBuild = {
-                        new EntityBuilder<EntityStructNotSerialized>(),    
-                        new SerializableEntityBuilder<EntityStructSerialized>(),
-                        new SerializableEntityBuilder<EntityStructSerialized2>
-                            ((SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>()) ,
-                             (SerializationType.Network, new DefaultSerializer<EntityStructSerialized2>())),
-                        new SerializableEntityBuilder<EntityStructPartiallySerialized>
-                            ((SerializationType.Storage, new PartialSerializer <EntityStructPartiallySerialized>())
+                static readonly IEntityComponentBuilder[] ComponentsToBuild = {
+                        new ComponentBuilder<EntityStructNotSerialized>(),    
+                        new SerializableComponentBuilder<SerializationType, EntityStructSerialized>(),
+                        new SerializableComponentBuilder<SerializationType, EntityStructSerialized2>
+                            (((int)SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>()) ,
+                             ((int)SerializationType.Network, new DefaultSerializer<EntityStructSerialized2>())),
+                        new SerializableComponentBuilder<SerializationType, EntityStructPartiallySerialized>
+                            (((int)SerializationType.Storage, new PartialSerializer <EntityStructPartiallySerialized>())
                         )
                 };
             }
@@ -221,14 +225,14 @@ namespace UnitTests
             [HashName("DefaultPatternForEntityDescriptorV0")]
             internal class DefaultPatternForEntityDescriptor : IEntityDescriptor
             {
-                public IEntityBuilder[] entitiesToBuild => _entitiesToBuild;
+                public IEntityComponentBuilder[] componentsToBuild => ComponentsToBuild;
                 
-                static readonly IEntityBuilder[] _entitiesToBuild = {
-                    new EntityBuilder<EntityStructNotSerialized>(),    
-                    new SerializableEntityBuilder<EntityStructSerialized2>
-                        ((SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>())),
-                    new SerializableEntityBuilder<EntityStructPartiallySerialized>
-                        ((SerializationType.Storage, new PartialSerializer <EntityStructPartiallySerialized>())
+                static readonly IEntityComponentBuilder[] ComponentsToBuild = {
+                    new ComponentBuilder<EntityStructNotSerialized>(),    
+                    new SerializableComponentBuilder<SerializationType, EntityStructSerialized2>
+                        (((int)SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>())),
+                    new SerializableComponentBuilder<SerializationType, EntityStructPartiallySerialized>
+                        (((int)SerializationType.Storage, new PartialSerializer <EntityStructPartiallySerialized>())
                         )
                 };
             }
@@ -240,15 +244,15 @@ namespace UnitTests
             [HashName("DefaultPatternForEntityDescriptorV1")]
             internal class DefaultPatternForEntityDescriptor : IEntityDescriptor
             {
-                public IEntityBuilder[] entitiesToBuild => _entitiesToBuild;
+                public IEntityComponentBuilder[] componentsToBuild => ComponentsToBuild;
                 
-                static readonly IEntityBuilder[] _entitiesToBuild = {
-                    new EntityBuilder<EntityStructNotSerialized>(),    
-                    new SerializableEntityBuilder<EntityStructSerialized>(),
-                    new SerializableEntityBuilder<EntityStructSerialized2>
-                        ((SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>())),
-                    new SerializableEntityBuilder<EntityStructPartiallySerialized>
-                        ((SerializationType.Storage, new PartialSerializer <EntityStructPartiallySerialized>())
+                static readonly IEntityComponentBuilder[] ComponentsToBuild = {
+                    new ComponentBuilder<EntityStructNotSerialized>(),    
+                    new SerializableComponentBuilder<EntityStructSerialized>(),
+                    new SerializableComponentBuilder<SerializationType, EntityStructSerialized2>
+                        (((int)SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>())),
+                    new SerializableComponentBuilder<SerializationType, EntityStructPartiallySerialized>
+                        (((int)SerializationType.Storage, new PartialSerializer <EntityStructPartiallySerialized>())
                         )
                 };
             }
@@ -260,16 +264,16 @@ namespace UnitTests
             [HashName("DefaultPatternForEntityDescriptorWithView")]
             internal class DefaultPatternForEntityDescriptor : IEntityDescriptor
             {
-                public IEntityBuilder[] entitiesToBuild => _entitiesToBuild;
+                public IEntityComponentBuilder[] componentsToBuild => ComponentsToBuild;
                 
-                static readonly IEntityBuilder[] _entitiesToBuild = {
-                    new EntityBuilder<EntityViewStructNotSerialized>(),    
-                    new SerializableEntityBuilder<EntityStructSerialized>(),
-                    new SerializableEntityBuilder<EntityStructSerialized2>
-                        ((SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>()) ,
-                         (SerializationType.Network, new DefaultSerializer<EntityStructSerialized2>())),
-                    new SerializableEntityBuilder<EntityStructPartiallySerialized>
-                        ((SerializationType.Storage, new PartialSerializer <EntityStructPartiallySerialized>())
+                static readonly IEntityComponentBuilder[] ComponentsToBuild = {
+                    new ComponentBuilder<EntityViewStructNotSerialized>(),    
+                    new SerializableComponentBuilder<SerializationType, EntityStructSerialized>(),
+                    new SerializableComponentBuilder<SerializationType, EntityStructSerialized2>
+                        (((int)SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>()) ,
+                         ((int)SerializationType.Network, new DefaultSerializer<EntityStructSerialized2>())),
+                    new SerializableComponentBuilder<SerializationType, EntityStructPartiallySerialized>
+                        (((int)SerializationType.Storage, new PartialSerializer <EntityStructPartiallySerialized>())
                         )
                 };
             }
@@ -277,49 +281,48 @@ namespace UnitTests
         
         class TestEngine: IQueryingEntitiesEngine
         {
-            public IEntitiesDB entitiesDB { get; set; }
+            public EntitiesDB entitiesDB { get; set; }
             public void        Ready()    {}
 
-            public bool HasEntity<T>(EGID ID) where T : struct, IEntityStruct
+            public bool HasEntity<T>(EGID ID) where T : struct, IEntityComponent
             {
                 return entitiesDB.Exists<T>(ID);
             }
 
-            public bool HasAnyEntityInGroup<T>(ExclusiveGroup groupID) where T : struct, IEntityStruct
+            public bool HasAnyEntityInGroup<T>(ExclusiveGroup groupID) where T : struct, IEntityComponent
             {
-                entitiesDB.QueryEntities<T>(groupID).ToFastAccess(out var count);
-                return count > 0;
+                return entitiesDB.QueryEntities<T>(groupID).count > 0;
             }
 
-            public bool HasAnyEntityInGroupArray<T>(ExclusiveGroup groupID) where T: struct, IEntityStruct
+            public bool HasAnyEntityInGroupArray<T>(ExclusiveGroup groupID) where T: struct, IEntityComponent
             {
-                entitiesDB.QueryEntities<T>(groupID).ToFastAccess(out var count);
-
-                return count != 0;
+                return entitiesDB.QueryEntities<T>(groupID).count > 0;
             }
         }
         
-        struct EntityStructNotSerialized : IEntityStruct
+        struct EntityStructNotSerialized : IEntityComponent
         {
         }
 
-        struct EntityStructSerialized : IEntityStruct
+        struct EntityStructSerialized : IEntityComponent
         {
             public int value;
         }
         
-        struct EntityStructSerialized2 : IEntityStruct
+        struct EntityStructSerialized2 : IEntityComponent
         {
             public int value;
         }
     
-        struct EntityStructPartiallySerialized : IEntityStruct
+        struct EntityStructPartiallySerialized : IEntityComponent
         {
+#pragma warning disable 169
             int value;
+#pragma warning restore 169
             [PartialSerializerField] public int value1;
         }
         
-        struct EntityViewStructNotSerialized : IEntityViewStruct
+        struct EntityViewStructNotSerialized : IEntityViewComponent
         {
 #pragma warning disable 649
             public ITestIt TestIt;
@@ -342,19 +345,20 @@ namespace UnitTests
 
             public float value { get; set; }
         }
+        
         class DeserializationFactory : IDeserializationFactory
         {
             readonly IEntityFactory _factory;
 
-            public EntityStructInitializer BuildDeserializedEntity(EGID                          egid,
+            public EntityComponentInitializer BuildDeserializedEntity(EGID                          egid,
                                                                    ISerializationData            serializationData,
                                                                    ISerializableEntityDescriptor entityDescriptor,
-                                                                   SerializationType             serializationType,
+                                                                   int             serializationType,
                                                                    IEntitySerialization          entitySerialization)
             {
                 var initializer = _factory.BuildEntity<SerializableEntityDescriptorWithViews>(egid, new []{new Implementor(1)});
                 
-                entitySerialization.DeserializeEntityStructs(serializationData, entityDescriptor, ref initializer, SerializationType.Storage);
+                entitySerialization.DeserializeEntityComponents(serializationData, entityDescriptor, ref initializer, (int) SerializationType.Storage);
 
                 return initializer;
             }

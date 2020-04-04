@@ -1,3 +1,4 @@
+#if later
 namespace Svelto.ECS
 {
     public class FastGroup
@@ -23,3 +24,4 @@ namespace Svelto.ECS
         public uint value => _group;
     }
 }
+#endif

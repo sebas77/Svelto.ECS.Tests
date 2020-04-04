@@ -18,17 +18,11 @@ namespace UnitTests
         static readonly ExclusiveGroup group8 = new ExclusiveGroup();
         static readonly ExclusiveGroup group0 = new ExclusiveGroup();
         static readonly ExclusiveGroup groupR4 = new ExclusiveGroup(4);
-        
-        class NamedGroup1 : NamedExclusiveGroup<NamedGroup1> {}
-        class NamedGroup2 : NamedExclusiveGroup<NamedGroup2> {}
-        class NamedGroup3 : NamedExclusiveGroup<NamedGroup3> {}
-        
-        static ExclusiveGroup[] groups = { NamedGroup1.Group, NamedGroup2.Group, NamedGroup3.Group};
 
         [SetUp]
         public void Init()
         {
-            _simpleSubmissionEntityViewScheduler = new SimpleSubmissionEntityViewScheduler();
+            _simpleSubmissionEntityViewScheduler = new SimpleSubmissioncheduler();
             _enginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
             _neverDoThisIsJustForTheTest = new TestEngine();
 
@@ -151,35 +145,6 @@ namespace UnitTests
             }
             
             Assert.Throws(typeof(ECSException), CheckFunction);
-        }
-        
-        [TestCase]
-        public void TestGroupEntitySwap()
-        {
-            for (int i = 0; i < 29; i++)
-            {
-                EGID egid = new EGID((uint) i, group1);
-                _entityFactory.BuildEntity<TestDescriptor>(egid, new[] { new TestIt(2) });
-            }
-
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
-
-            _entityFunctions.SwapEntitiesInGroup<TestDescriptor>(group1, group2);
-
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            
-            bool allFound = true;
-            bool mustNotBeFound = false;
-
-            for (uint i = 0; i < 29; i++)
-                allFound &= _neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(i, group2));
-
-            for (int i = 0; i < 29; i++)
-                mustNotBeFound |= _neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID((uint) i, group1));
-
-            
-            Assert.IsTrue(allFound);
-            Assert.IsTrue(mustNotBeFound == false);
         }
 
         [TestCase]
@@ -633,8 +598,8 @@ namespace UnitTests
         [TestCase((uint)0)][TestCase((uint)1)][TestCase((uint)2)]
         public void TestCreationAndRemovalOfDynamicEntityDescriptors(uint id)
         {
-            var ded = new DynamicEntityDescriptor<TestDescriptor>(new IEntityBuilder[] 
-                { new EntityBuilder<TestEntityStruct>() });
+            var ded = new DynamicEntityDescriptor<TestDescriptor>(new IEntityComponentBuilder[] 
+                { new ComponentBuilder<TestEntityStruct>() });
             
             _entityFactory.BuildEntity(new EGID(id, group0), ded, new[] {new TestIt(2)});
             
@@ -846,7 +811,6 @@ namespace UnitTests
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, group1)));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityStruct>(group1));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(group1));
-            uint count;
             Assert.AreSame(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(group1)[0].TestIt, testIt);
         }
         
@@ -1024,50 +988,6 @@ namespace UnitTests
                 Assert.Fail();
             });
         }
-        
-        [TestCase]
-        public void TestEntityCollectionsIteration()
-        {
-            var init = _entityFactory.BuildEntity<TestDescriptor7>(0, NamedGroup1.Group);
-            init.Init(new TestEntityStruct() { value = 5 });
-            init = _entityFactory.BuildEntity<TestDescriptor7>(1, NamedGroup2.Group);
-            init.Init(new TestEntityStruct() { value = 4 });
-            init = _entityFactory.BuildEntity<TestDescriptor7>(2, NamedGroup3.Group);
-            init.Init(new TestEntityStruct() { value = 1 });
-            
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            var collection = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>(groups);
-
-            var enumerator = collection.GetEnumerator();
-            enumerator.MoveNext();
-            Assert.That(enumerator.Current.value == 5, Is.True);
-            enumerator.MoveNext();
-            Assert.That(enumerator.Current.value == 4, Is.True);
-            enumerator.MoveNext();
-            Assert.That(enumerator.Current.value == 1, Is.True);
-        }
-        
-        [TestCase]
-        public void TestEntityCollectionsIterationWithDeletedGroup()
-        {
-            var init = _entityFactory.BuildEntity<TestDescriptor7>(0, NamedGroup1.Group);
-            init.Init(new TestEntityStruct() { value = 5 });
-            init = _entityFactory.BuildEntity<TestDescriptor7>(1, NamedGroup2.Group);
-            init.Init(new TestEntityStruct() { value = 4 });
-            init = _entityFactory.BuildEntity<TestDescriptor7>(2, NamedGroup3.Group);
-            init.Init(new TestEntityStruct() { value = 1 });
-            
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            _enginesRoot.GenerateEntityFunctions().RemoveGroupAndEntities(NamedGroup2.Group);
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            var collection = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>(groups);
-
-            var enumerator = collection.GetEnumerator();
-            enumerator.MoveNext();
-            Assert.That(enumerator.Current.value == 5, Is.True);
-            enumerator.MoveNext();
-            Assert.That(enumerator.Current.value == 1, Is.True);
-        }
 
         [TestCase]
         public void QueryingNotExistingViewsInAnExistingGroupMustNotCrash()
@@ -1132,15 +1052,15 @@ namespace UnitTests
 
             foreach (var iterator in iterators)
             {
-                if (iterator.entityStructA.ID.groupID == group0)
+                if (iterator.entityComponentA.ID.groupID == group0)
                 {
-                    Assert.IsTrue(iterator.entityStructA.value == index);
-                    Assert.IsTrue(iterator.entityStructB.value == index + 100);
+                    Assert.IsTrue(iterator.entityComponentA.value == index);
+                    Assert.IsTrue(iterator.entityComponentB.value == index + 100);
                 }
                 else
                 {
-                    Assert.IsTrue(iterator.entityStructA.value == index + 200);
-                    Assert.IsTrue(iterator.entityStructB.value == index + 300);
+                    Assert.IsTrue(iterator.entityComponentA.value == index + 200);
+                    Assert.IsTrue(iterator.entityComponentB.value == index + 300);
                 }
                 
                 index = ++index % 100;
@@ -1189,15 +1109,15 @@ namespace UnitTests
         EnginesRoot                         _enginesRoot;
         IEntityFactory                      _entityFactory;
         IEntityFunctions                    _entityFunctions;
-        SimpleSubmissionEntityViewScheduler _simpleSubmissionEntityViewScheduler;
+        SimpleSubmissioncheduler _simpleSubmissionEntityViewScheduler;
         TestEngine                          _neverDoThisIsJustForTheTest;
 
-        struct EVS1 : IEntityStruct
+        struct EVS1 : IEntityComponent
         {
             public EGID ID { get; set; }
         }
 
-        struct EVS2 : IEntityStruct
+        struct EVS2 : IEntityComponent
         {
             public EGID ID { get; set; }
         }
@@ -1208,13 +1128,13 @@ namespace UnitTests
 
         class B : ExtendibleEntityDescriptor<A>
         {
-            static readonly IEntityBuilder[] _nodesToBuild;
+            static readonly IEntityComponentBuilder[] _nodesToBuild;
 
             static B()
             {
-                _nodesToBuild = new IEntityBuilder[]
+                _nodesToBuild = new IEntityComponentBuilder[]
                 {
-                    new EntityBuilder<EVS2>(),
+                    new ComponentBuilder<EVS2>(),
                 };
             }
 
@@ -1229,13 +1149,13 @@ namespace UnitTests
 
         class B2 : ExtendibleEntityDescriptor<A2>
         {
-            static readonly IEntityBuilder[] _nodesToBuild;
+            static readonly IEntityComponentBuilder[] _nodesToBuild;
 
             static B2()
             {
-                _nodesToBuild = new IEntityBuilder[]
+                _nodesToBuild = new IEntityComponentBuilder[]
                 {
-                    new EntityBuilder<TestEntityStruct>(),
+                    new ComponentBuilder<TestEntityStruct>(),
                 };
             }
 
@@ -1265,7 +1185,7 @@ namespace UnitTests
         class TestDescriptor6 : GenericEntityDescriptor<TestEntityStruct, TestEntityStruct2>
         { }
 
-        struct TestEntityStruct : IEntityStruct, INeedEGID
+        struct TestEntityStruct : IEntityComponent, INeedEGID
         {
             public uint value;
 
@@ -1277,7 +1197,7 @@ namespace UnitTests
             public EGID ID { get; set; }
         }
         
-        struct TestEntityStruct2 : IEntityStruct
+        struct TestEntityStruct2 : IEntityComponent
         {
             public uint value;
 
@@ -1287,7 +1207,7 @@ namespace UnitTests
             }
         }
 
-        struct TestEntityViewStruct : IEntityViewStruct
+        struct TestEntityViewStruct : IEntityViewComponent
         {
 #pragma warning disable 649
             public ITestIt TestIt;
@@ -1325,29 +1245,30 @@ namespace UnitTests
 
             public void Remove(ref TestEntityViewStruct entityView, EGID egid)
             {
+                throw new NotImplementedException();
             }
 
-            readonly IEntityFactory _entityFactory;
+            IEntityFactory _entityFactory;
         }
 
         class TestEngine: IQueryingEntitiesEngine
         {
-            public IEntitiesDB entitiesDB { get; set; }
+            public EntitiesDB entitiesDB { get; set; }
             public void Ready() {}
 
-            public bool HasEntity<T>(EGID ID) where T : struct, IEntityStruct
+            public bool HasEntity<T>(EGID ID) where T : struct, IEntityComponent
             {
                 return entitiesDB.Exists<T>(ID);
             }
 
-            public bool HasAnyEntityInGroup<T>(ExclusiveGroup groupID) where T : struct, IEntityStruct
+            public bool HasAnyEntityInGroup<T>(ExclusiveGroup groupID) where T : struct, IEntityComponent
             {
-                return entitiesDB.QueryEntities<T>(groupID).length > 0;
+                return entitiesDB.QueryEntities<T>(groupID).count > 0;
             }
 
-            public bool HasAnyEntityInGroupArray<T>(ExclusiveGroup groupID) where T: struct, IEntityStruct
+            public bool HasAnyEntityInGroupArray<T>(ExclusiveGroup groupID) where T: struct, IEntityComponent
             {
-                return entitiesDB.QueryEntities<T>(groupID).length > 0;
+                return entitiesDB.QueryEntities<T>(groupID).count > 0;
             }
         }
     }

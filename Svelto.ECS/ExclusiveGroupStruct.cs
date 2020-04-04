@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
@@ -48,13 +49,18 @@ namespace Svelto.ECS
             return _id.GetHashCode();
         }
 
+        public override string ToString()
+        {
+            return _id.ToString();
+        }
+
         internal static ExclusiveGroupStruct Generate(byte bitmask = 0)
         {
             ExclusiveGroupStruct groupStruct;
 
             groupStruct._id = _globalId;
             groupStruct._bytemask = bitmask;
-            DBC.ECS.Check.Require(_globalId + 1 < UInt16.MaxValue, "too many exclusive groups created");
+            DBC.ECS.Check.Require(_globalId + 1 < ExclusiveGroup.MaxNumberOfExclusiveGroups, "too many exclusive groups created");
             _globalId++;
 
             return groupStruct;
@@ -66,7 +72,7 @@ namespace Svelto.ECS
         internal ExclusiveGroupStruct(ushort range):this()
         {
             _id = _globalId;
-            DBC.ECS.Check.Require(_globalId + range < UInt16.MaxValue, "too many exclusive groups created");
+            DBC.ECS.Check.Require(_globalId + range < ExclusiveGroup.MaxNumberOfExclusiveGroups, "too many exclusive groups created");
             _globalId += range;
         }
 
@@ -90,6 +96,11 @@ namespace Svelto.ECS
         public static implicit operator uint(ExclusiveGroupStruct groupStruct)
         {
             return groupStruct._id;
+        }
+        
+        public static implicit operator InternalGroup(ExclusiveGroupStruct groupStruct)
+        {
+            return new InternalGroup(groupStruct);
         }
 
         public static ExclusiveGroupStruct operator+(ExclusiveGroupStruct a, uint b)

@@ -1,18 +1,26 @@
 {
     "name": "Svelto.ECS",
     "references": [
-        "Svelto.Common"
+        "Unity.Entities",
+        "Unity.Collections",
+        "Unity.Burst",
+        "Svelto.Common_3"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
     "overrideReferences": true,
     "precompiledReferences": [
-        "System.Memory.dll",
         "System.Runtime.CompilerServices.Unsafe.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.entities",
+            "expression": "",
+            "define": "UNITY_ECS"
+        }
+    ],
     "noEngineReferences": false
 }

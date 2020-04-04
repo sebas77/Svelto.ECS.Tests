@@ -4,51 +4,46 @@ using Svelto.DataStructures;
 
 namespace Svelto.ECS.Internal
 {
-    public interface ITypeSafeDictionary<TValue> : ITypeSafeDictionary where TValue : IEntityStruct
+    public interface ITypeSafeDictionary<TValue> : ITypeSafeDictionary where TValue : IEntityComponent
     {
-        void       Add(uint            egidEntityId, in TValue entityView);
-        ref TValue GetValueByRef(uint  key);
-        TValue this[uint               idEntityId] { get; set; }
-        bool       TryGetValue(uint    entityId, out TValue item);
-        ref TValue GetDirectValue(uint findElementIndex);
-        ref TValue GetOrCreate(uint    idEntityId);
+        void Add(uint egidEntityId, in TValue entityComponent);
+        ref TValue GetValueByRef(uint key);
+        ref TValue this[uint idEntityId] { get; }
+        bool TryGetValue(uint entityId, out TValue item);
+        ref TValue GetOrCreate(uint idEntityId);
 
-        TValue[]                        GetValuesArray(out uint count);
-        TValue[]                        unsafeValues   { get; }
+        TValue[] GetValuesArray(out uint count);
+        TValue[] unsafeValues { get; }
+        object GenerateSentinel();
     }
 
     public interface ITypeSafeDictionary
     {
-        uint                Count { get; }
+        uint Count { get; }
         ITypeSafeDictionary Create();
 
-        void AddEntitiesToEngines(FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityViewEnginesDb,
-                                  ITypeSafeDictionary                                     realDic,
-                                  ExclusiveGroupStruct                     @group,
-                                  in PlatformProfiler                                     profiler);
+        void AddEntitiesToEngines(FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityComponentEnginesDb,
+            ITypeSafeDictionary realDic, ExclusiveGroupStruct @group, in PlatformProfiler profiler);
 
-        void RemoveEntitiesFromEngines(FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityViewEnginesDB,
-                                       in PlatformProfiler                                     profiler,
-                                       ExclusiveGroupStruct                     @group);
+        void RemoveEntitiesFromEngines(FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityComponentEnginesDB,
+            in PlatformProfiler profiler, ExclusiveGroupStruct @group);
 
         void AddEntitiesFromDictionary(ITypeSafeDictionary entitiesToSubmit, uint groupId);
 
-        void MoveEntityFromEngines(EGID                                                    fromEntityGid,
-                                   EGID?                                                   toEntityID, ITypeSafeDictionary toGroup,
-                                   FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> engines,
-                                   in PlatformProfiler                                     profiler);
+        void MoveEntityFromEngines(EGID fromEntityGid, EGID? toEntityID, ITypeSafeDictionary toGroup,
+            FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> engines, in PlatformProfiler profiler);
 
         void AddEntityToDictionary(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup);
 
-        void RemoveEntityFromDictionary(EGID fromEntityGid, in PlatformProfiler profiler);
+        void RemoveEntityFromDictionary(EGID fromEntityGid);
 
         void SetCapacity(uint size);
         void Trim();
         void Clear();
         void FastClear();
-        bool Has(uint          key);
-        bool ContainsKey(uint  egidEntityId);
-        uint GetIndex(uint     valueEntityId);
+        bool Has(uint key);
+        bool ContainsKey(uint egidEntityId);
+        uint GetIndex(uint valueEntityId);
         bool TryFindIndex(uint entityGidEntityId, out uint index);
     }
 }

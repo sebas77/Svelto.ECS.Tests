@@ -8,21 +8,21 @@ namespace Svelto.ECS
         : IEquatable<EntitySubmitOperation>
     {
         public readonly EntitySubmitOperationType type;
-        public readonly IEntityBuilder[]          builders;
+        public readonly IEntityComponentBuilder[]          builders;
         public readonly EGID                      fromID;
         public readonly EGID                      toID;
-#if DEBUG && !PROFILER
+#if DEBUG && !PROFILE_SVELTO
         public System.Diagnostics.StackFrame trace;
 #endif
 
         public EntitySubmitOperation(EntitySubmitOperationType operation, EGID from, EGID to,
-                                     IEntityBuilder[]          builders         = null)
+                                     IEntityComponentBuilder[]          builders         = null)
         {
             type          = operation;
             this.builders = builders;
             fromID        = from;
             toID          = to;
-#if DEBUG && !PROFILER
+#if DEBUG && !PROFILE_SVELTO
             trace = default;
 #endif
         }

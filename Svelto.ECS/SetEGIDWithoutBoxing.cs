@@ -4,15 +4,15 @@ using System.Reflection;
 
 namespace Svelto.ECS.Internal
 {
-    public delegate void SetEGIDWithoutBoxingActionCast<T>(ref T target, EGID egid) where T : struct, IEntityStruct;
+    public delegate void SetEGIDWithoutBoxingActionCast<T>(ref T target, EGID egid) where T : struct, IEntityComponent;
     
-    static class SetEGIDWithoutBoxing<T> where T : struct, IEntityStruct
+    static class SetEGIDWithoutBoxing<T> where T : struct, IEntityComponent
     {
         public static readonly SetEGIDWithoutBoxingActionCast<T> SetIDWithoutBoxing = MakeSetter();
 
         static SetEGIDWithoutBoxingActionCast<T> MakeSetter()
         {
-            if (EntityBuilder<T>.HAS_EGID)
+            if (ComponentBuilder<T>.HAS_EGID)
             {
 #if !ENABLE_IL2CPP
 //not working in .net standard 2.0 on client, bug?

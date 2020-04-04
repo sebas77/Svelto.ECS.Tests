@@ -1,8 +1,7 @@
-﻿﻿using System;
+﻿using System;
 using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
-using Svelto.ECS.Schedulers;
 
 namespace Svelto.ECS
 {
@@ -10,7 +9,7 @@ namespace Svelto.ECS
     {
         readonly FasterList<EntitySubmitOperation> _transientEntitiesOperations;
 
-        void SubmitEntityViews()
+        void SubmitEntityComponents()
         {
             using (var profiler = new PlatformProfiler("Svelto.ECS - Entities Submission"))
             {
@@ -21,7 +20,7 @@ namespace Svelto.ECS
                 } while ((_groupedEntityToAdd.currentEntitiesCreatedPerGroup.count > 0 ||
                           _entitiesOperations.Count > 0) && ++iterations < 5);
 
-#if DEBUG && !PROFILER
+#if DEBUG && !PROFILE_SVELTO
                 if (iterations == 5)
                     throw new ECSException("possible circular submission detected");
 #endif
@@ -30,17 +29,21 @@ namespace Svelto.ECS
 
         void SingleSubmission(in PlatformProfiler profiler)
         {
+#if UNITY_ECS            
+            NativeOperationSubmission(profiler);
+            DisposeNativeOperations(profiler);
+#endif
+            
             if (_entitiesOperations.Count > 0)
             {
                 using (profiler.Sample("Remove and Swap operations"))
                 {
                     _transientEntitiesOperations.FastClear();
-                    var entitySubmitOperations = _entitiesOperations.GetValuesArray(out var count);
-                    _transientEntitiesOperations.AddRange(entitySubmitOperations, count);
+                    _entitiesOperations.CopyValuesTo(_transientEntitiesOperations);
                     _entitiesOperations.FastClear();
 
-                    var entitiesOperations = _transientEntitiesOperations.ToArrayFast();
-                    for (var i = 0; i < _transientEntitiesOperations.Count; i++)
+                    var entitiesOperations = _transientEntitiesOperations.ToArrayFast(out _);
+                    for (var i = 0; i < _transientEntitiesOperations.count; i++)
                     {
                         try
                         {
@@ -71,7 +74,7 @@ namespace Svelto.ECS
                                 .FastConcat(entitiesOperations[i].type.ToString());
 
                             throw new ECSException(str.FastConcat(" ")
-#if DEBUG && !PROFILER
+#if DEBUG && !PROFILE_SVELTO
                                     .FastConcat(entitiesOperations[i].trace.ToString())
 #endif
                                 , e);
@@ -88,11 +91,11 @@ namespace Svelto.ECS
                 {
                     try
                     {
-                        AddEntityViewsToTheDBAndSuitableEngines(profiler);
+                        AddEntityComponentsToTheDBAndSuitableEngines(profiler);
                     }
                     finally
                     {
-                        using (profiler.Sample("clear operates double buffering"))
+                        using (profiler.Sample("clear 6operates double buffering"))
                         {
                             //other can be cleared now, but let's avoid deleting the dictionary every time
                             _groupedEntityToAdd.ClearOther();
@@ -102,7 +105,7 @@ namespace Svelto.ECS
             }
         }
 
-        void AddEntityViewsToTheDBAndSuitableEngines(in PlatformProfiler profiler)
+        void AddEntityComponentsToTheDBAndSuitableEngines(in PlatformProfiler profiler)
         {
             using (profiler.Sample("Add entities to database"))
             {
@@ -113,11 +116,11 @@ namespace Svelto.ECS
                     
                     FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> groupDB = GetOrCreateGroup(groupID);
 
-                    //add the entityViews in the group
-                    foreach (var entityViewsToSubmit in _groupedEntityToAdd.other[groupID])
+                    //add the entityComponents in the group
+                    foreach (var entityComponentsToSubmit in _groupedEntityToAdd.other[groupID])
                     {
-                        var type = entityViewsToSubmit.Key;
-                        var targetTypeSafeDictionary = entityViewsToSubmit.Value;
+                        var type = entityComponentsToSubmit.Key;
+                        var targetTypeSafeDictionary = entityComponentsToSubmit.Value;
                         var wrapper = new RefWrapper<Type>(type);
 
                         ITypeSafeDictionary dbDic = GetOrCreateTypeSafeDictionary(groupID, groupDB, wrapper, 
@@ -136,14 +139,13 @@ namespace Svelto.ECS
                 foreach (var groupToSubmit in _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
                 {
                     var groupID = groupToSubmit.Key;
+                    var groupDB = _groupEntityComponentsDB[groupID];
 
-                    var groupDB = _groupEntityViewsDB[groupID];
-
-                    foreach (var entityViewsToSubmit in _groupedEntityToAdd.other[groupID])
+                    foreach (var entityComponentsToSubmit in _groupedEntityToAdd.other[groupID])
                     {
-                        var realDic = groupDB[new RefWrapper<Type>(entityViewsToSubmit.Key)];
+                        var realDic = groupDB[new RefWrapper<Type>(entityComponentsToSubmit.Key)];
 
-                        entityViewsToSubmit.Value.AddEntitiesToEngines(_reactiveEnginesAddRemove, realDic,
+                        entityComponentsToSubmit.Value.AddEntitiesToEngines(_reactiveEnginesAddRemove, realDic,
                             new ExclusiveGroupStruct(groupToSubmit.Key), in profiler);
                     }
                 }
@@ -151,7 +153,6 @@ namespace Svelto.ECS
         }
 
         DoubleBufferedEntitiesToAdd                                 _groupedEntityToAdd;
-        readonly IEntitySubmissionScheduler                         _scheduler;
         readonly ThreadSafeDictionary<ulong, EntitySubmitOperation> _entitiesOperations;
     }
 }

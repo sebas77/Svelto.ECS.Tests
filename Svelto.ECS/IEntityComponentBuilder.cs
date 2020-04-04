@@ -4,12 +4,12 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public interface IEntityBuilder
+    public interface IEntityComponentBuilder
     {
         void BuildEntityAndAddToList(ref ITypeSafeDictionary dictionary, EGID egid,
             IEnumerable<object> implementors);
         ITypeSafeDictionary Preallocate(ref ITypeSafeDictionary dictionary, uint size);
 
-        Type GetEntityType();
+        Type GetEntityComponentType();
     }
 }

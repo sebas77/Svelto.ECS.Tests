@@ -31,7 +31,7 @@ namespace Svelto.ECS
 
                 _enginesRoot.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityEGID, entityEGID,
-                        EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
+                        EntityDescriptorTemplate<T>.descriptor.componentsToBuild));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -45,10 +45,11 @@ namespace Svelto.ECS
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void SwapEntitiesInGroup<T>(ExclusiveGroupStruct fromGroupID,
-                                               ExclusiveGroupStruct toGroupID)
+                ExclusiveGroupStruct toGroupID)
             {
                 _enginesRoot.Target.QueueEntitySubmitOperation(
-                        new EntitySubmitOperation(EntitySubmitOperationType.SwapGroup, new EGID(0, fromGroupID), new EGID(0, toGroupID)));
+                    new EntitySubmitOperation(EntitySubmitOperationType.SwapGroup, new EGID(0, fromGroupID),
+                        new EGID(0, toGroupID)));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,7 +89,12 @@ namespace Svelto.ECS
                 SwapEntityGroup<T>(fromID, toID);
             }
 
-            public GenericEntityFunctionWrapper Pin() { return new GenericEntityFunctionWrapper(this); }
+#if UNITY_ECS
+            public NativeEntityOperations ToNative<T>(Unity.Collections.Allocator allocator) where T : IEntityDescriptor, new()
+            {
+                return _enginesRoot.Target.ProvideNativeEntityOperationsQueue<T>(allocator);
+            }
+#endif            
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void SwapEntityGroup<T>(EGID fromID, EGID toID)
@@ -99,9 +105,9 @@ namespace Svelto.ECS
 
                 _enginesRoot.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Swap,
-                        fromID, toID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
+                        fromID, toID, EntityDescriptorTemplate<T>.descriptor.componentsToBuild));
             }
-            
+
             //enginesRoot is a weakreference because GenericEntityStreamConsumerFactory can be injected inside
 //engines of other enginesRoot
             readonly WeakReference<EnginesRoot> _enginesRoot;
@@ -109,7 +115,7 @@ namespace Svelto.ECS
 
         void QueueEntitySubmitOperation(EntitySubmitOperation entitySubmitOperation)
         {
-#if DEBUG && !PROFILER
+#if DEBUG && !PROFILE_SVELTO
             entitySubmitOperation.trace = new StackFrame(1, true);
 #endif
             _entitiesOperations.Add((ulong) entitySubmitOperation.fromID, entitySubmitOperation);
@@ -117,14 +123,14 @@ namespace Svelto.ECS
 
         void QueueEntitySubmitOperation<T>(EntitySubmitOperation entitySubmitOperation) where T : IEntityDescriptor
         {
-#if DEBUG && !PROFILER
+#if DEBUG && !PROFILE_SVELTO
             entitySubmitOperation.trace = new StackFrame(1, true);
 
             if (_entitiesOperations.TryGetValue((ulong) entitySubmitOperation.fromID, out var entitySubmitedOperation))
             {
                 if (entitySubmitedOperation != entitySubmitOperation)
                     throw new ECSException("Only one entity operation per submission is allowed"
-                        .FastConcat(" entityViewType: ")
+                        .FastConcat(" entityComponentType: ")
                         .FastConcat(typeof(T).Name)
                         .FastConcat(" submission type ", entitySubmitOperation.type.ToString(),
                             " from ID: ", entitySubmitOperation.fromID.entityID.ToString())
@@ -134,7 +140,7 @@ namespace Svelto.ECS
             }
             else
 #endif
-            _entitiesOperations.Set((ulong) entitySubmitOperation.fromID, entitySubmitOperation);
+                _entitiesOperations.Set((ulong) entitySubmitOperation.fromID, entitySubmitOperation);
         }
     }
 }

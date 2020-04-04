@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Svelto.ECS.Internal;
 
 #pragma warning disable 660,661
 
@@ -11,14 +12,14 @@ namespace Svelto.ECS
     /// public class TriggersGroup : ExclusiveGroup<TriggersGroup> {}
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class NamedExclusiveGroup<T>:ExclusiveGroup
+    public abstract class NamedExclusiveGroup<T>
     {
         public static ExclusiveGroup Group = new ExclusiveGroup();
         public static string         name  = typeof(T).FullName;
 
-        public NamedExclusiveGroup() { }
-        public NamedExclusiveGroup(string recognizeAs) : base(recognizeAs)  {}
-        public NamedExclusiveGroup(ushort range) : base(range) {}
+//        protected NamedExclusiveGroup() { }
+  //      protected NamedExclusiveGroup(string recognizeAs) : base(recognizeAs)  {}
+    //    protected NamedExclusiveGroup(ushort range) : base(range) {}
     }
 
     /// <summary>
@@ -33,8 +34,12 @@ namespace Svelto.ECS
     ///     public static ExclusiveGroup[] GroupOfGroups = { MyExclusiveGroup1, ...}; //for each on this!
     /// }
     /// </summary>
+    
+    ///To debug it use in your debug window: Svelto.ECS.Debugger.EGID.GetGroupNameFromId(groupID)
     public class ExclusiveGroup
     {
+        public const uint MaxNumberOfExclusiveGroups = 2 << 20; 
+        
         public ExclusiveGroup()
         {
             _group = ExclusiveGroupStruct.Generate();
@@ -58,6 +63,11 @@ namespace Svelto.ECS
         public static implicit operator ExclusiveGroupStruct(ExclusiveGroup group)
         {
             return group._group;
+        }
+        
+        public static implicit operator InternalGroup(ExclusiveGroup group)
+        {
+            return new InternalGroup(group._group);
         }
 
         public static explicit operator uint(ExclusiveGroup group)
@@ -84,15 +94,17 @@ namespace Svelto.ECS
             return _knownGroups[holderGroupName];
         }
 
+        public override string ToString()
+        {
+            return _group.ToString();
+        }
+
         static readonly Dictionary<string, ExclusiveGroupStruct> _knownGroups = new Dictionary<string,
             ExclusiveGroupStruct>();
-
 
 #if DEBUG
         readonly ushort _range;
 #endif
-        public uint value => _group;
-        
         readonly ExclusiveGroupStruct _group;
     }
 }
@@ -171,6 +183,6 @@ namespace Svelto.ECS
         }
 
 #if DEBUG
-        static string[] groupNames = new string[ushort.MaxValue];
+        static string[] groupNames = new string[ExclusiveGroup.MaxNumberOfExclusiveGroups];
 #endif
 #endif

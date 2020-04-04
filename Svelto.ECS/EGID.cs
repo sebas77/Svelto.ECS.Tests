@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 #pragma warning disable 660,661
@@ -9,12 +8,12 @@ namespace Svelto.ECS
     //todo: add debug map
     [Serialization.DoNotSerialize]
     [Serializable]
-    [StructLayout(LayoutKind.Explicit, Size = 8)]
-    public struct EGID:IEquatable<EGID>,IEqualityComparer<EGID>,IComparable<EGID>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct EGID:IEquatable<EGID>,IComparable<EGID>
     {
         [FieldOffset(0)] public readonly uint                 entityID;
         [FieldOffset(4)] public readonly ExclusiveGroupStruct groupID;
-        [FieldOffset(0)]                 ulong                _GID;
+        [FieldOffset(0)]        readonly ulong                _GID;
         
         public static bool operator ==(EGID obj1, EGID obj2)
         {
@@ -54,9 +53,14 @@ namespace Svelto.ECS
             return x == y;
         }
 
-        public int GetHashCode(EGID obj)
+        public override int GetHashCode()
         {
             return _GID.GetHashCode();
+        }
+
+        public int GetHashCode(EGID egid)
+        {
+            return egid.GetHashCode();
         }
 
         public int CompareTo(EGID other)

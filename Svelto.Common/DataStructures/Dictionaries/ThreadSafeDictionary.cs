@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Threading;
 
 namespace Svelto.DataStructures
 {
@@ -220,18 +218,24 @@ namespace Svelto.DataStructures
                 _lockQ.ExitWriteLock();
             }
         }
-
-        public TValue[] GetValuesArray(out uint count)
+        
+        public void CopyValuesTo(TValue[] tasks, uint index)
         {
             _lockQ.EnterReadLock();
             try
             {
-                return _dict.GetValuesArray(out count);
+                _dict.CopyValuesTo(tasks, index);
             }
             finally
             {
                 _lockQ.ExitReadLock();
             }
+        }
+
+        public void CopyValuesTo(FasterList<TValue> values)
+        {
+            values.ExpandTo(_dict.count);
+            CopyValuesTo(values.ToArrayFast(out _), 0);
         }
 
         public void FastClear()
@@ -246,7 +250,7 @@ namespace Svelto.DataStructures
                 _lockQ.ExitWriteLock();
             }
         }
-        
+
         readonly FasterDictionary<TKey, TValue> _dict;
         readonly ReaderWriterLockSlimEx _lockQ = ReaderWriterLockSlimEx.Create();
     }
