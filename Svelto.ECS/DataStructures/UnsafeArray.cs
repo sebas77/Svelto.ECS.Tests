@@ -49,9 +49,18 @@ namespace Svelto.ECS.DataStructures
                 if (space - structSize < 0)
                     throw new Exception("no writing authorized");
 #endif
-
                 var pointer = writePointer % capacity;
-                Unsafe.Write(ptr + pointer, item);
+
+                if (pointer + structSize <= capacity)
+                    Unsafe.Write(ptr + pointer, item);
+                else
+                if (pointer + structSize > capacity)
+                {
+                    var byteCount = capacity - pointer;
+                    Unsafe.CopyBlock(ptr + pointer, Unsafe.AsPointer(ref Unsafe.AsRef(item)), byteCount);
+                    var count = structSize - byteCount;
+                    Unsafe.CopyBlock(ptr, (byte *)Unsafe.AsPointer(ref Unsafe.AsRef(item)) + byteCount, count);
+                }
 
                 writePointer += structSize;
             }
@@ -71,7 +80,17 @@ namespace Svelto.ECS.DataStructures
 #endif
 
                 var pointer = writePointer % capacity;
-                Unsafe.Write(ptr + pointer, item);
+
+                if (pointer + structSize <= capacity)
+                    Unsafe.Write(ptr + pointer, item);
+                else
+                if (pointer + structSize > capacity)
+                {
+                    var byteCount = capacity - pointer;
+                    Unsafe.CopyBlock(ptr + pointer, Unsafe.AsPointer(ref Unsafe.AsRef(item)), byteCount);
+                    var count = structSize - byteCount;
+                    Unsafe.CopyBlock(ptr, (byte *)Unsafe.AsPointer(ref Unsafe.AsRef(item)) + byteCount, count);
+                }
 
                 writePointer += structSize;
             }
@@ -162,10 +181,9 @@ namespace Svelto.ECS.DataStructures
                         var readerHead = readPointer % capacity;
                         var writerHead = writePointer % capacity;
 
-                        uint currentSize;
                         if (readerHead < writerHead)
                         {
-                            currentSize = writePointer - readPointer;
+                            var currentSize = writePointer - readPointer;
                             //copy to the new pointer, from th reader position
                             MemoryUtilities.MemCpy((IntPtr) newPointer, (IntPtr) (ptr + readPointer), currentSize);
                         }
