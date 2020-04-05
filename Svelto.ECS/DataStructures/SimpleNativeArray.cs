@@ -1,14 +1,16 @@
-#if UNITY_ECS
 using System;
 using System.Runtime.CompilerServices;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
+using Svelto.Common;
+using Allocator = Svelto.Common.Allocator;
 
-namespace Svelto.ECS.DataStructures.Unity
+namespace Svelto.ECS.DataStructures
 {
     public struct SimpleNativeArray : IDisposable
     {
-        [NativeDisableUnsafePtrRestriction] unsafe UnsafeArray* _list;
+#if ENABLE_BURST_AOT        
+        [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
+#endif
+        unsafe UnsafeArray* _list;
 #if DEBUG && !PROFILE_SVELTO
         int hashType;
 #endif
@@ -30,20 +32,20 @@ namespace Svelto.ECS.DataStructures.Unity
 #if DEBUG && !PROFILE_SVELTO
                 rtnStruc.hashType = typeof(T).GetHashCode();
 #endif
-                var sizeOf  = UnsafeUtility.SizeOf<T>();
-                var alignOf = UnsafeUtility.AlignOf<T>();
+                var sizeOf  = MemoryUtilities.SizeOf<T>();
+                var alignOf = MemoryUtilities.AlignOf<T>();
 
                 UnsafeArray* listData =
-                    (UnsafeArray*) UnsafeUtility.Malloc(UnsafeUtility.SizeOf<UnsafeArray>()
-                                                     , UnsafeUtility.AlignOf<UnsafeArray>(), allocator);
-                UnsafeUtility.MemClear(listData, UnsafeUtility.SizeOf<UnsafeArray>());
+                    (UnsafeArray*) MemoryUtilities.Alloc(MemoryUtilities.SizeOf<UnsafeArray>()
+                                                        , MemoryUtilities.AlignOf<UnsafeArray>(), allocator);
+                MemoryUtilities.MemClear((IntPtr) listData, MemoryUtilities.SizeOf<UnsafeArray>());
 
                 listData->allocator = allocator;
 
                 if (newLength > 0)
-                    listData->Realloc(alignOf, (uint) (newLength * sizeOf));
+                    listData->Realloc((uint) alignOf, (uint) (newLength * sizeOf));
 
-                UnsafeUtility.MemClear(listData->ptr, listData->capacity * sizeOf);
+                MemoryUtilities.MemClear((IntPtr) listData->ptr, listData->capacity * sizeOf);
 
                 rtnStruc._list = listData;
 
@@ -93,9 +95,9 @@ namespace Svelto.ECS.DataStructures.Unity
                     throw new Exception("SimpleNativeArray: null-access");
 #endif
                 if (_list->space == 0)
-                    _list->Realloc(UnsafeUtility.AlignOf<T>(), (uint) ((_list->capacity + 1) * 1.5f));
+                    _list->Realloc((uint) MemoryUtilities.AlignOf<T>(), (uint) ((_list->capacity + 1) * 1.5f));
 
-                _list->Write(item);
+                _list->WriteUnaligned(item);
             }
         }
 
@@ -113,4 +115,3 @@ namespace Svelto.ECS.DataStructures.Unity
         }
     }
 }
-#endif

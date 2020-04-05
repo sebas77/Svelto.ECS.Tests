@@ -1,67 +1,117 @@
 using System;
 using System.Runtime.CompilerServices;
+
+#if !ENABLE_BURST_AOT
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+#endif
 
 namespace Svelto.Common
 {
-#if !UNITY_ECS    
-    public struct Allocator
+#if !ENABLE_BURST_AOT
+    public enum Allocator
     {
         
     }
-#endif    
-    
+#else    
+    public enum Allocator
+    {
+        /// <summary>
+        ///   <para>Invalid allocation.</para>
+        /// </summary>
+        Invalid = Unity.Collections.Allocator.Invalid,
+        /// <summary>
+        ///   <para>No allocation.</para>
+        /// </summary>
+        None = Unity.Collections.Allocator.None,
+        /// <summary>
+        ///   <para>Temporary allocation.</para>
+        /// </summary>
+        Temp = Unity.Collections.Allocator.Temp,
+        /// <summary>
+        ///   <para>Temporary job allocation.</para>
+        /// </summary>
+        TempJob = Unity.Collections.Allocator.TempJob,
+        /// <summary>
+        ///   <para>Persistent allocation.</para>
+        /// </summary>
+        Persistent = Unity.Collections.Allocator.Persistent
+    }
+#endif
+
     public static class MemoryUtilities
     {
-        public static void Free(IntPtr ptr)
+        public static void Free(IntPtr ptr, Allocator allocator)
         {
-#if UNITY_ECS
-                UnsafeUtility.Free(ptr, allocator);
+            unsafe
+            {
+#if ENABLE_BURST_AOT
+                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Free((void*) ptr, (Unity.Collections.Allocator) allocator);
 #else
-            Marshal.FreeHGlobal((IntPtr) ptr);
+                Marshal.FreeHGlobal((IntPtr) ptr);
 #endif
+            }
         }
 
-        public static unsafe void MemCpy(void* newPointer, void* readerHead, uint currentSize)
+        public static void MemCpy(IntPtr newPointer, IntPtr gead, uint currentSize)
         {
-#if UNITY_ECS
-            UnsafeUtility.MemCpy(newPointer, ptr + readerHead, currentSize);
+            unsafe 
+            {
+#if ENABLE_BURST_AOT
+                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.MemCpy((void*) newPointer, (void*) readerHead, currentSize);
 #else
-            Unsafe.CopyBlock(newPointer, readerHead, currentSize);
+                Unsafe.CopyBlock((void*) newPointer, (void*) gead, currentSize);
 #endif
+            }
         }
 
-        public static unsafe void* Alloc(uint newCapacity, uint alignOf, Allocator allocator)
+        public static IntPtr Alloc(uint newCapacity, uint alignOf, Allocator allocator)
         {
-#if UNITY_ECS
-            var newPointer = (void*) UnsafeUtility.Malloc(newCapacity, alignOf, allocator);
+            unsafe
+            {
+#if ENABLE_BURST_AOT
+                var newPointer =
+                    (void*) Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Malloc(newCapacity, (int) alignOf, (Unity.Collections.Allocator) allocator);
 #else
-            var newPointer = (void*) Marshal.AllocHGlobal((int) newCapacity);
+                var newPointer = Marshal.AllocHGlobal((int) newCapacity);
 #endif
-            return newPointer;
+                return (IntPtr) newPointer;
+            }
         }
 
-        public static unsafe void MemClear(void* listData, uint sizeOf)
+        public static void MemClear(IntPtr listData, uint sizeOf)
         {
-#if UNITY_ECS
-            var newPointer = (void*) UnsafeUtility.Malloc(newCapacity, alignOf, allocator);
+            unsafe 
+            {
+#if ENABLE_BURST_AOT
+                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.MemClear((void*) listData, sizeOf);
 #else
-            Unsafe.InitBlock(listData, 0, sizeOf);
-#endif            
-        }
-
-        public static uint SizeOf<T>()
-        {
-#if UNITY_ECS            
-            
-#else
-        return (uint) Unsafe.SizeOf<T>();
+               Unsafe.InitBlock((void*) listData, 0, sizeOf);
 #endif
+            }
         }
 
-        public static uint AlignOf<T>()
+        public static uint SizeOf<T>() where T : struct
         {
-            return 4;
+            return (uint) Unsafe.SizeOf<T>();
+        }
+
+        public static uint AlignOf<T>() { return 4; }
+
+        public static void CopyStructureToPtr<T>(ref T buffer, IntPtr bufferPtr) where T : struct
+        {
+            unsafe 
+            {
+                Unsafe.Write((void*) bufferPtr, buffer);
+            }
+        }
+
+        public static ref T ArrayElementAsRef<T>(IntPtr data, int threadIndex) where T : struct
+        {
+            unsafe
+            {
+                return ref Unsafe.AsRef<T>(Unsafe.Add<T>((void*) data, threadIndex));
+            }
         }
     }
 }

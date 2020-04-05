@@ -38,7 +38,7 @@ namespace Svelto.ECS
 #if UNITY_ECS
             public NativeEntityFactory ToNative<T>(Unity.Collections.Allocator allocator) where T : IEntityDescriptor, new()
             {
-                return _enginesRoot.Target.ProvideNativeEntityFactoryQueue<T>(allocator);
+                return _enginesRoot.Target.ProvideNativeEntityFactoryQueue<T>();
             }
 #endif            
             public EntityComponentInitializer BuildEntity<T>

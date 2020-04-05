@@ -6,8 +6,6 @@ namespace Svelto.ECS.Serialization
 {
     public struct SerializersInfo<SerializationEnum> where SerializationEnum:Enum
     {
-        SerializationEnum type;
-       
         public uint numberOfSerializationTypes => (uint) length;
 
         static readonly int length = Enum.GetNames(typeof(SerializationEnum)).Length;

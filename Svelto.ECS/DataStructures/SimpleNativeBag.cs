@@ -6,9 +6,9 @@ namespace Svelto.ECS.DataStructures
 {
     public struct SimpleNativeBag : IDisposable
     {
-#if UNITY_ECS        
-        [NativeDisableUnsafePtrRestriction]
-#endif 
+#if ENABLE_BURST_AOT        
+        [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
+#endif
         unsafe UnsafeArray* _list;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -57,14 +57,14 @@ namespace Svelto.ECS.DataStructures
             }
         }
 
-        public SimpleNativeBag(Allocator allocator)
+        public SimpleNativeBag(Common.Allocator allocator)
         {
             unsafe 
             {
                 UnsafeArray* listData =
                     (UnsafeArray*) MemoryUtilities.Alloc(MemoryUtilities.SizeOf<UnsafeArray>()
                                                        , MemoryUtilities.AlignOf<UnsafeArray>(), allocator);
-                MemoryUtilities.MemClear(listData, MemoryUtilities.SizeOf<UnsafeArray>());
+                MemoryUtilities.MemClear((IntPtr) listData, MemoryUtilities.SizeOf<UnsafeArray>());
 
                 listData->allocator = allocator;
 
@@ -72,6 +72,7 @@ namespace Svelto.ECS.DataStructures
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Dispose()
         {
             if (_list != null)
@@ -81,6 +82,7 @@ namespace Svelto.ECS.DataStructures
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T ReserveEnqueue<T>(out UnsafeArrayIndex index) where T:unmanaged
         {
             unsafe
@@ -126,11 +128,11 @@ namespace Svelto.ECS.DataStructures
             }
         }
 
-        public T Dequeue<T>() where T : struct
+        public ref T Dequeue<T>() where T : struct
         {
             unsafe 
             {
-                return _list->Read<T>();
+                return ref _list->Read<T>();
             }
         }
 

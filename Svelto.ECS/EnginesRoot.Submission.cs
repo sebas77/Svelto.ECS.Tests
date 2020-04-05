@@ -31,7 +31,6 @@ namespace Svelto.ECS
         {
 #if UNITY_ECS            
             NativeOperationSubmission(profiler);
-            DisposeNativeOperations(profiler);
 #endif
             
             if (_entitiesOperations.Count > 0)

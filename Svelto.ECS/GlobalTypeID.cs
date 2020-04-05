@@ -1,8 +1,7 @@
 #if UNITY_ECS
-
 using System.Threading;
 using Svelto.DataStructures;
-using Svelto.ECS.DataStructures.Unity;
+using Svelto.ECS.DataStructures;
 
 namespace Svelto.ECS
 {
@@ -10,8 +9,11 @@ namespace Svelto.ECS
     {
         internal static uint NextID<T>()
         {
+            //todo: this is not guaranteed to be unique, I must swap back to the increment!
             return (uint) Unity.Burst.BurstRuntime.GetHashCode32<T>();
+#pragma warning disable 162
             return (uint) (Interlocked.Increment(ref value.Data) - 1);
+#pragma warning restore 162
         }
 
         static GlobalTypeID()

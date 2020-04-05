@@ -47,6 +47,8 @@ namespace Svelto.ECS
             public void SwapEntitiesInGroup<T>(ExclusiveGroupStruct fromGroupID,
                 ExclusiveGroupStruct toGroupID)
             {
+                //todo add checks
+                
                 _enginesRoot.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.SwapGroup, new EGID(0, fromGroupID),
                         new EGID(0, toGroupID)));
@@ -90,9 +92,14 @@ namespace Svelto.ECS
             }
 
 #if UNITY_ECS
-            public NativeEntityOperations ToNative<T>(Unity.Collections.Allocator allocator) where T : IEntityDescriptor, new()
+            public NativeEntityRemove ToNativeRemove<T>() where T : IEntityDescriptor, new()
             {
-                return _enginesRoot.Target.ProvideNativeEntityOperationsQueue<T>(allocator);
+                return _enginesRoot.Target.ProvideNativeEntityRemoveQueue<T>();
+            }
+            
+            public NativeEntitySwap ToNativeSwap<T>() where T : IEntityDescriptor, new()
+            {
+                return _enginesRoot.Target.ProvideNativeEntitySwapQueue<T>();
             }
 #endif            
 
