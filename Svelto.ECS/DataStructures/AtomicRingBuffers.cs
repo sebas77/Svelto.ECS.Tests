@@ -6,10 +6,10 @@ using Allocator = Svelto.Common.Allocator;
 namespace Svelto.ECS.DataStructures.Unity
 {
     /// <summary>
-    /// A collection of <see cref="SimpleNativeBag"/> intended to allow one buffer per thread.
+    /// A collection of <see cref="NativeRingBuffer"/> intended to allow one buffer per thread.
     /// from: https://github.com/jeffvella/UnityEcsEvents/blob/develop/Runtime/MultiAppendBuffer.cs
     /// </summary>
-    unsafe struct MultiAppendBuffer:IDisposable
+    unsafe struct AtomicRingBuffers:IDisposable
     {
         public const int DefaultThreadIndex = -1;
         public const int MinThreadIndex = DefaultThreadIndex;
@@ -17,39 +17,39 @@ namespace Svelto.ECS.DataStructures.Unity
 #if ENABLE_BURST_AOT        
         [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
-        SimpleNativeBag* _data;
+        NativeRingBuffer* _data;
         public readonly Allocator Allocator;
         readonly uint _threadsCount;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsInvalidThreadIndex(int index) => index < MinThreadIndex || index > _threadsCount;
 
-        public MultiAppendBuffer(Common.Allocator allocator, uint threadsCount)
+        public AtomicRingBuffers(Common.Allocator allocator, uint threadsCount)
         {
             Allocator = allocator;
             _threadsCount = threadsCount;
 
-            var bufferSize = MemoryUtilities.SizeOf<SimpleNativeBag>();
+            var bufferSize = MemoryUtilities.SizeOf<NativeRingBuffer>();
             var bufferCount = _threadsCount;
             var allocationSize = bufferSize * bufferCount;
 
-            var ptr = (byte*)MemoryUtilities.Alloc(allocationSize, MemoryUtilities.AlignOf<int>(), allocator);
-            MemoryUtilities.MemClear((IntPtr) ptr, allocationSize);
+            var ptr = (byte*)MemoryUtilities.Alloc((uint) allocationSize, (uint) MemoryUtilities.AlignOf<int>(), allocator);
+            MemoryUtilities.MemClear((IntPtr) ptr, (uint) allocationSize);
 
             for (int i = 0; i < bufferCount; i++)
             {
-                var bufferPtr = (SimpleNativeBag*)(ptr + bufferSize * i);
-                var buffer = new SimpleNativeBag(allocator);
+                var bufferPtr = (NativeRingBuffer*)(ptr + bufferSize * i);
+                var buffer = new NativeRingBuffer((uint) i, allocator);
                 MemoryUtilities.CopyStructureToPtr(ref buffer, (IntPtr) bufferPtr);
             }
 
-            _data = (SimpleNativeBag*)ptr;
+            _data = (NativeRingBuffer*)ptr;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref SimpleNativeBag GetBuffer(int index)
+        public ref NativeRingBuffer GetBuffer(int index)
         {
-            return ref MemoryUtilities.ArrayElementAsRef<SimpleNativeBag>((IntPtr) _data, index);
+            return ref MemoryUtilities.ArrayElementAsRef<NativeRingBuffer>((IntPtr) _data, index);
         }
 
         public uint count => _threadsCount;

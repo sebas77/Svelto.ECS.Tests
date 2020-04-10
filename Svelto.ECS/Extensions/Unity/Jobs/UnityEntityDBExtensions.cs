@@ -1,4 +1,5 @@
 #if UNITY_2019_2_OR_NEWER
+using System;
 using Svelto.DataStructures;
 using Unity.Jobs;
 
@@ -7,51 +8,25 @@ namespace Svelto.ECS.Extensions.Unity
     public static class UnityEntityDBExtensions
     {
         public static JobHandle CombineDispose
-            <T1>(this in NativeBuffer<T1> buffer, JobHandle combinedDependencies,
-                JobHandle                                               inputDeps)
-            where T1 : unmanaged 
+            <T1>(this T1 disposable, JobHandle combinedDependencies, JobHandle inputDeps) where T1 : struct, IDisposable
         {
             return JobHandle.CombineDependencies(combinedDependencies,
-                new DisposeJob<NativeBuffer<T1>>(buffer)
-                    .Schedule(inputDeps));
+                                                 new DisposeJob<T1>(disposable).Schedule(inputDeps));
         }
         
         public static JobHandle CombineDispose
-            <T1>(this in EntityCollection<T1>.EntityNativeIterator<T1> entityCollection, JobHandle combinedDependencies,
-                JobHandle                                               inputDeps)
-            where T1 : unmanaged, IEntityComponent
+            <T1>(this T1 disposable, JobHandle inputDeps) where T1 : struct, IDisposable
         {
-            return JobHandle.CombineDependencies(combinedDependencies,
-                new DisposeJob<EntityCollection<T1>.EntityNativeIterator<T1>>(entityCollection).Schedule(inputDeps));
-        }
-        
-        public static JobHandle CombineDispose
-            <T1, T2>(this in BufferTuple<NativeBuffer<T1>, NativeBuffer<T2>> buffer, JobHandle combinedDependencies,
-                     JobHandle                                               inputDeps)
-            where T1 : unmanaged where T2 : unmanaged
-        {
-            return JobHandle.CombineDependencies(combinedDependencies,
-                                                 new DisposeJob<BufferTuple<NativeBuffer<T1>, NativeBuffer<T2>>>(buffer)
-                                                    .Schedule(inputDeps));
+            return new DisposeJob<T1>(disposable).Schedule(inputDeps);
         }
 
-        public static JobHandle CombineDispose
-            <T1, T2, T3>(this in BufferTuple<NativeBuffer<T1>, NativeBuffer<T2>, NativeBuffer<T3>> buffer,
-                         JobHandle                                                                 combinedDependencies,
-                         JobHandle                                                                 inputDeps)
-            where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged
-        {
-            return JobHandle.CombineDependencies(combinedDependencies,
-                                                 new DisposeJob<BufferTuple<NativeBuffer<T1>, NativeBuffer<T2>,
-                                                     NativeBuffer<T3>>>(buffer).Schedule(inputDeps));
-        }
         
-        public static JobHandle CombineDispose<T1>(this in NativeEGIDMapper<T1> mapper, JobHandle combinedDependencies,
-                                                    JobHandle inputDeps)
-            where T1 : unmanaged, IEntityComponent
+        public static JobHandle CombineDispose
+            <T1, T2>(this T1 disposable1, T2 disposable2, JobHandle combinedDependencies, JobHandle inputDeps) 
+                where T1 : struct, IDisposable where T2 : struct, IDisposable
         {
-            return JobHandle.CombineDependencies(combinedDependencies,
-                new DisposeJob<NativeEGIDMapper<T1>>(mapper).Schedule(inputDeps));
+            return JobHandle.CombineDependencies(combinedDependencies, new DisposeJob<T2>(disposable2).Schedule(inputDeps),
+                                                 new DisposeJob<T1>(disposable1).Schedule(inputDeps));
         }
     }
 }

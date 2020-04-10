@@ -1,7 +1,8 @@
-{
+﻿{
     "name": "Svelto.Common_3",
     "references": [
-        "Unity.Collections"
+        "Unity.Collections",
+        "Unity.Burst"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

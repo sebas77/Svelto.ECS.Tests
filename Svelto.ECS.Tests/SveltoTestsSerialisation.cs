@@ -14,7 +14,7 @@ namespace UnitTests
         [SetUp]
         public void Init()
         {
-            _simpleSubmissionEntityViewScheduler = new SimpleSubmissioncheduler();
+            _simpleSubmissionEntityViewScheduler = new SimpleEntitiesSubmissionScheduler();
             _enginesRoot                         = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
             _neverDoThisIsJustForTheTest         = new TestEngine();
 
@@ -188,7 +188,7 @@ namespace UnitTests
         EnginesRoot              _enginesRoot;
         IEntityFactory           _entityFactory;
         IEntityFunctions         _entityFunctions;
-        SimpleSubmissioncheduler _simpleSubmissionEntityViewScheduler;
+        SimpleEntitiesSubmissionScheduler _simpleSubmissionEntityViewScheduler;
         TestEngine               _neverDoThisIsJustForTheTest;
         
         //todo: this should not be at framework level
@@ -204,9 +204,9 @@ namespace UnitTests
             [HashName("DefaultPatternForEntityDescriptor")]
             internal class DefaultPatternForEntityDescriptor : IEntityDescriptor
             {
-                public IEntityComponentBuilder[] componentsToBuild => ComponentsToBuild;
+                public IComponentBuilder[] componentsToBuild => ComponentsToBuild;
                 
-                static readonly IEntityComponentBuilder[] ComponentsToBuild = {
+                static readonly IComponentBuilder[] ComponentsToBuild = {
                         new ComponentBuilder<EntityStructNotSerialized>(),    
                         new SerializableComponentBuilder<SerializationType, EntityStructSerialized>(),
                         new SerializableComponentBuilder<SerializationType, EntityStructSerialized2>
@@ -225,9 +225,9 @@ namespace UnitTests
             [HashName("DefaultPatternForEntityDescriptorV0")]
             internal class DefaultPatternForEntityDescriptor : IEntityDescriptor
             {
-                public IEntityComponentBuilder[] componentsToBuild => ComponentsToBuild;
+                public IComponentBuilder[] componentsToBuild => ComponentsToBuild;
                 
-                static readonly IEntityComponentBuilder[] ComponentsToBuild = {
+                static readonly IComponentBuilder[] ComponentsToBuild = {
                     new ComponentBuilder<EntityStructNotSerialized>(),    
                     new SerializableComponentBuilder<SerializationType, EntityStructSerialized2>
                         (((int)SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>())),
@@ -244,9 +244,9 @@ namespace UnitTests
             [HashName("DefaultPatternForEntityDescriptorV1")]
             internal class DefaultPatternForEntityDescriptor : IEntityDescriptor
             {
-                public IEntityComponentBuilder[] componentsToBuild => ComponentsToBuild;
+                public IComponentBuilder[] componentsToBuild => ComponentsToBuild;
                 
-                static readonly IEntityComponentBuilder[] ComponentsToBuild = {
+                static readonly IComponentBuilder[] ComponentsToBuild = {
                     new ComponentBuilder<EntityStructNotSerialized>(),    
                     new SerializableComponentBuilder<EntityStructSerialized>(),
                     new SerializableComponentBuilder<SerializationType, EntityStructSerialized2>
@@ -264,9 +264,9 @@ namespace UnitTests
             [HashName("DefaultPatternForEntityDescriptorWithView")]
             internal class DefaultPatternForEntityDescriptor : IEntityDescriptor
             {
-                public IEntityComponentBuilder[] componentsToBuild => ComponentsToBuild;
+                public IComponentBuilder[] componentsToBuild => ComponentsToBuild;
                 
-                static readonly IEntityComponentBuilder[] ComponentsToBuild = {
+                static readonly IComponentBuilder[] ComponentsToBuild = {
                     new ComponentBuilder<EntityViewStructNotSerialized>(),    
                     new SerializableComponentBuilder<SerializationType, EntityStructSerialized>(),
                     new SerializableComponentBuilder<SerializationType, EntityStructSerialized2>

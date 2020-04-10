@@ -22,7 +22,7 @@ namespace UnitTests
         [SetUp]
         public void Init()
         {
-            _simpleSubmissionEntityViewScheduler = new SimpleSubmissioncheduler();
+            _simpleSubmissionEntityViewScheduler = new SimpleEntitiesSubmissionScheduler();
             _enginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
             _neverDoThisIsJustForTheTest = new TestEngine();
 
@@ -32,9 +32,6 @@ namespace UnitTests
             _entityFunctions = _enginesRoot.GenerateEntityFunctions();
         }
 
-        public void TestRemoveEntityThrowExceptionIfNotGoundInGroup()
-        {}
-        
         struct Test
         {
             public  int i;
@@ -598,7 +595,7 @@ namespace UnitTests
         [TestCase((uint)0)][TestCase((uint)1)][TestCase((uint)2)]
         public void TestCreationAndRemovalOfDynamicEntityDescriptors(uint id)
         {
-            var ded = new DynamicEntityDescriptor<TestDescriptor>(new IEntityComponentBuilder[] 
+            var ded = new DynamicEntityDescriptor<TestDescriptor>(new IComponentBuilder[] 
                 { new ComponentBuilder<TestEntityStruct>() });
             
             _entityFactory.BuildEntity(new EGID(id, group0), ded, new[] {new TestIt(2)});
@@ -1109,7 +1106,7 @@ namespace UnitTests
         EnginesRoot                         _enginesRoot;
         IEntityFactory                      _entityFactory;
         IEntityFunctions                    _entityFunctions;
-        SimpleSubmissioncheduler _simpleSubmissionEntityViewScheduler;
+        SimpleEntitiesSubmissionScheduler _simpleSubmissionEntityViewScheduler;
         TestEngine                          _neverDoThisIsJustForTheTest;
 
         struct EVS1 : IEntityComponent
@@ -1128,11 +1125,11 @@ namespace UnitTests
 
         class B : ExtendibleEntityDescriptor<A>
         {
-            static readonly IEntityComponentBuilder[] _nodesToBuild;
+            static readonly IComponentBuilder[] _nodesToBuild;
 
             static B()
             {
-                _nodesToBuild = new IEntityComponentBuilder[]
+                _nodesToBuild = new IComponentBuilder[]
                 {
                     new ComponentBuilder<EVS2>(),
                 };
@@ -1149,11 +1146,11 @@ namespace UnitTests
 
         class B2 : ExtendibleEntityDescriptor<A2>
         {
-            static readonly IEntityComponentBuilder[] _nodesToBuild;
+            static readonly IComponentBuilder[] _nodesToBuild;
 
             static B2()
             {
-                _nodesToBuild = new IEntityComponentBuilder[]
+                _nodesToBuild = new IComponentBuilder[]
                 {
                     new ComponentBuilder<TestEntityStruct>(),
                 };

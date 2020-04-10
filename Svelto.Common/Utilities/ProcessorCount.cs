@@ -8,7 +8,12 @@ namespace Svelto.Common
 
         public static int Batch(uint length)
         {
-            return (int) Math.Max((int) (length / (processorCount)), 1);
+            var numBatches = length / processorCount;
+
+            if (numBatches < 16)
+                return 16;
+            
+            return (int) numBatches;
         }
     }
 }
