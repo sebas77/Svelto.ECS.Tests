@@ -1,11 +1,11 @@
 using System;
 using System.Runtime.CompilerServices;
-#if !ENABLE_BURST_AOT
+#if !UNITY_COLLECTIONS
 using System.Runtime.InteropServices;
 #endif
 namespace Svelto.Common
 {
-#if !ENABLE_BURST_AOT
+#if !UNITY_COLLECTIONS
     public enum Allocator
     {
         Invalid ,
@@ -47,7 +47,7 @@ namespace Svelto.Common
         {
             unsafe
             {
-#if ENABLE_BURST_AOT
+#if UNITY_COLLECTIONS
                 Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Free((void*) ptr, (Unity.Collections.Allocator) allocator);
 #else
                 Marshal.FreeHGlobal((IntPtr) ptr);
@@ -67,7 +67,7 @@ namespace Svelto.Common
         {
             unsafe
             {
-#if ENABLE_BURST_AOT
+#if UNITY_COLLECTIONS
                 var newPointer =
                     (void*) Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Malloc(newCapacity, (int) alignOf, (Unity.Collections.Allocator) allocator);
 #else
@@ -81,7 +81,7 @@ namespace Svelto.Common
         {
             unsafe 
             {
-#if ENABLE_BURST_AOT
+#if UNITY_COLLECTIONS
                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.MemClear((void*) listData, sizeOf);
 #else
                Unsafe.InitBlock((void*) listData, 0, sizeOf);

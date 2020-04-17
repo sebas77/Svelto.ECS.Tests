@@ -258,7 +258,7 @@ namespace Svelto.ECS.DataStructures
             return (uint)(Math.Ceiling(input / 4.0) * 4);            
         }
         
-#if ENABLE_BURST_AOT
+#if UNITY_ECS
         [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         unsafe byte* _ptr;

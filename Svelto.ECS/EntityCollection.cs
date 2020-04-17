@@ -143,7 +143,7 @@ namespace Svelto.ECS
             }
 
             readonly NB<NT> _array;
-#if ENABLE_BURST_AOT        
+#if UNITY_ECS        
             [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
             readonly unsafe int *          _index;

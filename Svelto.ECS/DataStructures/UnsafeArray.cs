@@ -115,7 +115,7 @@ namespace Svelto.ECS.DataStructures
             _writeIndex = 0;
         }
         
-#if ENABLE_BURST_AOT
+#if UNITY_ECS
         [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         unsafe byte* _ptr;

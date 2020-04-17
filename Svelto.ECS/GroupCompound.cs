@@ -15,41 +15,24 @@ namespace Svelto.ECS
             if ((Groups = GroupCompound<G3, G2, G1>.Groups) == null)
             if ((Groups = GroupCompound<G1, G3, G2>.Groups) == null)
             if ((Groups = GroupCompound<G2, G1, G3>.Groups) == null)
-                {
-                    Groups = new ExclusiveGroup[1];
+            {
+                Groups = new ExclusiveGroup[1];
 
-                    var Group = new ExclusiveGroup();
-                    Groups[0] = Group;
+                var Group = new ExclusiveGroup();
+                Groups[0] = Group;
                     
-                    Console.LogDebug("<color=orange>".FastConcat(typeof(G1).ToString().FastConcat("-", typeof(G2).ToString(), "-").FastConcat(typeof(G3).ToString(), "- Initialized ", Groups[0].ToString()), "</color>"));
+                Console.LogDebug("<color=orange>".FastConcat(typeof(G1).ToString().FastConcat("-", typeof(G2).ToString(), "-").FastConcat(typeof(G3).ToString(), "- Initialized ", Groups[0].ToString()), "</color>"));
                     
-              //      GroupCompound<G3, G1, G2>.Groups = Groups;
-                //    GroupCompound<G2, G3, G1>.Groups = Groups;
-                  //  GroupCompound<G3, G2, G1>.Groups = Groups;
-//                    GroupCompound<G1, G3, G2>.Groups = Groups;
-  //                  GroupCompound<G2, G1, G3>.Groups = Groups;
+                GroupCompound<G1, G2>.Add(Group); //<G1/G2> and <G2/G1> must share the same array
+                GroupCompound<G1, G3>.Add(Group);
+                GroupCompound<G2, G3>.Add(Group);
                     
-                    GroupCompound<G1, G2>.Add(Group); //<G1/G2> and <G2/G1> must share the same array
-                    GroupCompound<G1, G3>.Add(Group);
-                    GroupCompound<G2, G3>.Add(Group);
-                    
-                    GroupTag<G1>.Add(Group);
-                    GroupTag<G2>.Add(Group);
-                    GroupTag<G3>.Add(Group);
-                }
+                GroupTag<G1>.Add(Group);
+                GroupTag<G2>.Add(Group);
+                GroupTag<G3>.Add(Group);
+            }
             else
                 Console.LogDebug(typeof(G1).ToString().FastConcat("-", typeof(G2).ToString(), "-").FastConcat(typeof(G3).ToString(), "-", Groups[0].ToString()));
-            
-            // if (Groups == null || Groups != GroupCompound<G3, G1, G2>.Groups )
-            //     throw new Exception("not good");
-            // if (Groups == null || Groups != GroupCompound<G2, G3, G1>.Groups )
-            //     throw new Exception("not good");
-            // if (Groups == null || Groups != GroupCompound<G3, G2, G1>.Groups )
-            //     throw new Exception("not good");
-            // if (Groups == null || Groups != GroupCompound<G1, G3, G2>.Groups )
-            //     throw new Exception("not good");
-            // if (Groups == null || Groups != GroupCompound<G2, G1, G3>.Groups )
-            //     throw new Exception("not good");
         }
 
         public static ExclusiveGroupStruct BuildGroup => new ExclusiveGroupStruct(Groups[0]);

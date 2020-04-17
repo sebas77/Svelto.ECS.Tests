@@ -14,7 +14,7 @@ namespace Svelto.ECS.DataStructures.Unity
         public const int DefaultThreadIndex = -1;
         public const int MinThreadIndex = DefaultThreadIndex;
 
-#if ENABLE_BURST_AOT        
+#if UNITY_ECS        
         [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         NativeRingBuffer* _data;

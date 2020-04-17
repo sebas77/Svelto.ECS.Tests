@@ -750,7 +750,10 @@ namespace UnitTests
         [TestCase((uint)0)][TestCase((uint)1)][TestCase((uint)2)]
         public void TestBuildEntityWithImplementor(uint id)
         {
-            _entityFactory.BuildEntity<TestDescriptor5>(new EGID(id, group1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id, group1), new[]
+            {
+                new TestIt(2)
+            });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, group1)));
@@ -801,7 +804,7 @@ namespace UnitTests
         public void TestBuildEntityMixed(uint id)
         {
             TestIt testIt = new TestIt(2);
-            _entityFactory.BuildEntity<TestDescriptor5>
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>
                 (new EGID(id, group1), new[] { testIt });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
@@ -933,10 +936,10 @@ namespace UnitTests
         [TestCase((uint)8, (uint)9, (uint)10, (uint)11)]
         public void TestExecuteOnAllTheEntities(uint id, uint id2, uint id3, uint id4)
         {
-            _entityFactory.BuildEntity<TestDescriptor5>(new EGID(id, groupR4), new[] { new TestIt(2) });
-            _entityFactory.BuildEntity<TestDescriptor5>(new EGID(id2, groupR4 + 1), new[] { new TestIt(2) });
-            _entityFactory.BuildEntity<TestDescriptor5>(new EGID(id3, groupR4 + 2), new[] { new TestIt(2) });
-            _entityFactory.BuildEntity<TestDescriptor5>(new EGID(id4, groupR4 + 3), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id, groupR4), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id2, groupR4 + 1), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id3, groupR4 + 2), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id4, groupR4 + 3), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityViewStruct>((entity, group, groupCount, db) =>
@@ -969,10 +972,10 @@ namespace UnitTests
                 }
             }
 
-            _entityFunctions.RemoveEntity<TestDescriptor5>(new EGID(id, groupR4));
-            _entityFunctions.RemoveEntity<TestDescriptor5>(new EGID(id2, groupR4 + 1));
-            _entityFunctions.RemoveEntity<TestDescriptor5>(new EGID(id3, groupR4 + 2));
-            _entityFunctions.RemoveEntity<TestDescriptor5>(new EGID(id4, groupR4 + 3));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id, groupR4));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id2, groupR4 + 1));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id3, groupR4 + 2));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id4, groupR4 + 3));
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityViewStruct>((entity, group,  groupCount, db) =>
@@ -1176,7 +1179,7 @@ namespace UnitTests
         class TestDescriptor7 : GenericEntityDescriptor<TestEntityStruct>
         { }
 
-        class TestDescriptor5 : GenericEntityDescriptor<TestEntityViewStruct, TestEntityStruct>
+        class TestEntityWithComponentViewAndComponentStruct : GenericEntityDescriptor<TestEntityViewStruct, TestEntityStruct>
         { }
         
         class TestDescriptor6 : GenericEntityDescriptor<TestEntityStruct, TestEntityStruct2>

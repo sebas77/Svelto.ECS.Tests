@@ -97,7 +97,7 @@ namespace Svelto.DataStructures
                 {
 #if DEBUG && !PROFILE_SVELTO
                     if (index >= _count)
-                        throw new Exception("out of bound access");
+                        throw new Exception("NativeBuffer - out of bound access");
 #endif                    
                     return ref ((T*) _ptr)[index];
                     //return ref Unsafe.AsRef<T>(Unsafe.Add<T>((void*) _ptr, (int) index));
@@ -114,7 +114,7 @@ namespace Svelto.DataStructures
                 {
 #if DEBUG && !PROFILE_SVELTO
                     if (index >= _count)
-                        throw new Exception("out of bound access");
+                        throw new Exception("NativeBuffer - out of bound access");
 #endif                    
                     
                     return ref ((T*) _ptr)[index];
@@ -125,7 +125,7 @@ namespace Svelto.DataStructures
 
         GCHandle _handle;
         uint _count;
-#if ENABLE_BURST_AOT        
+#if UNITY_COLLECTIONS        
         [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         readonly IntPtr _ptr;

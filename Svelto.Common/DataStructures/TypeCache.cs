@@ -9,7 +9,7 @@ namespace Svelto.Common
 
     public class TypeHash<T>
     {
-#if !ENABLE_BURST_AOT        
+#if !UNITY_COLLECTIONS        
         public static readonly int hash = TypeCache<T>.type.GetHashCode();
 #else
         public static readonly int hash = Unity.Burst.BurstRuntime.GetHashCode32<T>();

@@ -97,8 +97,6 @@ namespace Svelto.ECS
                         var egid            = buffer.Dequeue<EGID>();
                         var componentCounts = buffer.Dequeue<uint>();
                         
-                        CheckAddEntityID(egid);
-                        
                         EntityComponentInitializer init =
                             BuildEntity(egid, _nativeAddOperations[componentsIndex].components);
 

@@ -7,7 +7,7 @@ namespace Svelto.ECS.DataStructures
 {
     public struct SharedNativeUInt: IDisposable
     {
-#if ENABLE_BURST_AOT        
+#if UNITY_ECS        
         [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         unsafe uint* data;

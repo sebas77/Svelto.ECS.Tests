@@ -7,7 +7,7 @@ namespace Svelto.ECS.DataStructures
 {
     public struct NativeDynamicArray : IDisposable
     {
-#if ENABLE_BURST_AOT        
+#if UNITY_ECS        
         [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         unsafe UnsafeArray* _list;
@@ -58,11 +58,13 @@ namespace Svelto.ECS.DataStructures
                 var sizeOf  = MemoryUtilities.SizeOf<T>();
                 var alignOf = MemoryUtilities.AlignOf<T>();
 
-                uint newCapacity = (uint) MemoryUtilities.SizeOf<UnsafeArray>();
+                uint pointerSize = (uint) MemoryUtilities.SizeOf<UnsafeArray>();
                 UnsafeArray* listData =
-                    (UnsafeArray*) MemoryUtilities.Alloc(newCapacity
+                    (UnsafeArray*) MemoryUtilities.Alloc(pointerSize
                                                        , (uint) MemoryUtilities.AlignOf<UnsafeArray>(), allocator);
-                MemoryUtilities.MemClear((IntPtr) listData, newCapacity);
+                
+                //clear to nullify the pointers
+                MemoryUtilities.MemClear((IntPtr) listData, pointerSize);
 
                 listData->allocator = allocator;
 
