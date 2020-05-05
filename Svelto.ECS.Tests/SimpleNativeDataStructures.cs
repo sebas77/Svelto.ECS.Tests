@@ -44,7 +44,7 @@ namespace UnitTests
     }
 
     [TestFixture]
-    public class NativeRingBufferTests
+    public class NativeBagTests
     {
         [SetUp]
         public void Init() { }
@@ -52,7 +52,7 @@ namespace UnitTests
         [Test]
         public void TestByteReallocWorks()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 for (var i = 0; i < 32; i++)
                     _simpleNativeBag.Enqueue((byte) 0);
@@ -66,7 +66,7 @@ namespace UnitTests
         {
             Assert.Throws<Exception>(() =>
             {
-                using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+                using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
                 {
                     _simpleNativeBag.Enqueue((byte) 0);
                     _simpleNativeBag.Enqueue((byte) 0);
@@ -89,7 +89,7 @@ namespace UnitTests
         [Test]
         public void TestDoofusesScenario()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 for (var i = 0; i < 32; i++)
                 {
@@ -114,7 +114,7 @@ namespace UnitTests
         [Test]
         public void TestDoofusesScenario2()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct()));
@@ -164,7 +164,7 @@ namespace UnitTests
         [Test]
         public void TestDoofusesScenario3()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct()));
@@ -289,7 +289,7 @@ namespace UnitTests
         [Test]
         public void TestDoofusesScenario4()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(1)));
@@ -362,7 +362,7 @@ namespace UnitTests
         [Test]
         public void TestDoofusesScenario5()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(1)));
@@ -501,7 +501,7 @@ namespace UnitTests
         [Test]
         public void TestEnqueueDequeueWontAlloc()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 for (var i = 0; i < 32; i++)
                 {
@@ -516,7 +516,7 @@ namespace UnitTests
         [Test]
         public void TestEnqueueDequeueWontAllocTooMuch()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 for (var i = 0; i < 32; i++)
                 {
@@ -537,7 +537,7 @@ namespace UnitTests
         [Test]
         public void TestEnqueueTwiceDequeueOnceLeavesWithHalfOfTheEntities()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 for (var i = 0; i < 32; i++)
                 {
@@ -553,7 +553,7 @@ namespace UnitTests
         [Test]
         public void TestLongReallocWorks()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 for (var i = 0; i < 32; i++)
                     _simpleNativeBag.Enqueue((long) 0);
@@ -565,7 +565,7 @@ namespace UnitTests
         [Test]
         public void TestMixedReallocWorks()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 for (var i = 0; i < 2; i++)
                 {
@@ -581,7 +581,7 @@ namespace UnitTests
         [Test]
         public void TestUintReallocWorks()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 for (var i = 0; i < 32; i++)
                     _simpleNativeBag.Enqueue((uint) 0);
@@ -593,7 +593,7 @@ namespace UnitTests
         [Test]
         public void TestWhatYouEnqueueIsWhatIDequeue()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 for (var i = 0; i < 32; i++)
                 {
@@ -614,7 +614,7 @@ namespace UnitTests
         [Test]
         public void TestWhatYouEnqueueIsWhatIDequeue2()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 for (var i = 0; i < 32; i++)
                 {
@@ -671,7 +671,7 @@ namespace UnitTests
         [Test]
         public void TestReaderGreaterThanWriter()
         {
-            using (var _simpleNativeBag = new NativeRingBuffer(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
             {
                 //write 16 uint. The writerHead will be at the end of the array
                 for (var i = 0; i < 16; i++)

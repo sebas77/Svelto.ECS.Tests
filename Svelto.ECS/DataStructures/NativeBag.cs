@@ -12,11 +12,13 @@ namespace Svelto.ECS.DataStructures
     ///     is done.
     ///     You can reserve a position in the queue to update it later.
     ///     The datastructure is a struct and it's "copyable"
+    ///     I eventually decided to call it NativeBag and not NativeBag because it can also be used as
+    ///     a preallocated memory pool where any kind of T can be stored as long as T is unmanaged
     /// </summary>
-    public struct NativeRingBuffer : IDisposable
+    public struct NativeBag : IDisposable
     {
 #if UNITY_ECS
-        [NativeDisableUnsafePtrRestriction]
+        [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         unsafe UnsafeBlob* _queue;
 
@@ -66,40 +68,16 @@ namespace Svelto.ECS.DataStructures
             }
         }
 
-        public NativeRingBuffer(Allocator allocator)
+        public NativeBag(Allocator allocator)
         {
             unsafe
             {
                 var sizeOf = MemoryUtilities.SizeOf<UnsafeBlob>();
-                var listData = (UnsafeBlob*) MemoryUtilities.Alloc((uint) sizeOf
-                                                                 , (uint) MemoryUtilities.AlignOf<UnsafeBlob>()
-                                                                 , allocator);
+                var listData = (UnsafeBlob*) MemoryUtilities.Alloc((uint) sizeOf, allocator);
 
                 //clear to nullify the pointers
                 MemoryUtilities.MemClear((IntPtr) listData, (uint) sizeOf);
                 listData->allocator = allocator;
-#if DEBUG && !PROFILE_SVELTO
-                listData->id = 0xDEADBEEF;
-#endif
-                _queue = listData;
-            }
-        }
-
-        public NativeRingBuffer(uint bufferID, Allocator allocator)
-        {
-            unsafe
-            {
-                var sizeOf = MemoryUtilities.SizeOf<UnsafeBlob>();
-                var listData = (UnsafeBlob*) MemoryUtilities.Alloc((uint) sizeOf
-                                                                 , (uint) MemoryUtilities.AlignOf<UnsafeBlob>()
-                                                                 , allocator);
-
-                //clear to nullify the pointers
-                MemoryUtilities.MemClear((IntPtr) listData, (uint) sizeOf);
-                listData->allocator = allocator;
-#if DEBUG && !PROFILE_SVELTO
-                listData->id = bufferID;
-#endif
                 _queue = listData;
             }
         }
@@ -125,14 +103,14 @@ namespace Svelto.ECS.DataStructures
 #endif
                 var sizeOf = MemoryUtilities.SizeOf<T>();
                 if (_queue->space - sizeOf < 0)
-                    _queue->Realloc((uint) MemoryUtilities.AlignOf<int>(), (uint) ((_queue->capacity + sizeOf) * 1.5f));
+                    _queue->Realloc((uint) ((_queue->capacity + sizeOf) * 1.5f));
 
                 return ref _queue->Reserve<T>(out index);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Enqueue<T>(in T item) where T : struct
+        public void Enqueue<T>(in T item) where T : unmanaged
         {
             unsafe
             {
@@ -142,7 +120,7 @@ namespace Svelto.ECS.DataStructures
 #endif
                 var sizeOf = MemoryUtilities.SizeOf<T>();
                 if (_queue->space - sizeOf < 0)
-                    _queue->Realloc((uint) MemoryUtilities.AlignOf<int>(), (uint) ((_queue->capacity + sizeOf) * 1.5f));
+                    _queue->Realloc((uint) ((_queue->capacity + sizeOf) * 1.5f));
 
                 _queue->Write(item);
             }
@@ -161,7 +139,7 @@ namespace Svelto.ECS.DataStructures
             }
         }
 
-        public T Dequeue<T>() where T : struct
+        public T Dequeue<T>() where T : unmanaged
         {
             unsafe
             {

@@ -1,50 +1,30 @@
-using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Threading;
 using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
     public struct EntityCollection<T> where T : IEntityComponent
     {
-        public EntityCollection(T[] array, uint count) : this()
-        {
-            _buffer.Set(array);
-            _count = count;
-        }
-
-        public EntityCollection(MB<T> buffer, uint count)
+        public EntityCollection(IBuffer<T> buffer, uint count)
         {
             _buffer = buffer;
-            _count = count;
+            _count  = count;
         }
 
         public uint count => _count;
 
-        readonly MB<T> _buffer;
-        readonly uint             _count;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T[] ToFastAccess(out uint actualCount)
-        {
-            actualCount = _count;
-            return _buffer.ToManagedArray();
-        }
+        readonly IBuffer<T> _buffer;
+        readonly uint  _count;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NB<NT> ToNativeBuffer<NT>() where NT : unmanaged, T
         {
-            return new NB<NT>(Unsafe.As<NT[]>(_buffer.ToManagedArray()), _count);
+            return new NB<NT>(_buffer.ToNativeArray(), _count, _buffer.capacity);
         }
-        
-        public EntityNativeIterator<NT> GetNativeEnumerator<NT>() where NT : unmanaged, T 
-                    { return new EntityNativeIterator<NT>(ToNativeBuffer<NT>()); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public MB<T> ToBuffer(out uint count)
+        public IBuffer<T> ToBuffer()
         {
-            count = _count;
             return _buffer;
         }
 
@@ -61,25 +41,19 @@ namespace Svelto.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public EntityIterator GetEnumerator()
-        {
-            return new EntityIterator(_buffer, _count);
-        }
+        public EntityIterator GetEnumerator() { return new EntityIterator(_buffer, _count); }
 
         public struct EntityIterator
         {
-            public EntityIterator(MB<T> array, uint count) : this()
+            public EntityIterator(IBuffer<T> array, uint count) : this()
             {
-                _array = array.ToManagedArray();
+                _array = array;
                 _count = count;
                 _index = -1;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool MoveNext()
-            {
-                return ++_index < _count;
-            }
+            public bool MoveNext() { return ++_index < _count; }
 
             public ref T Current
             {
@@ -87,66 +61,9 @@ namespace Svelto.ECS
                 get => ref _array[_index];
             }
 
-            readonly T[]  _array;
+            readonly IBuffer<T> _array;
             readonly uint _count;
             int           _index;
-        }
-        
-        /// <summary>
-        /// Note: this Enumerator is designed to work in a multithreaded parallel environment. The enumerator
-        /// can then be copied over several threads, that's why it must operate on pointers, otherwise each
-        /// thread will have it's own index which is not the goal of this enumerator.
-        /// </summary>
-        /// <typeparam name="NT"></typeparam>
-        public struct EntityNativeIterator<NT> : IDisposable where NT : unmanaged
-        {
-            public EntityNativeIterator(NB<NT> array) : this()
-            {
-                unsafe
-                {
-                    _array = array;
-                    _index = (int*) Marshal.AllocHGlobal(sizeof(int));
-                    *_index = -1;
-                }
-            }
-
-            public ref NT threadSafeNext
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get
-                {
-                    unsafe
-                    {
-                        return ref ((NT*) _array.ToNativeArray())[Interlocked.Increment(ref *_index)];
-                    }
-                }
-            }
-
-            public ref readonly NT current
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get
-                {
-                    unsafe
-                    {
-                        return ref ((NT*) _array.ToNativeArray())[*_index];
-                    }
-                }
-            }
-
-            public void Dispose() 
-            {
-                unsafe
-                {
-                    _array.Dispose(); Marshal.FreeHGlobal((IntPtr) _index);
-                }
-            }
-
-            readonly NB<NT> _array;
-#if UNITY_ECS        
-            [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
-#endif
-            readonly unsafe int *          _index;
         }
     }
 
@@ -176,17 +93,9 @@ namespace Svelto.ECS
         readonly EntityCollection<T1> _array1;
         readonly EntityCollection<T2> _array2;
 
-        public (T1[], T2[]) ToFastAccess(out uint count)
+        public BT<IBuffer<T1>, IBuffer<T2>> ToBuffers()
         {
-            count = this.count;
-
-            return (_array1.ToFastAccess(out _), _array2.ToFastAccess(out _));
-        }
-
-        public BT<MB<T1>, MB<T2>> ToBuffers()
-        {
-            var bufferTuple = new BT<MB<T1>, MB<T2>>
-                (_array1.ToBuffer(out _), _array2.ToBuffer(out _), count);
+            var bufferTuple = new BT<IBuffer<T1>, IBuffer<T2>>(_array1.ToBuffer(), _array2.ToBuffer(), count);
             return bufferTuple;
         }
 
@@ -269,17 +178,9 @@ namespace Svelto.ECS
 
         public uint count => Item1.count;
 
-        public (T1[], T2[], T3[]) ToFastAccess(out uint count)
+        public BT<IBuffer<T1>, IBuffer<T2>, IBuffer<T3>> ToBuffers()
         {
-            count = this.count;
-
-            return (_array1.ToFastAccess(out _), _array2.ToFastAccess(out _), _array3.ToFastAccess(out _));
-        }
-
-        public BT<MB<T1>, MB<T2>, MB<T3>> ToBuffers()
-        {
-            var bufferTuple = new BT<MB<T1>, MB<T2>, MB<T3>>
-                (_array1.ToBuffer(out _), _array2.ToBuffer(out _), _array3.ToBuffer(out _), count);
+            var bufferTuple = new BT<IBuffer<T1>, IBuffer<T2>, IBuffer<T3>>(_array1.ToBuffer(), _array2.ToBuffer(), _array3.ToBuffer(), count);
             return bufferTuple;
         }
 
@@ -494,10 +395,7 @@ namespace Svelto.ECS
         }
     }
     
-    public readonly struct BT<BufferT1, BufferT2, BufferT3, BufferT4> : IDisposable where BufferT1 : IDisposable
-                                                                          where BufferT2 : IDisposable
-                                                                          where BufferT3 : IDisposable
-                                                                          where BufferT4 : IDisposable
+    public readonly struct BT<BufferT1, BufferT2, BufferT3, BufferT4>
     {
         public readonly BufferT1 buffer1;
         public readonly BufferT2 buffer2;
@@ -513,19 +411,9 @@ namespace Svelto.ECS
             this.buffer4 = bufferT4;
             this.count   = count;
         }
-
-        public void Dispose()
-        {
-            buffer1.Dispose();
-            buffer2.Dispose();
-            buffer3.Dispose();
-            buffer4.Dispose();
-        }
     }
 
-    public readonly struct BT<BufferT1, BufferT2, BufferT3> : IDisposable where BufferT1 : IDisposable
-                                                                                   where BufferT2 : IDisposable
-                                                                                   where BufferT3 : IDisposable
+    public readonly struct BT<BufferT1, BufferT2, BufferT3>
     {
         public readonly BufferT1 buffer1;
         public readonly BufferT2 buffer2;
@@ -539,17 +427,9 @@ namespace Svelto.ECS
             this.buffer3 = bufferT3;
             this.count = count;
         }
-
-        public void Dispose()
-        {
-            buffer1.Dispose();
-            buffer2.Dispose();
-            buffer3.Dispose();
-        }
     }
 
-    public readonly struct BT<BufferT1, BufferT2> : IDisposable
-        where BufferT1 : IDisposable where BufferT2 : IDisposable
+    public readonly struct BT<BufferT1, BufferT2>
     {
         public readonly BufferT1 buffer1;
         public readonly BufferT2 buffer2;
@@ -560,12 +440,6 @@ namespace Svelto.ECS
             this.buffer1 = bufferT1;
             this.buffer2 = bufferT2;
             this.count = count;
-        }
-
-        public void Dispose()
-        {
-            buffer1.Dispose();
-            buffer2.Dispose();
         }
     }
 

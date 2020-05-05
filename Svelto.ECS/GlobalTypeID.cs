@@ -1,8 +1,8 @@
-#if UNITY_ECS
+using System;
 using System.Threading;
 using Svelto.DataStructures;
 using Svelto.ECS.DataStructures;
-using Unity.Burst;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
@@ -20,25 +20,55 @@ namespace Svelto.ECS
 
         static int value;
     }
-    
-    static class EntityComponentID<T>
-    {
-        internal static readonly SharedStatic<uint> ID = SharedStatic<uint>.GetOrCreate<GlobalTypeID, T>();
-    }
-    
+
     interface IFiller 
     {
-        void FillFromByteArray(EntityComponentInitializer init, NativeRingBuffer buffer);
+        void FillFromByteArray(EntityComponentInitializer init, NativeBag buffer);
     }
+
+    delegate void ForceUnmanagedCast<T>(EntityComponentInitializer init, NativeBag buffer) where T : struct, IEntityComponent;
 
     class Filler<T>: IFiller where T : struct, IEntityComponent
     {
-        void IFiller.FillFromByteArray(EntityComponentInitializer init, NativeRingBuffer buffer)
-        {
-            var component = buffer.Dequeue<T>();
+        static readonly ForceUnmanagedCast<T> _action;
 
-            init.Init(component);
+        static Filler()
+        {
+            var method = typeof(Trick).GetMethod(nameof(Trick.ForceUnmanaged)).MakeGenericMethod(typeof(T));
+            _action = (ForceUnmanagedCast<T>) Delegate.CreateDelegate(typeof(ForceUnmanagedCast<T>), method);
         }
+        
+        //it's an internal interface
+        void IFiller.FillFromByteArray(EntityComponentInitializer init, NativeBag buffer)
+        {
+            DBC.ECS.Check.Require(UnmanagedTypeExtensions.IsUnmanaged<T>() == true, "invalid type used");
+
+            _action(init, buffer);
+        }
+        
+        static class Trick
+        {    
+            public static void ForceUnmanaged<U>(EntityComponentInitializer init, NativeBag buffer) where U : unmanaged, IEntityComponent
+            {
+                var component = buffer.Dequeue<U>();
+
+                init.Init(component);
+            }
+        }
+    }
+
+    static class EntityComponentID<T>
+    {
+#if UNITY_ECS        
+        internal static readonly SharedStatic<uint> ID = SharedStatic<uint>.GetOrCreate<GlobalTypeID, T>();
+#else
+        internal struct SharedStatic
+        {
+            public uint Data;
+        }
+
+        internal static SharedStatic ID;
+#endif
     }
 
     static class EntityComponentIDMap
@@ -48,7 +78,7 @@ namespace Svelto.ECS
         internal static void Register<T>(IFiller entityBuilder) where T : struct, IEntityComponent
         {
             var location = EntityComponentID<T>.ID.Data = GlobalTypeID.NextID<T>();
-            TYPE_IDS.Add(location, entityBuilder);
+            TYPE_IDS.AddAt(location, entityBuilder);
         }
         
         internal static IFiller GetTypeFromID(uint typeId)
@@ -57,4 +87,3 @@ namespace Svelto.ECS
         }
     }
 }
-#endif

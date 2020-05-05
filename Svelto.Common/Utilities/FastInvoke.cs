@@ -1,27 +1,21 @@
 ﻿using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using Svelto.Common;
 
 namespace Svelto.Utilities
 {
     public static class FastInvoke<T> where T:struct
     {
-        public static int GetFieldOffset(RuntimeFieldHandle h) => 
-            Marshal.ReadInt32(h.Value + (4 + IntPtr.Size)) & 0xFFFFFF;
-        
         public static FastInvokeActionCast<T> MakeSetter(FieldInfo field)
         {
             if (field.FieldType.IsInterfaceEx() == true && field.FieldType.IsValueTypeEx() == false)
             {
-                int offset = GetFieldOffset(field.FieldHandle);
+                int offset = MemoryUtilities.GetFieldOffset(field);
                 return (ref T target, object o) =>
                 {
-                    unsafe
-                    {
-                        ref var pointer = ref Unsafe.AddByteOffset(ref target, (IntPtr) offset);
-                        Unsafe.Write(Unsafe.AsPointer(ref pointer), o);
-                    }
+                    ref T pointer = ref Unsafe.AddByteOffset(ref target, (IntPtr) offset);
+                    Unsafe.WriteUnaligned(ref Unsafe.As<T,byte>(ref pointer), o);
                 };
             }
 
