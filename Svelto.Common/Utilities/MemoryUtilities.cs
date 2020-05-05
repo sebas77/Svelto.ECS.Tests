@@ -3,9 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-#if !UNITY_COLLECTIONS
-using System.Runtime.InteropServices;
-#else
+#if UNITY_COLLECTIONS
 using Unity.Collections.LowLevel.Unsafe;
 #endif
 namespace Svelto.Common
