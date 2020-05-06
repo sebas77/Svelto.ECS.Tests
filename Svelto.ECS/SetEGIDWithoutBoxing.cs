@@ -2,7 +2,7 @@ using System;
 
 namespace Svelto.ECS.Internal
 {
-    public delegate void SetEGIDWithoutBoxingActionCast<T>(ref T target, EGID egid) where T : struct, IEntityComponent;
+    delegate void SetEGIDWithoutBoxingActionCast<T>(ref T target, EGID egid) where T : struct, IEntityComponent;
 
     static class SetEGIDWithoutBoxing<T> where T : struct, IEntityComponent
     {
@@ -14,7 +14,7 @@ namespace Svelto.ECS.Internal
         {
             if (ComponentBuilder<T>.HAS_EGID)
             {
-                var method = typeof(Foo).GetMethod(nameof(Foo.SetEGIDImpl)).MakeGenericMethod(typeof(T));
+                var method = typeof(Trick).GetMethod(nameof(Trick.SetEGIDImpl)).MakeGenericMethod(typeof(T));
                 return (SetEGIDWithoutBoxingActionCast<T>) Delegate.CreateDelegate(
                     typeof(SetEGIDWithoutBoxingActionCast<T>), method);
             }
@@ -22,7 +22,7 @@ namespace Svelto.ECS.Internal
             return null;
         }
 
-        static class Foo
+        static class Trick
         {    
             public static void SetEGIDImpl<U>(ref U target, EGID egid) where U : struct, INeedEGID
             {

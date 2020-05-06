@@ -102,7 +102,8 @@ namespace UnitTests
             test.Trim();
 
             test.Clear();
-            for (int i = 0; i < dictionarysize; i++) test[numbers[i]] = new Test(i);
+            for (int i = 0; i < dictionarysize; i++) 
+                test[numbers[i]] = new Test(i);
 
             for (int i = 0; i < dictionarysize; i++)
             {
@@ -955,17 +956,15 @@ namespace UnitTests
             });
 
 
-            uint count;
-            uint count2;
             for (uint i = 0; i < 4; i++)
             {
-                var buffer1 = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>(groupR4 + i).ToFastAccess(out count);
-                var buffer2 = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(groupR4 + i).ToFastAccess(out count2);
+                EntityCollection<TestEntityStruct> buffer1 = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>(groupR4 + i);
+                EntityCollection<TestEntityViewStruct> buffer2 = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(groupR4 + i);
 
-                Assert.AreEqual(count, 1);
-                Assert.AreEqual(count2, 1);
+                Assert.AreEqual(buffer1.count, 1);
+                Assert.AreEqual(buffer2.count, 1);
 
-                for (int j = 0; j < count; j++)
+                for (int j = 0; j < buffer1.count; j++)
                 {
                     Assert.AreEqual(buffer1[j].value, buffer1[j].ID.entityID);
                     Assert.AreEqual(buffer2[j].TestIt.value, buffer2[j].ID.entityID);

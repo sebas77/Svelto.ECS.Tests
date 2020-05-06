@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Svelto.Common;
 
 namespace Svelto.DataStructures
 {
@@ -11,29 +12,28 @@ namespace Svelto.DataStructures
     /// but do not track it. Hence it's meant to be used temporary and locally as the array can become invalid
     /// after a submission of entities.
     ///
-    /// ToDo: Sentinel to invalidate the array if a submission happens
+    /// NB are wrappers of arrays. Are not meant to resize or free
+    /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public struct NB<T>:IBuffer<T> where T:unmanaged
     {
-        public void Dispose()
+        public NB(IntPtr array, uint count, uint capacity) : this()
         {
-            if (_handle.IsAllocated)
-                _handle.Free();
-        }
-        
-        public unsafe NB(T* array, uint count) : this()
-        {
-            _ptr = new IntPtr(array);
+#if DEBUG && !PROFILE_SVELTO
+            if (count > capacity)
+                throw new Exception("count can't be more than capacity");
+#endif 
+            _ptr = array;
+            _capacity = capacity;
             _count = count;
         }
 
-        public NB(T[] array, uint count) : this()
+        public void Set(IntPtr array, uint count, uint capacity)
         {
-            _handle = GCHandle.Alloc(array, GCHandleType.Pinned);
-            _ptr    = _handle.AddrOfPinnedObject();
-            
-            _count = count;
+            _ptr      = array;
+            _capacity = capacity;
+            _count    = count;
         }
 
         public void CopyFrom<TBuffer>(TBuffer array, uint startIndex, uint size) where TBuffer:IBuffer<T>
@@ -46,7 +46,7 @@ namespace Svelto.DataStructures
             throw new NotImplementedException();
         }
 
-        public void CopyTo(T[] destination, uint sourceStartIndex, uint destinationStartIndex, uint size)
+        public void CopyTo(uint sourceStartIndex, T[] destination, uint destinationStartIndex, uint size)
         {
             throw new NotImplementedException();
         }
@@ -79,8 +79,10 @@ namespace Svelto.DataStructures
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntPtr ToNativeArray() { return _ptr; }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public GCHandle Pin() { return _handle; }
+        public uint capacity
+        {
+            get => _capacity;
+        }
 
         public uint count
         {
@@ -123,11 +125,16 @@ namespace Svelto.DataStructures
             }
         }
 
-        GCHandle _handle;
         uint _count;
-#if UNITY_COLLECTIONS        
+        uint _capacity;
+#if UNITY_COLLECTIONS
+        //todo can I remove this from here? it should be used outside
+        [Unity.Burst.NoAlias]
         [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
-        readonly IntPtr _ptr;
+        IntPtr _ptr;
+
+        public NB<T> AsReader() { return this; }
+        public NB<T> AsWriter() { return this; }
     }
 }

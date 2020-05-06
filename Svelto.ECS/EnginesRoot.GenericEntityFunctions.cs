@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -33,6 +33,18 @@ namespace Svelto.ECS
                     new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityEGID, entityEGID,
                         EntityDescriptorTemplate<T>.descriptor.componentsToBuild));
             }
+            
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void RemoveAllEntities<T>(ExclusiveGroupStruct group) where T : IEntityDescriptor, new()
+            {
+                throw new NotImplementedException();
+            }
+            
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void RemoveAllEntities<T>() where T : IEntityDescriptor, new()
+            {
+                throw new NotImplementedException();
+            }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void RemoveGroupAndEntities(ExclusiveGroupStruct groupID)
@@ -48,9 +60,11 @@ namespace Svelto.ECS
             {
                 throw new NotImplementedException("can't run this until I add the checks!");
                 
+#pragma warning disable 162
                 _enginesRoot.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.SwapGroup, new EGID(0, fromGroupID),
                         new EGID(0, toGroupID)));
+#pragma warning restore 162
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

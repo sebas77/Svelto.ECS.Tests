@@ -68,10 +68,10 @@ namespace UnitTests
                 
                 Assert.AreNotEqual(EatingReadDoofuses5, NoEatingReadDoofuses6);
                 
-                Assert.That(GroupTag<DOOFUSES>.Groups.Length, Is.EqualTo(6));
-                Assert.That(GroupTag<EATING>.Groups.Length, Is.EqualTo(4));
-                Assert.That(GroupTag<RED>.Groups.Length, Is.EqualTo(6));
-                Assert.That(GroupTag<NOTEATING>.Groups.Length, Is.EqualTo(4));
+                Assert.That(GroupTag<DOOFUSES>.Groups.count, Is.EqualTo(6));
+                Assert.That(GroupTag<EATING>.Groups.count, Is.EqualTo(4));
+                Assert.That(GroupTag<RED>.Groups.count, Is.EqualTo(6));
+                Assert.That(GroupTag<NOTEATING>.Groups.count, Is.EqualTo(4));
             }
     }
     
@@ -140,10 +140,10 @@ namespace UnitTests
                 
                 Assert.AreNotEqual(EatingReadDoofuses5, NoEatingReadDoofuses6);
                 
-                Assert.That(GroupTag<DOOFUSES>.Groups.Length, Is.EqualTo(6));
-                Assert.That(GroupTag<EATING>.Groups.Length, Is.EqualTo(4));
-                Assert.That(GroupTag<RED>.Groups.Length, Is.EqualTo(6));
-                Assert.That(GroupTag<NOTEATING>.Groups.Length, Is.EqualTo(4));
+                Assert.That(GroupTag<DOOFUSES>.Groups.count, Is.EqualTo(6));
+                Assert.That(GroupTag<EATING>.Groups.count, Is.EqualTo(4));
+                Assert.That(GroupTag<RED>.Groups.count, Is.EqualTo(6));
+                Assert.That(GroupTag<NOTEATING>.Groups.count, Is.EqualTo(4));
             }
     }
     
@@ -197,10 +197,10 @@ namespace UnitTests
                 Assert.AreEqual(EatingReadDoofuses4, EatingReadDoofuses5);
                 Assert.AreEqual(EatingReadDoofuses5, EatingReadDoofuses6);
                 
-                Assert.That(GroupTag<DOOFUSES>.Groups.Length, Is.EqualTo(5));
-                Assert.That(GroupTag<EATING>.Groups.Length, Is.EqualTo(4));
-                Assert.That(GroupTag<RED>.Groups.Length, Is.EqualTo(5));
-                Assert.That(GroupTag<NOTEATING>.Groups.Length, Is.EqualTo(3));
+                Assert.That(GroupTag<DOOFUSES>.Groups.count, Is.EqualTo(5));
+                Assert.That(GroupTag<EATING>.Groups.count, Is.EqualTo(4));
+                Assert.That(GroupTag<RED>.Groups.count, Is.EqualTo(5));
+                Assert.That(GroupTag<NOTEATING>.Groups.count, Is.EqualTo(3));
             }
     }
     
@@ -240,10 +240,10 @@ namespace UnitTests
                 
                 Assert.AreEqual(NotReadEating1, NotReadEating2);
                 
-                Assert.That(GroupTag<DOOFUSES>.Groups.Length, Is.EqualTo(4));
-                Assert.That(GroupTag<EATING>.Groups.Length, Is.EqualTo(3));
-                Assert.That(GroupTag<RED>.Groups.Length, Is.EqualTo(4));
-                Assert.That(GroupTag<NOTEATING>.Groups.Length, Is.EqualTo(3));
+                Assert.That(GroupTag<DOOFUSES>.Groups.count, Is.EqualTo(4));
+                Assert.That(GroupTag<EATING>.Groups.count, Is.EqualTo(3));
+                Assert.That(GroupTag<RED>.Groups.count, Is.EqualTo(4));
+                Assert.That(GroupTag<NOTEATING>.Groups.count, Is.EqualTo(3));
             }
     }
 }
