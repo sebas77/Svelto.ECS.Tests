@@ -1244,7 +1244,10 @@ namespace UnitTests
 
             public void Remove(ref TestEntityViewStruct entityView, EGID egid)
             {
-                throw new NotImplementedException();
+                // Svelto.ECS.Tests\Svelto.ECS\DataStructures\TypeSafeDictionary.cs:line 196
+                // calls Remove - throwing NotImplementedException here causes test host to
+                // crash in Visual Studio or when using "dotnet test" from the command line
+                // throw new NotImplementedException();
             }
 
             IEntityFactory _entityFactory;
