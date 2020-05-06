@@ -262,3 +262,6 @@ __pycache__/
 /UnitTests/UnitTests/packages.config
 Properties
 Svelto.ECS/EntityBuilder.cs.rej
+
+# Test reports
+/Svelto.ECS.Tests/reports
