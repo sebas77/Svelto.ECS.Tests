@@ -13,9 +13,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <UseSharedCompilation>false</UseSharedCompilation>
   </PropertyGroup>
-
-    <ItemGroup>
-    <PackageReference Include="System.Memory" Version="4.5.2" />
-      
+  <ItemGroup>
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.1" />
   </ItemGroup>
 </Project>
