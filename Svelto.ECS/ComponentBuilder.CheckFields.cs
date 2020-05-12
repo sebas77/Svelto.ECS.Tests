@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Svelto.ECS
 {
-    internal static class EntityBuilderUtilities
+    internal static class ComponentBuilderUtilities
     {
         const string MSG = "Entity Structs field and Entity View Struct components must hold value types.";
 

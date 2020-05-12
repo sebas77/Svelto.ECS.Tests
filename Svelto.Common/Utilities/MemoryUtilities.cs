@@ -1,11 +1,7 @@
 using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
-#if UNITY_COLLECTIONS
-using Unity.Collections.LowLevel.Unsafe;
-#endif
 namespace Svelto.Common
 {
 #if !UNITY_COLLECTIONS
@@ -44,14 +40,14 @@ namespace Svelto.Common
 #endif
 
     public static class MemoryUtilities
-    {
-#if UNITY_5_3_OR_NEWER && !UNITY_COLLECTIONS        
+    {    
+#if UNITY_EDITOR && !UNITY_COLLECTIONS        
         static MemoryUtilities()
         {
-            throw new Exception("Svelto.Common MemoryUtilities needs the Unity Collection package");      
+            #error Svelto.Common is depending on the Unity Collection package. Alternatively you can import System.Runtime.CompilerServices.Unsafe.dll
         }
 #endif
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Free(IntPtr ptr, Allocator allocator)
         {
@@ -60,7 +56,7 @@ namespace Svelto.Common
 #if UNITY_COLLECTIONS
                 UnsafeUtility.Free((void*) ptr, (Unity.Collections.Allocator) allocator);
 #else
-                Marshal.FreeHGlobal((IntPtr) ptr);
+                System.Runtime.InteropServices.Marshal.FreeHGlobal((IntPtr) ptr);
 #endif
             }
         }
@@ -74,7 +70,7 @@ namespace Svelto.Common
                 var newPointer =
                     UnsafeUtility.Malloc(newCapacity, (int) OptimalAlignment.alignment, (Unity.Collections.Allocator) allocator);
 #else
-                var newPointer = Marshal.AllocHGlobal((int) newCapacity);
+                var newPointer = System.Runtime.InteropServices.Marshal.AllocHGlobal((int) newCapacity);
 #endif
                 return (IntPtr) newPointer;
             }
@@ -96,7 +92,7 @@ namespace Svelto.Common
                 UnsafeUtility.MemCpy((void*) newPointer, (void*) realBuffer, oldSize);
                 Free(realBuffer, allocator);
 #else
-                var newPointer = Marshal.ReAllocHGlobal(realBuffer, (IntPtr) (newSize));
+                var newPointer = System.Runtime.InteropServices.Marshal.ReAllocHGlobal(realBuffer, (IntPtr) (newSize));
 #endif
                 realBuffer = newPointer;
             }
@@ -161,10 +157,13 @@ namespace Svelto.Common
             return UnsafeUtility.GetFieldOffset(field);
 #else
             int GetFieldOffset(RuntimeFieldHandle h) => 
-                Marshal.ReadInt32(h.Value + (4 + IntPtr.Size)) & 0xFFFFFF;
+                System.Runtime.InteropServices.Marshal.ReadInt32(h.Value + (4 + IntPtr.Size)) & 0xFFFFFF;
 
             return GetFieldOffset(field.FieldHandle);
 #endif
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint Align4(uint input) { return (uint) (Math.Ceiling(input / 4.0) * 4); }
     }
 }

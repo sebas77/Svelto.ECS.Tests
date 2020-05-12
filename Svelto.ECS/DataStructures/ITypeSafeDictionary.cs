@@ -17,9 +17,9 @@ namespace Svelto.ECS.Internal
         object GenerateSentinel();
     }
 
-    public interface ITypeSafeDictionary
+    public interface ITypeSafeDictionary:IDisposable
     {
-        uint Count { get; }
+        uint count { get; }
         ITypeSafeDictionary Create();
 
         void AddEntitiesToEngines(FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityComponentEnginesDb,
