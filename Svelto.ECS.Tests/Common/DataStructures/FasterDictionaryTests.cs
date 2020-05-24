@@ -2,7 +2,7 @@
 using Svelto.DataStructures;
 using Assert = NUnit.Framework.Assert;
 
-namespace Common.DataStructures
+namespace Svelto.ECS.Tests.Common.DataStructures
 {
     [TestFixture]
     class FasterDictionaryTests

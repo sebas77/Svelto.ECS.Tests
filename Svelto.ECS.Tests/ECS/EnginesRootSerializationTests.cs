@@ -10,13 +10,15 @@ using Svelto.ECS.Schedulers;
 namespace Svelto.ECS.Tests.ECS
 {
     [TestFixture]
-    class EnginesRootTests
+    class EnginesRootSerializationTests
     {
         [SetUp]
         public void Init()
         {
             _scheduler = new SimpleEntitiesSubmissionScheduler();
             _enginesRoot = new EnginesRoot(_scheduler);
+            _entityFactory = _enginesRoot.GenerateEntityFactory();
+            _entityFunctions = _enginesRoot.GenerateEntityFunctions();
         }
 
         [TestCase(Description="Test that engines are disposed when the EngineRoot is disposed")]
@@ -77,5 +79,7 @@ namespace Svelto.ECS.Tests.ECS
 
         IEntitiesSubmissionScheduler _scheduler;
         EnginesRoot _enginesRoot;
+        IEntityFactory _entityFactory;
+        IEntityFunctions _entityFunctions;
     }
 }
