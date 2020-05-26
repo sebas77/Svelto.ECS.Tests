@@ -8,6 +8,11 @@ namespace Svelto.DataStructures
         IBuffer<T> buffer;
         MB<T> realBuffer;
 
+        public ManagedStrategy(uint size):this()
+        {
+            Alloc(size);
+        }
+
         public void Alloc(uint size)
         {
             MB<T> b = new MB<T>();
@@ -18,12 +23,12 @@ namespace Svelto.DataStructures
 
         public int capacity => buffer.capacity;
 
-        public void Resize(uint size)
+        public void Resize(uint newCapacity)
         {
-            DBC.Common.Check.Require(size > 0, "Resize requires a size greater than 0");
+            DBC.Common.Check.Require(newCapacity > 0, "Resize requires a size greater than 0");
             
             var realBuffer = buffer.ToManagedArray();
-            Array.Resize(ref realBuffer, (int) size);
+            Array.Resize(ref realBuffer, (int) newCapacity);
             MB<T> b = new MB<T>();
             b.Set(realBuffer);
             buffer = b;
@@ -31,6 +36,7 @@ namespace Svelto.DataStructures
         }
 
         public void Clear() => realBuffer.Clear();
+        public void FastClear() => realBuffer.FastClear();
 
         public ref T this[uint index]
         {

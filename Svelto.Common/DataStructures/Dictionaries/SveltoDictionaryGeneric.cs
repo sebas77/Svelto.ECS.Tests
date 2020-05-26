@@ -1,3 +1,4 @@
+#if TEST_PROFILING
 using System;
 using System.Runtime.CompilerServices;
 using Svelto.DataStructures.Internal;
@@ -525,3 +526,4 @@ namespace Svelto.DataStructures
         public IBuffer<TValue> unsafeValues => _values.ToBuffer();
     }
 }
+#endif

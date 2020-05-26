@@ -6,7 +6,7 @@ namespace Svelto.ECS.Internal
 
     static class SetEGIDWithoutBoxing<T> where T : struct, IEntityComponent
     {
-        public static SetEGIDWithoutBoxingActionCast<T> SetIDWithoutBoxing = MakeSetter();
+        public static readonly SetEGIDWithoutBoxingActionCast<T> SetIDWithoutBoxing = MakeSetter();
 
         public static void Warmup() { }
 
@@ -14,7 +14,7 @@ namespace Svelto.ECS.Internal
         {
             if (ComponentBuilder<T>.HAS_EGID)
             {
-#if !IL2CPP                
+#if !ENABLE_IL2CPP                
                 var method = typeof(Trick).GetMethod(nameof(Trick.SetEGIDImpl)).MakeGenericMethod(typeof(T));
                 return (SetEGIDWithoutBoxingActionCast<T>) System.Delegate.CreateDelegate(
                     typeof(SetEGIDWithoutBoxingActionCast<T>), method);

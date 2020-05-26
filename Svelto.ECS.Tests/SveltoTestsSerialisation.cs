@@ -23,6 +23,12 @@ namespace UnitTests
             _entityFactory   = _enginesRoot.GenerateEntityFactory();
             _entityFunctions = _enginesRoot.GenerateEntityFunctions();
         }
+        
+        [TearDown]
+        public void Dipose()
+        {
+            _enginesRoot.Dispose();
+        }
 
         [TestCase]
         public void TestSerializingToByteArrayRemoveGroup()
@@ -87,7 +93,6 @@ namespace UnitTests
                                                      simpleSerializationData, (int) SerializationType.Storage);
             generateEntitySerializer.SerializeEntity(new EGID(1, NamedGroup1.Group), 
                                                      simpleSerializationData, (int) SerializationType.Storage);
-            _enginesRoot.Dispose();
             
             var newEnginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
             _neverDoThisIsJustForTheTest = new TestEngine();
@@ -100,7 +105,6 @@ namespace UnitTests
                                                           (int) SerializationType.Storage);
             generateEntitySerializer.DeserializeNewEntity(new EGID(1, NamedGroup1.Group), simpleSerializationData,
                                                           (int) SerializationType.Storage);
-            
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(0, NamedGroup1.Group).value, Is.EqualTo(5));
@@ -110,6 +114,8 @@ namespace UnitTests
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(1, NamedGroup1.Group).value, Is.EqualTo(4));
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(1, NamedGroup1.Group).value, Is.EqualTo(3));
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructPartiallySerialized>(1, NamedGroup1.Group).value1, Is.EqualTo(2));
+            
+            newEnginesRoot.Dispose();
         }
         
         [TestCase]
@@ -127,7 +133,7 @@ namespace UnitTests
             generateEntitySerializer.SerializeEntity(new EGID(0, NamedGroup1.Group), 
                                                      simpleSerializationData, (int) SerializationType.Storage);
 
-            _enginesRoot.Dispose();
+
             var newEnginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
             _neverDoThisIsJustForTheTest = new TestEngine();
             
@@ -146,6 +152,8 @@ namespace UnitTests
 
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(0, NamedGroup1.Group).value, Is.EqualTo(4));
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructPartiallySerialized>(0, NamedGroup1.Group).value1, Is.EqualTo(3));
+            
+            newEnginesRoot.Dispose();
         }
         
         [TestCase]
@@ -164,7 +172,7 @@ namespace UnitTests
             generateEntitySerializer.SerializeEntity(new EGID(0, NamedGroup1.Group), 
                                                      simpleSerializationData, (int) SerializationType.Storage);
 
-            _enginesRoot.Dispose();
+
             var newEnginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
             _neverDoThisIsJustForTheTest = new TestEngine();
             
@@ -183,6 +191,8 @@ namespace UnitTests
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(0, NamedGroup1.Group).value, Is.EqualTo(5));
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(0, NamedGroup1.Group).value, Is.EqualTo(4));
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructPartiallySerialized>(0, NamedGroup1.Group).value1, Is.EqualTo(3));
+            
+            newEnginesRoot.Dispose();
         }
 
         EnginesRoot              _enginesRoot;

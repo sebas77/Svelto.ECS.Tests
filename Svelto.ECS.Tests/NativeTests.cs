@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using NUnit.Framework;
 using Svelto.Common;
@@ -40,6 +41,33 @@ namespace UnitTests
             using (var _simpleNativeBag = NativeDynamicArray.Alloc<uint>(Allocator.Temp))
             {
                 Assert.Throws<Exception>(() => _simpleNativeBag.Set<uint>(10, 10));
+            }
+        }
+    }
+
+    [TestFixture]
+    public class MemoryUtilitiesTests
+    {
+        struct Test
+        {
+            public int a;
+            public int b;
+        }
+        
+        [Test]
+        public void TestResize()
+        {
+            unsafe
+            {
+                var ptr = MemoryUtilities.Alloc(10, Allocator.Persistent);
+                Unsafe.Write((void*) ptr, new Test() {a = 3, b = 1});
+                Unsafe.Write((void*) (ptr + 8), (short)-10);
+                ptr = MemoryUtilities.Realloc(ptr, 10, 16, Allocator.Persistent);
+                var test = Unsafe.Read<Test>((void*) ptr);
+                Assert.That(test.a == 3);
+                Assert.That(test.b == 1);
+                Assert.That(Unsafe.Read<short>((void*) (ptr + 8)) == -10);
+                MemoryUtilities.Free(ptr, Allocator.Persistent);
             }
         }
     }

@@ -5,9 +5,9 @@ namespace Svelto.DataStructures
     public interface IBufferStrategy<T>: IDisposable
     {
         int capacity { get; }
-        
+
         void Alloc(uint size);
-        void Resize(uint size);
+        void Resize(uint newCapacity);
         void Clear();
         
         ref T this[uint index] { get ; }
@@ -15,5 +15,6 @@ namespace Svelto.DataStructures
         
         IntPtr ToNativeArray();
         IBuffer<T> ToBuffer();
+        void FastClear();
     }
 }
