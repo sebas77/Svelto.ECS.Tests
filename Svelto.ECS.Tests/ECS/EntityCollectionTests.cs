@@ -110,10 +110,10 @@ namespace Svelto.ECS.Tests.ECS
 
                 var entitiesBuffer = entities.ToBuffer();
                 // can't get a managed array from a native buffer
-                Assert.Throws<NotImplementedException>(() => entitiesBuffer.ToManagedArray());
+                Assert.Throws<NotImplementedException>(() => entitiesBuffer.buffer.ToManagedArray());
 
                 var entityViewsBuffer = entityViews.ToBuffer();
-                var entityViewsManagedArray = entityViewsBuffer.ToManagedArray();
+                var entityViewsManagedArray = entityViewsBuffer.buffer.ToManagedArray();
 
                 for (int j = 0; j < entityViews.count; j++)
                 {
@@ -133,10 +133,10 @@ namespace Svelto.ECS.Tests.ECS
 
                 var entityViewsBuffer = entityViews.ToBuffer();
                 // can't get a native array from a managed buffer
-                Assert.Throws<NotImplementedException>(() => entityViewsBuffer.ToNativeArray(out _));
+                Assert.Throws<NotImplementedException>(() => entityViewsBuffer.buffer.ToNativeArray(out _));
 
                 var entitiesBuffer = entities.ToBuffer();
-                var entitiesNativeArray = entitiesBuffer.ToNativeArray(out _);
+                var entitiesNativeArray = entitiesBuffer.buffer.ToNativeArray(out _);
                 var sizeOfStruct = Marshal.SizeOf<TestEntityStruct>();
 
                 for (int j = 0; j < entities.count; j++)
@@ -155,7 +155,7 @@ namespace Svelto.ECS.Tests.ECS
             {
                 EntityCollection<TestEntityStruct> entities = _testEngine.entitiesDB.QueryEntities<TestEntityStruct>(_group + i);
 
-                var entitiesBuffer = entities.ToNativeBuffer<TestEntityStruct>();
+                var entitiesBuffer = entities.ToBuffer();
                 Assert.AreEqual(entities.count, entitiesBuffer.count);
 
                 var entitiesNativeArray = entitiesBuffer.buffer.ToNativeArray(out _);

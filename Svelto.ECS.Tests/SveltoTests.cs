@@ -549,11 +549,8 @@ namespace UnitTests
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            ExclusiveGroupStruct[] groupStructId = 
-            {
-                group0,
-                group1
-            };
+            FasterList<ExclusiveGroupStruct> groupStructId = new FasterList<ExclusiveGroupStruct>( 
+            new ExclusiveGroupStruct[]{group0, group1});
             var iterators =
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>(groupStructId);
 

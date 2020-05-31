@@ -18,11 +18,6 @@
             "name": "com.unity.collections",
             "expression": "",
             "define": "UNITY_COLLECTIONS"
-        },
-        {
-            "name": "com.unity.collections",
-            "expression": "",
-            "define": "UNITY_COLLECTIONS"
         }
     ],
     "noEngineReferences": false

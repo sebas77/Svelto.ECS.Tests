@@ -69,7 +69,7 @@ namespace Svelto.Common
 #endif          
                 var signedPointer = SignedPointer(newCapacity, (IntPtr) newPointer);
 
-                CheckBoundaries(newPointer);
+                CheckBoundaries((IntPtr) newPointer);
 
                 return signedPointer;
             }
