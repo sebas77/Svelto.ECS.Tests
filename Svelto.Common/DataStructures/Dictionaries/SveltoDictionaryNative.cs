@@ -1,6 +1,5 @@
 using System;
 using Svelto.Common;
-using Svelto.DataStructures.Internal;
 
 namespace Svelto.DataStructures
 {
@@ -25,6 +24,15 @@ namespace Svelto.DataStructures
         public SveltoDictionary(uint size, Allocator nativeAllocator)
         {
             _dictionary = new SveltoDictionary<TKey, TValue, NativeStrategy<FasterDictionaryNode<TKey>>, NativeStrategy<TValue>>(size, nativeAllocator);
+        }
+
+        public static implicit operator SveltoDictionary<TKey, TValue>
+            (SveltoDictionary<TKey, TValue, NativeStrategy<FasterDictionaryNode<TKey>>, NativeStrategy<TValue>> dic)
+        {
+            return new SveltoDictionary<TKey, TValue>()
+            {
+                _dictionary =  dic
+            };
         }
 
         public IBuffer<TValue> GetValues(out uint count) { return _dictionary.GetValues(out count); }

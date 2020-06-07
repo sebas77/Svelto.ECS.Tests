@@ -2,16 +2,15 @@
 using System;
 using System.Runtime.CompilerServices;
 using Svelto.DataStructures;
-using Svelto.DataStructures.Internal;
 
 namespace Svelto.ECS
 {
     public readonly struct NativeEGIDMapper<T>:IDisposable where T : unmanaged, IEntityComponent
     {
-        readonly NativeFasterDictionary<uint, T> map;
+        readonly SveltoDictionary<uint, T> map;
         public ExclusiveGroupStruct groupID { get; }
 
-        public NativeEGIDMapper(ExclusiveGroupStruct groupStructId, NativeFasterDictionary<uint, T> toNative):this()
+        public NativeEGIDMapper(ExclusiveGroupStruct groupStructId, SveltoDictionary<uint, T, NativeStrategy<FasterDictionaryNode<uint>>, NativeStrategy<T>> toNative):this()
         {
             groupID = groupStructId;
             map = toNative;
@@ -28,7 +27,7 @@ namespace Svelto.ECS
 #else
                 map.TryFindIndex(entityID, out var findIndex);
 #endif
-            return ref map.GetDirectValue<T>(findIndex);
+            return ref map.GetDirectValueByRef(findIndex);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -38,7 +37,7 @@ namespace Svelto.ECS
             {
                 unsafe
                 {
-                    value = Unsafe.AsRef<T>(Unsafe.Add<T>((void*) map.unsafeValues, (int) index));
+                    value = Unsafe.AsRef<T>(Unsafe.Add<T>((void*) map.GetValues(out _).ToNativeArray(out _), (int) index));
                     return true;
                 }
             }
@@ -52,7 +51,7 @@ namespace Svelto.ECS
         {
             if (map.TryFindIndex(entityID, out index))
             {
-                return new NB<T>((IntPtr) map.unsafeValues, map.capacity);
+                return new NB<T>((IntPtr) map.GetValues(out var count).ToNativeArray(out _), count);
             }
 
             throw new ECSException("Entity not found");
@@ -63,7 +62,7 @@ namespace Svelto.ECS
         {
             if (map.TryFindIndex(entityID, out index))
             {
-                array =  new NB<T>((IntPtr) map.unsafeValues, map.capacity);
+                array =  new NB<T>((IntPtr) map.GetValues(out var count).ToNativeArray(out _), count);
                 return true;
             }
 

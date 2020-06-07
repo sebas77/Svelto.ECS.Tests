@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
-using Svelto.DataStructures.Internal;
 
 namespace Svelto.DataStructures
 {

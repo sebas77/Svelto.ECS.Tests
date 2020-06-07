@@ -3,7 +3,6 @@ using System;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
-using Svelto.DataStructures.Internal;
 using Svelto.ECS.Extensions.Unity;
 using Svelto.ECS.Internal;
 using Unity.Jobs;
@@ -15,7 +14,7 @@ namespace Svelto.ECS
         internal static NativeEGIDMapper<T> ToNativeEGIDMapper<T>(this TypeSafeDictionary<T> dic,
             ExclusiveGroupStruct groupStructId) where T : unmanaged, IEntityComponent
         {
-            var mapper = new NativeEGIDMapper<T>(groupStructId, dic.implUnmgd.ToNative<uint, T>());
+            var mapper = new NativeEGIDMapper<T>(groupStructId, dic.implUnmgd);
 
             return mapper;
         }
