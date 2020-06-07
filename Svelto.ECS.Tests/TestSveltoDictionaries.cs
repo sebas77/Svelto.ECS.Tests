@@ -108,7 +108,7 @@ namespace Common.DataStructures
         [TestCase(10000)]
         public void TestSveltoDictionary(int dictionarysize)
         {
-            SveltoDictionary<int, Test> test = new SveltoDictionary<int, Test>(1, new NativeStrategy<Test>());
+            SveltoDictionary<int, Test> test = new SveltoDictionary<int, Test>(1);
 
             int[] numbers = new int[dictionarysize];
 

@@ -34,8 +34,10 @@ namespace Svelto.ECS.Tests
 
     struct TestEntityViewStruct : IEntityViewComponent
     {
+#pragma warning disable 649
         public ITestFloatValue TestFloatValue;
         public ITestIntValue TestIntValue;
+#pragma warning restore 649        
 
         public EGID ID { get; set; }
     }

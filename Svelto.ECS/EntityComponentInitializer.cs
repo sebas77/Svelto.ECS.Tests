@@ -12,6 +12,8 @@ namespace Svelto.ECS
             _ID = id;
         }
 
+        public EGID EGID => _ID;
+
         public void Init<T>(T initializer) where T : struct, IEntityComponent
         {
             if (_group.TryGetValue(new RefWrapper<Type>(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE),

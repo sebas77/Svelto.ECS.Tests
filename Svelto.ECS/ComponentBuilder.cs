@@ -71,8 +71,6 @@ namespace Svelto.ECS
             return ENTITY_COMPONENT_TYPE;
         }
 
-        public bool IsUnmanaged => IS_UNMANAGED;
-
         static ComponentBuilder()
         {
             ENTITY_COMPONENT_TYPE = typeof(T);
@@ -80,7 +78,7 @@ namespace Svelto.ECS
             IS_ENTITY_VIEW_COMPONENT = typeof(IEntityViewComponent).IsAssignableFrom(ENTITY_COMPONENT_TYPE);
             HAS_EGID = typeof(INeedEGID).IsAssignableFrom(ENTITY_COMPONENT_TYPE);
             ENTITY_COMPONENT_NAME = ENTITY_COMPONENT_TYPE.ToString();
-            IS_UNMANAGED = ENTITY_COMPONENT_TYPE.IsUnmanaged() && ENTITY_COMPONENT_TYPE != ComponentBuilderUtilities.ENTITY_STRUCT_INFO_VIEW;
+            var IS_UNMANAGED = ENTITY_COMPONENT_TYPE.IsUnmanaged();
 
             if (IS_UNMANAGED)
                 EntityComponentIDMap.Register<T>(new Filler<T>());
@@ -107,7 +105,7 @@ namespace Svelto.ECS
 
         static readonly          T      DEFAULT_IT;
         static readonly          string ENTITY_COMPONENT_NAME;
-        internal static readonly bool   IS_UNMANAGED;
+        
 
         static class EntityViewComponentCache
         {

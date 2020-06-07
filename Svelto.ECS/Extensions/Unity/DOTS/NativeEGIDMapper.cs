@@ -1,3 +1,4 @@
+#if UNITY_BURST
 using System;
 using System.Runtime.CompilerServices;
 using Svelto.DataStructures;
@@ -21,31 +22,33 @@ namespace Svelto.ECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Entity(uint entityID)
         {
-            unsafe
-            {
 #if DEBUG && !PROFILE_SVELTO
-                if (map.TryFindIndex(entityID, out var findIndex) == false)
-                    throw new Exception("Entity not found in this group ".FastConcat(typeof(T).ToString()));
+            if (map.TryFindIndex(entityID, out var findIndex) == false)
+                throw new Exception("Entity not found in this group ".FastConcat(typeof(T).ToString()));
 #else
                 map.TryFindIndex(entityID, out var findIndex);
 #endif
-                return ref map.unsafeValues[(int) findIndex];
-            }
+            return ref map.GetDirectValue<T>(findIndex);
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetEntity(uint entityID, out T value)
         {
             if (map.TryFindIndex(entityID, out var index))
             {
-                value = map.GetDirectValue(index);
-                return true;
+                unsafe
+                {
+                    value = Unsafe.AsRef<T>(Unsafe.Add<T>((void*) map.unsafeValues, (int) index));
+                    return true;
+                }
             }
 
             value = default;
             return false;
         }
         
-        public unsafe NB<T>GetArrayAndEntityIndex(uint entityID, out uint index)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public NB<T>GetArrayAndEntityIndex(uint entityID, out uint index)
         {
             if (map.TryFindIndex(entityID, out index))
             {
@@ -55,7 +58,8 @@ namespace Svelto.ECS
             throw new ECSException("Entity not found");
         }
         
-        public unsafe bool TryGetArrayAndEntityIndex(uint entityID, out uint index, out NB<T> array)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryGetArrayAndEntityIndex(uint entityID, out uint index, out NB<T> array)
         {
             if (map.TryFindIndex(entityID, out index))
             {
@@ -69,7 +73,7 @@ namespace Svelto.ECS
 
         public void Dispose()
         {
-            map.Dispose();
+       //     map.Dispose();
         }
 
         public bool Exists(uint idEntityId)
@@ -78,3 +82,4 @@ namespace Svelto.ECS
         }
     }
 }
+#endif

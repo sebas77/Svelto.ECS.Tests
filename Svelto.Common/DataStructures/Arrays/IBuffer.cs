@@ -9,9 +9,9 @@ namespace Svelto.DataStructures
     
     public interface IBuffer<T>:IBufferBase<T>
     {
-        //ToDo to remove
+        //ToDo to remove (only implementation can be used)
         ref T this[uint index] { get; }
-        //ToDo to remove
+        //ToDo to remove(only implementation can be used)
         ref T this[int index] { get; }
         
         void CopyTo(uint sourceStartIndex, T[] destination, uint destinationStartIndex, uint size);
