@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
-
 #else
 using System;
 using System.Diagnostics;
@@ -11,13 +10,13 @@ using System.Diagnostics;
 namespace Svelto.ECS
 {
     /// <summary>
-    ///     Note: this check doesn't catch the case when an add and remove is done on the same entity before the next
+    ///     Note: this check doesn't catch the case when an add and remove is done on the same entity before the nextI am
     ///     submission. Two operations on the same entity are not allowed between submissions.
     /// </summary>
     public partial class EnginesRoot
     {
 #if DEBUG && !PROFILE_SVELTO
-        void CheckRemoveEntityID(EGID egid, Type entityComponent = default)
+        void CheckRemoveEntityID(EGID egid, Type entityComponent)
         {
             if (_idCheckers.TryGetValue(egid.groupID, out var hash))
             {
@@ -39,7 +38,7 @@ namespace Svelto.ECS
             }
         }
 
-        void CheckAddEntityID(EGID egid, Type entityComponent = default)
+        void CheckAddEntityID(EGID egid, Type entityComponent)
         {
 //            Console.LogError("<color=orange>added</color> ".FastConcat(egid.ToString()));
 
@@ -60,17 +59,17 @@ namespace Svelto.ECS
         readonly FasterDictionary<uint, HashSet<uint>> _idCheckers = new FasterDictionary<uint, HashSet<uint>>();
 #else
         [Conditional("_CHECKS_DISABLED")]
-        void CheckRemoveEntityID(EGID egid, Type entityComponent = default)
+        void CheckRemoveEntityID(EGID egid, Type entityComponent)
         {
         }
 
         [Conditional("_CHECKS_DISABLED")]
-        void CheckAddEntityID(EGID egid, Type entityComponent = default)
+        void CheckAddEntityID(EGID egid, Type entityComponen)
         {
         }
         
         [Conditional("_CHECKS_DISABLED")]
-        void RemoveGroupID(ExclusiveGroupStruct groupID, Type entityComponent = default)
+        void RemoveGroupID(ExclusiveGroupStruct groupID)
         {
         }
 #endif

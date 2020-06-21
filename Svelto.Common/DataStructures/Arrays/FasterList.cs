@@ -11,7 +11,7 @@ namespace Svelto.DataStructures
         public uint count => _count;
         public uint capacity => (uint) _buffer.Length;
         
-        public static implicit operator FasterList<T>(T[] array)
+        public static explicit operator FasterList<T>(T[] array)
         {
             return new FasterList<T>(array);
         }
@@ -77,11 +77,6 @@ namespace Svelto.DataStructures
             _count = (uint) source.count;
         }
         
-        public static implicit operator FasterReadOnlyList<T>(FasterList<T> list)
-        {
-            return new FasterReadOnlyList<T>(list);
-        }
-
         public ref T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -131,9 +126,19 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddRange(in FasterList<T> items)
+        public FasterList<T> AddRange(in FasterList<T> items)
         {
             AddRange(items._buffer, (uint) items.count);
+
+            return this;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public FasterList<T> AddRange(in FasterReadOnlyList<T> items)
+        {
+            AddRange(items._list._buffer, (uint) items.count);
+
+            return this;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

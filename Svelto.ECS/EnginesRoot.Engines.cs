@@ -77,15 +77,34 @@ namespace Svelto.ECS
         {
             using (var profiler = new PlatformProfiler("Final Dispose"))
             {
+                foreach (var engine in _disposableEngines)
+                {
+                    try
+                    {
+                        engine.Dispose();
+                    }
+                    catch (Exception e)
+                    {
+                        Svelto.Console.LogException(e);
+                    }
+                }
+                
                 foreach (FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>.
                     KeyValuePairFast groups in _groupEntityComponentsDB)
                 {
                     foreach (FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>.KeyValuePairFast entityList in
                         groups.Value)
-                        entityList.Value.RemoveEntitiesFromEngines(_reactiveEnginesAddRemove, profiler
-                                                                 , new ExclusiveGroupStruct(groups.Key));
+                        try
+                        {
+                            entityList.Value.RemoveEntitiesFromEngines(_reactiveEnginesAddRemove, profiler
+                                                                     , new ExclusiveGroupStruct(groups.Key));
+                        }
+                        catch (Exception e)
+                        {
+                            Svelto.Console.LogException(e);
+                        }
                 }
-
+                
                 foreach (FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>.
                     KeyValuePairFast groups in _groupEntityComponentsDB)
                 {
@@ -97,9 +116,6 @@ namespace Svelto.ECS
                 _groupEntityComponentsDB.Clear();
                 _groupsPerEntity.Clear();
 
-                foreach (var engine in _disposableEngines)
-                    engine.Dispose();
-
                 _disposableEngines.Clear();
                 _enginesSet.Clear();
                 _enginesTypeSet.Clear();
@@ -108,12 +124,13 @@ namespace Svelto.ECS
 
                 _entitiesOperations.Clear();
                 _transientEntitiesOperations.Clear();
-                scheduler.Dispose();
 #if DEBUG && !PROFILE_SVELTO
                 _idCheckers.Clear();
 #endif
                 _groupedEntityToAdd.Dispose();
                 _entitiesStream.Dispose();
+                
+                scheduler.Dispose();
             }
 
             GC.SuppressFinalize(this);

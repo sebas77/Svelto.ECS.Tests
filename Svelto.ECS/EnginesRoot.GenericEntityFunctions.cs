@@ -1,5 +1,6 @@
 ﻿using System;
  using System.Runtime.CompilerServices;
+using Svelto.Common;
 
 namespace Svelto.ECS
 {
@@ -26,7 +27,8 @@ namespace Svelto.ECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void RemoveEntity<T>(EGID entityEGID) where T : IEntityDescriptor, new()
             {
-                _enginesRoot.Target.CheckRemoveEntityID(entityEGID);
+                DBC.ECS.Check.Require(entityEGID.groupID != 0, "invalid group detected");
+                _enginesRoot.Target.CheckRemoveEntityID(entityEGID, TypeCache<T>.type);
 
                 _enginesRoot.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityEGID, entityEGID,
@@ -49,6 +51,7 @@ namespace Svelto.ECS
             public void RemoveGroupAndEntities(ExclusiveGroupStruct groupID)
             {
                 _enginesRoot.Target.RemoveGroupID(groupID);
+                DBC.ECS.Check.Require(groupID != 0, "invalid group detected");
 
                 _enginesRoot.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, new EGID(0, groupID), new EGID()));
@@ -118,8 +121,11 @@ namespace Svelto.ECS
             public void SwapEntityGroup<T>(EGID fromID, EGID toID)
                 where T : IEntityDescriptor, new()
             {
-                _enginesRoot.Target.CheckRemoveEntityID(fromID);
-                _enginesRoot.Target.CheckAddEntityID(toID);
+                DBC.ECS.Check.Require(fromID.groupID != 0, "invalid group detected");
+                DBC.ECS.Check.Require(toID.groupID != 0, "invalid group detected");
+                
+                _enginesRoot.Target.CheckRemoveEntityID(fromID, TypeCache<T>.type);
+                _enginesRoot.Target.CheckAddEntityID(toID, TypeCache<T>.type);
 
                 _enginesRoot.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Swap,

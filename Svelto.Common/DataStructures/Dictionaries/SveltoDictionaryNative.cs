@@ -14,16 +14,16 @@ namespace Svelto.DataStructures
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
-
     public struct SveltoDictionary<TKey, TValue> : ISveltoDictionary<TKey, TValue>
-        where TKey : unmanaged, IEquatable<TKey> where TValue: unmanaged
+        where TKey : unmanaged, IEquatable<TKey> where TValue : unmanaged
     {
-        public SveltoDictionary(uint size):this(size, Allocator.Persistent)
-        { }
-        
+        public SveltoDictionary(uint size) : this(size, Allocator.Persistent) { }
+
         public SveltoDictionary(uint size, Allocator nativeAllocator)
         {
-            _dictionary = new SveltoDictionary<TKey, TValue, NativeStrategy<FasterDictionaryNode<TKey>>, NativeStrategy<TValue>>(size, nativeAllocator);
+            _dictionary =
+                new SveltoDictionary<TKey, TValue, NativeStrategy<FasterDictionaryNode<TKey>>, NativeStrategy<TValue>>(
+                    size, nativeAllocator);
         }
 
         public static implicit operator SveltoDictionary<TKey, TValue>
@@ -31,34 +31,40 @@ namespace Svelto.DataStructures
         {
             return new SveltoDictionary<TKey, TValue>()
             {
-                _dictionary =  dic
+                _dictionary = dic
             };
         }
 
-        public IBuffer<TValue> GetValues(out uint count) { return _dictionary.GetValues(out count); }
-        public uint            count                     => _dictionary.count;
-
-        public void Add(TKey key, in TValue value) { _dictionary.Add(key, in value); }
-        public void Set(TKey key, in TValue value) { _dictionary.Set(key, in value); }
-        public void Clear() { _dictionary.Clear(); }
-        public void FastClear() { _dictionary.FastClear(); }
-        public bool ContainsKey(TKey key) { return _dictionary.ContainsKey(key); }
-        public bool TryGetValue(TKey key, out TValue result) { return _dictionary.TryGetValue(key, out result); }
-        public ref TValue GetOrCreate(TKey key) { return ref _dictionary.GetOrCreate(key); }
-        public ref TValue GetOrCreate(TKey key, Func<TValue> builder) { return ref _dictionary.GetOrCreate(key, builder); }
-        public ref TValue GetDirectValueByRef(uint index) { return ref _dictionary.GetDirectValueByRef(index); }
-        public ref TValue GetValueByRef(TKey key) { return ref _dictionary.GetValueByRef(key); }
-        public void SetCapacity(uint size) { _dictionary.SetCapacity(size); }
-        public TValue this[TKey key]
+        public NB<TValue> GetValues(out uint count)
         {
-            get => _dictionary[key];
-            set => _dictionary[key] = value;
+            count = this.count;
+            return _dictionary._values.ToRealBuffer();
         }
 
-        public bool Remove(TKey key) { return _dictionary.Remove(key); }
-        public void Trim() { _dictionary.Trim(); }
+        public uint count => _dictionary.count;
+
+        public     void   Add(TKey key, in TValue value)           { _dictionary.Add(key, in value); }
+        public     void   Set(TKey key, in TValue value)           { _dictionary.Set(key, in value); }
+        public     void   Clear()                                  { _dictionary.Clear(); }
+        public     void   FastClear()                              { _dictionary.FastClear(); }
+        public     bool   ContainsKey(TKey key)                    { return _dictionary.ContainsKey(key); }
+        public     bool   TryGetValue(TKey key, out TValue result) { return _dictionary.TryGetValue(key, out result); }
+        public ref TValue GetOrCreate(TKey key)                    { return ref _dictionary.GetOrCreate(key); }
+
+        public ref TValue GetOrCreate(TKey key, Func<TValue> builder)
+        {
+            return ref _dictionary.GetOrCreate(key, builder);
+        }
+
+        public ref TValue GetDirectValueByRef(uint index) { return ref _dictionary.GetDirectValueByRef(index); }
+        public ref TValue GetValueByRef(TKey key)         { return ref _dictionary.GetValueByRef(key); }
+        public     void   SetCapacity(uint size)          { _dictionary.SetCapacity(size); }
+        public TValue this[TKey key] { get => _dictionary[key]; set => _dictionary[key] = value; }
+
+        public bool Remove(TKey key)                           { return _dictionary.Remove(key); }
+        public void Trim()                                     { _dictionary.Trim(); }
         public bool TryFindIndex(TKey key, out uint findIndex) { return _dictionary.TryFindIndex(key, out findIndex); }
-        public uint GetIndex(TKey key) { return _dictionary.GetIndex(key); }
+        public uint GetIndex(TKey key)                         { return _dictionary.GetIndex(key); }
 
         public void Dispose() { _dictionary.Dispose(); }
 

@@ -446,10 +446,11 @@ namespace Svelto.ECS.Internal
                             (entityComponentsEngines[i] as IReactOnAddAndRemove<TValue>).Remove(ref entity, egid);
                         }
                     }
-                    catch (Exception e)
+                    catch
                     {
-                        throw new ECSException(
-                            "Code crashed inside Remove callback ".FastConcat(typeof(TValue).ToString()), e);
+                        Svelto.Console.LogError("Code crashed inside Remove callback ".FastConcat(typeof(TValue).ToString()));
+
+                        throw;
                     }
         }
 
@@ -471,7 +472,7 @@ namespace Svelto.ECS.Internal
                             (entityComponentsEngines[i] as IReactOnAddAndRemove<TValue>).Add(ref entity, egid);
                         }
                     }
-                    catch (Exception)
+                    catch
                     {
                         Svelto.Console.LogError("Code crashed inside Add callback ".FastConcat(typeof(TValue).ToString()));
 

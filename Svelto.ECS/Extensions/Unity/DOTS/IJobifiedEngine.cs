@@ -7,5 +7,17 @@ namespace Svelto.ECS.Extensions.Unity
     {
         JobHandle Execute(JobHandle _jobHandle);
     }
+    
+    public interface IJobifiedGroupEngine : IJobifiedEngine
+    { }
+    
+    public interface IJobifiedEngine<T> : IEngine
+    {
+        JobHandle Execute(JobHandle _jobHandle, ref T _param);
+    }
+    
+    public interface IJobifiedGroupEngine<T> : IJobifiedEngine<T>
+    {
+    }
 }
 #endif

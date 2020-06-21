@@ -5,16 +5,28 @@ namespace Svelto.ECS
 {
     public readonly struct AllGroupsEnumerable<T1> where T1 : struct, IEntityComponent
     {
+        public ref struct GroupCollection
+        {
+            internal EntityCollection<T1> collection;
+            internal ExclusiveGroupStruct group;
+
+            public void Deconstruct(out EntityCollection<T1> collection, out ExclusiveGroupStruct group)
+            {
+                collection = this.collection;
+                group = this.@group;
+            }
+        }
+        
         public AllGroupsEnumerable(EntitiesDB db)
         {
             _db = db;
         }
         
-        public struct GroupsIterator
+        public ref struct GroupsIterator
         {
             public GroupsIterator(EntitiesDB db) : this()
             {
-                _db = db.FindGroups<T1>().GetEnumerator();
+                _db = db.FindGroups_INTERNAL<T1>().GetEnumerator();
             }
 
             public bool MoveNext()
@@ -27,7 +39,7 @@ namespace Svelto.ECS
                     
                     if (typeSafeDictionary.count == 0) continue;
 
-                    _array.buffer = new BT<IBuffer<T1>>(typeSafeDictionary.GetValues(out var count), count);
+                    _array.collection = new EntityCollection<T1>(typeSafeDictionary.GetValues(out var count), count);
                     _array.@group = new ExclusiveGroupStruct(group.Key);
 
                     return true;
@@ -36,10 +48,10 @@ namespace Svelto.ECS
                 return false;
             }
 
-            public (BT<IBuffer<T1>>, ExclusiveGroupStruct) Current => _array;
+            public GroupCollection Current => _array;
 
-            FasterDictionary<uint, ITypeSafeDictionary>.FasterDictionaryKeyValueEnumerator _db;
-            (BT<IBuffer<T1>> buffer, ExclusiveGroupStruct group) _array;
+            FasterDictionary<uint, ITypeSafeDictionary>.FasterDictionaryKeyValueEnumerator _db; 
+            GroupCollection _array;
         }
 
         public GroupsIterator GetEnumerator()

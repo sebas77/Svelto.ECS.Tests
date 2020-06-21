@@ -50,7 +50,7 @@ namespace Svelto.ECS
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeEGIDMultiMapper<T> QueryNativeMappedEntities<T>(this EntitiesDB entitiesDb, FasterReadOnlyList<ExclusiveGroupStruct> groups)
+        public static NativeEGIDMultiMapper<T> QueryNativeMappedEntities<T>(this EntitiesDB entitiesDb, LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
             where T : unmanaged, IEntityComponent
         {
             var dictionary =
@@ -64,13 +64,11 @@ namespace Svelto.ECS
                     dictionary.Add(group, ((TypeSafeDictionary<T>)typeSafeDictionary).implUnmgd);
             }
             
-            
-            
             return new NativeEGIDMultiMapper<T>(dictionary);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryQueryNativeMappedEntities<T>(this EntitiesDB entitiesDb, FasterReadOnlyList<ExclusiveGroupStruct> groups, out NativeEGIDMultiMapper<T> mapper)
+        public static bool TryQueryNativeMappedEntities<T>(this EntitiesDB entitiesDb, LocalFasterReadOnlyList<ExclusiveGroupStruct> groups, out NativeEGIDMultiMapper<T> mapper)
             where T : unmanaged, IEntityComponent
         {
             var dictionary =

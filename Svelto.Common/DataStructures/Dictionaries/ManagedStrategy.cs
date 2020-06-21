@@ -51,7 +51,6 @@ namespace Svelto.DataStructures
             get => ref realBuffer[index];
         }
 
-        public IntPtr ToNativeArray() => throw new NotImplementedException();
         public IBuffer<T> ToBuffer() => buffer;
 
         public void Dispose() {  }

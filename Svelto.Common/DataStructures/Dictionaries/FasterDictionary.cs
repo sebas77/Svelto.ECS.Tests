@@ -48,6 +48,12 @@ namespace Svelto.DataStructures
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _values;
         }
+        
+        public FasterDictionaryNode<TKey>[] unsafeKeys
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _valuesInfo;
+        }
 
         public uint count => _freeValueCellIndex;
 

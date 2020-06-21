@@ -53,9 +53,10 @@ namespace Svelto.ECS
         //TODO SOON: ALL THIS STUFF BELOW MUST DISAPPEAR
         readonly IBuffer<T> _buffer;
 
+        //todo to remove
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EntityIterator GetEnumerator() { return new EntityIterator(_buffer, _count); }
-
+//todo to remove
         public ref struct EntityIterator
         {
             public EntityIterator(IBuffer<T> array, uint count) : this()
@@ -90,17 +91,14 @@ namespace Svelto.ECS
 
         public uint count => _array1.count;
 
-        /// <summary>
-        /// At this point in time I am not sure if this would ever be useful or it should return the buffer directly
-        /// Avoiding its use as it's not necessary atm until further decision
-        /// </summary>
-        public EntityCollection<T2> item2
+        //todo to remove
+        public EntityCollection<T2> Item2
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _array2;
         }
-
-        public EntityCollection<T1> item1
+//todo to remove
+        public EntityCollection<T1> Item1
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _array1;
@@ -108,10 +106,10 @@ namespace Svelto.ECS
 
         readonly EntityCollection<T1> _array1;
         readonly EntityCollection<T2> _array2;
-
+//todo to remove
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EntityIterator GetEnumerator() { return new EntityIterator(this); }
-
+//todo to remove
         public ref struct EntityIterator
         {
             public EntityIterator(in EntityCollection<T1, T2> array1) : this()
@@ -149,26 +147,26 @@ namespace Svelto.ECS
             _array2 = array2;
             _array3 = array3;
         }
-
-        public EntityCollection<T1> item1
+//todo to remove
+        public EntityCollection<T1> Item1
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _array1;
         }
-
-        public EntityCollection<T2> item2
+//todo to remove
+        public EntityCollection<T2> Item2
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _array2;
         }
-
-        public EntityCollection<T3> item3
+//todo to remove
+        public EntityCollection<T3> Item3
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _array3;
         }
 
-        public uint count => item1.count;
+        public uint count => Item1.count;
 
         readonly EntityCollection<T1> _array1;
         readonly EntityCollection<T2> _array2;
@@ -190,25 +188,29 @@ namespace Svelto.ECS
             _array4 = array4;
         }
 
-        public EntityCollection<T1> item1
+        //todo to remove
+        public EntityCollection<T1> Item1
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _array1;
         }
 
-        public EntityCollection<T2> item2
+        //todo to remove
+        public EntityCollection<T2> Item2
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _array2;
         }
 
-        public EntityCollection<T3> item3
+        //todo to remove
+        public EntityCollection<T3> Item3
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _array3;
         }
         
-        public EntityCollection<T4> item4
+        //todo to remove
+        public EntityCollection<T4> Item4
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _array4;
@@ -320,13 +322,13 @@ namespace Svelto.ECS
         public ref T1 entityComponentA
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref array1.item1[index];
+            get => ref array1.Item1[index];
         }
 
         public ref T2 entityComponentB
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref array1.item2[index];
+            get => ref array1.Item2[index];
         }
     }
 
@@ -347,19 +349,19 @@ namespace Svelto.ECS
         public ref T1 entityComponentA
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref array1.item1[index];
+            get => ref array1.Item1[index];
         }
 
         public ref T2 entityComponentB
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref array1.item2[index];
+            get => ref array1.Item2[index];
         }
 
         public ref T3 entityComponentC
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref array1.item3[index];
+            get => ref array1.Item3[index];
         }
     }
 }

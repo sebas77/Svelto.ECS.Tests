@@ -7,7 +7,8 @@ namespace Svelto.ECS.DataStructures
 {
     public struct NativeDynamicArray : IDisposable
     {
-#if UNITY_COLLECTIONS      
+#if UNITY_COLLECTIONS
+        [global::Unity.Burst.NoAlias]
         [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         unsafe UnsafeArray* _list;
@@ -101,7 +102,7 @@ namespace Svelto.ECS.DataStructures
                 if (hashType != TypeHash<T>.hash)
                     throw new Exception("NativeDynamicArray: not excepted type used");
                 if (index >= Capacity<T>())
-                    throw new Exception($"NativeDynamicArray: out of bound access, index {index} count {Count<T>()}");
+                    throw new Exception($"NativeDynamicArray: out of bound access, index {index} capacity {Capacity<T>()}");
 #endif            
                 _list->Set(index, value);
             }
@@ -134,6 +135,27 @@ namespace Svelto.ECS.DataStructures
                     _list->Realloc((uint) (((uint)((Count<T>() + 1) * 1.5f) * (float)structSize)));
            
                 _list->Add(item);
+            }
+        }
+
+        public void GrowAndSetCount<T>(uint count) where T : struct
+        {
+            unsafe
+            {
+#if DEBUG && !PROFILE_SVELTO
+                if (_list == null)
+                    throw new Exception("NativeDynamicArray: null-access");
+                if (hashType != TypeHash<T>.hash)
+                    throw new Exception("NativeDynamicArray: not excepted type used");
+#endif
+                uint structSize = (uint) MemoryUtilities.SizeOf<T>();
+                
+                uint size = (uint) (count * structSize);
+                if (_list->capacity < size)
+                    _list->Realloc((uint) size);
+
+                if (_list->count < size)
+                    _list->SetCountTo((uint) size);
             }
         }
         
@@ -278,10 +300,9 @@ namespace Svelto.ECS.DataStructures
                     throw new Exception("NativeDynamicArray: not excepted type used");
 #endif
            
-                var ptr = ToPTR<EGID>();
-
                 var sizeOf = MemoryUtilities.SizeOf<T>();
-                Unsafe.CopyBlock(ptr + index * sizeOf, ptr + (index + 1) * sizeOf, (uint) ((Count<T>() - (index + 1)) * sizeOf));
+                //Unsafe.CopyBlock may not be memory overlapping safe (memcpy vs memmove)
+                Buffer.MemoryCopy(_list->ptr + index * sizeOf, _list->ptr + (index + 1) * sizeOf, _list->count, (uint) ((Count<T>() - (index + 1)) * sizeOf));
                 _list->Pop<T>();
             }
         }

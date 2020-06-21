@@ -33,7 +33,7 @@ namespace Svelto.ECS
         {
             //todo: remove operation array and store entity descriptor hash in the return value
             _nativeSwapOperations.Add(
-                new NativeOperationSwap(EntityDescriptorTemplate<T>.descriptor.componentsToBuild));
+                new NativeOperationSwap(EntityDescriptorTemplate<T>.descriptor.componentsToBuild, TypeCache<T>.type));
 
             return new NativeEntitySwap(_swapOperationQueue, _nativeSwapOperations.count - 1);
         }
@@ -42,7 +42,7 @@ namespace Svelto.ECS
         {
             //todo: remove operation array and store entity descriptor hash in the return value
             _nativeAddOperations.Add(
-                new NativeOperationBuild(EntityDescriptorTemplate<T>.descriptor.componentsToBuild));
+                new NativeOperationBuild(EntityDescriptorTemplate<T>.descriptor.componentsToBuild, TypeCache<T>.type));
 
             return new NativeEntityFactory(_addOperationQueue, _nativeAddOperations.count - 1);
         }
@@ -75,8 +75,8 @@ namespace Svelto.ECS
                         var     componentsIndex = buffer.Dequeue<uint>();
                         var entityEGID      = buffer.Dequeue<DoubleEGID>();
                         
-                        CheckRemoveEntityID(entityEGID.@from);
-                        CheckAddEntityID(entityEGID.to); 
+                        CheckRemoveEntityID(entityEGID.@from, _nativeSwapOperations[componentsIndex].type);
+                        CheckAddEntityID(entityEGID.to, _nativeSwapOperations[componentsIndex].type); 
                         
                         QueueEntitySubmitOperation(new EntitySubmitOperation(
                                                        EntitySubmitOperationType.Swap, entityEGID.@from, entityEGID.to
@@ -98,7 +98,7 @@ namespace Svelto.ECS
                         var componentCounts = buffer.Dequeue<uint>();
                         
                         EntityComponentInitializer init =
-                            BuildEntity(egid, _nativeAddOperations[componentsIndex].components);
+                            BuildEntity(egid, _nativeAddOperations[componentsIndex].components, _nativeAddOperations[componentsIndex].type);
 
                         //only called if Init is called on the initialized (there is something to init)
                         while (componentCounts > 0)
@@ -144,9 +144,11 @@ namespace Svelto.ECS
     readonly struct NativeOperationBuild
     {
         internal readonly IComponentBuilder[] components;
+        internal readonly Type type;
 
-        public NativeOperationBuild(IComponentBuilder[] descriptorComponentsToBuild)
+        public NativeOperationBuild(IComponentBuilder[] descriptorComponentsToBuild, Type entityType)
         {
+            type = entityType;
             components = descriptorComponentsToBuild;
         }
     }
@@ -166,10 +168,12 @@ namespace Svelto.ECS
     readonly struct NativeOperationSwap
     {
         internal readonly IComponentBuilder[] components;
+        internal readonly Type type;
 
-        public NativeOperationSwap(IComponentBuilder[] descriptorComponentsToSwap)
+        public NativeOperationSwap(IComponentBuilder[] descriptorComponentsToSwap, Type entityType)
         {
             components = descriptorComponentsToSwap;
+            type = entityType;
         }
     }
 }

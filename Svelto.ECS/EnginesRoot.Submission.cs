@@ -32,7 +32,6 @@ namespace Svelto.ECS
 #if UNITY_BURST          
             NativeOperationSubmission(profiler);
 #endif
-            
             if (_entitiesOperations.Count > 0)
             {
                 using (profiler.Sample("Remove and Swap operations"))
@@ -115,7 +114,7 @@ namespace Svelto.ECS
                 {
                     var groupID = groupOfEntitiesToSubmit.Key;
                     
-                    FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> groupDB = GetOrCreateGroup(groupID);
+                    FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> groupDB = GetOrCreateGroup(groupID, profiler);
 
                     //add the entityComponents in the group
                     foreach (var entityComponentsToSubmit in _groupedEntityToAdd.other[groupID])

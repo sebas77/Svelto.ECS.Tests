@@ -74,8 +74,11 @@ namespace Svelto.Utilities
 #if UNITY_EDITOR                    
                     var fastConcat = "<b><color=red>".FastConcat(txt, "</color></b> ", Environment.NewLine, stack)
                         .FastConcat(Environment.NewLine, dataString);
-                    
+
+                    var error = Application.GetStackTraceLogType(UnityEngine.LogType.Error);
+                    Application.SetStackTraceLogType(UnityEngine.LogType.Error, StackTraceLogType.None);
                     Debug.LogError(fastConcat);
+                    Application.SetStackTraceLogType(UnityEngine.LogType.Error, error);
 #else
                     if (type == LogType.Error)
                         Debug.LogError(txt);

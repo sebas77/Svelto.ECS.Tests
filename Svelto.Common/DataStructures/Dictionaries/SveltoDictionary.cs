@@ -4,31 +4,32 @@ using Svelto.Common;
 
 namespace Svelto.DataStructures
 {
-    public struct SveltoDictionary<TKey, TValue, TKeyStrategy, TValueStrategy>: IDisposable, ISveltoDictionary<TKey, TValue> where TKey : IEquatable<TKey>
-                                                                                                                             where TKeyStrategy:struct, IBufferStrategy<FasterDictionaryNode<TKey>>
-                                                                                                                             where TValueStrategy:struct, IBufferStrategy<TValue>
+    public struct
+        SveltoDictionary<TKey, TValue, TKeyStrategy, TValueStrategy> : IDisposable, ISveltoDictionary<TKey, TValue>
+        where TKey : IEquatable<TKey>
+        where TKeyStrategy : struct, IBufferStrategy<FasterDictionaryNode<TKey>>
+        where TValueStrategy : struct, IBufferStrategy<TValue>
     {
-        public SveltoDictionary(uint size):this(size, Allocator.Persistent)
-        { }
-        
-        public SveltoDictionary(uint size, Allocator nativeAllocator):this()
+        public SveltoDictionary(uint size) : this(size, Allocator.Persistent) { }
+
+        public SveltoDictionary(uint size, Allocator nativeAllocator) : this()
         {
             //AllocationStrategy must be passed external for TValue because SveltoDictionary doesn't have struct
             //constraint needed for the NativeVersion
             _valuesInfo = new TKeyStrategy();
             _valuesInfo.Alloc(size, nativeAllocator);
-            
+
             _buckets = new NativeStrategy<int>((uint) HashHelpers.GetPrime((int) size), nativeAllocator);
-            
+
             _values = new TValueStrategy();
             _values.Alloc(size, nativeAllocator);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IBuffer<TValue> GetValues(out uint count)
         {
             count = _freeValueCellIndex;
-        
+
             return _values.ToBuffer();
         }
 
@@ -42,18 +43,16 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set(TKey key, in TValue value)
-        {
-            AddValue(key, in value, out _);
-        }
+        public void Set(TKey key, in TValue value) { AddValue(key, in value, out _); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
-            if (_freeValueCellIndex == 0) return;
-        
+            if (_freeValueCellIndex == 0)
+                return;
+
             _freeValueCellIndex = 0;
-        
+
             _buckets.Clear();
             _values.Clear();
             _valuesInfo.Clear();
@@ -62,19 +61,17 @@ namespace Svelto.DataStructures
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void FastClear()
         {
-            if (_freeValueCellIndex == 0) return;
-        
+            if (_freeValueCellIndex == 0)
+                return;
+
             _freeValueCellIndex = 0;
-        
+
             _buckets.Clear();
             _valuesInfo.Clear();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ContainsKey(TKey key)
-        {
-            return TryFindIndex(key, out _);
-        }
+        public bool ContainsKey(TKey key) { return TryFindIndex(key, out _); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SveltoDictionaryKeyValueEnumerator GetEnumerator()
@@ -90,7 +87,7 @@ namespace Svelto.DataStructures
                 result = _values[(int) findIndex];
                 return true;
             }
-        
+
             result = default;
             return false;
         }
@@ -103,9 +100,9 @@ namespace Svelto.DataStructures
             {
                 return ref _values[(int) findIndex];
             }
-        
+
             AddValue(key, default, out findIndex);
-        
+
             return ref _values[(int) findIndex];
         }
 
@@ -116,17 +113,14 @@ namespace Svelto.DataStructures
             {
                 return ref _values[(int) findIndex];
             }
-        
+
             AddValue(key, builder(), out findIndex);
-        
+
             return ref _values[(int) findIndex];
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetDirectValueByRef(uint index)
-        {
-            return ref _values[index];
-        }
+        public ref TValue GetDirectValueByRef(uint index) { return ref _values[index]; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetValueByRef(TKey key)
@@ -156,7 +150,7 @@ namespace Svelto.DataStructures
 
         bool AddValue(TKey key, in TValue value, out uint indexSet)
         {
-            int hash = key.GetHashCode();
+            int  hash        = key.GetHashCode();
             uint bucketIndex = Reduce((uint) hash, (uint) _buckets.capacity);
 
             if (_freeValueCellIndex == _values.capacity)
@@ -166,7 +160,7 @@ namespace Svelto.DataStructures
                 _values.Resize((uint) expandPrime);
                 _valuesInfo.Resize((uint) expandPrime);
             }
-            
+
             //buckets value -1 means it's empty
             var valueIndex = _buckets[bucketIndex] - 1;
 
@@ -181,12 +175,11 @@ namespace Svelto.DataStructures
                     //must check if the key already exists in the dictionary
                     //for some reason this is faster than using Comparer<TKey>.default, should investigate
                     ref var fasterDictionaryNode = ref _valuesInfo[currentValueIndex];
-                    if (fasterDictionaryNode.hashcode == hash &&
-                        fasterDictionaryNode.key.Equals(key) == true)
+                    if (fasterDictionaryNode.hashcode == hash && fasterDictionaryNode.key.Equals(key) == true)
                     {
                         //the key already exists, simply replace the value!
                         _values[currentValueIndex] = value;
-                        indexSet = (uint) currentValueIndex;
+                        indexSet                   = (uint) currentValueIndex;
                         return false;
                     }
 
@@ -208,18 +201,19 @@ namespace Svelto.DataStructures
             //item with this bucketIndex will point to the last value created
             //ToDo: if instead I assume that the original one is the one in the bucket
             //I wouldn't need to update the bucket here. Small optimization but important
-            _buckets[bucketIndex] = (int) (_freeValueCellIndex + 1);
+            _buckets[bucketIndex]        = (int) (_freeValueCellIndex + 1);
             _values[_freeValueCellIndex] = value;
-            
+
             indexSet = _freeValueCellIndex;
             _freeValueCellIndex++;
-            
+
             //too many collisions?asd
             if (_collisions > _buckets.capacity)
             {
                 //we need more space and less collisions
                 _buckets.Dispose();
-                _buckets = new NativeStrategy<int>((uint) HashHelpers.ExpandPrime((int) _collisions), _buckets.allocationStrategy);
+                _buckets = new NativeStrategy<int>((uint) HashHelpers.ExpandPrime((int) _collisions)
+                                                 , _buckets.allocationStrategy);
                 _collisions = 0;
 
                 //we need to get all the hash code of all the values stored so far and spread them over the new bucket
@@ -246,7 +240,7 @@ namespace Svelto.DataStructures
                         //the bucket will point to this value, so 
                         //the previous index will be used as previous for the new value.
                         fasterDictionaryNode.previous = existingValueIndex;
-                        fasterDictionaryNode.next = -1;
+                        fasterDictionaryNode.next     = -1;
                         //and update the previous next index to the new one
                         _valuesInfo[existingValueIndex].next = newValueIndex;
                     }
@@ -254,7 +248,7 @@ namespace Svelto.DataStructures
                     {
                         //ok nothing was indexed, the bucket was empty. We need to update the previous
                         //values of next and previous
-                        fasterDictionaryNode.next = -1;
+                        fasterDictionaryNode.next     = -1;
                         fasterDictionaryNode.previous = -1;
                     }
                 }
@@ -265,7 +259,7 @@ namespace Svelto.DataStructures
 
         public bool Remove(TKey key)
         {
-            int hash = key.GetHashCode();
+            int  hash        = key.GetHashCode();
             uint bucketIndex = Reduce((uint) hash, (uint) _buckets.capacity);
 
             //find the bucket
@@ -281,8 +275,8 @@ namespace Svelto.DataStructures
                     //if the key is found and the bucket points directly to the node to remove
                     if (_buckets[bucketIndex] - 1 == indexToValueToRemove)
                     {
-                        DBC.Common.Check.Require(fasterDictionaryNode.next == -1,
-                            "if the bucket points to the cell, next MUST NOT exists");
+                        DBC.Common.Check.Require(fasterDictionaryNode.next == -1
+                                               , "if the bucket points to the cell, next MUST NOT exists");
                         //the bucket will point to the previous cell. if a previous cell exists
                         //its next pointer must be updated!
                         //<--- iteration order  
@@ -294,8 +288,8 @@ namespace Svelto.DataStructures
                         _buckets[bucketIndex] = fasterDictionaryNode.previous + 1;
                     }
                     else
-                        DBC.Common.Check.Require(fasterDictionaryNode.next != -1,
-                            "if the bucket points to another cell, next MUST exists");
+                        DBC.Common.Check.Require(fasterDictionaryNode.next != -1
+                                               , "if the bucket points to another cell, next MUST exists");
 
                     UpdateLinkedList(indexToValueToRemove, ref _valuesInfo);
 
@@ -324,8 +318,7 @@ namespace Svelto.DataStructures
                 //first we find the index in the bucket list of the pointer that points to the cell
                 //to move
                 ref var fasterDictionaryNode = ref _valuesInfo[_freeValueCellIndex];
-                var movingBucketIndex =
-                    Reduce((uint) fasterDictionaryNode.hashcode, (uint) _buckets.capacity);
+                var     movingBucketIndex    = Reduce((uint) fasterDictionaryNode.hashcode, (uint) _buckets.capacity);
 
                 //if the key is found and the bucket points directly to the node to remove
                 //it must now point to the cell where it's going to be moved
@@ -334,7 +327,7 @@ namespace Svelto.DataStructures
 
                 //otherwise it means that there was more than one key with the same hash (collision), so 
                 //we need to update the linked list and its pointers
-                int next = fasterDictionaryNode.next;
+                int next     = fasterDictionaryNode.next;
                 int previous = fasterDictionaryNode.previous;
 
                 //they now point to the cell where the last value is moved into
@@ -345,7 +338,7 @@ namespace Svelto.DataStructures
 
                 //finally, actually move the values
                 _valuesInfo[indexToValueToRemove] = fasterDictionaryNode;
-                _values[indexToValueToRemove] = _values[_freeValueCellIndex];
+                _values[indexToValueToRemove]     = _values[_freeValueCellIndex];
             }
 
             return true;
@@ -363,7 +356,7 @@ namespace Svelto.DataStructures
 
         public bool TryFindIndex(TKey key, out uint findIndex)
         {
-            int hash = key.GetHashCode();
+            int  hash        = key.GetHashCode();
             uint bucketIndex = Reduce((uint) hash, (uint) _buckets.capacity);
 
             int valueIndex = _buckets[bucketIndex] - 1;
@@ -390,7 +383,8 @@ namespace Svelto.DataStructures
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint GetIndex(TKey key)
         {
-            if (TryFindIndex(key, out var findIndex)) return findIndex;
+            if (TryFindIndex(key, out var findIndex))
+                return findIndex;
 
             throw new SveltoDictionaryException("Key not found");
         }
@@ -415,7 +409,7 @@ namespace Svelto.DataStructures
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void UpdateLinkedList(int index, ref TKeyStrategy valuesInfo)
         {
-            int next = valuesInfo[index].next;
+            int next     = valuesInfo[index].next;
             int previous = valuesInfo[index].previous;
 
             if (next != -1)
@@ -426,9 +420,10 @@ namespace Svelto.DataStructures
 
         public ref struct SveltoDictionaryKeyValueEnumerator
         {
-            public SveltoDictionaryKeyValueEnumerator(SveltoDictionary<TKey, TValue, TKeyStrategy, TValueStrategy> dic) : this()
+            public SveltoDictionaryKeyValueEnumerator
+                (SveltoDictionary<TKey, TValue, TKeyStrategy, TValueStrategy> dic) : this()
             {
-                _dic = dic;
+                _dic   = dic;
                 _index = -1;
                 _count = (int) dic.count;
             }
@@ -449,10 +444,11 @@ namespace Svelto.DataStructures
                 return false;
             }
 
-            public KeyValuePairFast Current => new KeyValuePairFast(_dic._valuesInfo[_index].key, _dic._values.ToBuffer(), _index);
+            public KeyValuePairFast Current =>
+                new KeyValuePairFast(_dic._valuesInfo[_index].key, _dic._values.ToBuffer(), _index);
 
             readonly SveltoDictionary<TKey, TValue, TKeyStrategy, TValueStrategy> _dic;
-            readonly int                            _count;
+            readonly int                                                          _count;
 
             int _index;
         }
@@ -463,17 +459,18 @@ namespace Svelto.DataStructures
         public readonly ref struct KeyValuePairFast
         {
             readonly IBuffer<TValue> _dicValues;
-            readonly TKey     _key;
-            readonly int      _index;
+            readonly TKey            _key;
+            readonly int             _index;
 
             public KeyValuePairFast(TKey keys, IBuffer<TValue> dicValues, int index)
             {
                 _dicValues = dicValues;
                 _index     = index;
-                _key = keys;
+                _key       = keys;
             }
 
-            public TKey Key   => _key;
+            public TKey Key => _key;
+
             //todo: I can't use ToFast here, unboxing would be slower than indexing the array in a IBuffer. I have to use the Strategy here
             public ref TValue Value => ref _dicValues[_index];
         }
@@ -485,13 +482,13 @@ namespace Svelto.DataStructures
             _buckets.Dispose();
         }
 
-        TKeyStrategy        _valuesInfo;
-        NativeStrategy<int> _buckets;
-        uint                _freeValueCellIndex;
-        uint                _collisions;
-        TValueStrategy      _values;
+        TKeyStrategy            _valuesInfo;
+        NativeStrategy<int>     _buckets;
+        uint                    _freeValueCellIndex;
+        uint                    _collisions;
+        internal TValueStrategy _values;
     }
-    
+
     public class SveltoDictionaryException : Exception
     {
         public SveltoDictionaryException(string keyAlreadyExisting) : base(keyAlreadyExisting) { }

@@ -56,23 +56,23 @@ namespace Svelto.ECS.Tests.ECS
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _testEngine.entitiesDB.ExecuteOnAllEntities<TestEntityViewStruct>((entity, group, groupCount, db) =>
+            foreach (var ((buffer, count), exclusiveGroupStruct) in _testEngine.entitiesDB.QueryEntities<TestEntityViewStruct>())
             {
-                for (int i = 0; i < groupCount; i++)
+                for (int i = 0; i < count; i++)
                 {
-                    entity[i].TestFloatValue.Value += entity[i].ID.entityID;
-                    entity[i].TestIntValue.Value += (int)entity[i].ID.entityID;
+                    buffer[i].TestFloatValue.Value += buffer[i].ID.entityID;
+                    buffer[i].TestIntValue.Value   += (int)buffer[i].ID.entityID;
                 }
-            });
-
-            _testEngine.entitiesDB.ExecuteOnAllEntities<TestEntityStruct>((entity, group, groupCount, db) =>
+            }
+            
+            foreach (var ((buffer, count), exclusiveGroupStruct) in _testEngine.entitiesDB.QueryEntities<TestEntityStruct>())
             {
-                for (int i = 0; i < groupCount; i++)
+                for (int i = 0; i < count; i++)
                 {
-                    entity[i].floatValue = 1 + entity[i].ID.entityID;
-                    entity[i].intValue = 1 + (int)entity[i].ID.entityID;
+                    buffer[i].floatValue = 1 + buffer[i].ID.entityID;
+                    buffer[i].intValue = 1 + (int)buffer[i].ID.entityID;
                 }
-            });
+            }
         }
 
         [TestCase(Description = "Test EntityCollection<T> QueryEntities")]

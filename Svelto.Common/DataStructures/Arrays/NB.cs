@@ -100,7 +100,7 @@ namespace Svelto.DataStructures
         [Unity.Burst.NoAlias]
         [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
-        IntPtr _ptr; 
+        readonly IntPtr _ptr; 
 
         public NB<T> AsReader() { return this; }
         public NB<T> AsWriter() { return this; }

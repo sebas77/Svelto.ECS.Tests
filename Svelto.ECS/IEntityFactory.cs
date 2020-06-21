@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Svelto.ECS
@@ -63,6 +64,9 @@ namespace Svelto.ECS
 
         EntityComponentInitializer BuildEntity<T>(EGID egid, T entityDescriptor, IEnumerable<object> implementors = null)
             where T : IEntityDescriptor;
+
+        EntityComponentInitializer BuildEntity
+            (EGID egid, IComponentBuilder[] componentsToBuild, Type type, IEnumerable<object> implementors = null);
 
 #if UNITY_BURST
         NativeEntityFactory ToNative<T>() where T : IEntityDescriptor, new();

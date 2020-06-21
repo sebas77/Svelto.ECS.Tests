@@ -5,15 +5,17 @@ using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
-    public readonly struct NativeEGIDMapper<T>:IDisposable where T : unmanaged, IEntityComponent
+    public readonly struct NativeEGIDMapper<T> where T : unmanaged, IEntityComponent
     {
         readonly SveltoDictionary<uint, T> map;
-        public ExclusiveGroupStruct groupID { get; }
+        public   ExclusiveGroupStruct      groupID { get; }
 
-        public NativeEGIDMapper(ExclusiveGroupStruct groupStructId, SveltoDictionary<uint, T, NativeStrategy<FasterDictionaryNode<uint>>, NativeStrategy<T>> toNative):this()
+        public NativeEGIDMapper
+        (ExclusiveGroupStruct groupStructId
+       , SveltoDictionary<uint, T, NativeStrategy<FasterDictionaryNode<uint>>, NativeStrategy<T>> toNative) : this()
         {
             groupID = groupStructId;
-            map = toNative;
+            map     = toNative;
         }
 
         public uint Count => map.count;
@@ -25,19 +27,20 @@ namespace Svelto.ECS
             if (map.TryFindIndex(entityID, out var findIndex) == false)
                 throw new Exception("Entity not found in this group ".FastConcat(typeof(T).ToString()));
 #else
-                map.TryFindIndex(entityID, out var findIndex);
+            map.TryFindIndex(entityID, out var findIndex);
 #endif
             return ref map.GetDirectValueByRef(findIndex);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetEntity(uint entityID, out T value)
         {
-            if (map.TryFindIndex(entityID, out var index))
+            if (map.count > 0 && map.TryFindIndex(entityID, out var index))
             {
                 unsafe
                 {
-                    value = Unsafe.AsRef<T>(Unsafe.Add<T>((void*) map.GetValues(out _).ToNativeArray(out _), (int) index));
+                    value = Unsafe.AsRef<T>(Unsafe.Add<T>((void*) map.GetValues(out _).ToNativeArray(out _)
+                                                        , (int) index));
                     return true;
                 }
             }
@@ -45,9 +48,9 @@ namespace Svelto.ECS
             value = default;
             return false;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public NB<T>GetArrayAndEntityIndex(uint entityID, out uint index)
+        public NB<T> GetArrayAndEntityIndex(uint entityID, out uint index)
         {
             if (map.TryFindIndex(entityID, out index))
             {
@@ -56,23 +59,19 @@ namespace Svelto.ECS
 
             throw new ECSException("Entity not found");
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetArrayAndEntityIndex(uint entityID, out uint index, out NB<T> array)
         {
-            if (map.TryFindIndex(entityID, out index))
+            index = 0;
+            if (map.count > 0 && map.TryFindIndex(entityID, out index))
             {
-                array =  new NB<T>((IntPtr) map.GetValues(out var count).ToNativeArray(out _), count);
+                array = new NB<T>((IntPtr) map.GetValues(out var count).ToNativeArray(out _), count);
                 return true;
             }
 
             array = default;
             return false;
-        }
-
-        public void Dispose()
-        {
-       //     map.Dispose();
         }
 
         public bool Exists(uint idEntityId)

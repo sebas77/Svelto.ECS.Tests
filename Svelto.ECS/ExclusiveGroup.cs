@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 #pragma warning disable 660,661
 
@@ -16,7 +17,10 @@ namespace Svelto.ECS
         public static ExclusiveGroup Group = new ExclusiveGroup();
         public static string         name  = typeof(T).FullName;
 
-//        protected NamedExclusiveGroup() { }
+        static NamedExclusiveGroup()
+        {
+            EGIDDebugger._idToName[(uint) Group] = name;
+        }
   //      protected NamedExclusiveGroup(string recognizeAs) : base(recognizeAs)  {}
     //    protected NamedExclusiveGroup(ushort range) : base(range) {}
     }

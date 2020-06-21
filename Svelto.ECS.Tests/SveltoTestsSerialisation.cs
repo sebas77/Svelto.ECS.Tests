@@ -143,7 +143,7 @@ namespace UnitTests
             generateEntitySerializer = newEnginesRoot.GenerateEntitySerializer();
             
             //needed for the versioning to work
-            generateEntitySerializer.RegisterSerializationFactory<SerializableEntityDescriptorV0>(new DefaultVersioningFactory<SerializableEntityDescriptorV1>(newEnginesRoot.GenerateEntityFactory()));
+            generateEntitySerializer.RegisterSerializationFactory<SerializableEntityDescriptorV0>(new DefaultVersioningFactory<SerializableEntityDescriptorV1>());
 
             generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData,
                                                           (int) SerializationType.Storage);
@@ -180,7 +180,7 @@ namespace UnitTests
             
             simpleSerializationData.Reset();
             generateEntitySerializer = newEnginesRoot.GenerateEntitySerializer();
-            DeserializationFactory factory = new DeserializationFactory(newEnginesRoot.GenerateEntityFactory());
+            DeserializationFactory factory = new DeserializationFactory();
             generateEntitySerializer.RegisterSerializationFactory<SerializableEntityDescriptorWithViews>(factory);
 
             generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData,
@@ -358,22 +358,17 @@ namespace UnitTests
         
         class DeserializationFactory : IDeserializationFactory
         {
-            readonly IEntityFactory _factory;
-
-            public EntityComponentInitializer BuildDeserializedEntity(EGID                          egid,
-                                                                   ISerializationData            serializationData,
-                                                                   ISerializableEntityDescriptor entityDescriptor,
-                                                                   int             serializationType,
-                                                                   IEntitySerialization          entitySerialization)
+            public EntityComponentInitializer BuildDeserializedEntity
+            (EGID egid, ISerializationData serializationData, ISerializableEntityDescriptor entityDescriptor
+           , int serializationType, IEntitySerialization entitySerialization, IEntityFactory factory
+           , bool enginesRootIsDeserializationOnly)
             {
-                var initializer = _factory.BuildEntity<SerializableEntityDescriptorWithViews>(egid, new []{new Implementor(1)});
+                var initializer = factory.BuildEntity<SerializableEntityDescriptorWithViews>(egid, new []{new Implementor(1)});
                 
                 entitySerialization.DeserializeEntityComponents(serializationData, entityDescriptor, ref initializer, (int) SerializationType.Storage);
 
                 return initializer;
             }
-
-            public DeserializationFactory(IEntityFactory factory) { _factory = factory; }
         }
     }
 }

@@ -52,7 +52,7 @@ namespace Svelto.Common
                         , $"Sequenced item not tagged as Sequenced {type.Name}");
                 string typeName = type.GetCustomAttribute<SequencedAttribute>().name;
                 DBC.Common.Check.Require(cachedEnum.ContainsKey(typeName) == true
-                    , $"Sequenced item not contained in the sequence {typeName}");
+                    , $"Sequenced item not contained in the sequence {typeof(En).Name}: {typeName}");
                     var index = cachedEnum[typeName];
                     counted++;
                 DBC.Common.Check.Require(_ordered[index] == null, $"Items to sequence contains duplicate, {typeName} (wrong sequenced attribute name?)");
@@ -66,7 +66,7 @@ namespace Svelto.Common
 
                 foreach (T debugItem in itemsToSort)
                 {
-                    debug.Add(debugItem.GetType().Name);
+                    debug.Add(debugItem.GetType().GetCustomAttribute<SequencedAttribute>().name);
                 }
 
                 foreach (var debugSequence in cachedEnum.Keys)

@@ -4,12 +4,35 @@ using UnityEngine;
 
 namespace Svelto.ECS.Extensions.Unity
 {
+    public static class EntityDescriptorHolderHelper
+    {
+        public static EntityComponentInitializer Create<T>(EGID ID, Transform contextHolder,
+                                                           IEntityFactory factory, out T holder)
+            where T : MonoBehaviour, IEntityDescriptorHolder
+        {
+            holder = contextHolder.GetComponentInChildren<T>(true);
+            var implementors = holder.GetComponents<IImplementor>();
+
+            return factory.BuildEntity(ID, holder.GetDescriptor(), implementors);
+        }
+        
+        public static EntityComponentInitializer Create<T>(EGID ID, Transform contextHolder,
+                                                           IEntityFactory factory)
+            where T : MonoBehaviour, IEntityDescriptorHolder
+        {
+            var holder       = contextHolder.GetComponentInChildren<T>(true);
+            var implementors = holder.GetComponents<IImplementor>();
+
+            return factory.BuildEntity(ID, holder.GetDescriptor(), implementors);
+        }
+    }
+    
     public static class SveltoGUIHelper
     {
         public static T CreateFromPrefab<T>(ref uint startIndex, Transform contextHolder, IEntityFactory factory,
             ExclusiveGroup group, string groupNamePostfix = null) where T : MonoBehaviour, IEntityDescriptorHolder
         {
-            var holder = Create<T>(new EGID(startIndex++, group), contextHolder, factory);
+            Create<T>(new EGID(startIndex++, group), contextHolder, factory, out var holder);
             var childs = contextHolder.GetComponentsInChildren<IEntityDescriptorHolder>(true);
 
             foreach (var child in childs)
@@ -31,29 +54,18 @@ namespace Svelto.ECS.Extensions.Unity
             return holder;
         }
 
-
-        public static T Create<T>(EGID ID, Transform contextHolder, IEntityFactory factory)
-            where T : MonoBehaviour, IEntityDescriptorHolder
-        {
-            var holder = contextHolder.GetComponentInChildren<T>(true);
-            DBC.ECS.Check.Assert(holder != null, $"`{nameof(holder)}` is null! No component of type " +
-                                                 $"`{typeof(T)}` was found between its children.");
-
-            var implementors = holder.GetComponents<IImplementor>();
-
-            factory.BuildEntity(ID, holder.GetDescriptor(), implementors);
-
-            return holder;
-        }
-
-        public static EntityComponentInitializer CreateWithEntity<T>(EGID ID, Transform contextHolder,
+        public static EntityComponentInitializer Create<T>(EGID ID, Transform contextHolder,
             IEntityFactory factory, out T holder)
             where T : MonoBehaviour, IEntityDescriptorHolder
         {
-            holder = contextHolder.GetComponentInChildren<T>(true);
-            var implementors = holder.GetComponents<IImplementor>();
-
-            return factory.BuildEntity(ID, holder.GetDescriptor(), implementors);
+            return EntityDescriptorHolderHelper.Create<T>(ID, contextHolder, factory, out holder);
+        }
+        
+        public static EntityComponentInitializer Create<T>(EGID ID, Transform contextHolder,
+                                                           IEntityFactory factory)
+            where T : MonoBehaviour, IEntityDescriptorHolder
+        {
+            return EntityDescriptorHolderHelper.Create<T>(ID, contextHolder, factory);
         }
 
         public static uint CreateAll<T>(uint startIndex, ExclusiveGroup group,
@@ -97,8 +109,8 @@ namespace Svelto.ECS.Extensions.Unity
             return startIndex;
         }
 
-      /// <summary>
-        /// Works like CreateAll but only builds entities with holders that have the same group specfied
+        /// <summary>
+        /// Works like CreateAll but only builds entities with holders that have the same group specified
         /// </summary>
         /// <param name="startId"></param>
         /// <param name="group">The group to match</param>

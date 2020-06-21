@@ -1,8 +1,7 @@
 using System.Threading;
 using Svelto.DataStructures;
-using Svelto.ECS.Internal;
 
-namespace Svelto.ECS
+namespace Svelto.ECS.Experimental
 {
     struct GroupsList
     {
@@ -12,22 +11,25 @@ namespace Svelto.ECS
         }
 
         static readonly FasterList<ExclusiveGroupStruct> groups;
+        
         public FasterList<ExclusiveGroupStruct> reference => groups;
     }
     
-    public struct QueryGroups
+    public ref struct QueryGroups
     {
         static readonly ThreadLocal<GroupsList> groups = new ThreadLocal<GroupsList>();
+
+        public FasterReadOnlyList<ExclusiveGroupStruct> result => groups.Value.reference;
         
-        public FasterList<ExclusiveGroupStruct> result => groups.Value.reference;
-        
-        public QueryGroups(FasterDictionary<uint, ITypeSafeDictionary> findGroups)
+        public QueryGroups(LocalFasterReadOnlyList<ExclusiveGroupStruct> findGroups)
         {
-            var group = groups.Value.reference;
+            var groupsValue = groups.Value;
+            var group = groupsValue.reference;
+
             group.FastClear();
-            foreach (var keyvalue in findGroups)
+            for (int i = 0; i < findGroups.count; i++)
             {
-                group.Add(new ExclusiveGroupStruct(keyvalue.Key));
+                group.Add(findGroups[i]);
             }
         }
 
@@ -49,5 +51,21 @@ namespace Svelto.ECS
 
             return this;
         }
-    }
+        
+        public QueryGroups Except(ExclusiveGroupStruct groupsToIgnore)
+        {
+            var group       = groups.Value.reference;
+            var groupsCount = group.count;
+
+            for (int j = 0; j < groupsCount; j++)
+                if (groupsToIgnore == group[j])
+                {
+                    group.UnorderedRemoveAt(j);
+                    j--;
+                    groupsCount--;
+                }
+
+            return this;
+        }
+   }
 }

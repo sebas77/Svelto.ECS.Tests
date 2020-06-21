@@ -1,7 +1,6 @@
 #if UNITY_BURST
 using System;
 using Svelto.DataStructures;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace Svelto.ECS
 {

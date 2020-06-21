@@ -26,7 +26,7 @@ namespace Svelto.ECS
             return (_streams[TypeRefWrapper<T>.wrapper] as EntityStream<T>).GenerateConsumer(name, capacity);
         }
 
-        public Consumer<T> GenerateConsumer<T>(ExclusiveGroup group, string name, uint capacity)
+        public Consumer<T> GenerateConsumer<T>(ExclusiveGroupStruct group, string name, uint capacity)
             where T : unmanaged, IEntityComponent
         {
             if (_streams.ContainsKey(TypeRefWrapper<T>.wrapper) == false)
@@ -107,7 +107,7 @@ namespace Svelto.ECS
             return consumer;
         }
 
-        internal Consumer<T> GenerateConsumer(ExclusiveGroup group, string name, uint capacity)
+        internal Consumer<T> GenerateConsumer(ExclusiveGroupStruct group, string name, uint capacity)
         {
             var consumer = new Consumer<T>(group, name, capacity);
 
@@ -140,7 +140,7 @@ namespace Svelto.ECS
             }
         }
 
-        internal Consumer(ExclusiveGroup group, string name, uint capacity) : this(name, capacity)
+        internal Consumer(ExclusiveGroupStruct group, string name, uint capacity) : this(name, capacity)
         {
             this.@group = @group;
             hasGroup = true;
@@ -195,7 +195,7 @@ namespace Svelto.ECS
 
         readonly RingBuffer<ValueTuple<T, EGID>> _ringBuffer;
 
-        internal readonly ExclusiveGroup @group;
+        internal readonly ExclusiveGroupStruct @group;
         internal readonly bool           hasGroup;
         internal          IntPtr         mustBeDisposed;
 

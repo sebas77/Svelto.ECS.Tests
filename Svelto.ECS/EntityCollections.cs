@@ -4,12 +4,12 @@ using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
-    public readonly struct EntityCollections<T1, T2, T3, T4> where T1 : struct, IEntityComponent
+    public readonly ref struct EntityCollections<T1, T2, T3, T4> where T1 : struct, IEntityComponent
                                                              where T2 : struct, IEntityComponent
                                                              where T3 : struct, IEntityComponent
                                                              where T4 : struct, IEntityComponent
     {
-        public EntityCollections(EntitiesDB db, FasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
+        public EntityCollections(EntitiesDB db, in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
         {
             _db     = db;
             _groups = groups;
@@ -25,11 +25,11 @@ namespace Svelto.ECS
         }
 
         readonly EntitiesDB                               _db;
-        readonly FasterReadOnlyList<ExclusiveGroupStruct> _groups;
+        readonly LocalFasterReadOnlyList<ExclusiveGroupStruct> _groups;
 
         public ref struct EntityGroupsIterator
         {
-            public EntityGroupsIterator(EntitiesDB db, FasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
+            public EntityGroupsIterator(EntitiesDB db, in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
             {
                 _db         = db;
                 _groups     = groups;
@@ -69,7 +69,7 @@ namespace Svelto.ECS
             }
 
             readonly EntitiesDB                               _db;
-            readonly FasterReadOnlyList<ExclusiveGroupStruct> _groups;
+            readonly LocalFasterReadOnlyList<ExclusiveGroupStruct> _groups;
             uint                                              _count;
             int                                               _index;
             int                                               _indexGroup;
@@ -78,11 +78,11 @@ namespace Svelto.ECS
         }
     }
 
-    public readonly struct EntityCollections<T1, T2, T3> where T1 : struct, IEntityComponent
+    public readonly ref struct EntityCollections<T1, T2, T3> where T1 : struct, IEntityComponent
                                                          where T2 : struct, IEntityComponent
                                                          where T3 : struct, IEntityComponent
     {
-        public EntityCollections(EntitiesDB db, FasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
+        public EntityCollections(EntitiesDB db, in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
         {
             _db     = db;
             _groups = groups;
@@ -92,11 +92,11 @@ namespace Svelto.ECS
         public EntityGroupsIterator GetEnumerator() { return new EntityGroupsIterator(_db, _groups); }
 
         readonly EntitiesDB                               _db;
-        readonly FasterReadOnlyList<ExclusiveGroupStruct> _groups;
+        readonly LocalFasterReadOnlyList<ExclusiveGroupStruct> _groups;
 
         public ref struct EntityGroupsIterator
         {
-            public EntityGroupsIterator(EntitiesDB db, FasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
+            public EntityGroupsIterator(EntitiesDB db, in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
             {
                 _db         = db;
                 _groups     = groups;
@@ -136,7 +136,7 @@ namespace Svelto.ECS
             }
 
             readonly EntitiesDB                               _db;
-            readonly FasterReadOnlyList<ExclusiveGroupStruct> _groups;
+            readonly LocalFasterReadOnlyList<ExclusiveGroupStruct> _groups;
             uint                                              _count;
             int                                               _index;
             int                                               _indexGroup;
@@ -145,10 +145,10 @@ namespace Svelto.ECS
         }
     }
 
-    public readonly struct EntityCollections<T1, T2>
+    public readonly ref struct EntityCollections<T1, T2>
         where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent
     {
-        public EntityCollections(EntitiesDB db, FasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
+        public EntityCollections(EntitiesDB db, in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
         {
             _db     = db;
             _groups = groups;
@@ -158,11 +158,11 @@ namespace Svelto.ECS
         public EntityGroupsIterator GetEnumerator() { return new EntityGroupsIterator(_db, _groups); }
 
         readonly EntitiesDB                               _db;
-        readonly FasterReadOnlyList<ExclusiveGroupStruct> _groups;
+        readonly LocalFasterReadOnlyList<ExclusiveGroupStruct> _groups;
 
         public ref struct EntityGroupsIterator
         {
-            public EntityGroupsIterator(EntitiesDB db, FasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
+            public EntityGroupsIterator(EntitiesDB db, in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
             {
                 _db         = db;
                 _groups     = groups;
@@ -200,7 +200,7 @@ namespace Svelto.ECS
             }
 
             readonly EntitiesDB                               _db;
-            readonly FasterReadOnlyList<ExclusiveGroupStruct> _groups;
+            readonly LocalFasterReadOnlyList<ExclusiveGroupStruct> _groups;
             int                                               _index;
             int                                               _indexGroup;
 
@@ -208,9 +208,9 @@ namespace Svelto.ECS
         }
     }
 
-    public readonly struct EntityCollections<T> where T : struct, IEntityComponent
+    public readonly ref struct EntityCollections<T> where T : struct, IEntityComponent
     {
-        public EntityCollections(EntitiesDB db, FasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
+        public EntityCollections(EntitiesDB db, in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
         {
             _db     = db;
             _groups = groups;
@@ -220,11 +220,11 @@ namespace Svelto.ECS
         public EntityGroupsIterator GetEnumerator() { return new EntityGroupsIterator(_db, _groups); }
 
         readonly EntitiesDB                               _db;
-        readonly FasterReadOnlyList<ExclusiveGroupStruct> _groups;
+        readonly LocalFasterReadOnlyList<ExclusiveGroupStruct> _groups;
 
         public ref struct EntityGroupsIterator
         {
-            public EntityGroupsIterator(EntitiesDB db, FasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
+            public EntityGroupsIterator(EntitiesDB db, in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) : this()
             {
                 _db         = db;
                 _groups     = groups;
@@ -255,7 +255,7 @@ namespace Svelto.ECS
             public ref T Current => ref _array[(uint) _index];
 
             readonly EntitiesDB                               _db;
-            readonly FasterReadOnlyList<ExclusiveGroupStruct> _groups;
+            readonly LocalFasterReadOnlyList<ExclusiveGroupStruct> _groups;
 
             EntityCollection<T> _array;
             uint                _count;

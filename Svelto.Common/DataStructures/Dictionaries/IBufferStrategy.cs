@@ -14,9 +14,6 @@ namespace Svelto.DataStructures
         ref T this[uint index] { get ; }
         ref T this[int index] { get ; }
         
-        //ToDo: somethihg must be done for this
-        IntPtr ToNativeArray();
-        //ToDo: somethihg must be done for this
         IBuffer<T> ToBuffer();
     }
 }
