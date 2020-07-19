@@ -6,7 +6,7 @@ namespace Svelto.ECS.Extensions.Unity
 {
     public static class EntityDescriptorHolderHelper
     {
-        public static EntityComponentInitializer Create<T>(EGID ID, Transform contextHolder,
+        public static EntityComponentInitializer CreateEntity<T>(this Transform contextHolder, EGID ID,
                                                            IEntityFactory factory, out T holder)
             where T : MonoBehaviour, IEntityDescriptorHolder
         {
@@ -16,7 +16,7 @@ namespace Svelto.ECS.Extensions.Unity
             return factory.BuildEntity(ID, holder.GetDescriptor(), implementors);
         }
         
-        public static EntityComponentInitializer Create<T>(EGID ID, Transform contextHolder,
+        public static EntityComponentInitializer Create<T>(this Transform contextHolder, EGID ID,
                                                            IEntityFactory factory)
             where T : MonoBehaviour, IEntityDescriptorHolder
         {
@@ -30,17 +30,21 @@ namespace Svelto.ECS.Extensions.Unity
     public static class SveltoGUIHelper
     {
         public static T CreateFromPrefab<T>(ref uint startIndex, Transform contextHolder, IEntityFactory factory,
-            ExclusiveGroup group, string groupNamePostfix = null) where T : MonoBehaviour, IEntityDescriptorHolder
+            ExclusiveGroup group, bool searchImplementorsInChildren = false, string groupNamePostfix = null) where T : MonoBehaviour, IEntityDescriptorHolder
         {
             Create<T>(new EGID(startIndex++, group), contextHolder, factory, out var holder);
-            var childs = contextHolder.GetComponentsInChildren<IEntityDescriptorHolder>(true);
+            var children = contextHolder.GetComponentsInChildren<IEntityDescriptorHolder>(true);
 
-            foreach (var child in childs)
+            foreach (var child in children)
             {
+                IImplementor[] childImplementors;
                 if (child.GetType() != typeof(T))
                 {
                     var monoBehaviour = child as MonoBehaviour;
-                    var childImplementors = monoBehaviour.GetComponents<IImplementor>();
+                    if (searchImplementorsInChildren == false)
+                        childImplementors = monoBehaviour.GetComponents<IImplementor>();
+                    else
+                        childImplementors = monoBehaviour.GetComponentsInChildren<IImplementor>(true);
                     startIndex = InternalBuildAll(
                         startIndex,
                         child,
@@ -55,17 +59,23 @@ namespace Svelto.ECS.Extensions.Unity
         }
 
         public static EntityComponentInitializer Create<T>(EGID ID, Transform contextHolder,
-            IEntityFactory factory, out T holder)
+            IEntityFactory factory, out T holder, bool searchImplementorsInChildren = false)
             where T : MonoBehaviour, IEntityDescriptorHolder
         {
-            return EntityDescriptorHolderHelper.Create<T>(ID, contextHolder, factory, out holder);
+            holder = contextHolder.GetComponentInChildren<T>(true);
+            var implementors = searchImplementorsInChildren == false ? holder.GetComponents<IImplementor>() : holder.GetComponentsInChildren<IImplementor>(true) ;
+
+            return factory.BuildEntity(ID, holder.GetDescriptor(), implementors);
         }
         
         public static EntityComponentInitializer Create<T>(EGID ID, Transform contextHolder,
-                                                           IEntityFactory factory)
+                                                           IEntityFactory factory, bool searchImplementorsInChildren = false)
             where T : MonoBehaviour, IEntityDescriptorHolder
         {
-            return EntityDescriptorHolderHelper.Create<T>(ID, contextHolder, factory);
+            var holder       = contextHolder.GetComponentInChildren<T>(true);
+            var implementors = searchImplementorsInChildren == false ? holder.GetComponents<IImplementor>() : holder.GetComponentsInChildren<IImplementor>(true) ;
+
+            return factory.BuildEntity(ID, holder.GetDescriptor(), implementors);
         }
 
         public static uint CreateAll<T>(uint startIndex, ExclusiveGroup group,

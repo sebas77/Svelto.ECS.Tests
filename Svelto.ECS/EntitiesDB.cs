@@ -6,66 +6,11 @@ using System;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
+using Svelto.ECS.Hybrid;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public ref struct TupleRef<T1> where T1 : struct, IEntityComponent
-    {
-        public readonly EntityCollections<T1> entities;
-        public readonly GroupsEnumerable<T1>  groups;
-
-        public TupleRef(in EntityCollections<T1> entityCollections, in GroupsEnumerable<T1> groupsEnumerable)
-        {
-            this.entities = entityCollections;
-            groups        = groupsEnumerable;
-        }
-    }
-
-    public ref struct TupleRef<T1, T2> where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent
-    {
-        public readonly EntityCollections<T1, T2> entities;
-        public readonly GroupsEnumerable<T1, T2>  groups;
-
-        public TupleRef(in EntityCollections<T1, T2> entityCollections, in GroupsEnumerable<T1, T2> groupsEnumerable)
-        {
-            this.entities = entityCollections;
-            groups        = groupsEnumerable;
-        }
-    }
-
-    public ref struct TupleRef<T1, T2, T3> where T1 : struct, IEntityComponent
-                                           where T2 : struct, IEntityComponent
-                                           where T3 : struct, IEntityComponent
-    {
-        public readonly EntityCollections<T1, T2, T3> entities;
-        public readonly GroupsEnumerable<T1, T2, T3>  groups;
-
-        public TupleRef
-            (in EntityCollections<T1, T2, T3> entityCollections, in GroupsEnumerable<T1, T2, T3> groupsEnumerable)
-        {
-            this.entities = entityCollections;
-            groups        = groupsEnumerable;
-        }
-    }
-
-    public ref struct TupleRef<T1, T2, T3, T4> where T1 : struct, IEntityComponent
-                                               where T2 : struct, IEntityComponent
-                                               where T3 : struct, IEntityComponent
-                                               where T4 : struct, IEntityComponent
-    {
-        public readonly EntityCollections<T1, T2, T3, T4> entities;
-        public readonly GroupsEnumerable<T1, T2, T3, T4>  groups;
-
-        public TupleRef
-        (in EntityCollections<T1, T2, T3, T4> entityCollections
-       , in GroupsEnumerable<T1, T2, T3, T4> groupsEnumerable)
-        {
-            this.entities = entityCollections;
-            groups        = groupsEnumerable;
-        }
-    }
-
     public partial class EntitiesDB
     {
         internal EntitiesDB
@@ -91,21 +36,6 @@ namespace Svelto.ECS
                                                                           .FastConcat("'"));
 #endif
             return ref entities[0];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T QueryEntity<T>(EGID entityGID) where T : struct, IEntityComponent
-        {
-            IBuffer<T> array;
-            if ((array = QueryEntitiesAndIndexInternal<T>(entityGID, out var index)) != null)
-                return ref array[(int) index];
-
-            throw new EntityNotFoundException(entityGID, typeof(T));
-        }
-
-        public ref T QueryEntity<T>(uint id, ExclusiveGroupStruct group) where T : struct, IEntityComponent
-        {
-            return ref QueryEntity<T>(new EGID(id, group));
         }
 
         /// <summary>
@@ -138,13 +68,14 @@ namespace Svelto.ECS
         {
             var T1entities = QueryEntities<T1>(groupStruct);
             var T2entities = QueryEntities<T2>(groupStruct);
-
+#if DEBUG && !PROFILE_SVELTO
             if (T1entities.count != T2entities.count)
-                throw new ECSException("Entity views count do not match in group. Entity 1: ' count: "
-                                      .FastConcat(T1entities.count).FastConcat(typeof(T1).ToString())
+                throw new ECSException("Entity components count do not match in group. Entity 1: ' count: "
+                                      .FastConcat(T1entities.count).FastConcat(" ", typeof(T1).ToString())
                                       .FastConcat("'. Entity 2: ' count: ".FastConcat(T2entities.count)
-                                                                          .FastConcat(typeof(T2).ToString())
-                                                                          .FastConcat("'")));
+                                                                          .FastConcat(" ", typeof(T2).ToString())
+                                                                          .FastConcat("' group: ", groupStruct.ToName())));
+#endif                                                                          
 
             return new EntityCollection<T1, T2>(T1entities, T2entities);
         }
@@ -155,9 +86,9 @@ namespace Svelto.ECS
             var T1entities = QueryEntities<T1>(groupStruct);
             var T2entities = QueryEntities<T2>(groupStruct);
             var T3entities = QueryEntities<T3>(groupStruct);
-
+#if DEBUG && !PROFILE_SVELTO
             if (T1entities.count != T2entities.count || T2entities.count != T3entities.count)
-                throw new ECSException("Entity views count do not match in group. Entity 1: "
+                throw new ECSException("Entity components count do not match in group. Entity 1: "
                                       .FastConcat(typeof(T1).ToString()).FastConcat(" count: ")
                                       .FastConcat(T1entities.count).FastConcat(
                                            " Entity 2: "
@@ -165,6 +96,7 @@ namespace Svelto.ECS
                                               .FastConcat(T2entities.count)
                                               .FastConcat(" Entity 3: ".FastConcat(typeof(T3).ToString()))
                                               .FastConcat(" count: ").FastConcat(T3entities.count)));
+#endif            
 
             return new EntityCollection<T1, T2, T3>(T1entities, T2entities, T3entities);
         }
@@ -222,7 +154,7 @@ namespace Svelto.ECS
 
             return (typeSafeDictionary as ITypeSafeDictionary<T>).ToEGIDMapper(groupStructId);
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryQueryMappedEntities<T>
             (ExclusiveGroupStruct groupStructId, out EGIDMapper<T> mapper) where T : struct, IEntityComponent
@@ -235,41 +167,6 @@ namespace Svelto.ECS
             mapper = (typeSafeDictionary as ITypeSafeDictionary<T>).ToEGIDMapper(groupStructId);
 
             return true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IBuffer<T> QueryEntitiesAndIndex<T>(EGID entityGID, out uint index) where T : struct, IEntityComponent
-        {
-            IBuffer<T> array;
-            if ((array = QueryEntitiesAndIndexInternal<T>(entityGID, out index)) != null)
-                return array;
-
-            throw new EntityNotFoundException(entityGID, typeof(T));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryQueryEntitiesAndIndex<T>(EGID entityGid, out uint index, out IBuffer<T> array)
-            where T : struct, IEntityComponent
-        {
-            if ((array = QueryEntitiesAndIndexInternal<T>(entityGid, out index)) != null)
-                return true;
-
-            return false;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IBuffer<T> QueryEntitiesAndIndex<T>(uint id, ExclusiveGroupStruct @group, out uint index)
-            where T : struct, IEntityComponent
-        {
-            return QueryEntitiesAndIndex<T>(new EGID(id, @group), out index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryQueryEntitiesAndIndex<T>
-            (uint id, ExclusiveGroupStruct group, out uint index, out IBuffer<T> array)
-            where T : struct, IEntityComponent
-        {
-            return TryQueryEntitiesAndIndex<T>(new EGID(id, @group), out index, out array);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -305,19 +202,22 @@ namespace Svelto.ECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasAny<T>(ExclusiveGroupStruct groupStruct) where T : struct, IEntityComponent
         {
-            return QueryEntities<T>(groupStruct).count > 0;
+            return Count<T>(groupStruct) > 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Count<T>(ExclusiveGroupStruct groupStruct) where T : struct, IEntityComponent
         {
-            return (int) QueryEntities<T>(groupStruct).count;
+            if (SafeQueryEntityDictionary<T>(groupStruct, out var typeSafeDictionary) == false)
+                return 0;
+            
+            return (int) typeSafeDictionary.count;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PublishEntityChange<T>(EGID egid) where T : unmanaged, IEntityComponent
         {
-            _entityStream.PublishEntity(ref QueryEntity<T>(egid), egid);
+            _entityStream.PublishEntity(ref this.QueryEntity<T>(egid), egid);
         }
 
         [Obsolete("<color=orange>This Method will be removed soon. please use QueryEntities instead</color>")]
@@ -353,21 +253,8 @@ namespace Svelto.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        IBuffer<T> QueryEntitiesAndIndexInternal<T>(EGID entityGID, out uint index) where T : struct, IEntityComponent
-        {
-            index = 0;
-            if (SafeQueryEntityDictionary<T>(entityGID.groupID, out var safeDictionary) == false)
-                return null;
-
-            if (safeDictionary.TryFindIndex(entityGID.entityID, out index) == false)
-                return null;
-
-            return (safeDictionary as ITypeSafeDictionary<T>).GetValues(out _);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool SafeQueryEntityDictionary<T>(uint group, out ITypeSafeDictionary typeSafeDictionary)
-            where T : struct, IEntityComponent
+            where T : IEntityComponent
         {
             if (UnsafeQueryEntityDictionary(group, TypeCache<T>.type, out var safeDictionary) == false)
             {
@@ -427,9 +314,9 @@ namespace Svelto.ECS
 
         readonly EntitiesStream _entityStream;
 
-        //grouped set of entity views, this is the standard way to handle entity views entity views are grouped per
+        //grouped set of entity components, this is the standard way to handle entity components are grouped per
         //group, then indexable per type, then indexable per EGID. however the TypeSafeDictionary can return an array of
-        //values directly, that can be iterated over, so that is possible to iterate over all the entity views of
+        //values directly, that can be iterated over, so that is possible to iterate over all the entity components of
         //a specific type inside a specific group.
         readonly FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>
             _groupEntityComponentsDB;

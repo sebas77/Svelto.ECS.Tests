@@ -126,13 +126,13 @@ namespace Svelto.ECS
                         ITypeSafeDictionary dbDic = GetOrCreateTypeSafeDictionary(groupID, groupDB, wrapper, 
                             targetTypeSafeDictionary);
 
-                        //Fill the DB with the entity views generate this frame.
+                        //Fill the DB with the entity components generate this frame.
                         dbDic.AddEntitiesFromDictionary(targetTypeSafeDictionary, groupID);
                     }
                 }
             }
 
-            //then submit everything in the engines, so that the DB is up to date with all the entity views and struct
+            //then submit everything in the engines, so that the DB is up to date with all the entity components
             //created by the entity built
             using (profiler.Sample("Add entities to engines"))
             {

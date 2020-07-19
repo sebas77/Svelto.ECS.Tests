@@ -3,6 +3,11 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
+    /// <summary>
+    /// ToDo it would be interesting to have a version of this dedicated to unmanaged, IEntityComponent
+    /// that can be burstifiable 
+    /// </summary>
+    /// <typeparam name="T1"></typeparam>
     public readonly struct AllGroupsEnumerable<T1> where T1 : struct, IEntityComponent
     {
         public ref struct GroupCollection

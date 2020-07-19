@@ -45,21 +45,24 @@ namespace Svelto.ECS
                                            , out FasterDictionary<uint, ITypeSafeDictionary> result2) == false)
                 return result;
             
-            var result2Count           = result2.count;
             var result1Count           = result1.count;
-            var fasterDictionaryNodes2 = result2.unsafeKeys;
+            var result2Count           = result2.count;
             var fasterDictionaryNodes1 = result1.unsafeKeys;
-        
-            for (int i = 0; i < result2Count; i++)
-            for (int j = 0; j < result1Count; j++)
+            var fasterDictionaryNodes2 = result2.unsafeKeys;
+
+            for (int i = 0; i < result1Count; i++)
             {
-                if (fasterDictionaryNodes2[i].key == fasterDictionaryNodes1[j].key)
+                for (int j = 0; j < result2Count; j++)
                 {
-                    result.Add(new ExclusiveGroupStruct(fasterDictionaryNodes2[i].key));
-                    break;
+                    //if the same group is found used with both T1 and T2
+                    if (fasterDictionaryNodes1[i].key == fasterDictionaryNodes2[j].key)
+                    {
+                        result.Add(new ExclusiveGroupStruct(fasterDictionaryNodes1[i].key));
+                        break;
+                    }
                 }
             }
-        
+
             return result;
         }
 

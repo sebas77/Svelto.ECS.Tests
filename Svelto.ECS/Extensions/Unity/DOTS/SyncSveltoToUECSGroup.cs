@@ -18,6 +18,8 @@ namespace Svelto.ECS.Extensions.Unity
             
             return _jobHandle;
         }
+        
+        public string name => nameof(SyncSveltoToUECSGroup);
 
         readonly SimulationSystemGroup _simulationSystemGroup;
     }

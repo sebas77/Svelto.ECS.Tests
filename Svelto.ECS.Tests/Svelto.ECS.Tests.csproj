@@ -22,7 +22,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Svelto.Common\Svelto.Common.csproj" />
       <ProjectReference Include="..\Svelto.ECS\Svelto.ECS.csproj" />
     </ItemGroup>
 

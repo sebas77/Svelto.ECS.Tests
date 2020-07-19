@@ -54,21 +54,6 @@ namespace Svelto.ECS.DataStructures
             }
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetWithinCount<T>(uint index, in T value) where T : struct
-        {
-            unsafe
-            {
-                uint sizeOf     = (uint) MemoryUtilities.SizeOf<T>();
-                uint writeIndex = (uint) (index * sizeOf);
-                
-#if DEBUG && !PROFILE_SVELTO                
-                if (count < writeIndex + sizeOf)
-                    throw new Exception("no writing authorized");
-#endif
-                Unsafe.AsRef<T>(Unsafe.Add<T>(_ptr, (int) index)) = value;
-            }
-        }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add<T>(in T value) where T : struct

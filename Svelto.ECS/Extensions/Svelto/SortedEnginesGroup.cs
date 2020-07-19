@@ -1,38 +1,53 @@
-#if UNITY_2019_1_OR_NEWER
 using Svelto.DataStructures;
-using Unity.Jobs;
 using Svelto.Common;
 
-namespace Svelto.ECS.Extensions.Unity
+namespace Svelto.ECS.Extensions
 {
+    public interface IStepEngine : IEngine
+    {
+        void Step();
+        
+        string name { get; }
+    }
+    
+    public interface IGroupEngine : IStepEngine
+    { }
+    
+    public interface IStepEngine<T> : IEngine
+    {
+        void Step(ref T _param);
+        
+        string name { get; }
+    }
+    
+    public interface IStepGroupEngine<T> : IStepEngine<T>
+    {
+    }
     /// <summary>
     /// Note sorted jobs run in serial
     /// </summary>
     /// <typeparam name="Interface"></typeparam>
     /// <typeparam name="SequenceOrder"></typeparam>
-    public abstract class SortedJobifedEnginesGroup<Interface, SequenceOrder> : IJobifiedGroupEngine
-        where SequenceOrder : struct, ISequenceOrder where Interface : class, IJobifiedEngine
+    public abstract class SortedEnginesGroup<Interface, SequenceOrder> : IGroupEngine
+        where SequenceOrder : struct, ISequenceOrder where Interface : class, IStepEngine
     {
-        protected SortedJobifedEnginesGroup(FasterList<Interface> engines)
+        protected SortedEnginesGroup(FasterList<Interface> engines)
         {
-            _name = "SortedJobifedEnginesGroup - "+this.GetType().Name;
+            _name = "SortedEnginesGroup - "+this.GetType().Name;
             _instancedSequence = new Sequence<Interface, SequenceOrder>(engines);
         }
 
-        public JobHandle Execute(JobHandle inputHandles)
+        public void Step()
         {
             var sequenceItems = _instancedSequence.items;
-            JobHandle combinedHandles = inputHandles;
             using (var profiler = new PlatformProfiler(_name))
             {
                 for (var index = 0; index < sequenceItems.count; index++)
                 {
                     var engine = sequenceItems[index];
-                    using (profiler.Sample(engine.name)) combinedHandles = JobHandle.CombineDependencies(combinedHandles, engine.Execute(combinedHandles));
+                    using (profiler.Sample(engine.name)) engine.Step();
                 }
             }
-
-            return combinedHandles; 
         }
 
         public string name => _name;
@@ -41,16 +56,16 @@ namespace Svelto.ECS.Extensions.Unity
         readonly Sequence<Interface, SequenceOrder> _instancedSequence;
     } 
     
-    public abstract class SortedJobifedEnginesGroup<Interface, Parameter, SequenceOrder>: IJobifiedGroupEngine<Parameter>
-        where SequenceOrder : struct, ISequenceOrder where Interface : class, IJobifiedEngine<Parameter>
+    public abstract class SortedEnginesGroup<Interface, Parameter, SequenceOrder>: IStepGroupEngine<Parameter>
+        where SequenceOrder : struct, ISequenceOrder where Interface : class, IStepEngine<Parameter>
     {
-        protected SortedJobifedEnginesGroup(FasterList<Interface> engines)
+        protected SortedEnginesGroup(FasterList<Interface> engines)
         {
-            _name = "SortedJobifedEnginesGroup - "+this.GetType().Name;
+            _name = "SortedEnginesGroup - "+this.GetType().Name;
             _instancedSequence = new Sequence<Interface, SequenceOrder>(engines);
         }
 
-        public JobHandle Execute(JobHandle combinedHandles, ref Parameter param)
+        public void Step(ref Parameter param)
         {
             var sequenceItems = _instancedSequence.items;
             using (var profiler = new PlatformProfiler(_name))
@@ -58,12 +73,9 @@ namespace Svelto.ECS.Extensions.Unity
                 for (var index = 0; index < sequenceItems.count; index++)
                 {
                     var engine = sequenceItems[index];
-                    using (profiler.Sample(engine.name)) combinedHandles =
-                        JobHandle.CombineDependencies(combinedHandles, engine.Execute(combinedHandles, ref param));
+                    using (profiler.Sample(engine.name)) engine.Step(ref param);
                 }
             }
-
-            return combinedHandles;
         }
 
         public string name => _name;
@@ -72,4 +84,3 @@ namespace Svelto.ECS.Extensions.Unity
         readonly Sequence<Interface, SequenceOrder> _instancedSequence;
     }
 }
-#endif

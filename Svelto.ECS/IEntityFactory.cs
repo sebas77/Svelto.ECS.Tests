@@ -34,7 +34,7 @@ namespace Svelto.ECS
         ///     itself in terms of EntityComponents to build. The Implementors are passed to fill the
         ///     references of the EntityComponents components. Please read the articles on my blog
         ///     to understand better the terminologies
-        ///     Using this function is like building a normal entity, but the entity views
+        ///     Using this function is like building a normal entity, but the entity components
         ///     are grouped by groupID to be more efficiently processed inside engines and
         ///     improve cache locality. Either class entityComponents and struct entityComponents can be
         ///     grouped.
@@ -69,7 +69,7 @@ namespace Svelto.ECS
             (EGID egid, IComponentBuilder[] componentsToBuild, Type type, IEnumerable<object> implementors = null);
 
 #if UNITY_BURST
-        NativeEntityFactory ToNative<T>() where T : IEntityDescriptor, new();
+        NativeEntityFactory ToNative<T>(string memberName) where T : IEntityDescriptor, new();
 #endif        
     }
 }

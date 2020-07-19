@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Svelto.ECS.Tests", "Svelto.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Svelto.ECS", "Svelto.ECS\Svelto.ECS.csproj", "{FA56E2CA-2F6F-487E-A64D-E30B37777BC1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Svelto.Common", "Svelto.Common\Svelto.Common.csproj", "{5941B022-E71D-426B-8213-EBAA37D5BA79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Svelto.Common", "Svelto.Common_3\Svelto.Common.csproj", "{5941B022-E71D-426B-8213-EBAA37D5BA79}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

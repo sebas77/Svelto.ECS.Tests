@@ -4,7 +4,7 @@ using Svelto.DataStructures;
 namespace Svelto.ECS
 {
     /// <summary>
-    /// DynamicEntityDescriptor can be used to add entity views to an existing EntityDescriptor that act as flags,
+    /// DynamicEntityDescriptor can be used to add entity components to an existing EntityDescriptor that act as flags,
     /// at building time.
     /// This method allocates, so it shouldn't be abused
     /// </summary>

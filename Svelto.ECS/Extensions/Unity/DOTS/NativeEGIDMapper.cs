@@ -7,7 +7,7 @@ namespace Svelto.ECS
 {
     public readonly struct NativeEGIDMapper<T> where T : unmanaged, IEntityComponent
     {
-        readonly SveltoDictionary<uint, T> map;
+        readonly SveltoDictionaryNative<uint, T> map;
         public   ExclusiveGroupStruct      groupID { get; }
 
         public NativeEGIDMapper

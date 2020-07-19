@@ -19,26 +19,26 @@ namespace Svelto.ECS
         readonly AtomicNativeBags _swapOperationQueue =
             new AtomicNativeBags(Common.Allocator.Persistent, JobsUtility.MaxJobThreadCount + 1);
 
-        NativeEntityRemove ProvideNativeEntityRemoveQueue<T>() where T : IEntityDescriptor, new()
+        NativeEntityRemove ProvideNativeEntityRemoveQueue<T>(string memberName) where T : IEntityDescriptor, new()
         {
             //todo: remove operation array and store entity descriptor hash in the return value
             //todo I maybe able to provide a  _nativeSwap.SwapEntity<entityDescriptor> 
             _nativeRemoveOperations.Add(
-                new NativeOperationRemove(EntityDescriptorTemplate<T>.descriptor.componentsToBuild, TypeCache<T>.type));
+                new NativeOperationRemove(EntityDescriptorTemplate<T>.descriptor.componentsToBuild, TypeCache<T>.type, memberName));
 
             return new NativeEntityRemove(_removeOperationQueue, _nativeRemoveOperations.count - 1);
         }
         
-        NativeEntitySwap ProvideNativeEntitySwapQueue<T>() where T : IEntityDescriptor, new()
+        NativeEntitySwap ProvideNativeEntitySwapQueue<T>(string memberName) where T : IEntityDescriptor, new()
         {
             //todo: remove operation array and store entity descriptor hash in the return value
             _nativeSwapOperations.Add(
-                new NativeOperationSwap(EntityDescriptorTemplate<T>.descriptor.componentsToBuild, TypeCache<T>.type));
+                new NativeOperationSwap(EntityDescriptorTemplate<T>.descriptor.componentsToBuild, TypeCache<T>.type, memberName));
 
             return new NativeEntitySwap(_swapOperationQueue, _nativeSwapOperations.count - 1);
         }
 
-        NativeEntityFactory ProvideNativeEntityFactoryQueue<T>() where T : IEntityDescriptor, new()
+        NativeEntityFactory ProvideNativeEntityFactoryQueue<T>(string memberName) where T : IEntityDescriptor, new()
         {
             //todo: remove operation array and store entity descriptor hash in the return value
             _nativeAddOperations.Add(
@@ -75,8 +75,8 @@ namespace Svelto.ECS
                         var     componentsIndex = buffer.Dequeue<uint>();
                         var entityEGID      = buffer.Dequeue<DoubleEGID>();
                         
-                        CheckRemoveEntityID(entityEGID.@from, _nativeSwapOperations[componentsIndex].type);
-                        CheckAddEntityID(entityEGID.to, _nativeSwapOperations[componentsIndex].type); 
+                        CheckRemoveEntityID(entityEGID.@from, _nativeSwapOperations[componentsIndex].type, _nativeSwapOperations[componentsIndex].caller );
+                        CheckAddEntityID(entityEGID.to, _nativeSwapOperations[componentsIndex].type, _nativeSwapOperations[componentsIndex].caller); 
                         
                         QueueEntitySubmitOperation(new EntitySubmitOperation(
                                                        EntitySubmitOperationType.Swap, entityEGID.@from, entityEGID.to
@@ -157,9 +157,11 @@ namespace Svelto.ECS
     {
         internal readonly IComponentBuilder[] components;
         internal readonly Type type;
+        internal readonly string caller;
         
-        public NativeOperationRemove(IComponentBuilder[] descriptorComponentsToRemove, Type entityType)
+        public NativeOperationRemove(IComponentBuilder[] descriptorComponentsToRemove, Type entityType, string caller)
         {
+            this.caller = caller;
             components = descriptorComponentsToRemove;
             type = entityType;
         }
@@ -169,9 +171,11 @@ namespace Svelto.ECS
     {
         internal readonly IComponentBuilder[] components;
         internal readonly Type type;
+        internal readonly string caller;
 
-        public NativeOperationSwap(IComponentBuilder[] descriptorComponentsToSwap, Type entityType)
+        public NativeOperationSwap(IComponentBuilder[] descriptorComponentsToSwap, Type entityType, string caller)
         {
+            this.caller = caller;
             components = descriptorComponentsToSwap;
             type = entityType;
         }

@@ -51,7 +51,7 @@ namespace Svelto.ECS
 
         public override string ToString()
         {
-            return _id.ToString();
+            return this.ToName();
         }
 
         internal static ExclusiveGroupStruct Generate(byte bitmask = 0)
@@ -111,5 +111,6 @@ namespace Svelto.ECS
         [FieldOffset(3)] byte _bytemask;
         
         static uint _globalId = 1; //it starts from 1 because default EGID is considered not initalized value
+        
     }
 }

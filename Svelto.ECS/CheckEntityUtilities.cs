@@ -16,13 +16,14 @@ namespace Svelto.ECS
     public partial class EnginesRoot
     {
 #if DEBUG && !PROFILE_SVELTO
-        void CheckRemoveEntityID(EGID egid, Type entityComponent)
+        void CheckRemoveEntityID(EGID egid, Type entityComponent, string caller = "")
         {
             if (_idCheckers.TryGetValue(egid.groupID, out var hash))
             {
                 if (hash.Contains(egid.entityID) == false)
                     throw new ECSException("Entity with not found ID is about to be removed: id: "
-                                          .FastConcat(egid.entityID).FastConcat(" groupid: ").FastConcat(egid.groupID)
+                                          .FastConcat(" caller: ", caller, " ")
+                                          .FastConcat(egid.entityID).FastConcat(" groupid: ").FastConcat(egid.groupID.ToName())
                                           .FastConcat(" type: ").FastConcat(entityComponent != null ? entityComponent.Name : "not available"));
 
                 hash.Remove(egid.entityID);
@@ -33,12 +34,13 @@ namespace Svelto.ECS
             else
             {
                 throw new ECSException("Entity with not found ID is about to be removed: id: "
-                                      .FastConcat(egid.entityID).FastConcat(" groupid: ").FastConcat(egid.groupID)
+                                      .FastConcat(" caller: ", caller, " ")
+                                      .FastConcat(egid.entityID).FastConcat(" groupid: ").FastConcat(egid.groupID.ToName())
                                       .FastConcat(" type: ").FastConcat(entityComponent != null ? entityComponent.Name : "not available"));
             }
         }
 
-        void CheckAddEntityID(EGID egid, Type entityComponent)
+        void CheckAddEntityID(EGID egid, Type entityComponent, string caller = "")
         {
 //            Console.LogError("<color=orange>added</color> ".FastConcat(egid.ToString()));
 
@@ -48,7 +50,7 @@ namespace Svelto.ECS
                 if (hash.Contains(egid.entityID))
                     throw new ECSException("Entity with used ID is about to be built: '"
                                           .FastConcat("' id: '").FastConcat(egid.entityID).FastConcat("' groupid: '")
-                                          .FastConcat(egid.groupID).FastConcat(entityComponent != null ? entityComponent.Name : "not available")
+                                          .FastConcat(egid.groupID.ToName()).FastConcat(" ", entityComponent != null ? entityComponent.Name : "not available")
                                           .FastConcat("'"));
 
             hash.Add(egid.entityID);
@@ -59,12 +61,12 @@ namespace Svelto.ECS
         readonly FasterDictionary<uint, HashSet<uint>> _idCheckers = new FasterDictionary<uint, HashSet<uint>>();
 #else
         [Conditional("_CHECKS_DISABLED")]
-        void CheckRemoveEntityID(EGID egid, Type entityComponent)
+        void CheckRemoveEntityID(EGID egid, Type entityComponent, string caller = "")
         {
         }
 
         [Conditional("_CHECKS_DISABLED")]
-        void CheckAddEntityID(EGID egid, Type entityComponen)
+        void CheckAddEntityID(EGID egid, Type entityComponen, string caller = "")
         {
         }
         

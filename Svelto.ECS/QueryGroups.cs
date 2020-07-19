@@ -14,13 +14,11 @@ namespace Svelto.ECS.Experimental
         
         public FasterList<ExclusiveGroupStruct> reference => groups;
     }
-    
+
     public ref struct QueryGroups
     {
         static readonly ThreadLocal<GroupsList> groups = new ThreadLocal<GroupsList>();
 
-        public FasterReadOnlyList<ExclusiveGroupStruct> result => groups.Value.reference;
-        
         public QueryGroups(LocalFasterReadOnlyList<ExclusiveGroupStruct> findGroups)
         {
             var groupsValue = groups.Value;
@@ -33,7 +31,7 @@ namespace Svelto.ECS.Experimental
             }
         }
 
-        public QueryGroups Except(ExclusiveGroupStruct[] groupsToIgnore)
+        public QueryResult Except(ExclusiveGroupStruct[] groupsToIgnore)
         {
             var group = groups.Value.reference;
             var groupsCount = group.count;
@@ -49,10 +47,10 @@ namespace Svelto.ECS.Experimental
                     }
             }
 
-            return this;
+            return new QueryResult(group);
         }
         
-        public QueryGroups Except(ExclusiveGroupStruct groupsToIgnore)
+        public QueryResult Except(ExclusiveGroupStruct groupsToIgnore)
         {
             var group       = groups.Value.reference;
             var groupsCount = group.count;
@@ -65,7 +63,15 @@ namespace Svelto.ECS.Experimental
                     groupsCount--;
                 }
 
-            return this;
+            return new QueryResult(group);
         }
    }
+
+    public readonly ref struct QueryResult
+    {
+        readonly FasterReadOnlyList<ExclusiveGroupStruct> _group;
+        public QueryResult(FasterList<ExclusiveGroupStruct> @group) { _group = @group; }
+        
+        public FasterReadOnlyList<ExclusiveGroupStruct> result => _group;       
+    }
 }

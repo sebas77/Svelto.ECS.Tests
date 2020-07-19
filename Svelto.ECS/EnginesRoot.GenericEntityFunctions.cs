@@ -106,14 +106,14 @@ namespace Svelto.ECS
             }
 
 #if UNITY_BURST
-            public NativeEntityRemove ToNativeRemove<T>() where T : IEntityDescriptor, new()
+            public NativeEntityRemove ToNativeRemove<T>(string memberName) where T : IEntityDescriptor, new()
             {
-                return _enginesRoot.Target.ProvideNativeEntityRemoveQueue<T>();
+                return _enginesRoot.Target.ProvideNativeEntityRemoveQueue<T>(memberName);
             }
             
-            public NativeEntitySwap ToNativeSwap<T>() where T : IEntityDescriptor, new()
+            public NativeEntitySwap ToNativeSwap<T>(string memberName) where T : IEntityDescriptor, new()
             {
-                return _enginesRoot.Target.ProvideNativeEntitySwapQueue<T>();
+                return _enginesRoot.Target.ProvideNativeEntitySwapQueue<T>(memberName);
             }
 #endif            
 

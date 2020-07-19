@@ -5,30 +5,6 @@ using Svelto.ECS.Hybrid;
 
 namespace Svelto.ECS
 {
-    // public static class Test
-    // {
-    //     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    //     public static void Deconstruct<T1>(in this EntityCollection<T1> ec, out BT<NB<T1>> buffer) where T1 : unmanaged, IEntityComponent
-    //     {
-    //         buffer = new BT<NB<T1>>(ec._nativedBuffer, ec.count);
-    //     }
-    //     
-    //     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    //     public static void Deconstruct<T1, T2>(in this EntityCollection<T1, T2> ec, out BT<NB<T1>, NB<T2>> buffers) where T1 : unmanaged, IEntityComponent
-    //                                                                                                                 where T2 : unmanaged, IEntityComponent
-    //     {
-    //         buffers = new BT<NB<T1>, NB<T2>>(ec.Item1._nativedBuffer, ec.Item2._nativedBuffer, ec.count);
-    //     }
-    //     
-    //     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    //     public static void Deconstruct<T1, T2, T3>(in this EntityCollection<T1, T2, T3> ec, out BT<NB<T1>, NB<T2>, NB<T3>> buffers) where T1 : unmanaged, IEntityComponent
-    //                                                                                                                                 where T2 : unmanaged, IEntityComponent
-    //                                                                                                                                 where T3 : unmanaged, IEntityComponent
-    //     {
-    //         buffers = new BT<NB<T1>, NB<T2>, NB<T3>>(ec.Item1._nativedBuffer, ec.Item2._nativedBuffer, ec.Item3._nativedBuffer, ec.count);
-    //     }
-    // }
-    
     public static class EntityCollectionExtension
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,6 +74,7 @@ namespace Svelto.ECS
         {
             return new BT<MB<T1>>(ec._managedBuffer, ec.count);
         }
+        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (MB<T1> buffer1, MB<T2> buffer2, uint count) ToBuffers<T1, T2>
@@ -107,6 +84,7 @@ namespace Svelto.ECS
             return (ec.Item1._managedBuffer, ec.Item2._managedBuffer, ec.count);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (MB<T1> buffer1, MB<T2> buffer2, MB<T3> buffer3, uint count) ToBuffers<T1, T2, T3>
             (in this EntityCollection<T1, T2, T3> ec)
             where T2 : struct, IEntityViewComponent
@@ -135,7 +113,8 @@ namespace Svelto.ECS
             buffer2 = ec.Item2._managedBuffer;
             count   = (int) ec.count;
         }
-
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (NB<T1> buffer1, MB<T2> buffer2, MB<T3> buffer3, uint count) ToBuffers<T1, T2, T3>
             (in this EntityCollection<T1, T2, T3> ec)
             where T1 : unmanaged, IEntityComponent
@@ -148,6 +127,18 @@ namespace Svelto.ECS
     
     public static class EntityCollectionExtensionD
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Deconstruct<T1, T2, T3>(in this EntityCollection<T1, T2, T3> ec, out NB<T1> buffer1, out NB<T2> buffer2, out MB<T3> buffer3, out int count) where T1 : unmanaged, IEntityComponent
+                                                                                                                                                                       where T2 : unmanaged, IEntityComponent
+                                                                                                                                                                       where T3 : struct, IEntityViewComponent
+        {
+            buffer1 = ec.Item1._nativedBuffer;
+            buffer2 = ec.Item2._nativedBuffer;
+            buffer3 = ec.Item3._managedBuffer;
+            count   = (int) ec.count;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (NB<T1> buffer1, NB<T2> buffer2, MB<T3> buffer3, uint count) ToBuffers<T1, T2, T3>
             (in this EntityCollection<T1, T2, T3> ec)
             where T1 : unmanaged, IEntityComponent

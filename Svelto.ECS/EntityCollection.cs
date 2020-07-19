@@ -1,12 +1,13 @@
 using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
     public readonly ref struct EntityCollection<T> where T : struct, IEntityComponent
     {
-        static readonly bool IsUnmanaged = UnmanagedTypeExtensions.IsUnmanaged<T>(); 
+        static readonly bool IsUnmanaged = TypeSafeDictionary<T>._isUmanaged; 
         
         public EntityCollection(IBuffer<T> buffer, uint count):this()
         {
@@ -134,6 +135,7 @@ namespace Svelto.ECS
             readonly uint                     _count;
             int                               _index;
         }
+
     }
 
     public readonly ref struct EntityCollection<T1, T2, T3> where T3 : struct, IEntityComponent
@@ -230,7 +232,7 @@ namespace Svelto.ECS
         public readonly BufferT2 buffer2;
         public readonly BufferT3 buffer3;
         public readonly BufferT4 buffer4;
-        public readonly uint     count;
+        public readonly int     count;
 
         public BT(BufferT1 bufferT1, BufferT2 bufferT2, BufferT3 bufferT3, BufferT4 bufferT4, uint count) : this()
         {
@@ -238,7 +240,7 @@ namespace Svelto.ECS
             this.buffer2 = bufferT2;
             this.buffer3 = bufferT3;
             this.buffer4 = bufferT4;
-            this.count   = count;
+            this.count   = (int) count;
         }
     }
 
@@ -247,17 +249,17 @@ namespace Svelto.ECS
         public readonly BufferT1 buffer1;
         public readonly BufferT2 buffer2;
         public readonly BufferT3 buffer3;
-        public readonly uint     count;
+        public readonly int     count;
 
         public BT(BufferT1 bufferT1, BufferT2 bufferT2, BufferT3 bufferT3, uint count) : this()
         {
             this.buffer1 = bufferT1;
             this.buffer2 = bufferT2;
             this.buffer3 = bufferT3;
-            this.count   = count;
+            this.count   = (int) count;
         }
 
-        public void Deconstruct(out BufferT1 bufferT1, out BufferT2 bufferT2, out BufferT3 bufferT3, out uint count)
+        public void Deconstruct(out BufferT1 bufferT1, out BufferT2 bufferT2, out BufferT3 bufferT3, out int count)
         {
             bufferT1 = buffer1;
             bufferT2 = buffer2;
@@ -269,15 +271,15 @@ namespace Svelto.ECS
     public readonly struct BT<BufferT1>
     {
         public readonly BufferT1 buffer;
-        public readonly uint     count;
+        public readonly int     count;
 
         public BT(BufferT1 bufferT1, uint count) : this()
         {
             this.buffer = bufferT1;
-            this.count  = count;
+            this.count  = (int) count;
         }
         
-        public void Deconstruct(out BufferT1 bufferT1, out uint count)
+        public void Deconstruct(out BufferT1 bufferT1, out int count)
         {
             bufferT1 = buffer;
             count    = this.count;
@@ -290,16 +292,16 @@ namespace Svelto.ECS
     {
         public readonly BufferT1 buffer1;
         public readonly BufferT2 buffer2;
-        public readonly uint     count;
+        public readonly int     count;
 
         public BT(BufferT1 bufferT1, BufferT2 bufferT2, uint count) : this()
         {
             this.buffer1 = bufferT1;
             this.buffer2 = bufferT2;
-            this.count   = count;
+            this.count   = (int) count;
         }
         
-        public void Deconstruct(out BufferT1 bufferT1, out BufferT2 bufferT2, out uint count)
+        public void Deconstruct(out BufferT1 bufferT1, out BufferT2 bufferT2, out int count)
         {
             bufferT1 = buffer1;
             bufferT2 = buffer2;
