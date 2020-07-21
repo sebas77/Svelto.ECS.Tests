@@ -14,20 +14,14 @@ namespace Svelto.ECS.Tests
 
     class TestFloatValue : ITestFloatValue
     {
-        public TestFloatValue(float i)
-        {
-            Value = i;
-        }
+        public TestFloatValue(float i) { Value = i; }
 
         public float Value { get; set; }
     }
 
     class TestIntValue : ITestIntValue
     {
-        public TestIntValue(int i)
-        {
-            Value = i;
-        }
+        public TestIntValue(int i) { Value = i; }
 
         public int Value { get; set; }
     }
@@ -36,8 +30,8 @@ namespace Svelto.ECS.Tests
     {
 #pragma warning disable 649
         public ITestFloatValue TestFloatValue;
-        public ITestIntValue TestIntValue;
-#pragma warning restore 649        
+        public ITestIntValue   TestIntValue;
+#pragma warning restore 649
 
         public EGID ID { get; set; }
     }

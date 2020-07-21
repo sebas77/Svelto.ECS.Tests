@@ -18,9 +18,9 @@ namespace Common.DataStructures
         [TestCase]
         public void TestFasterDictionary()
         {
-            FasterDictionary<int, Test> test = new FasterDictionary<int, Test>();
-            uint dictionarysize = 10000;
-            int[] numbers = new int[dictionarysize];
+            FasterDictionary<int, Test> test           = new FasterDictionary<int, Test>();
+            uint                        dictionarysize = 10000;
+            int[]                       numbers        = new int[dictionarysize];
             for (int i = 1; i < dictionarysize; i++)
                 numbers[i] = numbers[i - 1] + i * HashHelpers.ExpandPrime((int) dictionarysize);
 
@@ -108,7 +108,8 @@ namespace Common.DataStructures
         [TestCase(10000)]
         public void TestSveltoDictionary(int dictionarysize)
         {
-            SveltoDictionary<int, Test, NativeStrategy<FasterDictionaryNode<int>>, NativeStrategy<Test>> test = new SveltoDictionary<int, Test, NativeStrategy<FasterDictionaryNode<int>>, NativeStrategy<Test>>(1);
+            SveltoDictionary<int, Test, NativeStrategy<FasterDictionaryNode<int>>, NativeStrategy<Test>> test =
+                new SveltoDictionary<int, Test, NativeStrategy<FasterDictionaryNode<int>>, NativeStrategy<Test>>(1);
 
             int[] numbers = new int[dictionarysize];
 
@@ -159,7 +160,7 @@ namespace Common.DataStructures
             for (int i = (int) (dictionarysize - 1); i >= 0; i -= 3)
                 if (test.Remove(i) == true)
                     throw new Exception();
-            
+
             test.Clear();
 
             for (int i = (int) (dictionarysize - 1); i >= 0; i -= 3)
@@ -186,7 +187,7 @@ namespace Common.DataStructures
                 if (JapaneseCalendar.i != i)
                     throw new Exception("read back test failed");
             }
-            
+
             test.Clear();
 
             for (int i = 0; i < dictionarysize; i++)

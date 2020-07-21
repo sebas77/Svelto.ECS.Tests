@@ -4,23 +4,22 @@ using System.Diagnostics;
 #endif
 using System;
 using System.Reflection;
+using System.Text;
+using Svelto.Common;
 
 namespace Svelto.ECS
 {
     internal static class ComponentBuilderUtilities
     {
-        const string MSG = "Entity Structs field and Entity View Struct components must hold value types.";
-
+        const string MSG = "Entity Components field and Entity View Components components must hold value types.";
 
 #if DISABLE_CHECKS
         [Conditional("_CHECKS_DISABLED")]
 #endif
         public static void CheckFields(Type entityComponentType, bool needsReflection, bool isStringAllowed = false)
         {
-            if (entityComponentType == ENTITY_STRUCT_INFO_VIEW ||
-                entityComponentType == EGIDType ||
-                entityComponentType == EXCLUSIVEGROUPSTRUCTTYPE ||
-                entityComponentType == SERIALIZABLE_ENTITY_STRUCT)
+            if (entityComponentType == ENTITY_STRUCT_INFO_VIEW || entityComponentType == EGIDType ||
+                entityComponentType == EXCLUSIVEGROUPSTRUCTTYPE || entityComponentType == SERIALIZABLE_ENTITY_STRUCT)
             {
                 return;
             }
@@ -48,16 +47,16 @@ namespace Svelto.ECS
 
                 if (fields.Length < 1)
                 {
-                    ProcessError("No valid fields found in Entity View Struct", entityComponentType);
+                    ProcessError("No valid fields found in Entity View Components", entityComponentType);
                 }
 
                 for (int i = fields.Length - 1; i >= 0; --i)
                 {
                     FieldInfo fieldInfo = fields[i];
 
-                    if (fieldInfo.FieldType.IsInterfaceEx() == false && fieldInfo.FieldType.IsValueTypeEx() == false)
+                    if (fieldInfo.FieldType.IsInterfaceEx() == false && fieldInfo.FieldType.IsUnmanagedEx() == false)
                     {
-                        ProcessError("Entity View Structs must hold only public interfaces or value type fields.",
+                        ProcessError("Entity View Components must hold only public interfaces or value type fields.",
                             entityComponentType);
                     }
 
@@ -77,22 +76,27 @@ namespace Svelto.ECS
                         }
 
                         Type propertyType = properties[j].PropertyType;
-                        if (propertyType != STRINGTYPE)
-                        {
-                            //for EntityComponentStructs, component fields that are structs that hold strings
-                            //are allowed
-                            SubCheckFields(propertyType, entityComponentType, isStringAllowed: true);
-                        }
+
+                        //for EntityComponentStructs, component fields that are structs that hold strings
+                        //are allowed
+                        SubCheckFields(propertyType, entityComponentType, isStringAllowed: true);
                     }
                 }
             }
         }
 
+        static bool IsString(Type type)
+        {
+            return type == STRINGTYPE || type == STRINGBUILDERTYPE;
+        }
+
         static void SubCheckFields(Type fieldType, Type entityComponentType, bool isStringAllowed = false)
         {
-            if (fieldType.IsPrimitive || fieldType.IsValueType || (isStringAllowed == true && fieldType == STRINGTYPE))
+            //pass if it's Primitive or C# 8 unmanaged, or it's a string and string are allowed
+            if (fieldType.IsPrimitive || (isStringAllowed == true && IsString(fieldType) == true) || fieldType.IsUnmanagedEx() == true)
             {
-                if (fieldType.IsValueType && !fieldType.IsEnum && fieldType.IsPrimitive == false)
+                //if it's a struct we have to check the fields recursively
+                if (IsString(fieldType) == false && !fieldType.IsEnum && fieldType.IsPrimitive == false)
                 {
                     CheckFields(fieldType, false, isStringAllowed);
                 }
@@ -119,6 +123,7 @@ namespace Svelto.ECS
         static readonly Type EXCLUSIVEGROUPSTRUCTTYPE   = typeof(ExclusiveGroupStruct);
         static readonly Type SERIALIZABLE_ENTITY_STRUCT = typeof(SerializableEntityComponent);
         static readonly Type STRINGTYPE                 = typeof(string);
+        static readonly Type STRINGBUILDERTYPE          = typeof(StringBuilder);
 
         internal static readonly Type ENTITY_STRUCT_INFO_VIEW = typeof(EntityInfoViewComponent);
     }

@@ -22,7 +22,7 @@ namespace UnitTests
                 Assert.That(_simpleNativeBag.Count<uint>(), Is.EqualTo(33));
             }
         }
-        
+
         [Test]
         public void TestSetOutOfTheIndex()
         {
@@ -34,7 +34,7 @@ namespace UnitTests
                 Assert.That(_simpleNativeBag.Count<uint>(), Is.EqualTo(11));
             }
         }
-        
+
         [Test]
         public void TestSetOutOfTheCapacity()
         {
@@ -53,15 +53,19 @@ namespace UnitTests
             public int a;
             public int b;
         }
-        
+
         [Test]
         public void TestResize()
         {
             unsafe
             {
                 var ptr = MemoryUtilities.Alloc(10, Allocator.Persistent);
-                Unsafe.Write((void*) ptr, new Test() {a = 3, b = 1});
-                Unsafe.Write((void*) (ptr + 8), (short)-10);
+                Unsafe.Write((void*) ptr, new Test()
+                {
+                    a = 3
+                  , b = 1
+                });
+                Unsafe.Write((void*) (ptr + 8), (short) -10);
                 ptr = MemoryUtilities.Realloc(ptr, 10, 16, Allocator.Persistent);
                 var test = Unsafe.Read<Test>((void*) ptr);
                 Assert.That(test.a == 3);
@@ -189,7 +193,7 @@ namespace UnitTests
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(0));
             }
         }
-        
+
         [Test]
         public void TestDoofusesScenario3()
         {
@@ -203,32 +207,32 @@ namespace UnitTests
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct()));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct()));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 var dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(0));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(0));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(0));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(0));
-                
+
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct()));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct()));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
@@ -237,7 +241,7 @@ namespace UnitTests
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(0));
-                
+
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct()));
                 _simpleNativeBag.Enqueue((uint) 1);
@@ -257,7 +261,6 @@ namespace UnitTests
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct()));
 
-                
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
@@ -307,14 +310,14 @@ namespace UnitTests
         {
             internal uint entityID;
             internal uint groupID;
-            
+
             public EGID(uint i, ExclusiveGroupStruct exclusiveGroupStruct)
             {
                 entityID = i;
                 @groupID = exclusiveGroupStruct.group;
             }
         }
-        
+
         [Test]
         public void TestDoofusesScenario4()
         {
@@ -326,91 +329,91 @@ namespace UnitTests
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(2)));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(3)));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 var dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(1));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(2));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(3));
-                
+
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(1)));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(2)));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(3)));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(1));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(2));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(3));
-                
+
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(1)));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(2)));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(3)));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(1));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(2));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(3));
             }
         }
-        
+
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         struct EGIDU
         {
-            internal uint entityID;
+            internal uint         entityID;
             ExclusiveGroupStructU exclusiveGroupStruct;
-            internal short groupID => exclusiveGroupStruct.group;
-            
+            internal short        groupID => exclusiveGroupStruct.group;
+
             public EGIDU(uint i, ExclusiveGroupStructU exclusiveGroupStruct)
             {
-                entityID = i;
+                entityID                  = i;
                 this.exclusiveGroupStruct = exclusiveGroupStruct;
             }
         }
-        
+
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         struct ExclusiveGroupStructU
         {
             internal short group;
-            byte test;
-            public ExclusiveGroupStructU(uint i):this() { @group = (short) i; }
+            byte           test;
+            public ExclusiveGroupStructU(uint i) : this() { @group = (short) i; }
         }
-        
-         [Test]
+
+        [Test]
         public void TestDoofusesScenario4Unaligned()
         {
             using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
@@ -421,68 +424,68 @@ namespace UnitTests
                 _simpleNativeBag.Enqueue(new EGIDU(1, new ExclusiveGroupStructU(2)));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGIDU(1, new ExclusiveGroupStructU(3)));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 var dequeue = _simpleNativeBag.Dequeue<EGIDU>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(1));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGIDU>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(2));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGIDU>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(3));
-                
+
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGIDU(1, new ExclusiveGroupStructU(1)));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGIDU(1, new ExclusiveGroupStructU(2)));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGIDU(1, new ExclusiveGroupStructU(3)));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGIDU>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(1));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGIDU>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(2));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGIDU>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(3));
-                
+
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGIDU(1, new ExclusiveGroupStructU(1)));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGIDU(1, new ExclusiveGroupStructU(2)));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGIDU(1, new ExclusiveGroupStructU(3)));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGIDU>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(1));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGIDU>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(2));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGIDU>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(3));
             }
         }
-        
+
         [Test]
         public void TestDoofusesScenario5()
         {
@@ -490,12 +493,12 @@ namespace UnitTests
             {
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(1)));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 var dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(1));
-                
+
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(2)));
                 _simpleNativeBag.Enqueue((uint) 1);
@@ -504,27 +507,27 @@ namespace UnitTests
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(4)));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(5)));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(2));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(3));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(4));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(5));
-                
+
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(6)));
                 _simpleNativeBag.Enqueue((uint) 1);
@@ -533,50 +536,50 @@ namespace UnitTests
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(8)));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(9)));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(6));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(7));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(8));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(9));
-                
+
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(10)));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(10));
-                
+
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(11)));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(12)));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(11));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(12));
-                
+
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(13)));
                 _simpleNativeBag.Enqueue((uint) 1);
@@ -589,32 +592,32 @@ namespace UnitTests
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(17)));
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(18)));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(13));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(14));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(15));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(16));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
                 Assert.That((uint) dequeue.groupID, Is.EqualTo(17));
-                
+
                 Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(1));
                 dequeue = _simpleNativeBag.Dequeue<EGID>();
                 Assert.That(dequeue.entityID, Is.EqualTo(1));
@@ -657,7 +660,7 @@ namespace UnitTests
                 Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24));
             }
         }
-        
+
         [Test]
         public void TestEnqueueDequeueWontAllocTooMuchOnce()
         {
@@ -667,11 +670,11 @@ namespace UnitTests
                     _simpleNativeBag.Enqueue((byte) 0);
                     Assert.That(_simpleNativeBag.capacity, Is.EqualTo(8));
                     _simpleNativeBag.Enqueue((byte) 0);
-                    Assert.That(_simpleNativeBag.capacity, Is.EqualTo(8)); 
+                    Assert.That(_simpleNativeBag.capacity, Is.EqualTo(8));
                     _simpleNativeBag.Enqueue((byte) 0);
                     Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24)); //(8 + 1) * 2 = 18 => aligned 24
                     _simpleNativeBag.Enqueue((byte) 0);
-                    Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24)); 
+                    Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24));
                     _simpleNativeBag.Dequeue<byte>();
                     _simpleNativeBag.Dequeue<byte>();
                     _simpleNativeBag.Dequeue<byte>();
@@ -681,13 +684,13 @@ namespace UnitTests
                 Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24));
             }
         }
-        
+
         struct Weird
         {
             public short a;
-            public byte b;
+            public byte  b;
         }
-        
+
         [Test]
         public void TestEnqueueDequeueWontAllocTooMuchWithWeirdStruct()
         {
@@ -708,6 +711,7 @@ namespace UnitTests
                 Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24));
             }
         }
+
         [Test]
         public void TestEnqueueDequeueWontAllocTooMuchWithWeirdStructOnce()
         {
@@ -730,14 +734,14 @@ namespace UnitTests
                 Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24));
             }
         }
-        
+
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         struct Weird2
         {
             public short a;
-            public  byte  b;
+            public byte  b;
         }
-        
+
         [Test]
         public void TestEnqueueDequeueWontAllocTooMuchWithWeirdStructUnalignedOnce()
         {
@@ -837,7 +841,7 @@ namespace UnitTests
                 Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24));
             }
         }
-        
+
         [Test]
         public void TestWhatYouEnqueueIsWhatIDequeueMixed()
         {
@@ -845,14 +849,38 @@ namespace UnitTests
             {
                 for (var i = 0; i < 32; i++)
                 {
-                    _simpleNativeBag.Enqueue((byte) 0);                            //4
-                    _simpleNativeBag.Enqueue(new Weird2() { a=0xFA, b = 7 });      //(4 + 4) * 2 = 16
-                    _simpleNativeBag.Enqueue(new Weird() { a =0xFA, b = 7 });
-                    _simpleNativeBag.Enqueue(new Weird2() { a =0xFA, b = 7 });
+                    _simpleNativeBag.Enqueue((byte) 0); //4
+                    _simpleNativeBag.Enqueue(new Weird2()
+                    {
+                        a = 0xFA
+                      , b = 7
+                    }); //(4 + 4) * 2 = 16
+                    _simpleNativeBag.Enqueue(new Weird()
+                    {
+                        a = 0xFA
+                      , b = 7
+                    });
+                    _simpleNativeBag.Enqueue(new Weird2()
+                    {
+                        a = 0xFA
+                      , b = 7
+                    });
                     Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(0));
-                    Assert.That(_simpleNativeBag.Dequeue<Weird2>(), Is.EqualTo(new Weird2() { a =0xFA, b = 7 }));
-                    Assert.That(_simpleNativeBag.Dequeue<Weird>(), Is.EqualTo(new Weird() { a =0xFA, b = 7 }));
-                    Assert.That(_simpleNativeBag.Dequeue<Weird2>(), Is.EqualTo(new Weird2() { a =0xFA, b = 7 }));
+                    Assert.That(_simpleNativeBag.Dequeue<Weird2>(), Is.EqualTo(new Weird2()
+                    {
+                        a = 0xFA
+                      , b = 7
+                    }));
+                    Assert.That(_simpleNativeBag.Dequeue<Weird>(), Is.EqualTo(new Weird()
+                    {
+                        a = 0xFA
+                      , b = 7
+                    }));
+                    Assert.That(_simpleNativeBag.Dequeue<Weird2>(), Is.EqualTo(new Weird2()
+                    {
+                        a = 0xFA
+                      , b = 7
+                    }));
                 }
 
                 Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24));
@@ -915,7 +943,7 @@ namespace UnitTests
                 Assert.That(_simpleNativeBag.capacity, Is.EqualTo(1016));
             }
         }
-        
+
         [Test]
         public void TestReaderGreaterThanWriter()
         {
@@ -929,35 +957,35 @@ namespace UnitTests
 
                 Assert.That(_simpleNativeBag.count, Is.EqualTo(64));
                 Assert.That(_simpleNativeBag.capacity, Is.EqualTo(120)); //
-                
+
                 //read 8 uint, the readerHead will be in the middle of the array
                 for (var i = 0; i < 8; i++)
                 {
                     Assert.That(_simpleNativeBag.Dequeue<uint>(), Is.EqualTo(i));
                 }
-                
+
                 Assert.That(_simpleNativeBag.count, Is.EqualTo(32));
                 Assert.That(_simpleNativeBag.capacity, Is.EqualTo(120));
-                
+
                 //write 4 uint, now the writer head wrapped and it's before the reader head
                 //capacity must stay unchanged
-                for (var i = 16; i < 16+7; i++)
+                for (var i = 16; i < 16 + 7; i++)
                 {
                     _simpleNativeBag.Enqueue((uint) i);
                 }
-                
+
                 Assert.That(_simpleNativeBag.count, Is.EqualTo(60));
                 Assert.That(_simpleNativeBag.capacity, Is.EqualTo(120));
-                
+
                 //now I will surpass reader, so it won't change the capacity because there is enough space
-                for (var i = 16+7; i < 16+7+2; i++)
+                for (var i = 16 + 7; i < 16 + 7 + 2; i++)
                 {
                     _simpleNativeBag.Enqueue((uint) i);
                 }
-                
+
                 Assert.That(_simpleNativeBag.count, Is.EqualTo(68));
                 Assert.That(_simpleNativeBag.capacity, Is.EqualTo(120));
-                
+
                 //dequeue everything and verify values
                 int index = 8;
                 while (_simpleNativeBag.IsEmpty())

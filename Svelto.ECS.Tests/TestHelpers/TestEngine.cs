@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Svelto.ECS.Tests
+﻿namespace Svelto.ECS.Tests
 {
     class TestEngine : IQueryingEntitiesEngine
     {
         public EntitiesDB entitiesDB { get; set; }
-        public void Ready() { }
+        public void       Ready()    { }
 
-        public bool HasEntity<T>(EGID ID) where T : struct, IEntityComponent
-        {
-            return entitiesDB.Exists<T>(ID);
-        }
+        public bool HasEntity<T>(EGID ID) where T : struct, IEntityComponent { return entitiesDB.Exists<T>(ID); }
 
         public bool HasAnyEntityInGroup<T>(ExclusiveGroup groupID) where T : struct, IEntityComponent
         {
