@@ -11,7 +11,7 @@ namespace Svelto.ECS
 {
     internal static class ComponentBuilderUtilities
     {
-        const string MSG = "Entity Components field and Entity View Components components must hold value types.";
+        const string MSG = "Entity Components and Entity View Components fields cannot hold managed fields outside the Svelto rules.";
 
 #if DISABLE_CHECKS
         [Conditional("_CHECKS_DISABLED")]
@@ -28,7 +28,7 @@ namespace Svelto.ECS
             {
                 if (entityComponentType.IsClass)
                 {
-                    throw new EntityComponentException("EntityComponents must be structs.", entityComponentType);
+                    throw new ECSException("EntityComponents must be structs.", entityComponentType);
                 }
 
                 FieldInfo[] fields = entityComponentType.GetFields(BindingFlags.Public | BindingFlags.Instance);
@@ -54,32 +54,41 @@ namespace Svelto.ECS
                 {
                     FieldInfo fieldInfo = fields[i];
 
-                    if (fieldInfo.FieldType.IsInterfaceEx() == false && fieldInfo.FieldType.IsUnmanagedEx() == false)
+                    if (fieldInfo.FieldType.IsInterfaceEx() == true)
                     {
-                        ProcessError("Entity View Components must hold only public interfaces or value type fields.",
-                            entityComponentType);
-                    }
+                        PropertyInfo[] properties = fieldInfo.FieldType.GetProperties(
+                            BindingFlags.Public | BindingFlags.Instance
+                                                | BindingFlags.DeclaredOnly);
 
-                    PropertyInfo[] properties = fieldInfo.FieldType.GetProperties(
-                        BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-
-                    for (int j = properties.Length - 1; j >= 0; --j)
-                    {
-                        if (properties[j].PropertyType.IsGenericType)
+                        for (int j = properties.Length - 1; j >= 0; --j)
                         {
-                            Type genericTypeDefinition = properties[j].PropertyType.GetGenericTypeDefinition();
-                            if (genericTypeDefinition == DISPATCHONSETTYPE ||
-                                genericTypeDefinition == DISPATCHONCHANGETYPE)
+                            if (properties[j].PropertyType.IsGenericType)
                             {
-                                continue;
+                                Type genericTypeDefinition = properties[j].PropertyType.GetGenericTypeDefinition();
+                                if (genericTypeDefinition == DISPATCHONSETTYPE
+                                 || genericTypeDefinition == DISPATCHONCHANGETYPE)
+                                {
+                                    continue;
+                                }
                             }
+
+                            Type propertyType = properties[j].PropertyType;
+
+                            //for EntityComponentStructs, component fields that are structs that hold strings
+                            //are allowed
+                            SubCheckFields(propertyType, entityComponentType, isStringAllowed: true);
                         }
+                    }
+                    else
+                    if (fieldInfo.FieldType.IsUnmanagedEx() == true)
+                    {
+                        SubCheckFields(fieldInfo.FieldType, entityComponentType, isStringAllowed: true);
+                    }
+                    else
+                    {
+                        ProcessError("Entity View Components must hold only public interfaces, strings or unmanaged type fields.",
+                                     entityComponentType);
 
-                        Type propertyType = properties[j].PropertyType;
-
-                        //for EntityComponentStructs, component fields that are structs that hold strings
-                        //are allowed
-                        SubCheckFields(propertyType, entityComponentType, isStringAllowed: true);
                     }
                 }
             }
@@ -90,10 +99,18 @@ namespace Svelto.ECS
             return type == STRINGTYPE || type == STRINGBUILDERTYPE;
         }
 
+        /// <summary>
+        /// This method checks the fields if it's an IEntityComponent, but checks all the properties if it's
+        /// IEntityViewComponent
+        /// </summary>
+        /// <param name="fieldType"></param>
+        /// <param name="entityComponentType"></param>
+        /// <param name="isStringAllowed"></param>
         static void SubCheckFields(Type fieldType, Type entityComponentType, bool isStringAllowed = false)
         {
             //pass if it's Primitive or C# 8 unmanaged, or it's a string and string are allowed
-            if (fieldType.IsPrimitive || (isStringAllowed == true && IsString(fieldType) == true) || fieldType.IsUnmanagedEx() == true)
+            //this check must allow pointers are they are unmanaged types
+            if ((isStringAllowed == true && IsString(fieldType) == true) || fieldType.IsUnmanagedEx() == true)
             {
                 //if it's a struct we have to check the fields recursively
                 if (IsString(fieldType) == false && !fieldType.IsEnum && fieldType.IsPrimitive == false)
@@ -111,10 +128,10 @@ namespace Svelto.ECS
         {
             if (fieldType != null)
             {
-                throw new EntityComponentException(message, entityComponentType, fieldType);
+                throw new ECSException(message, entityComponentType, fieldType);
             }
 
-            throw new EntityComponentException(message, entityComponentType);
+            throw new ECSException(message, entityComponentType);
         }
 
         static readonly Type DISPATCHONCHANGETYPE       = typeof(DispatchOnChange<>);
@@ -123,21 +140,8 @@ namespace Svelto.ECS
         static readonly Type EXCLUSIVEGROUPSTRUCTTYPE   = typeof(ExclusiveGroupStruct);
         static readonly Type SERIALIZABLE_ENTITY_STRUCT = typeof(SerializableEntityComponent);
         static readonly Type STRINGTYPE                 = typeof(string);
-        static readonly Type STRINGBUILDERTYPE          = typeof(StringBuilder);
+        static readonly Type STRINGBUILDERTYPE          = typeof(System.Text.StringBuilder);
 
         internal static readonly Type ENTITY_STRUCT_INFO_VIEW = typeof(EntityInfoViewComponent);
-    }
-
-    public class EntityComponentException : Exception
-    {
-        public EntityComponentException(string message, Type entityComponentType, Type type) :
-            base(message.FastConcat(" entity view: '", entityComponentType.ToString(), "', field: '", type.ToString()))
-        {
-        }
-
-        public EntityComponentException(string message, Type entityComponentType) :
-            base(message.FastConcat(" entity view: ", entityComponentType.ToString()))
-        {
-        }
     }
 }
