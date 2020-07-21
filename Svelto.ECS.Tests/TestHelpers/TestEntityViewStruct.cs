@@ -12,6 +12,11 @@ namespace Svelto.ECS.Tests
         int Value { get; set; }
     }
 
+    interface ITestStringValue
+    {
+        string Value { get; set; }
+    }
+
     class TestFloatValue : ITestFloatValue
     {
         public TestFloatValue(float i) { Value = i; }
@@ -26,6 +31,13 @@ namespace Svelto.ECS.Tests
         public int Value { get; set; }
     }
 
+    class TestStringValue : ITestStringValue
+    {
+        public TestStringValue(string i) { Value = i; }
+        
+        public string Value { get; set; }
+    }
+
     struct TestEntityViewStruct : IEntityViewComponent
     {
 #pragma warning disable 649
@@ -33,6 +45,15 @@ namespace Svelto.ECS.Tests
         public ITestIntValue   TestIntValue;
 #pragma warning restore 649
 
+        public EGID ID { get; set; }
+    }
+
+    struct TestEntityViewComponentString : IEntityViewComponent
+    {
+#pragma warning disable 649
+        public ITestStringValue TestStringValue;
+#pragma warning restore 649
+        
         public EGID ID { get; set; }
     }
 }
