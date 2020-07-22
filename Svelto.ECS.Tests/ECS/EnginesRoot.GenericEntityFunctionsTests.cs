@@ -44,10 +44,10 @@ namespace Svelto.ECS.Tests.ECS
 
             Assert.AreEqual(1, countB, "An entity should exist in Group B");
             Assert.AreEqual(toEgid.entityID, componentB[0].ID.entityID, "Swapped entity should have the target entityID");
-            Assert.AreEqual(1f, componentB[0].floatValue);
-            Assert.AreEqual(1, componentB[0].intValue);
-            Assert.AreEqual(1f, componentViewB[0].TestFloatValue.Value);
-            Assert.AreEqual(1, componentViewB[0].TestIntValue.Value);
+            Assert.AreEqual(1f, componentB[0].floatValue, "Component values should be copied");
+            Assert.AreEqual(1, componentB[0].intValue, "Component values should be copied");
+            Assert.AreEqual(1f, componentViewB[0].TestFloatValue.Value, "ViewComponent values should be copied");
+            Assert.AreEqual(1, componentViewB[0].TestIntValue.Value, "ViewComponent values should be copied");
         }
 
         SimpleEntitiesSubmissionScheduler _scheduler;
