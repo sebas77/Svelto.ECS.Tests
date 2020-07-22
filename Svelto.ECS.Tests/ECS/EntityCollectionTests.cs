@@ -52,6 +52,12 @@ namespace Svelto.ECS.Tests.ECS
                     
                     _entityFactory.BuildEntity<TestEntityViewComponentWithString>(
                         new EGID(id++, _group + i), new object[] {new TestStringValue("test")});
+                    
+                    _entityFactory.BuildEntity<TestEntityViewComponentWithCustomStruct>(
+                        new EGID(id++, _group + i), new object[]
+                        {
+                            new TestCustomStructWithString("test")
+                        });
                 }
             }
 
@@ -203,6 +209,25 @@ namespace Svelto.ECS.Tests.ECS
                 for (int j = 0; j < entityViews.count; j++)
                 {
                     Assert.AreEqual((entityViews[j].ID.entityID + 1).ToString(), entityViewsManagedArray[j].TestStringValue.Value);
+                }
+            }
+        }
+        
+        [TestCase(Description = "Test EntityCollection<T> CustomStruct String")]
+        public void TestEntityCollection1WithCustomStructString()
+        {
+            for (uint i = 0; i < _groupCount; i++)
+            {
+                EntityCollection<TestEntityViewComponentCustomStruct> entityViews =
+                    _testEngine.entitiesDB.QueryEntities<TestEntityViewComponentCustomStruct>(_group + i);
+
+                var entityViewsBuffer = entityViews.ToBuffer();
+                var entityViewsManagedArray = entityViewsBuffer.buffer.ToManagedArray();
+
+                for (int j = 0; j < entityViews.count; j++)
+                {
+                    Assert.AreEqual((entityViews[j].ID.entityID + 1).ToString(),
+                        entityViewsManagedArray[j].TestCustomStructString.Value);
                 }
             }
         }

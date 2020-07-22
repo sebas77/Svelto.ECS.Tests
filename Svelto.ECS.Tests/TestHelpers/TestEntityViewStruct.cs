@@ -56,4 +56,23 @@ namespace Svelto.ECS.Tests
         
         public EGID ID { get; set; }
     }
+
+    struct TestCustomStructWithString
+    {
+        public readonly string Value;
+        
+        public TestCustomStructWithString(string i)
+        {
+            Value = i;
+        }
+    }
+    
+    struct TestEntityViewComponentCustomStruct : IEntityViewComponent
+    {
+#pragma warning disable 649
+        public TestCustomStructWithString TestCustomStructString;
+#pragma warning restore 649
+        
+        public EGID ID { get; set; }
+    }
 }
