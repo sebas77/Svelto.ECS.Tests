@@ -17,12 +17,12 @@ namespace Svelto.ECS.Tests.ECS
             _enginesRoot.AddEngine(_engine);
         }
 
-        // [TearDown]
-        // public void Cleanup()
-        // {
-        //     _functions.RemoveAllEntities<TestEntityWithComponentViewAndComponentStruct>();
-        //     _scheduler.SubmitEntities();
-        // }
+        [TearDown]
+        public void Cleanup()
+        {
+            _functions.RemoveAllEntities<TestEntityWithComponentViewAndComponentStruct>();
+            _scheduler.SubmitEntities();
+        }
 
         [Test]
         public void TestRemoveEntityWithEntityIdAndGroup()
