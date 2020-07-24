@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS.Tests.ECS
 {
@@ -91,6 +92,73 @@ namespace Svelto.ECS.Tests.ECS
         }
 
         [Test]
+        public void TestRemoveAllEntities()
+        {
+            CreateTestEntity(0, GroupA);
+            CreateTestEntity(1, GroupA);
+            CreateTestEntity(2, GroupA);
+            CreateTestEntity(0, GroupB);
+            CreateTestEntity(1, GroupB);
+            CreateTestEntity(2, GroupB);
+            _scheduler.SubmitEntities();
+
+            _functions.RemoveAllEntities<TestEntityWithComponentViewAndComponentStruct>();
+            _scheduler.SubmitEntities();
+
+            var countA = _engine.entitiesDB.Count<TestEntityStruct>(GroupA);
+            Assert.AreEqual(0, countA, "All groups should be empty after remove all entities");
+            var countB = _engine.entitiesDB.Count<TestEntityStruct>(GroupB);
+            Assert.AreEqual(0, countB, "All groups should be empty after remove all entities");
+        }
+
+        [Test]
+        public void TestRemoveGroupAndEntities()
+        {
+            CreateTestEntity(0, GroupA);
+            CreateTestEntity(1, GroupA);
+            CreateTestEntity(1, GroupB);
+            _scheduler.SubmitEntities();
+
+            _functions.RemoveGroupAndEntities(GroupA);
+            _scheduler.SubmitEntities();
+
+            var group = _engine.entitiesDB.FindGroups<TestEntityStruct>();
+            Assert.AreEqual(1, group.count, "Target group should be removed.");
+
+            var query = _engine.entitiesDB.QueryEntities<TestEntityStruct>(GroupAB);
+            var enumerator = query.entities.GetEnumerator();
+            var entityCount = 0;
+            while (enumerator.MoveNext())
+            {
+                entityCount++;
+            }
+            Assert.AreEqual(1, entityCount, "Entities in the target group should be removed");
+        }
+
+        [Test]
+        public void TestSwapEntitiesInGroup()
+        {
+            // todo: Test what happens when source group is empty?
+
+            CreateTestEntity(0, GroupA, 0);
+            CreateTestEntity(1, GroupA, 1);
+            CreateTestEntity(2, GroupA, 2);
+            _scheduler.SubmitEntities();
+
+            _functions.SwapEntitiesInGroup<TestEntityWithComponentViewAndComponentStruct>(GroupA, GroupB);
+            _scheduler.SubmitEntities();
+
+            var countA = _engine.entitiesDB.Count<TestEntityStruct>(GroupA);
+            Assert.AreEqual(0, countA, "Source group should be empty after swap");
+
+            var (componentsB, countB) = _engine.entitiesDB.QueryEntities<TestEntityStruct>(GroupB);
+            Assert.AreEqual(3, countB, "All entities should exist in target group after swap");
+            Assert.AreEqual(2, componentsB[2].intValue, "Values in components should be copied after swap");
+
+            // todo: What is the expected behaviour when source entity id is already used in target group?
+        }
+
+        [Test]
         public void TestSwapEntityFromEgidToEgid()
         {
             CreateTestEntity(0, GroupA);
@@ -154,5 +222,6 @@ namespace Svelto.ECS.Tests.ECS
 
         static ExclusiveGroup GroupA = new ExclusiveGroup();
         static ExclusiveGroup GroupB = new ExclusiveGroup();
+        static FasterList<ExclusiveGroupStruct> GroupAB = new FasterList<ExclusiveGroupStruct>().Add(GroupA).Add(GroupB);
     }
 }
