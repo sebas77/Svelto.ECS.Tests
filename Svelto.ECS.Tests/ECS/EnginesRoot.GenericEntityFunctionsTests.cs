@@ -21,7 +21,8 @@ namespace Svelto.ECS.Tests.ECS
         [TearDown]
         public void Cleanup()
         {
-            _functions.RemoveAllEntities<TestEntityWithComponentViewAndComponentStruct>();
+            _functions.RemoveGroupAndEntities(GroupA);
+            _functions.RemoveGroupAndEntities(GroupB);
             _scheduler.SubmitEntities();
         }
 
