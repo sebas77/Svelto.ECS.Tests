@@ -7,9 +7,9 @@ namespace Svelto.ECS
     public readonly struct NativeEntityFactory
     {
         readonly AtomicNativeBags _addOperationQueue;
-        readonly uint             _index;
+        readonly int             _index;
 
-        internal NativeEntityFactory(AtomicNativeBags addOperationQueue, uint index)
+        internal NativeEntityFactory(AtomicNativeBags addOperationQueue, int index)
         {
             _index             = index;
             _addOperationQueue = addOperationQueue;

@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using Svelto.ECS;
 
-namespace UnitTests
+namespace Svelto.ECS.Tests.GroupCompounds
 {
     [TestFixture]
     public class GroupCompound1

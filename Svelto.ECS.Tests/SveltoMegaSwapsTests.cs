@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using Svelto.ECS;
 
-namespace UnitTests
+namespace Svelto.ECS.Tests.Messy
 {
     [TestFixture]
     public class TestSveltoMegaSwaps

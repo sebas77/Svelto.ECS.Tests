@@ -4,7 +4,7 @@ using Svelto.ECS;
 using Svelto.ECS.Hybrid;
 using Svelto.ECS.Serialization;
 
-namespace UnitTests
+namespace Svelto.ECS.Tests.Serialization
 {
     [TestFixture]
     public class TestSveltoECSSerialisation
@@ -67,7 +67,7 @@ namespace UnitTests
             generateEntitySerializer.SerializeEntity(new EGID(1, NamedGroup1.Group), simpleSerializationData
                                                    , (int) SerializationType.Storage);
 
-            _entityFunctions.RemoveGroupAndEntities(NamedGroup1.Group);
+            _entityFunctions.RemoveEntitiesFromGroup(NamedGroup1.Group);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             simpleSerializationData.Reset();

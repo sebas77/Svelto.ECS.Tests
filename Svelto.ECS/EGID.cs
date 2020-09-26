@@ -13,6 +13,8 @@ namespace Svelto.ECS
         [FieldOffset(0)] public readonly uint                 entityID;
         [FieldOffset(4)] public readonly ExclusiveGroupStruct groupID;
         [FieldOffset(0)]        readonly ulong                _GID;
+
+        public static readonly EGID Empty = new EGID();
         
         public static bool operator ==(EGID obj1, EGID obj2)
         {
@@ -74,7 +76,8 @@ namespace Svelto.ECS
 
         public override string ToString()
         {
-            return "id ".FastConcat(entityID).FastConcat(" group ").FastConcat(groupID.ToName());
+            var value = groupID.ToName();
+            return "id ".FastConcat(entityID).FastConcat(" group ").FastConcat(value);
         }
     }
 }

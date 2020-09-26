@@ -6,9 +6,9 @@ namespace Svelto.ECS
     public readonly struct NativeEntitySwap
     {
         readonly AtomicNativeBags _swapQueue;
-        readonly uint             _indexSwap;
+        readonly int             _indexSwap;
 
-        internal NativeEntitySwap(AtomicNativeBags EGIDsToSwap, uint indexSwap)
+        internal NativeEntitySwap(AtomicNativeBags EGIDsToSwap, int indexSwap)
         {
             _swapQueue = EGIDsToSwap;
             _indexSwap = indexSwap;

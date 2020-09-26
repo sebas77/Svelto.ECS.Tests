@@ -1,4 +1,6 @@
 ﻿using System;
+using Svelto.DataStructures;
+using Svelto.ECS.Internal;
 using Svelto.ECS.Serialization;
 
 namespace Svelto.ECS
@@ -46,20 +48,6 @@ namespace Svelto.ECS
                 IDeserializationFactory factory = serializationDescriptorMap.GetSerializationFactory(descriptorHash);
                 var entityDescriptor = serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
 
-                // //default factory
-                // //todo: we have a default factory, why don't we always register that instead?
-                // if (factory == null)
-                // {
-                //     var initializer = _enginesRoot.BuildEntity(egid,
-                //         _enginesRoot._isDeserializationOnly ? entityDescriptor.entitiesToSerialize
-                //             : entityDescriptor.componentsToBuild, entityDescriptor.realType);
-                //
-                //     DeserializeEntityComponents(serializationData, entityDescriptor, ref initializer, serializationType);
-                //
-                //     return initializer;
-                // }
-
-                //custom factory
                 return factory.BuildDeserializedEntity(egid, serializationData, entityDescriptor, serializationType,
                     this, this._enginesRoot.GenerateEntityFactory(), _enginesRoot._isDeserializationOnly);
             }
@@ -180,11 +168,13 @@ namespace Svelto.ECS
             {
                 SerializationDescriptorMap descriptorMap = _enginesRoot.serializationDescriptorMap;
                 var entityDescriptor = descriptorMap.GetDescriptorFromHash(serializableEntityHeader.descriptorHash);
+                
+                if (_enginesRoot._groupEntityComponentsDB.TryGetValue(egid.groupID, out var entitiesInGroupPerType) == false)
+                    throw new Exception("Entity Serialization failed");
 
                 foreach (var serializableEntityBuilder in entityDescriptor.entitiesToSerialize)
                 {
-                    _enginesRoot._entitiesDB.UnsafeQueryEntityDictionary(egid.groupID,
-                        serializableEntityBuilder.GetEntityComponentType(), out var safeDictionary);
+                    entitiesInGroupPerType.TryGetValue(new RefWrapper<Type>(serializableEntityBuilder.GetEntityComponentType()), out var safeDictionary);
 
                     serializationData.BeginNextEntityComponent();
                     serializableEntityBuilder.Deserialize(egid.entityID, safeDictionary, serializationData,

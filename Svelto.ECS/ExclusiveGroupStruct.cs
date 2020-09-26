@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Svelto.ECS
@@ -111,6 +110,5 @@ namespace Svelto.ECS
         [FieldOffset(3)] byte _bytemask;
         
         static uint _globalId = 1; //it starts from 1 because default EGID is considered not initalized value
-        
     }
 }

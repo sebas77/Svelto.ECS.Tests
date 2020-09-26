@@ -5,20 +5,18 @@ using Assert = NUnit.Framework.Assert;
 
 namespace Svelto.ECS.Tests.ECS
 {
-    [TestFixture(0u, (ushort) 4, 100)]
-    [TestFixture(20u, (ushort) 6, 100)]
-    [TestFixture(123u, (ushort) 8, 100)]
+    [TestFixture(0u, 100)]
+    [TestFixture(20u, 100)]
+    [TestFixture(123u, 100)]
     class EntityCollectionTests
     {
-        public EntityCollectionTests(uint idStart, ushort groupCount, int entityCountPerGroup)
+        public EntityCollectionTests(uint idStart, int entityCountPerGroup)
         {
             this._idStart             = idStart;
-            this._groupCount          = groupCount;
             this._entityCountPerGroup = entityCountPerGroup;
         }
 
         readonly uint   _idStart;
-        readonly ushort _groupCount;
         readonly int    _entityCountPerGroup;
 
         EnginesRoot                       _enginesRoot;
@@ -26,7 +24,11 @@ namespace Svelto.ECS.Tests.ECS
         IEntityFunctions                  _entityFunctions;
         SimpleEntitiesSubmissionScheduler _simpleSubmissionEntityViewScheduler;
         TestEngine                        _testEngine;
-        ExclusiveGroup                    _group;
+
+        static   ushort         numberOfGroups = 10;
+        static   ExclusiveGroup _group         = new ExclusiveGroup(numberOfGroups);
+        readonly ushort         _groupCount    = numberOfGroups;
+
 
         [SetUp]
         public void Init()
@@ -40,8 +42,6 @@ namespace Svelto.ECS.Tests.ECS
             _entityFactory   = _enginesRoot.GenerateEntityFactory();
             _entityFunctions = _enginesRoot.GenerateEntityFunctions();
 
-            _group = new ExclusiveGroup(_groupCount);
-
             var id = _idStart;
             for (uint i = 0; i < _groupCount; i++)
             {
@@ -52,12 +52,6 @@ namespace Svelto.ECS.Tests.ECS
                     
                     _entityFactory.BuildEntity<TestEntityViewComponentWithString>(
                         new EGID(id++, _group + i), new object[] {new TestStringValue("test")});
-                    
-                    _entityFactory.BuildEntity<TestEntityViewComponentWithCustomStruct>(
-                        new EGID(id++, _group + i), new object[]
-                        {
-                            new TestCustomStructWithString("test")
-                        });
                 }
             }
 
@@ -96,28 +90,13 @@ namespace Svelto.ECS.Tests.ECS
         [TestCase(Description = "Test EntityCollection<T> QueryEntities")]
         public void TestEntityCollection1()
         {
-            for (uint i = 0; i < _groupCount; i++)
+            void TestNotAcceptedEntityComponent()
             {
-                EntityCollection<TestEntityStruct> entities =
-                    _testEngine.entitiesDB.QueryEntities<TestEntityStruct>(_group + i);
-                EntityCollection<TestEntityViewStruct> entityViews =
-                    _testEngine.entitiesDB.QueryEntities<TestEntityViewStruct>(_group + i);
-
-                Assert.AreEqual(_entityCountPerGroup, entities.count);
-                Assert.AreEqual(_entityCountPerGroup, entityViews.count);
-
-                foreach (var entity in entities)
-                {
-                    Assert.AreEqual(entity.ID.entityID + 1, entity.floatValue);
-                    Assert.AreEqual(entity.ID.entityID + 1, entity.intValue);
-                }
-
-                foreach (var entityView in entityViews)
-                {
-                    Assert.AreEqual(entityView.ID.entityID + 1, entityView.TestFloatValue.Value);
-                    Assert.AreEqual(entityView.ID.entityID + 1, entityView.TestIntValue.Value);
-                }
+                _entityFactory.BuildEntity<TestEntityViewComponentWithCustomStruct>(
+                    new EGID(0, _group), new object[] {new TestCustomStructWithString("test")});
             }
+
+            Assert.Throws<TypeInitializationException>(TestNotAcceptedEntityComponent);
         }
 
         [TestCase(Description = "Test EntityCollection<T> ToBuffer ToManagedArray")]
@@ -209,25 +188,6 @@ namespace Svelto.ECS.Tests.ECS
                 for (int j = 0; j < entityViews.count; j++)
                 {
                     Assert.AreEqual((entityViews[j].ID.entityID + 1).ToString(), entityViewsManagedArray[j].TestStringValue.Value);
-                }
-            }
-        }
-        
-        [TestCase(Description = "Test EntityCollection<T> CustomStruct String")]
-        public void TestEntityCollection1WithCustomStructString()
-        {
-            for (uint i = 0; i < _groupCount; i++)
-            {
-                EntityCollection<TestEntityViewComponentCustomStruct> entityViews =
-                    _testEngine.entitiesDB.QueryEntities<TestEntityViewComponentCustomStruct>(_group + i);
-
-                var entityViewsBuffer = entityViews.ToBuffer();
-                var entityViewsManagedArray = entityViewsBuffer.buffer.ToManagedArray();
-
-                for (int j = 0; j < entityViews.count; j++)
-                {
-                    Assert.AreEqual((entityViews[j].ID.entityID + 1).ToString(),
-                        entityViewsManagedArray[j].TestCustomStructString.Value);
                 }
             }
         }

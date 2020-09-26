@@ -10,7 +10,7 @@ namespace Svelto.ECS.Extensions.Unity
     /// </summary>
     /// <typeparam name="Interface"></typeparam>
     /// <typeparam name="SequenceOrder"></typeparam>
-    public abstract class SortedJobifedEnginesGroup<Interface, SequenceOrder> : IJobifiedGroupEngine
+    public abstract class SortedJobifedEnginesGroup<Interface, SequenceOrder> 
         where SequenceOrder : struct, ISequenceOrder where Interface : class, IJobifiedEngine
     {
         protected SortedJobifedEnginesGroup(FasterList<Interface> engines)

@@ -3,7 +3,7 @@ using NUnit.Framework;
 using NUnit.Framework.Internal;
 using Svelto.DataStructures;
 
-namespace Common.DataStructures
+namespace Svelto.Common.Tests.Datastructures
 {
     [TestFixture]
     public class TestDictionaries
@@ -108,8 +108,8 @@ namespace Common.DataStructures
         [TestCase(10000)]
         public void TestSveltoDictionary(int dictionarysize)
         {
-            SveltoDictionary<int, Test, NativeStrategy<FasterDictionaryNode<int>>, NativeStrategy<Test>> test =
-                new SveltoDictionary<int, Test, NativeStrategy<FasterDictionaryNode<int>>, NativeStrategy<Test>>(1);
+            SveltoDictionary<int, Test, NativeStrategy<FasterDictionaryNode<int>>, NativeStrategy<Test>, NativeStrategy<int>> test =
+                new SveltoDictionary<int, Test, NativeStrategy<FasterDictionaryNode<int>>, NativeStrategy<Test>, NativeStrategy<int>>(1);
 
             int[] numbers = new int[dictionarysize];
 
