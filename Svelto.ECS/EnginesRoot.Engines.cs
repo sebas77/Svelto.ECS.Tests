@@ -81,6 +81,10 @@ namespace Svelto.ECS
             
             using (var profiler = new PlatformProfiler("Final Dispose"))
             {
+                //Note: The engines are disposed before the the remove callback to give the chance to behave
+                //differently if a remove happens as a consequence of a dispose
+                //The pattern is to implement the IDisposable interface and set a flag in the engine. The 
+                //remove callback will then behave differently according the flag.
                 foreach (var engine in _disposableEngines)
                 {
                     try

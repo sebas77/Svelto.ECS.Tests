@@ -55,8 +55,10 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-                var rtnStruc = new NativeDynamicArray {_hashType = TypeHash<T>.hash};
 #if DEBUG && !PROFILE_SVELTO
+                var rtnStruc = new NativeDynamicArray {_hashType = TypeHash<T>.hash};
+#else           
+                NativeDynamicArray rtnStruc = default;
 #endif
                 var sizeOf = MemoryUtilities.SizeOf<T>();
 

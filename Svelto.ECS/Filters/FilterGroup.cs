@@ -30,7 +30,7 @@ namespace Svelto.ECS
         /// <summary>
         /// Todo: how to detect if the indices are still pointing to valid entities
         /// </summary>
-        public FilteredIndices filteredIndicies => new FilteredIndices(_denseListOfIndicesToEntityComponentArray);
+        public FilteredIndices filteredIndices => new FilteredIndices(_denseListOfIndicesToEntityComponentArray);
 
         public void Add<N>(uint entityID, N mapper)  where N:IEGIDMapper
         {
@@ -39,7 +39,7 @@ namespace Svelto.ECS
                 throw new ECSException($"using an invalid filter");
             if (_EIDs.ContainsKey(entityID) == true)
                 throw new ECSException(
-                    $"trying to add an existing entity {entityID} to filter {mapper.type} with group {mapper.groupID}");
+                    $"trying to add an existing entity {entityID} to filter {mapper.entityType} with group {mapper.groupID}");
 #endif
             //Get the index of the Entity in the component array
             var indexOfEntityInBufferComponent = mapper.GetIndex(entityID);

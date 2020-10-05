@@ -16,7 +16,7 @@ namespace Svelto.ECS
         }
 
         public int   count => _map.count;
-        public Type type  => TypeCache<T>.type;
+        public Type entityType  => TypeCache<T>.type;
         public   ExclusiveGroupStruct                    groupID { get; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -26,7 +26,7 @@ namespace Svelto.ECS
             if (_map.TryFindIndex(entityID, out var findIndex) == false)
                 throw new Exception("Entity not found in this group ".FastConcat(typeof(T).ToString()));
 #else
-            map.TryFindIndex(entityID, out var findIndex);
+            _map.TryFindIndex(entityID, out var findIndex);
 #endif
             return ref _map.GetDirectValueByRef(findIndex);
         }

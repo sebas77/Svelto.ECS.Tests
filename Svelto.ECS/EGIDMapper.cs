@@ -13,9 +13,9 @@ namespace Svelto.ECS
     /// <typeparam name="T"></typeparam>
     public readonly struct EGIDMapper<T>: IEGIDMapper where T : struct, IEntityComponent
     {
-        public uint                 length  => _map.count;
-        public ExclusiveGroupStruct groupID { get; }
-        public Type                 type    => TypeCache<T>.type;
+        public uint                 length          => _map.count;
+        public ExclusiveGroupStruct groupID         { get; }
+        public Type                 entityType            => TypeCache<T>.type;
 
         internal EGIDMapper(ExclusiveGroupStruct groupStructId, ITypeSafeDictionary<T> dic) : this()
         {
@@ -93,6 +93,6 @@ namespace Svelto.ECS
         uint GetIndex(uint entityID);
         
         ExclusiveGroupStruct groupID { get; }
-        Type          type    { get; }
+        Type          entityType    { get; }
     }
 }

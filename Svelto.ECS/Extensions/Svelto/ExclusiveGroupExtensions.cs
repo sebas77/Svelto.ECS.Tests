@@ -24,5 +24,15 @@ namespace Svelto.ECS
 
             return false;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool FoundIn(this in ExclusiveGroupStruct group, LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
+        {
+            for (int i = 0; i < groups.count; ++i)
+                if (groups[i] == group)
+                    return true;
+
+            return false;
+        }
     }
 }

@@ -3,6 +3,7 @@
 #endif
 
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Svelto.Common;
@@ -27,16 +28,10 @@ namespace Svelto.ECS.DataStructures
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-#if DEBUG && !PROFILE_SVELTO
                 unsafe
                 {
-                    if (_queue == null)
-                        throw new Exception("SimpleNativeArray: null-access");
-
-                    if (Interlocked.CompareExchange(ref _threadSentinel, 1, 0) != 0)
-                        throw new Exception("NativeBag is not thread safe, reading and writing operations can happen" +
-                            "on different threads, but not simultaneously");
-
+                    BasicTests();
+#if DEBUG && !PROFILE_SVELTO                    
                     try
                     {
 #endif
@@ -59,14 +54,8 @@ namespace Svelto.ECS.DataStructures
             {
                 unsafe
                 {
+                    BasicTests();
 #if DEBUG && !PROFILE_SVELTO
-                    if (_queue == null)
-                        throw new Exception("SimpleNativeArray: null-access");
-
-                    if (Interlocked.CompareExchange(ref _threadSentinel, 1, 0) != 0)
-                        throw new Exception("NativeBag is not thread safe, reading and writing operations can happen" +
-                            "on different threads, but not simultaneously");
-
                     try
                     {
 #endif
@@ -93,7 +82,9 @@ namespace Svelto.ECS.DataStructures
                 MemoryUtilities.MemClear((IntPtr) listData, (uint) sizeOf);
                 listData->allocator = allocator;
                 _queue              = listData;
+#if DEBUG && !PROFILE_SVELTO                
                 _threadSentinel     = 0;
+#endif                
             }
         }
 
@@ -102,14 +93,8 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
+                BasicTests();
 #if DEBUG && !PROFILE_SVELTO
-                if (_queue == null)
-                    throw new Exception("SimpleNativeArray: null-access");
-
-                if (Interlocked.CompareExchange(ref _threadSentinel, 1, 0) != 0)
-                    throw new Exception("NativeBag is not thread safe, reading and writing operations can happen" +
-                        "on different threads, but not simultaneously");
-
                 try
                 {
 #endif
@@ -133,14 +118,22 @@ namespace Svelto.ECS.DataStructures
             if (_queue != null)
             {
 #if DEBUG && !PROFILE_SVELTO
+                //todo: this must be unit tested
                 if (Interlocked.CompareExchange(ref _threadSentinel, 1, 0) != 0)
                     throw new Exception("NativeBag is not thread safe, reading and writing operations can happen" +
                         "on different threads, but not simultaneously");
-#endif            
-                _queue->Dispose();
-                _queue = null;
+
+                try
+                {
+#endif
+                    _queue->Dispose();
+                    _queue = null;
 #if DEBUG && !PROFILE_SVELTO
-                Volatile.Write(ref _threadSentinel, 0);
+                }
+                finally
+                {
+                    Volatile.Write(ref _threadSentinel, 0);
+                }
 #endif                
             }
         }
@@ -150,21 +143,17 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
-                if (_queue == null)
-                    throw new Exception("SimpleNativeArray: null-access");
-
-                if (Interlocked.CompareExchange(ref _threadSentinel, 1, 0) != 0)
-                    throw new Exception("NativeBag is not thread safe, reading and writing operations can happen" +
-                        "on different threads, but not simultaneously");
-
+                BasicTests();
+                
                 var sizeOf = MemoryUtilities.SizeOf<T>();
                 if (_queue->space - sizeOf < 0)
                     _queue->Realloc((uint) ((_queue->capacity + sizeOf) * 2.0f));
 
+#if DEBUG && !PROFILE_SVELTO
                 try
                 {
-#endif
+#endif                    
+
                     return ref _queue->Reserve<T>(out index);
 #if DEBUG && !PROFILE_SVELTO
                 }
@@ -181,21 +170,23 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
+                BasicTests();
+
 #if DEBUG && !PROFILE_SVELTO
-                if (_queue == null)
-                    throw new Exception("SimpleNativeArray: null-access");
-
-                if (Interlocked.CompareExchange(ref _threadSentinel, 1, 0) != 0)
-                    throw new Exception("NativeBag is not thread safe, reading and writing operations can happen" +
-                        "on different threads, but not simultaneously");
-
-                var sizeOf = MemoryUtilities.SizeOf<T>();
-                if (_queue->space - sizeOf < 0)
-                    _queue->Realloc((uint) ((_queue->capacity + MemoryUtilities.Align4((uint) sizeOf)) * 2.0f));
+                try
+                {
 #endif
-                _queue->Write(item);
+                    var sizeOf = MemoryUtilities.SizeOf<T>();
+                    if (_queue->space - sizeOf < 0)
+                        _queue->Realloc((uint) ((_queue->capacity + MemoryUtilities.Align4((uint) sizeOf)) * 2.0f));
+
+                    _queue->Write(item);
 #if DEBUG && !PROFILE_SVELTO
-                Volatile.Write(ref _threadSentinel, 0);
+                }
+                finally
+                {
+                    Volatile.Write(ref _threadSentinel, 0);
+                }
 #endif
             }
         }
@@ -205,17 +196,18 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
+                BasicTests();
 #if DEBUG && !PROFILE_SVELTO
-                if (_queue == null)
-                    throw new Exception("SimpleNativeArray: null-access");
-
-                if (Interlocked.CompareExchange(ref _threadSentinel, 1, 0) != 0)
-                    throw new Exception("NativeBag is not thread safe, reading and writing operations can happen" +
-                        "on different threads, but not simultaneously");
+                try
+                {
 #endif
-                _queue->Clear();
+                    _queue->Clear();
 #if DEBUG && !PROFILE_SVELTO
-                Volatile.Write(ref _threadSentinel, 0);
+                }
+                finally
+                {
+                    Volatile.Write(ref _threadSentinel, 0);
+                }
 #endif
             }
         }
@@ -224,14 +216,8 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
+                BasicTests();
 #if DEBUG && !PROFILE_SVELTO
-                if (_queue == null)
-                    throw new Exception("SimpleNativeArray: null-access");
-
-                if (Interlocked.CompareExchange(ref _threadSentinel, 1, 0) != 0)
-                    throw new Exception("NativeBag is not thread safe, reading and writing operations can happen" +
-                        "on different threads, but not simultaneously");
-
                 try
                 {
 #endif
@@ -250,13 +236,8 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
-                if (_queue == null)
-                    throw new Exception("SimpleNativeArray: null-access");
-
-                if (Interlocked.CompareExchange(ref _threadSentinel, 1, 0) != 0)
-                    throw new Exception("NativeBag is not thread safe, reading and writing operations can happen" +
-                        "on different threads, but not simultaneously");
+                BasicTests();
+#if DEBUG && !PROFILE_SVELTO                
                 try
                 {
 #endif
@@ -269,6 +250,19 @@ namespace Svelto.ECS.DataStructures
                 }
 #endif
             }
+        }
+
+        [Conditional("DISABLE_CHECKS")]
+        unsafe void BasicTests()
+        {
+            if (_queue == null)
+                throw new Exception("SimpleNativeArray: null-access");
+#if DEBUG && !PROFILE_SVELTO
+            //todo: this must be unit tested
+            if (Interlocked.CompareExchange(ref _threadSentinel, 1, 0) != 0)
+                throw new Exception("NativeBag is not thread safe, reading and writing operations can happen"
+                                  + "on different threads, but not simultaneously");
+#endif            
         }
 
 #if DEBUG && !PROFILE_SVELTO

@@ -16,6 +16,16 @@ namespace Svelto.ECS
             var innerloopBatchCount = ProcessorCount.BatchSize((uint) iterations);
             return job.ScheduleBatch((int)iterations, innerloopBatchCount, inputDeps);
         }
+        
+        public static JobHandle ScheduleParallel
+            <JOB>(this JOB job, int iterations, JobHandle inputDeps) where JOB: struct, IJobParallelForBatch
+        {
+            if (iterations <= 0)
+                return inputDeps;
+            
+            var innerloopBatchCount = ProcessorCount.BatchSize((uint) iterations);
+            return job.ScheduleBatch((int)iterations, innerloopBatchCount, inputDeps);
+        }
     }
     
     public static class UnityJobExtensions2
@@ -31,6 +41,16 @@ namespace Svelto.ECS
             where T1 : struct, IDisposable where T2 : struct, IDisposable
         {
             return new DisposeJob<T1, T2>(disposable1, disposable2).Schedule(inputDeps);
+        }
+        
+        public static JobHandle ScheduleParallel
+            <JOB>(this JOB job, int iterations, JobHandle inputDeps) where JOB: struct, IJobParallelFor
+        {
+            if (iterations <= 0)
+                return inputDeps;
+            
+            var innerloopBatchCount = ProcessorCount.BatchSize((uint) iterations);
+            return job.Schedule((int)iterations, innerloopBatchCount, inputDeps);
         }
         
         public static JobHandle ScheduleParallel

@@ -23,12 +23,19 @@ namespace Svelto.ECS
             public ref FilterGroup CreateOrGetFilterForGroup<T>(int filterID, ExclusiveGroupStruct groupID)
                 where T : struct, IEntityComponent
             {
-                var fasterDictionary = _filters.GetOrCreate(TypeRefWrapper<T>.wrapper
-                  , () => new FasterDictionary<ExclusiveGroupStruct, GroupFilters>());
+                var refWrapper = TypeRefWrapper<T>.wrapper;
+                
+                return ref CreateOrGetFilterForGroup(filterID, groupID, refWrapper);
+            }
 
-                GroupFilters filters = fasterDictionary.GetOrCreate(groupID, 
-                    () => 
-                        new GroupFilters(new SharedSveltoDictionaryNative<int, FilterGroup>(0), groupID));
+            ref FilterGroup CreateOrGetFilterForGroup(int filterID, ExclusiveGroupStruct groupID, RefWrapper<Type> refWrapper)
+            {
+                var fasterDictionary =
+                    _filters.GetOrCreate(refWrapper, () => new FasterDictionary<ExclusiveGroupStruct, GroupFilters>());
+
+                GroupFilters filters =
+                    fasterDictionary.GetOrCreate(
+                        groupID, () => new GroupFilters(new SharedSveltoDictionaryNative<int, FilterGroup>(0), groupID));
 
                 return ref filters.CreateOrGetFilter(filterID, groupID);
             }
@@ -161,9 +168,9 @@ namespace Svelto.ECS
                 filter.Remove(egid.entityID);
             }
 
-            public void AddEntity<T, N>(int filtersID, EGID egid, N mapper) where N:IEGIDMapper where T : struct, IEntityComponent
+            public void AddEntity<N>(int filtersID, EGID egid, N mapper) where N:IEGIDMapper
             {
-                ref var filter = ref CreateOrGetFilterForGroup<T>(filtersID, egid.groupID);
+                ref var filter = ref CreateOrGetFilterForGroup(filtersID, egid.groupID, new RefWrapper<Type>(mapper.entityType));
 
                 filter.Add(egid.entityID, mapper);
             }
