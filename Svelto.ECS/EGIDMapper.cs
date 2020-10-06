@@ -1,15 +1,23 @@
+using System;
 using System.Runtime.CompilerServices;
+using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public readonly struct EGIDMapper<T> where T : struct, IEntityComponent
+    /// <summary>
+    /// Note: does mono devirtualize sealed classes? If so it could be worth to use TypeSafeDictionary instead of
+    /// the interface 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public readonly struct EGIDMapper<T>: IEGIDMapper where T : struct, IEntityComponent
     {
-        public   uint                   length  => _map.count;
-        public   ExclusiveGroupStruct   groupID { get; }
+        public uint                 length          => _map.count;
+        public ExclusiveGroupStruct groupID         { get; }
+        public Type                 entityType            => TypeCache<T>.type;
 
-        public EGIDMapper(ExclusiveGroupStruct groupStructId, ITypeSafeDictionary<T> dic) : this()
+        internal EGIDMapper(ExclusiveGroupStruct groupStructId, ITypeSafeDictionary<T> dic) : this()
         {
             groupID = groupStructId;
             _map     = dic;
@@ -19,6 +27,8 @@ namespace Svelto.ECS
         public ref T Entity(uint entityID)
         {
 #if DEBUG && !PROFILE_SVELTO
+            if (_map == null)
+                throw new System.Exception("Not initialized EGIDMapper in this group ".FastConcat(typeof(T).ToString()));
                 if (_map.TryFindIndex(entityID, out var findIndex) == false)
                     throw new System.Exception("Entity not found in this group ".FastConcat(typeof(T).ToString()));
 #else
@@ -62,6 +72,27 @@ namespace Svelto.ECS
             return false;
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public uint GetIndex(uint entityID)
+        {
+            return _map.GetIndex(entityID);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool FindIndex(uint valueKey, out uint index)
+        {
+            return _map.TryFindIndex(valueKey, out index);
+        }
+        
         readonly ITypeSafeDictionary<T> _map;
+    }
+
+    public interface IEGIDMapper
+    {
+        bool FindIndex(uint valueKey, out uint index);
+        uint GetIndex(uint entityID);
+        
+        ExclusiveGroupStruct groupID { get; }
+        Type          entityType    { get; }
     }
 }

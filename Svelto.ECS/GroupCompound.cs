@@ -105,7 +105,12 @@ namespace Svelto.ECS
 
         static GroupTag()
         {
-            _Groups.Add(new ExclusiveGroup());
+            var group = new ExclusiveGroup();
+            _Groups.Add(group);
+            
+#if DEBUG                    
+            GroupMap.idToName[(uint) group] = $"Compound: {typeof(T).Name}";
+#endif            
         }
 
         //Each time a new combination of group tags is found a new group is added.
@@ -116,9 +121,6 @@ namespace Svelto.ECS
                     throw new Exception("temporary must be transformed in unit test");
 
             _Groups.Add(group);
-#if DEBUG                    
-            GroupMap.idToName[(uint) group] = $"Compound: {typeof(T).Name}";
-#endif            
         }
 
         public static ExclusiveGroupStruct BuildGroup => new ExclusiveGroupStruct(_Groups[0]);

@@ -80,11 +80,7 @@ namespace Svelto.ECS
                         }
                     }
                     else
-                    if (fieldInfo.FieldType.IsUnmanagedEx() == true)
-                    {
-                        SubCheckFields(fieldInfo.FieldType, entityComponentType, isStringAllowed: true);
-                    }
-                    else
+                    if (fieldInfo.FieldType.IsUnmanagedEx() == false)
                     {
                         ProcessError("Entity View Components must hold only public interfaces, strings or unmanaged type fields.",
                                      entityComponentType);
@@ -110,10 +106,10 @@ namespace Svelto.ECS
         {
             //pass if it's Primitive or C# 8 unmanaged, or it's a string and string are allowed
             //this check must allow pointers are they are unmanaged types
-            if ((isStringAllowed == true && IsString(fieldType) == true) || fieldType.IsUnmanagedEx() == true)
+            if ((isStringAllowed == true && IsString(fieldType) == true) || fieldType.IsValueTypeEx() == true)
             {
                 //if it's a struct we have to check the fields recursively
-                if (IsString(fieldType) == false && !fieldType.IsEnum && fieldType.IsPrimitive == false)
+                if (IsString(fieldType) == false)
                 {
                     CheckFields(fieldType, false, isStringAllowed);
                 }

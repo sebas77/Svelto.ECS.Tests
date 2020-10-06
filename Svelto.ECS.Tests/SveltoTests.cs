@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Text;
 using NUnit.Framework;
 using Svelto.DataStructures;
@@ -7,7 +7,7 @@ using Svelto.ECS.Experimental;
 using Svelto.ECS.Hybrid;
 using Assert = NUnit.Framework.Assert;
 
-namespace UnitTests
+namespace Svelto.ECS.Tests.Messy
 {
     [TestFixture]
     public class TestSveltoECS
@@ -402,7 +402,7 @@ namespace UnitTests
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, group1)));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(group1));
 
-            _entityFunctions.RemoveGroupAndEntities(group1);
+            _entityFunctions.RemoveEntitiesFromGroup(group1);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, group1)));

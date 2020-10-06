@@ -6,16 +6,28 @@ namespace Svelto.ECS
 {
     public struct NativeEGIDMultiMapper<T>:IDisposable where T : unmanaged, IEntityComponent
     {
-        SveltoDictionary<ExclusiveGroupStruct,
-            SveltoDictionary<uint, T, NativeStrategy<FasterDictionaryNode<uint>>, NativeStrategy<T>>,
-            NativeStrategy<FasterDictionaryNode<ExclusiveGroupStruct>>, NativeStrategy<
-                SveltoDictionary<uint, T, NativeStrategy<FasterDictionaryNode<uint>>, NativeStrategy<T>>>> _dic;
+        SveltoDictionary<ExclusiveGroupStruct, SveltoDictionary<uint, T, 
+                NativeStrategy<FasterDictionaryNode<uint>>,
+                NativeStrategy<T>, 
+                NativeStrategy<int>>, 
+            NativeStrategy<FasterDictionaryNode<ExclusiveGroupStruct>>, 
+            NativeStrategy<SveltoDictionary<uint, T, 
+                NativeStrategy<FasterDictionaryNode<uint>>, 
+                NativeStrategy<T>,
+                NativeStrategy<int>>>,
+            NativeStrategy<int>> _dic;
 
         public NativeEGIDMultiMapper
-        (SveltoDictionary<ExclusiveGroupStruct,
-             SveltoDictionary<uint, T, NativeStrategy<FasterDictionaryNode<uint>>, NativeStrategy<T>>,
-             NativeStrategy<FasterDictionaryNode<ExclusiveGroupStruct>>, NativeStrategy<
-                 SveltoDictionary<uint, T, NativeStrategy<FasterDictionaryNode<uint>>, NativeStrategy<T>>>> dictionary)
+        (SveltoDictionary<ExclusiveGroupStruct, SveltoDictionary<uint, T, 
+                NativeStrategy<FasterDictionaryNode<uint>>,
+                NativeStrategy<T>, 
+                NativeStrategy<int>>, 
+            NativeStrategy<FasterDictionaryNode<ExclusiveGroupStruct>>, 
+            NativeStrategy<SveltoDictionary<uint, T, 
+                NativeStrategy<FasterDictionaryNode<uint>>, 
+                NativeStrategy<T>,
+                NativeStrategy<int>>>,
+            NativeStrategy<int>> dictionary)
         {
             _dic = dictionary;
         }

@@ -56,7 +56,7 @@ namespace Svelto.ECS
                                         entitiesOperations[i].fromID, null);
                                     break;
                                 case EntitySubmitOperationType.RemoveGroup:
-                                    RemoveGroupAndEntities(
+                                    RemoveEntitiesFromGroup(
                                         entitiesOperations[i].fromID.groupID, profiler);
                                     break;
                                 case EntitySubmitOperationType.SwapGroup:
@@ -152,7 +152,7 @@ namespace Svelto.ECS
             }
         }
 
-        DoubleBufferedEntitiesToAdd                                 _groupedEntityToAdd;
+        readonly DoubleBufferedEntitiesToAdd                        _groupedEntityToAdd;
         readonly ThreadSafeDictionary<ulong, EntitySubmitOperation> _entitiesOperations;
     }
 }

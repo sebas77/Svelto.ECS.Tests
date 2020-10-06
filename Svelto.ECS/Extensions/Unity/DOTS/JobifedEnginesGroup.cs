@@ -12,9 +12,6 @@ namespace Svelto.ECS.Extensions.Unity
         string name { get; }
     }
     
-    public interface IJobifiedGroupEngine : IJobifiedEngine
-    { }
-    
     public interface IJobifiedEngine<T> : IEngine
     {
         JobHandle Execute(JobHandle _jobHandle, ref T _param);
@@ -29,7 +26,7 @@ namespace Svelto.ECS.Extensions.Unity
     /// Note unsorted jobs run in parallel
     /// </summary>
     /// <typeparam name="Interface"></typeparam>
-    public abstract class JobifedEnginesGroup<Interface> : IJobifiedGroupEngine where Interface : class, IJobifiedEngine
+    public abstract class JobifedEnginesGroup<Interface> where Interface : class, IJobifiedEngine
     {
         protected JobifedEnginesGroup(FasterList<Interface> engines)
         {

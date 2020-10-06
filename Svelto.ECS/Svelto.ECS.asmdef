@@ -5,7 +5,7 @@
         "Unity.Collections",
         "Unity.Burst",
         "Unity.Jobs",
-        "Svelto.Common_3"
+        "Svelto.Common"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Svelto.Common;
 using Svelto.DataStructures;
 
@@ -17,7 +18,7 @@ namespace Svelto.ECS.Internal
 
     public interface ITypeSafeDictionary:IDisposable
     {
-        uint count { get; }
+        uint                count { get; }
         ITypeSafeDictionary Create();
 
         void AddEntitiesToEngines(FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityComponentEnginesDb,
@@ -38,5 +39,7 @@ namespace Svelto.ECS.Internal
         bool ContainsKey(uint egidEntityId);
         uint GetIndex(uint valueEntityId);
         bool TryFindIndex(uint entityGidEntityId, out uint index);
+
+        void KeysEvaluator(System.Action<uint> action);
     }
 }

@@ -21,8 +21,8 @@ namespace Svelto.ECS.Tests.ECS
         [TearDown]
         public void Cleanup()
         {
-            _functions.RemoveGroupAndEntities(GroupA);
-            _functions.RemoveGroupAndEntities(GroupB);
+            _functions.RemoveEntitiesFromGroup(GroupA);
+            _functions.RemoveEntitiesFromGroup(GroupB);
             _scheduler.SubmitEntities();
         }
 
@@ -78,41 +78,6 @@ namespace Svelto.ECS.Tests.ECS
         }
 
         [Test]
-        public void TestRemoveAllEntitiesWithGroup()
-        {
-            CreateTestEntity(0, GroupA);
-            CreateTestEntity(1, GroupA);
-            CreateTestEntity(2, GroupA);
-            _scheduler.SubmitEntities();
-
-            _functions.RemoveAllEntities<TestEntityWithComponentViewAndComponentStruct>(GroupA);
-            _scheduler.SubmitEntities();
-
-            var countA = _engine.entitiesDB.Count<TestEntityStruct>(GroupA);
-            Assert.AreEqual(0, countA, "Target group should be empty after remove all entities");
-        }
-
-        [Test]
-        public void TestRemoveAllEntities()
-        {
-            CreateTestEntity(0, GroupA);
-            CreateTestEntity(1, GroupA);
-            CreateTestEntity(2, GroupA);
-            CreateTestEntity(0, GroupB);
-            CreateTestEntity(1, GroupB);
-            CreateTestEntity(2, GroupB);
-            _scheduler.SubmitEntities();
-
-            _functions.RemoveAllEntities<TestEntityWithComponentViewAndComponentStruct>();
-            _scheduler.SubmitEntities();
-
-            var countA = _engine.entitiesDB.Count<TestEntityStruct>(GroupA);
-            Assert.AreEqual(0, countA, "All groups should be empty after remove all entities");
-            var countB = _engine.entitiesDB.Count<TestEntityStruct>(GroupB);
-            Assert.AreEqual(0, countB, "All groups should be empty after remove all entities");
-        }
-
-        [Test]
         public void TestRemoveGroupAndEntities()
         {
             CreateTestEntity(0, GroupA);
@@ -120,11 +85,8 @@ namespace Svelto.ECS.Tests.ECS
             CreateTestEntity(1, GroupB);
             _scheduler.SubmitEntities();
 
-            _functions.RemoveGroupAndEntities(GroupA);
+            _functions.RemoveEntitiesFromGroup(GroupA);
             _scheduler.SubmitEntities();
-
-            var group = _engine.entitiesDB.FindGroups<TestEntityStruct>();
-            Assert.AreEqual(1, group.count, "Target group should be removed.");
 
             var query = _engine.entitiesDB.QueryEntities<TestEntityStruct>(GroupAB);
             var enumerator = query.entities.GetEnumerator();
@@ -204,7 +166,7 @@ namespace Svelto.ECS.Tests.ECS
                 _scheduler.SubmitEntities();
             }
 
-            Assert.Throws<ECSException>(SwapEntityAlreadyExists, "When source EGID doesn't exists it should throw an exception");
+            Assert.Throws<ECSException>(SwapEntityNotFound, "When source EGID doesn't exists it should throw an exception");
         }
 
         EntityComponentInitializer CreateTestEntity(uint entityId, ExclusiveGroupStruct group, int value = 1)

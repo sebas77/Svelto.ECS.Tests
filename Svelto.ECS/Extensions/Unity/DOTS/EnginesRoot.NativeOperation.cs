@@ -3,7 +3,6 @@ using System;
 using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.DataStructures.Unity;
-using Unity.Jobs.LowLevel.Unsafe;
 
 namespace Svelto.ECS
 {
@@ -11,13 +10,13 @@ namespace Svelto.ECS
     {
         //todo: I very likely don't need to create one for each native entity factory, the same can be reused
         readonly AtomicNativeBags _addOperationQueue =
-            new AtomicNativeBags(Common.Allocator.Persistent, JobsUtility.MaxJobThreadCount + 1);
+            new AtomicNativeBags(Common.Allocator.Persistent);
 
         readonly AtomicNativeBags _removeOperationQueue =
-            new AtomicNativeBags(Common.Allocator.Persistent, JobsUtility.MaxJobThreadCount + 1);
+            new AtomicNativeBags(Common.Allocator.Persistent);
 
         readonly AtomicNativeBags _swapOperationQueue =
-            new AtomicNativeBags(Common.Allocator.Persistent, JobsUtility.MaxJobThreadCount + 1);
+            new AtomicNativeBags(Common.Allocator.Persistent);
 
         NativeEntityRemove ProvideNativeEntityRemoveQueue<T>(string memberName) where T : IEntityDescriptor, new()
         {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Svelto.Common;
 using Svelto.DataStructures;
+using Svelto.ECS.Experimental;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
 
@@ -51,8 +52,9 @@ namespace Svelto.ECS
             _groupsPerEntity    = new FasterDictionary<RefWrapper<Type>, FasterDictionary<uint, ITypeSafeDictionary>>();
             _groupedEntityToAdd = new DoubleBufferedEntitiesToAdd();
 
-            _entitiesStream = new EntitiesStream();
-            _entitiesDB     = new EntitiesDB(_groupEntityComponentsDB, _groupsPerEntity, _entitiesStream);
+            _entityStreams = EntitiesStreams.Create();
+            _groupFilters   = new FasterDictionary<RefWrapper<Type>, FasterDictionary<ExclusiveGroupStruct, GroupFilters>>();
+            _entitiesDB     = new EntitiesDB(this);
 
             scheduler        = entitiesComponentScheduler;
             scheduler.onTick = new EntitiesSubmitter(this);
@@ -75,8 +77,14 @@ namespace Svelto.ECS
         /// </summary>
         public void Dispose()
         {
+            _isDisposing = true;
+            
             using (var profiler = new PlatformProfiler("Final Dispose"))
             {
+                //Note: The engines are disposed before the the remove callback to give the chance to behave
+                //differently if a remove happens as a consequence of a dispose
+                //The pattern is to implement the IDisposable interface and set a flag in the engine. The 
+                //remove callback will then behave differently according the flag.
                 foreach (var engine in _disposableEngines)
                 {
                     try
@@ -113,6 +121,16 @@ namespace Svelto.ECS
                         entityList.Value.Dispose();
                 }
 
+                foreach (FasterDictionary<RefWrapper<Type>, FasterDictionary<ExclusiveGroupStruct, GroupFilters>>.KeyValuePairFast type in _groupFilters)
+                    foreach (FasterDictionary<ExclusiveGroupStruct, GroupFilters>.KeyValuePairFast group in type.Value)
+                            group.Value.Dispose();
+
+                _groupFilters.Clear();
+#if UNITY_BURST                
+                _addOperationQueue.Dispose();
+                _removeOperationQueue.Dispose();
+                _swapOperationQueue.Dispose();
+#endif
                 _groupEntityComponentsDB.Clear();
                 _groupsPerEntity.Clear();
 
@@ -128,7 +146,7 @@ namespace Svelto.ECS
                 _idCheckers.Clear();
 #endif
                 _groupedEntityToAdd.Dispose();
-                _entitiesStream.Dispose();
+                _entityStreams.Dispose();
                 
                 scheduler.Dispose();
             }
@@ -226,5 +244,6 @@ namespace Svelto.ECS
         readonly FasterList<IDisposable>                                 _disposableEngines;
         readonly FasterList<IEngine>                                     _enginesSet;
         readonly HashSet<Type>                                           _enginesTypeSet;
+        internal   bool                                                  _isDisposing;
     }
 }

@@ -6,9 +6,9 @@ namespace Svelto.ECS
     public readonly struct NativeEntityRemove
     {
         readonly AtomicNativeBags _removeQueue;
-        readonly uint             _indexRemove;
+        readonly int             _indexRemove;
 
-        internal NativeEntityRemove(AtomicNativeBags EGIDsToRemove, uint indexRemove)
+        internal NativeEntityRemove(AtomicNativeBags EGIDsToRemove, int indexRemove)
         {
             _removeQueue = EGIDsToRemove;
             _indexRemove = indexRemove;

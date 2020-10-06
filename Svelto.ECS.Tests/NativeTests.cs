@@ -6,7 +6,7 @@ using Svelto.Common;
 using Svelto.ECS;
 using Svelto.ECS.DataStructures;
 
-namespace UnitTests
+namespace Svelto.ECS.Tests.Native
 {
     [TestFixture]
     public class NativeArrayTests

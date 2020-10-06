@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
@@ -65,7 +65,7 @@ namespace Svelto.ECS
 
             return groupStruct;
         }
-        
+
         internal ExclusiveGroupStruct(ExclusiveGroupStruct @group):this() { this = group; }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Svelto.ECS
         {
             return groupStruct._id;
         }
-        
+
         public static ExclusiveGroupStruct operator+(ExclusiveGroupStruct a, uint b)
         {
             var group = new ExclusiveGroupStruct {_id = a._id + b};
@@ -107,10 +107,9 @@ namespace Svelto.ECS
             return @group;
         }
 
-        [FieldOffset(0)] uint       _id;
+        [FieldOffset(0)] uint _id;
         [FieldOffset(3)] byte _bytemask;
-        
-        static uint _globalId = 1; //it starts from 1 because default EGID is considered not initalized value
-        
+
+        static           uint _globalId = 1; //it starts from 1 because default EGID is considered not initalized value
     }
 }

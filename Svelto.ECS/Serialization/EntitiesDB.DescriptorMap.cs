@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Svelto.Common;
 using Svelto.ECS.Serialization;
@@ -24,23 +25,19 @@ namespace Svelto.ECS
                 using (new StandardProfiler("Assemblies Scan"))
                 {
                     Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                //    Assembly executingAssembly = Assembly.GetExecutingAssembly();
 
                     Type d1 = typeof(DefaultVersioningFactory<>);
                     foreach (Assembly assembly in assemblies)
                     {
-                   //     if (assembly.GetReferencedAssemblies().Contains(executingAssembly.GetName()))
+                        foreach (Type type in GetTypesSafe(assembly))
                         {
-                            foreach (Type type in GetTypesSafe(assembly))
+                            if (type != null && type.IsClass && type.IsAbstract == false && type.BaseType != null
+                             && type.BaseType.IsGenericType && type.BaseType.GetGenericTypeDefinition()
+                             == typeof(SerializableEntityDescriptor<>))
                             {
-                                if (type != null && type.IsClass && type.IsAbstract == false && type.BaseType != null
-                                 && type.BaseType.IsGenericType && type.BaseType.GetGenericTypeDefinition()
-                                 == typeof(SerializableEntityDescriptor<>))
-                                {
-                                    var descriptor = Activator.CreateInstance(type) as ISerializableEntityDescriptor;
+                                var descriptor = Activator.CreateInstance(type) as ISerializableEntityDescriptor;
 
-                                    RegisterEntityDescriptor(descriptor, type, d1);
-                                }
+                                RegisterEntityDescriptor(descriptor, type, d1);
                             }
                         }
                     }
@@ -105,7 +102,6 @@ namespace Svelto.ECS
             {
                 _factories[SerializationEntityDescriptorTemplate<Descriptor>.hash] = deserializationFactory;
             }
-
 
             readonly Dictionary<uint, ISerializableEntityDescriptor> _descriptors;
             readonly Dictionary<uint, IDeserializationFactory> _factories;
