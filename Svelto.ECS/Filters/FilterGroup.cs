@@ -97,7 +97,7 @@ namespace Svelto.ECS
             _reverseEGIDs.Clear();
 
             foreach (var value in _EIDs)
-                if (mapper.FindIndex(value.Key, out var indexOfEntityInBufferComponent))
+                if (mapper.FindIndex(value.Key, out var indexOfEntityInBufferComponent) == true)
                 {
                     _denseListOfIndicesToEntityComponentArray.Add(indexOfEntityInBufferComponent);
                     var lastIndex = (uint) (_denseListOfIndicesToEntityComponentArray.Count() - 1);

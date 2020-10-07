@@ -10,9 +10,6 @@ namespace Svelto.ECS
         string name { get; }
     }
     
-    public interface IGroupEngine : IStepEngine
-    { }
-    
     public interface IStepEngine<T> : IEngine
     {
         void Step(ref T _param);
@@ -20,16 +17,16 @@ namespace Svelto.ECS
         string name { get; }
     }
     
+    public interface IStepGroupEngine : IStepEngine
+    {
+    }
+    
     public interface IStepGroupEngine<T> : IStepEngine<T>
     {
     }
-    /// <summary>
-    /// Note sorted jobs run in serial
-    /// </summary>
-    /// <typeparam name="Interface"></typeparam>
-    /// <typeparam name="SequenceOrder"></typeparam>
-    public abstract class SortedEnginesGroup<Interface, SequenceOrder> : IGroupEngine
-        where SequenceOrder : struct, ISequenceOrder where Interface : class, IStepEngine
+
+    public abstract class SortedEnginesGroup<Interface, SequenceOrder> : IStepGroupEngine
+        where SequenceOrder : struct, ISequenceOrder where Interface : IStepEngine
     {
         protected SortedEnginesGroup(FasterList<Interface> engines)
         {
@@ -57,7 +54,7 @@ namespace Svelto.ECS
     } 
     
     public abstract class SortedEnginesGroup<Interface, Parameter, SequenceOrder>: IStepGroupEngine<Parameter>
-        where SequenceOrder : struct, ISequenceOrder where Interface : class, IStepEngine<Parameter>
+        where SequenceOrder : struct, ISequenceOrder where Interface : IStepEngine<Parameter>
     {
         protected SortedEnginesGroup(FasterList<Interface> engines)
         {

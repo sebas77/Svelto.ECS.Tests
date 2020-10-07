@@ -79,7 +79,6 @@ namespace Svelto.ECS
         }
         
 #if DEBUG && !PROFILE_SVELTO
-
         readonly ExclusiveGroupStruct _group;
 #endif
     }
