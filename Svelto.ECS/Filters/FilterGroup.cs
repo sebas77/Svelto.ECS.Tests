@@ -146,9 +146,12 @@ namespace Svelto.ECS
                     //remove the entity to delete from the tracked Entity
                     _EIDs.Remove(entityID);
                     //the last index of the last entity is updated to the slot of the deleted entity
-                    _EIDs[entityToMove] = indexFromEGID;
-                    //the reverseEGID is updated accordingly
-                    _reverseEGIDs[indexFromEGID] = entityToMove;
+                    if (entityToMove != entityID)
+                    {
+                        _EIDs[entityToMove] = indexFromEGID;
+                        //the reverseEGID is updated accordingly
+                        _reverseEGIDs[indexFromEGID] = entityToMove;
+                    }
                     //finally remove the deleted entity from the filters array
                     _denseListOfIndicesToEntityComponentArray.UnorderedRemoveAt(indexFromEGID);
                 }
