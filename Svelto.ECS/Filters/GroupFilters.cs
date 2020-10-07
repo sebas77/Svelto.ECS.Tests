@@ -4,8 +4,6 @@ namespace Svelto.ECS
 {
     public struct GroupFilters
     {
-        SharedSveltoDictionaryNative<int, FilterGroup> filters;
-
         public GroupFilters(SharedSveltoDictionaryNative<int, FilterGroup> filters, ExclusiveGroupStruct group)
         {
             this.filters = filters;
@@ -81,5 +79,6 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILE_SVELTO
         readonly ExclusiveGroupStruct _group;
 #endif
+        SharedSveltoDictionaryNative<int, FilterGroup> filters;
     }
 }

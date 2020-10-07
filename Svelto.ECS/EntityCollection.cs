@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
@@ -135,7 +134,6 @@ namespace Svelto.ECS
             readonly uint                     _count;
             int                               _index;
         }
-
     }
 
     public readonly ref struct EntityCollection<T1, T2, T3> where T3 : struct, IEntityComponent

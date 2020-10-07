@@ -13,8 +13,7 @@ namespace Svelto.DataStructures
         where TBucketStrategy : struct, IBufferStrategy<int>
     {
         public SveltoDictionary(uint size) : this(size, Allocator.Persistent)
-        {
-        }
+        { }
 
         public SveltoDictionary(uint size, Allocator nativeAllocator) : this()
         {

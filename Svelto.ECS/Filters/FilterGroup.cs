@@ -1,5 +1,4 @@
-﻿using System;
-using Svelto.Common;
+﻿using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.DataStructures;
 
@@ -21,14 +20,15 @@ namespace Svelto.ECS
         {
             _denseListOfIndicesToEntityComponentArray =
                 new NativeDynamicArrayCast<uint>(NativeDynamicArray.Alloc<uint>(Allocator.Persistent));
-            _reverseEGIDs = new NativeDynamicArrayCast<uint>(NativeDynamicArray.Alloc<uint>(Allocator.Persistent));
-
-            _EIDs                 = new SharedSveltoDictionaryNative<uint, uint>(0, Allocator.Persistent);
+            //from the index, find the entityID
+            _reverseEIDs = new NativeDynamicArrayCast<uint>(NativeDynamicArray.Alloc<uint>(Allocator.Persistent));
+            //from the entityID, find the index
+            _indexOfEntityInDenseList                 = new SharedSveltoDictionaryNative<uint, uint>(0, Allocator.Persistent);
             _exclusiveGroupStruct = exclusiveGroupStruct;
         }
 
         /// <summary>
-        /// Todo: how to detect if the indices are still pointing to valid entities
+        /// Todo: how to detect if the indices are still pointing to valid entities?
         /// </summary>
         public FilteredIndices filteredIndices => new FilteredIndices(_denseListOfIndicesToEntityComponentArray);
 
@@ -37,7 +37,7 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILE_SVELTO
             if (_denseListOfIndicesToEntityComponentArray.isValid == false)
                 throw new ECSException($"using an invalid filter");
-            if (_EIDs.ContainsKey(entityID) == true)
+            if (_indexOfEntityInDenseList.ContainsKey(entityID) == true)
                 throw new ECSException(
                     $"trying to add an existing entity {entityID} to filter {mapper.entityType} with group {mapper.groupID}");
 #endif
@@ -47,12 +47,12 @@ namespace Svelto.ECS
             //add the index in the list of filtered indices
             _denseListOfIndicesToEntityComponentArray.Add(indexOfEntityInBufferComponent);
 
-            //inverse map: need to get from the index to the entityID. This wouldn't be needed with a real sparseset
+            //inverse map: need to get the entityID from the index. This wouldn't be needed with a real sparseset
             var lastIndex = (uint) (_denseListOfIndicesToEntityComponentArray.Count() - 1);
-            _reverseEGIDs.AddAt(lastIndex) = entityID;
+            _reverseEIDs.AddAt(lastIndex) = entityID;
 
             //remember the entities indices. This is needed to remove entities from the filter
-            _EIDs.Add(entityID, lastIndex);
+            _indexOfEntityInDenseList.Add(entityID, lastIndex);
         }
 
         public void Remove(uint entityID)
@@ -60,7 +60,7 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILE_SVELTO
             if (_denseListOfIndicesToEntityComponentArray.isValid == false)
                 throw new ECSException($"invalid Filter");
-            if (_EIDs.ContainsKey(entityID) == false)
+            if (_indexOfEntityInDenseList.ContainsKey(entityID) == false)
                 throw new ECSException(
                     $"trying to remove a not existing entity {new EGID(entityID, _exclusiveGroupStruct)} from filter");
 #endif
@@ -73,7 +73,7 @@ namespace Svelto.ECS
             if (_denseListOfIndicesToEntityComponentArray.isValid == false)
                 throw new ECSException($"invalid Filter");
 #endif
-            if (_EIDs.ContainsKey(entityID) == false)
+            if (_indexOfEntityInDenseList.ContainsKey(entityID) == false)
                 return false;
 
             InternalRemove(entityID);
@@ -82,10 +82,16 @@ namespace Svelto.ECS
         }
 
         /// <summary>
-        ///If filters are not in sync with the operations of remove and swap, filters may end up to point to
+        ///If filters are not in sync with the operations of remove and swap, filters may end up pointing to
         ///invalid indices. I need to put in place a way to be able to recognised an invalid filter.
         ///This is currently a disadvantage of the filters. The filters are not updated by the framework
         ///but they must be updated by the user.
+        ///When to use this method: Add and Removed should be used to add and remove entities in the filters. This is
+        /// valid as long as no structural changes happen in the group of entities involved.
+        /// IF structural changes happen, the indices stored in the filters won't be valid anymore. On structural changes
+        /// (specifically entities swapped or removed)
+        /// the filters must then be rebuilt. It would be too slow to add this in the standard flow of Svelto in
+        /// the current state, so calling this method is a user responsibility. 
         /// </summary>
         public void RebuildIndicesOnStructuralChange<N>(N mapper) where N:IEGIDMapper
         {
@@ -94,20 +100,20 @@ namespace Svelto.ECS
                 throw new ECSException($"invalid Filter");
 #endif
             _denseListOfIndicesToEntityComponentArray.Clear();
-            _reverseEGIDs.Clear();
+            _reverseEIDs.Clear();
 
-            foreach (var value in _EIDs)
+            foreach (var value in _indexOfEntityInDenseList)
                 if (mapper.FindIndex(value.Key, out var indexOfEntityInBufferComponent) == true)
                 {
                     _denseListOfIndicesToEntityComponentArray.Add(indexOfEntityInBufferComponent);
                     var lastIndex = (uint) (_denseListOfIndicesToEntityComponentArray.Count() - 1);
-                    _reverseEGIDs.AddAt(lastIndex) = value.Key;
+                    _reverseEIDs.AddAt(lastIndex) = value.Key;
                 }
 
-            _EIDs.Clear();
+            _indexOfEntityInDenseList.Clear();
 
-            for (uint i = 0; i < _reverseEGIDs.Count(); i++)
-                _EIDs[_reverseEGIDs[i]] = i;
+            for (uint i = 0; i < _reverseEIDs.Count(); i++)
+                _indexOfEntityInDenseList[_reverseEIDs[i]] = i;
         }
 
         public void Clear()
@@ -116,8 +122,8 @@ namespace Svelto.ECS
             if (_denseListOfIndicesToEntityComponentArray.isValid == false)
                 throw new ECSException($"invalid Filter");
 #endif
-            _EIDs.FastClear();
-            _reverseEGIDs.Clear();
+            _indexOfEntityInDenseList.FastClear();
+            _reverseEIDs.Clear();
             _denseListOfIndicesToEntityComponentArray.Clear();
         }
 
@@ -128,8 +134,8 @@ namespace Svelto.ECS
                 throw new ECSException($"invalid Filter");
 #endif
             _denseListOfIndicesToEntityComponentArray.Dispose();
-            _EIDs.Dispose();
-            _reverseEGIDs.Dispose();
+            _indexOfEntityInDenseList.Dispose();
+            _reverseEIDs.Dispose();
         }
 
         void InternalRemove(uint entityID)
@@ -140,33 +146,39 @@ namespace Svelto.ECS
                 if (count > 1)
                 {
                     //get the index in the filter array of the entity to delete
-                    var indexFromEGID = _EIDs[entityID];
+                    var indexInDenseListFromEGID = _indexOfEntityInDenseList[entityID];
                     //get the entityID of the last entity in the filter array
-                    uint entityToMove = _reverseEGIDs[count - 1];
-                    //remove the entity to delete from the tracked Entity
-                    _EIDs.Remove(entityID);
+                    uint entityIDToMove = _reverseEIDs[count - 1];
+                    
                     //the last index of the last entity is updated to the slot of the deleted entity
-                    if (entityToMove != entityID)
+                    if (entityIDToMove != entityID)
                     {
-                        _EIDs[entityToMove] = indexFromEGID;
+                        _indexOfEntityInDenseList[entityIDToMove] = indexInDenseListFromEGID;
                         //the reverseEGID is updated accordingly
-                        _reverseEGIDs[indexFromEGID] = entityToMove;
+                        _reverseEIDs[indexInDenseListFromEGID] = entityIDToMove;
                     }
+                    
+                    //
+                    _reverseEIDs.UnorderedRemoveAt(count - 1);
+
                     //finally remove the deleted entity from the filters array
-                    _denseListOfIndicesToEntityComponentArray.UnorderedRemoveAt(indexFromEGID);
+                    _denseListOfIndicesToEntityComponentArray.UnorderedRemoveAt(indexInDenseListFromEGID);
+                    
+                    //remove the entity to delete from the tracked Entity
+                    _indexOfEntityInDenseList.Remove(entityID);
                 }
                 else
                 {
-                    _EIDs.FastClear();
-                    _reverseEGIDs.Clear();
+                    _indexOfEntityInDenseList.FastClear();
+                    _reverseEIDs.Clear();
                     _denseListOfIndicesToEntityComponentArray.Clear();
                 }
             }
         }
 
         NativeDynamicArrayCast<uint>            _denseListOfIndicesToEntityComponentArray;
-        NativeDynamicArrayCast<uint>            _reverseEGIDs; //forced to use this because it's not a real sparse set
-        SharedSveltoDictionaryNative<uint, uint> _EIDs;
+        NativeDynamicArrayCast<uint>            _reverseEIDs; //forced to use this because it's not a real sparse set
+        SharedSveltoDictionaryNative<uint, uint> _indexOfEntityInDenseList;
 
         readonly ExclusiveGroupStruct _exclusiveGroupStruct;
     }

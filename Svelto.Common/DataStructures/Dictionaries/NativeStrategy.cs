@@ -8,13 +8,6 @@ namespace Svelto.DataStructures
 {
     public struct NativeStrategy<T> : IBufferStrategy<T> where T : struct
     {
-        Allocator _nativeAllocator;
-        NB<T>     _realBuffer;
-#if UNITY_COLLECTIONS
-        [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
-#endif
-        IntPtr _buffer;
-
 #if DEBUG && !PROFILE_SVELTO            
         static NativeStrategy()
         {
@@ -34,7 +27,7 @@ namespace Svelto.DataStructures
             var realBuffer =
                 MemoryUtilities.Alloc((uint) (newCapacity * MemoryUtilities.SizeOf<T>()), _nativeAllocator);
             NB<T> b = new NB<T>(realBuffer, newCapacity);
-            _buffer          = IntPtr.Zero;
+            _buffer          = default;
             _realBuffer = b;
         }
 
@@ -58,7 +51,7 @@ namespace Svelto.DataStructures
             pointer = MemoryUtilities.Realloc(pointer, (uint) (capacity * sizeOf), (uint) (newCapacity * sizeOf)
                                             , Allocator.Persistent);
             NB<T> b = new NB<T>(pointer, newCapacity);
-            _buffer     = IntPtr.Zero;
+            _buffer     = default;
             _realBuffer = b;
         }
 
@@ -80,10 +73,20 @@ namespace Svelto.DataStructures
 
         public IBuffer<T> ToBuffer()
         {
-            if (_buffer == IntPtr.Zero)
-                _buffer = GCHandle.ToIntPtr(GCHandle.Alloc(_realBuffer, GCHandleType.Normal));
-            
-            return (IBuffer<T>) GCHandle.FromIntPtr(_buffer).Target;
+            //To use this struct in Burst it cannot hold interfaces. This weird looking code is to
+            //be able to store _realBuffer as a c# reference.
+            if (_invalidHandle)
+            {
+                _invalidHandle = false;
+                _buffer.Free();
+                _buffer = default;
+            }
+            if ((IntPtr)_buffer == IntPtr.Zero)
+            {
+                _buffer = GCHandle.Alloc(_realBuffer, GCHandleType.Normal);
+            }
+
+            return (IBuffer<T>) _buffer.Target;
         }
 
         public NB<T> ToRealBuffer() { return _realBuffer; }
@@ -95,14 +98,23 @@ namespace Svelto.DataStructures
         {
             if (_realBuffer.ToNativeArray(out _) != IntPtr.Zero)
             {
-                if (_buffer != IntPtr.Zero)
-                    GCHandle.FromIntPtr(_buffer).Free();
                 MemoryUtilities.Free(_realBuffer.ToNativeArray(out _), Allocator.Persistent);
             }
             else
                 throw new Exception("trying to dispose disposed buffer");
 
             _realBuffer = default;
+            _invalidHandle = true;
         }
+        
+        Allocator _nativeAllocator;
+        NB<T>     _realBuffer;
+#if UNITY_COLLECTIONS
+        [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
+#endif
+        GCHandle _buffer;
+
+        bool _invalidHandle;
+
     }
 }
