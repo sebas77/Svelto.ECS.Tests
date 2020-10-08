@@ -12,11 +12,7 @@ namespace Svelto.ECS
 
         static GroupCompound()
         {
-            if ((_Groups = GroupCompound<G3, G1, G2>._Groups) == null)
-            if ((_Groups = GroupCompound<G2, G3, G1>._Groups) == null)
-            if ((_Groups = GroupCompound<G3, G2, G1>._Groups) == null)
-            if ((_Groups = GroupCompound<G1, G3, G2>._Groups) == null)
-            if ((_Groups = GroupCompound<G2, G1, G3>._Groups) == null)
+            if (_Groups == null)
             {
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
 
@@ -35,7 +31,13 @@ namespace Svelto.ECS
                 
 #if DEBUG
                 GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name}";
-#endif 
+#endif
+                //all the combinations must share the same group
+                GroupCompound<G3, G1, G2>._Groups = _Groups;
+                GroupCompound<G2, G3, G1>._Groups = _Groups;
+                GroupCompound<G3, G2, G1>._Groups = _Groups;
+                GroupCompound<G1, G3, G2>._Groups = _Groups;
+                GroupCompound<G2, G1, G3>._Groups = _Groups;
             }
         }
         
@@ -46,8 +48,6 @@ namespace Svelto.ECS
                     throw new Exception("temporary must be transformed in unit test");
             
             _Groups.Add(group);
-            
-          //  GroupCompound<G1, G2, G3>._Groups = _Groups;
         }
 
         public static ExclusiveGroupStruct BuildGroup => new ExclusiveGroupStruct(_Groups[0]);
@@ -55,13 +55,11 @@ namespace Svelto.ECS
 
     public abstract class GroupCompound<G1, G2> where G1 : GroupTag<G1> where G2 : GroupTag<G2>
     {
-        static FasterList<ExclusiveGroupStruct> _Groups; 
-        public static FasterReadOnlyList<ExclusiveGroupStruct> Groups => new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
+        static readonly FasterList<ExclusiveGroupStruct>         _Groups; 
+        public static   FasterReadOnlyList<ExclusiveGroupStruct> Groups => new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
 
         static GroupCompound()
         {
-            _Groups = GroupCompound<G2, G1>._Groups;
-            
             if (_Groups == null)
             {
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
@@ -74,7 +72,8 @@ namespace Svelto.ECS
                 
 #if DEBUG        
                 GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}";
-#endif 
+#endif
+                GroupCompound<G2, G1>._Groups = _Groups;
             }
         } 
 
@@ -87,9 +86,6 @@ namespace Svelto.ECS
                     throw new Exception("temporary must be transformed in unit test");
             
             _Groups.Add(group);
-            
-            //unit test this to check if it's necessary
-          //  GroupCompound<G2, G1>._Groups = _Groups;
         }
     }
 
