@@ -3,6 +3,75 @@ using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
+    public abstract class GroupCompound<G1, G2, G3, G4>
+        where G1 : GroupTag<G1> where G2 : GroupTag<G2> where G3 : GroupTag<G3> where G4 : GroupTag<G4>
+    {
+        static readonly FasterList<ExclusiveGroupStruct> _Groups;
+        
+        public static FasterReadOnlyList<ExclusiveGroupStruct> Groups => new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
+
+        static GroupCompound()
+        {
+            if (_Groups == null)
+            {
+                _Groups = new FasterList<ExclusiveGroupStruct>(1);
+
+                var Group = new ExclusiveGroup();
+                _Groups.Add(Group);
+                
+                GroupCompound<G1, G2>.Add(Group); //<G1/G2> and <G2/G1> must share the same array
+                GroupCompound<G1, G3>.Add(Group);
+                GroupCompound<G2, G3>.Add(Group);
+                
+                //This is done here to be sure that the group is added once per group tag
+                //(if done inside the previous group compound it would be added multiple times)
+                GroupTag<G1>.Add(Group);
+                GroupTag<G2>.Add(Group);
+                GroupTag<G3>.Add(Group);
+                GroupTag<G4>.Add(Group);
+                
+#if DEBUG
+                GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name}-{typeof(G4).Name}";
+#endif
+                //all the combinations must share the same group
+                GroupCompound<G1, G2, G4, G3>._Groups = _Groups;
+                GroupCompound<G1, G3, G2, G4>._Groups = _Groups;
+                GroupCompound<G1, G3, G4, G2>._Groups = _Groups;
+                GroupCompound<G1, G4, G2, G3>._Groups = _Groups;
+                GroupCompound<G2, G1, G3, G4>._Groups = _Groups;
+                GroupCompound<G2, G3, G4, G1>._Groups = _Groups;
+                GroupCompound<G3, G1, G2, G4>._Groups = _Groups;
+                GroupCompound<G4, G1, G2, G3>._Groups = _Groups;
+                GroupCompound<G1, G4, G3, G2>._Groups = _Groups;
+                GroupCompound<G2, G1, G4, G3>._Groups = _Groups;
+                GroupCompound<G2, G4, G3, G1>._Groups = _Groups;
+                GroupCompound<G3, G1, G4, G2>._Groups = _Groups;
+                GroupCompound<G4, G1, G3, G2>._Groups = _Groups;
+                GroupCompound<G2, G3, G1, G4>._Groups = _Groups;
+                GroupCompound<G3, G4, G1, G2>._Groups = _Groups;
+                GroupCompound<G2, G4, G1, G3>._Groups = _Groups;
+                GroupCompound<G3, G2, G1, G4>._Groups = _Groups;
+                GroupCompound<G3, G2, G4, G1>._Groups = _Groups;
+                GroupCompound<G3, G4, G2, G1>._Groups = _Groups;
+                GroupCompound<G4, G2, G1, G3>._Groups = _Groups;
+                GroupCompound<G4, G2, G3, G1>._Groups = _Groups;
+                GroupCompound<G4, G3, G1, G2>._Groups = _Groups;
+                GroupCompound<G4, G3, G2, G1>._Groups = _Groups;
+            }
+        }
+        
+        public static void Add(ExclusiveGroupStruct @group)
+        {
+            for (int i = 0; i < _Groups.count; ++i)
+                if (_Groups[i] == group)
+                    throw new Exception("temporary must be transformed in unit test");
+            
+            _Groups.Add(group);
+        }
+
+        public static ExclusiveGroupStruct BuildGroup => new ExclusiveGroupStruct(_Groups[0]);
+    }
+
     public abstract class GroupCompound<G1, G2, G3>
         where G1 : GroupTag<G1> where G2 : GroupTag<G2> where G3 : GroupTag<G3>
     {
