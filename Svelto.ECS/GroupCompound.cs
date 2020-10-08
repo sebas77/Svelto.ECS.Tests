@@ -22,6 +22,7 @@ namespace Svelto.ECS
                 GroupCompound<G1, G2, G3>.Add(Group);
                 GroupCompound<G1, G2, G4>.Add(Group);
                 GroupCompound<G1, G3, G4>.Add(Group);
+                GroupCompound<G2, G3, G4>.Add(Group);
                 
                 GroupCompound<G1, G2>.Add(Group); //<G1/G2> and <G2/G1> must share the same array
                 GroupCompound<G1, G3>.Add(Group);
