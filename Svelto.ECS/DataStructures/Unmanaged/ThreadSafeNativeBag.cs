@@ -1,3 +1,4 @@
+#if later
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -61,7 +62,7 @@ namespace Svelto.ECS.DataStructures
                 var listData = (UnsafeBlob*) MemoryUtilities.Alloc((uint) sizeOf, allocator);
 
                 //clear to nullify the pointers
-                MemoryUtilities.MemClear((IntPtr) listData, (uint) sizeOf);
+                //MemoryUtilities.MemClear((IntPtr) listData, (uint) sizeOf);
                 listData->allocator = allocator;
                 _queue = listData;
             }
@@ -77,7 +78,7 @@ namespace Svelto.ECS.DataStructures
                 var listData = (UnsafeBlob*) MemoryUtilities.Alloc((uint) sizeOf, allocator);
 
                 //clear to nullify the pointers
-                MemoryUtilities.MemClear((IntPtr) listData, (uint) sizeOf);
+                //MemoryUtilities.MemClear((IntPtr) listData, (uint) sizeOf);
                 listData->allocator = allocator;
                 _queue              = listData;
                 _queue->Realloc(capacity);
@@ -104,6 +105,7 @@ namespace Svelto.ECS.DataStructures
             if (_queue != null)
             {
                 _queue->Dispose();
+                MemoryUtilities.Free((IntPtr) _queue, _queue->allocator);
                 _queue = null;
             }
         }
@@ -189,3 +191,4 @@ namespace Svelto.ECS.DataStructures
         int _writingGuard;
     }
 }
+#endif

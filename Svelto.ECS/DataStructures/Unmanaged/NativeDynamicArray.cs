@@ -66,7 +66,7 @@ namespace Svelto.ECS.DataStructures
                 UnsafeArray* listData    = (UnsafeArray*) MemoryUtilities.Alloc(structSize, allocator);
 
                 //clear to nullify the pointers
-                MemoryUtilities.MemClear((IntPtr) listData, structSize);
+                //MemoryUtilities.MemClear((IntPtr) listData, structSize);
 
                 rtnStruc._allocator = allocator;
                 listData->Realloc((uint) (newLength * sizeOf), allocator);

@@ -224,8 +224,7 @@ namespace Svelto.DataStructures
             if (_collisions > _buckets.capacity)
             {
                 //we need more space and less collisions
-                _buckets.Dispose();
-                _buckets.Alloc((uint) HashHelpers.ExpandPrime((int) _collisions), _buckets.allocationStrategy);
+                _buckets.Resize((uint) HashHelpers.ExpandPrime((int) _collisions), false);
                 _collisions = 0;
 
                 //we need to get all the hash code of all the values stored so far and spread them over the new bucket

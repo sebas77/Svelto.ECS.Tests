@@ -8,7 +8,7 @@ namespace Svelto.ECS.DataStructures
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Count() => _array.Count<T>();
-        
+
         public int count => _array.Count<T>();
 
         public ref T this[int index]
@@ -33,23 +33,16 @@ namespace Svelto.ECS.DataStructures
         public void RemoveAt(uint index) { _array.RemoveAt<T>(index); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Clear()
-        {
-            _array.Clear();
-        }
+        public void Clear() { _array.Clear(); }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Dispose()
-        {
-            _array.Dispose();
-        }
+        public void Dispose() { _array.Dispose(); }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T AddAt(uint lastIndex)
-        {
-            return ref _array.AddAt<T>(lastIndex);
-        }
+        public ref T AddAt(uint lastIndex) { return ref _array.AddAt<T>(lastIndex); }
 
         public bool isValid => _array.isValid;
-            
+
         NativeDynamicArray _array;
     }
 }

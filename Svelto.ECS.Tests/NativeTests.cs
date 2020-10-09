@@ -777,7 +777,7 @@ namespace Svelto.ECS.Tests.Native
                     _simpleNativeBag.Dequeue<byte>();
                 }
 
-                Assert.That(_simpleNativeBag.count, Is.EqualTo(128));
+                Assert.That(_simpleNativeBag.count, Is.EqualTo(208));
             }
         }
 

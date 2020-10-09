@@ -8,7 +8,7 @@ namespace Svelto.DataStructures
         bool isValid  { get; }
 
         void Alloc(uint size, Allocator nativeAllocator);
-        void Resize(uint newCapacity);
+        void Resize(uint newCapacity, bool copyContent = true);
         void Clear();
         
         ref T this[uint index] { get ; }

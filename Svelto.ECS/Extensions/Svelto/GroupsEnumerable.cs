@@ -4,9 +4,9 @@ using Svelto.DataStructures;
 namespace Svelto.ECS
 {
     /// <summary>
-    /// NOTE THESE ENUMERABLES EXIST TO AVOID BOILERPLATE CODE AS THEY SKIP 0 SIZED GROUPS
-    /// However if the normal pattern with the double foreach is used, this is not necessary
-    /// Note: atm cannot be ref structs because they are returned in a valuetuple
+    ///     NOTE THESE ENUMERABLES EXIST TO AVOID BOILERPLATE CODE AS THEY SKIP 0 SIZED GROUPS
+    ///     However if the normal pattern with the double foreach is used, this is not necessary
+    ///     Note: atm cannot be ref structs because they are returned in a valuetuple
     /// </summary>
     /// <typeparam name="T1"></typeparam>
     /// <typeparam name="T2"></typeparam>
@@ -50,8 +50,8 @@ namespace Svelto.ECS
                     Check.Assert(entityCollection1.count == entityCollection2.count
                                , "congratulation, you found a bug in Svelto, please report it");
 
-                    EntityCollection<T1, T2, T3> array  = entityCollection1;
-                    var                          array2 = entityCollection2;
+                    var array  = entityCollection1;
+                    var array2 = entityCollection2;
                     _buffers = new EntityCollection<T1, T2, T3, T4>(array.Item1, array.Item2, array.Item3, array2);
                     break;
                 }
@@ -67,7 +67,7 @@ namespace Svelto.ECS
             public void Reset() { _indexGroup = -1; }
 
             public RefCurrent<T1, T2, T3, T4> Current => new RefCurrent<T1, T2, T3, T4>(_buffers, _groups[_indexGroup]);
-            
+
             readonly LocalFasterReadOnlyList<ExclusiveGroupStruct> _groups;
 
             int                              _indexGroup;
@@ -77,16 +77,19 @@ namespace Svelto.ECS
 
         public GroupsIterator GetEnumerator() { return new GroupsIterator(_db, _groups); }
     }
-    
-    public ref struct RefCurrent<T1, T2, T3, T4> where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent where T3 : struct, IEntityComponent where T4 : struct, IEntityComponent
+
+    public ref struct RefCurrent<T1, T2, T3, T4> where T1 : struct, IEntityComponent
+                                                 where T2 : struct, IEntityComponent
+                                                 where T3 : struct, IEntityComponent
+                                                 where T4 : struct, IEntityComponent
     {
-        public RefCurrent(in EntityCollection<T1, T2, T3, T4> buffers, ExclusiveGroupStruct @group)
+        public RefCurrent(in EntityCollection<T1, T2, T3, T4> buffers, ExclusiveGroupStruct group)
         {
             _buffers = buffers;
-            _group   = @group;
+            _group   = group;
         }
-        
-        public void Deconstruct(out EntityCollection<T1, T2, T3, T4> buffers, out ExclusiveGroupStruct @group)
+
+        public void Deconstruct(out EntityCollection<T1, T2, T3, T4> buffers, out ExclusiveGroupStruct group)
         {
             buffers = _buffers;
             group   = _group;
@@ -97,7 +100,7 @@ namespace Svelto.ECS
     }
 
     /// <summary>
-    /// ToDo source gen could return the implementation of IBuffer directly, but cannot be done manually
+    ///     ToDo source gen could return the implementation of IBuffer directly, but cannot be done manually
     /// </summary>
     /// <typeparam name="T1"></typeparam>
     /// <typeparam name="T2"></typeparam>
@@ -129,8 +132,7 @@ namespace Svelto.ECS
                 //attention, the while is necessary to skip empty groups
                 while (++_indexGroup < _groups.count)
                 {
-                    EntityCollection<T1, T2, T3> entityCollection =
-                        _entitiesDB.QueryEntities<T1, T2, T3>(_groups[_indexGroup]);
+                    var entityCollection = _entitiesDB.QueryEntities<T1, T2, T3>(_groups[_indexGroup]);
                     if (entityCollection.count == 0)
                         continue;
 
@@ -159,16 +161,18 @@ namespace Svelto.ECS
 
         public GroupsIterator GetEnumerator() { return new GroupsIterator(_db, _groups); }
     }
-    
-    public ref struct RefCurrent<T1, T2, T3> where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent where T3 : struct, IEntityComponent
+
+    public ref struct RefCurrent<T1, T2, T3> where T1 : struct, IEntityComponent
+                                             where T2 : struct, IEntityComponent
+                                             where T3 : struct, IEntityComponent
     {
-        public RefCurrent(in EntityCollection<T1, T2, T3> buffers, ExclusiveGroupStruct @group)
+        public RefCurrent(in EntityCollection<T1, T2, T3> buffers, ExclusiveGroupStruct group)
         {
             _buffers = buffers;
-            _group   = @group;
+            _group   = group;
         }
-        
-        public void Deconstruct(out EntityCollection<T1, T2, T3> buffers, out ExclusiveGroupStruct @group)
+
+        public void Deconstruct(out EntityCollection<T1, T2, T3> buffers, out ExclusiveGroupStruct group)
         {
             buffers = _buffers;
             group   = _group;
@@ -233,16 +237,16 @@ namespace Svelto.ECS
         readonly EntitiesDB                                    _db;
         readonly LocalFasterReadOnlyList<ExclusiveGroupStruct> _groups;
     }
-    
+
     public ref struct RefCurrent<T1, T2> where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent
     {
-        public RefCurrent(in EntityCollection<T1, T2> buffers, ExclusiveGroupStruct @group)
+        public RefCurrent(in EntityCollection<T1, T2> buffers, ExclusiveGroupStruct group)
         {
-            _buffers    = buffers;
-            _group = @group;
+            _buffers = buffers;
+            _group   = group;
         }
-        
-        public void Deconstruct(out EntityCollection<T1, T2> buffers, out ExclusiveGroupStruct @group)
+
+        public void Deconstruct(out EntityCollection<T1, T2> buffers, out ExclusiveGroupStruct group)
         {
             buffers = _buffers;
             group   = _group;
@@ -301,22 +305,22 @@ namespace Svelto.ECS
         readonly EntitiesDB                                    _db;
         readonly LocalFasterReadOnlyList<ExclusiveGroupStruct> _groups;
     }
-    
+
     public ref struct RefCurrent<T1> where T1 : struct, IEntityComponent
     {
-        public RefCurrent(in EntityCollection<T1> buffers, ExclusiveGroupStruct @group)
+        public RefCurrent(in EntityCollection<T1> buffers, ExclusiveGroupStruct group)
         {
             _buffers = buffers;
-            _group   = @group;
+            _group   = group;
         }
-        
-        public void Deconstruct(out EntityCollection<T1> buffers, out ExclusiveGroupStruct @group)
+
+        public void Deconstruct(out EntityCollection<T1> buffers, out ExclusiveGroupStruct group)
         {
             buffers = _buffers;
             group   = _group;
         }
 
         public readonly EntityCollection<T1> _buffers;
-        public readonly ExclusiveGroupStruct     _group;
+        public readonly ExclusiveGroupStruct _group;
     }
 }

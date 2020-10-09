@@ -190,7 +190,7 @@ namespace Svelto.ECS
             where T : struct, IEntityComponent
         {
             if (SafeQueryEntityDictionary<T>(groupStructId, out var typeSafeDictionary) == false)
-                throw new EntityGroupNotFoundException(typeof(T));
+                throw new EntityGroupNotFoundException(typeof(T) , groupStructId.ToName());
 
             return (typeSafeDictionary as ITypeSafeDictionary<T>).ToEGIDMapper(groupStructId);
         }

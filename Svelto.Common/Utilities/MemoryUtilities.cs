@@ -56,7 +56,7 @@ namespace Svelto.Common
 #endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntPtr Alloc(uint newCapacity, Allocator allocator)
+        public static IntPtr Alloc(uint newCapacity, Allocator allocator, bool clear = true)
         {
             unsafe
             {
@@ -69,7 +69,8 @@ namespace Svelto.Common
                 var newPointer = System.Runtime.InteropServices.Marshal.AllocHGlobal(signedCapacity);
 #endif
                 //Note MemClear is actually necessary
-                MemClear((IntPtr) newPointer, (uint) signedCapacity);
+                if (clear)
+                    MemClear((IntPtr) newPointer, (uint) signedCapacity);
           
                 var signedPointer = SignedPointer(newCapacity, (IntPtr) newPointer);
 
@@ -79,7 +80,7 @@ namespace Svelto.Common
             }
         }
 
-        public static IntPtr Realloc(IntPtr realBuffer, uint oldCapacity , uint newCapacity, Allocator allocator)
+        public static IntPtr Realloc(IntPtr realBuffer, uint oldCapacity , uint newCapacity, Allocator allocator, bool copy = true)
         {
             unsafe
             {
@@ -90,12 +91,17 @@ namespace Svelto.Common
                     throw new Exception("new size must be greater than oldsize");
 #endif          
                 //Alloc returns the corret Signed Pointer already
-                IntPtr signedPointer = Alloc(newCapacity, allocator);
+                IntPtr signedPointer = Alloc(newCapacity, allocator, !copy);
 
                 //Copy only the real data
-                if (oldCapacity > 0)
+                if (copy && oldCapacity > 0)
+                {
                     Unsafe.CopyBlock((void*) signedPointer, (void*) realBuffer, oldCapacity);
-                
+                    var sizeOf = newCapacity - oldCapacity;
+                    var intPtr = (IntPtr) signedPointer + (int) oldCapacity;
+                    MemClear(intPtr, sizeOf);
+                }
+
                 //Free unsigns the pointer itself
                 Free(realBuffer, allocator);
                 return signedPointer;

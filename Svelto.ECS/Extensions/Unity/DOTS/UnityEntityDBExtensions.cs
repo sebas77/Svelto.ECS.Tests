@@ -17,11 +17,11 @@ namespace Svelto.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeEGIDMapper<T> QueryNativeMappedEntities<T>(this EntitiesDB entitiesDb, ExclusiveGroupStruct groupStructId)
+        public static NativeEGIDMapper<T>  QueryNativeMappedEntities<T>(this EntitiesDB entitiesDb, ExclusiveGroupStruct groupStructId)
             where T : unmanaged, IEntityComponent
         {
             if (entitiesDb.SafeQueryEntityDictionary<T>(groupStructId, out var typeSafeDictionary) == false)
-                throw new EntityGroupNotFoundException(typeof(T));
+                throw new EntityGroupNotFoundException(typeof(T), groupStructId.ToName());
 
             return (typeSafeDictionary as TypeSafeDictionary<T>).ToNativeEGIDMapper(groupStructId);
         }

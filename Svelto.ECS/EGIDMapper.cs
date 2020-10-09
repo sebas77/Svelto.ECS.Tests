@@ -49,6 +49,7 @@ namespace Svelto.ECS
             return false;
         }
 
+        //todo: I still need to write the version that doesn't return IBuffer
         public IBuffer<T> GetArrayAndEntityIndex(uint entityID, out uint index)
         {
             if (_map.TryFindIndex(entityID, out index))
@@ -59,6 +60,7 @@ namespace Svelto.ECS
             throw new ECSException("Entity not found");
         }
 
+        //todo: I still need to write the version that doesn't return IBuffer
         public bool TryGetArrayAndEntityIndex(uint entityID, out uint index, out IBuffer<T> array)
         {
             index = default;
@@ -71,19 +73,25 @@ namespace Svelto.ECS
             array = default;
             return false;
         }
-        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Exists(uint idEntityId)
+        {
+            return _map.count > 0 && _map.TryFindIndex(idEntityId, out _);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint GetIndex(uint entityID)
         {
             return _map.GetIndex(entityID);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool FindIndex(uint valueKey, out uint index)
         {
             return _map.TryFindIndex(valueKey, out index);
         }
-        
+
         readonly ITypeSafeDictionary<T> _map;
     }
 
@@ -91,6 +99,7 @@ namespace Svelto.ECS
     {
         bool FindIndex(uint valueKey, out uint index);
         uint GetIndex(uint entityID);
+        bool Exists(uint idEntityId);
         
         ExclusiveGroupStruct groupID { get; }
         Type          entityType    { get; }

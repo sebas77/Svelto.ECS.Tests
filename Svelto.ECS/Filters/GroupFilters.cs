@@ -38,6 +38,12 @@ namespace Svelto.ECS
         {
             foreach (var filter in filters)
                 filter.Value.Clear();
+        }
+        
+        public void DeleteFilters()
+        {
+            foreach (var filter in filters)
+                filter.Value.Clear();
             
             filters.FastClear();
         }

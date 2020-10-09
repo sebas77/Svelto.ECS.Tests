@@ -126,6 +126,7 @@ namespace Svelto.ECS
                             group.Value.Dispose();
 
                 _groupFilters.Clear();
+
 #if UNITY_BURST                
                 _addOperationQueue.Dispose();
                 _removeOperationQueue.Dispose();

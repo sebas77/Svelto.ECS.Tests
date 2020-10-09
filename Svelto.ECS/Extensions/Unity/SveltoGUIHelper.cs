@@ -1,4 +1,6 @@
 #if UNITY_5 || UNITY_5_3_OR_NEWER
+using System;
+using System.Collections.Generic;
 using Svelto.ECS.Hybrid;
 using UnityEngine;
 
@@ -63,6 +65,10 @@ namespace Svelto.ECS.Extensions.Unity
             where T : MonoBehaviour, IEntityDescriptorHolder
         {
             holder = contextHolder.GetComponentInChildren<T>(true);
+            if (holder == null)
+            {
+                throw new Exception($"Could not find holder {typeof(T).Name} in {contextHolder.name}");
+            }
             var implementors = searchImplementorsInChildren == false ? holder.GetComponents<IImplementor>() : holder.GetComponentsInChildren<IImplementor>(true) ;
 
             return factory.BuildEntity(ID, holder.GetDescriptor(), implementors);
@@ -73,6 +79,10 @@ namespace Svelto.ECS.Extensions.Unity
             where T : MonoBehaviour, IEntityDescriptorHolder
         {
             var holder       = contextHolder.GetComponentInChildren<T>(true);
+            if (holder == null)
+            {
+                throw new Exception($"Could not find holder {typeof(T).Name} in {contextHolder.name}");
+            }
             var implementors = searchImplementorsInChildren == false ? holder.GetComponents<IImplementor>() : holder.GetComponentsInChildren<IImplementor>(true) ;
 
             return factory.BuildEntity(ID, holder.GetDescriptor(), implementors);
@@ -86,7 +96,6 @@ namespace Svelto.ECS.Extensions.Unity
             foreach (var holder in holders)
             {
                 var implementors = holder.GetComponents<IImplementor>();
-
                 startIndex = InternalBuildAll(startIndex, holder, factory, group, implementors, groupNamePostfix);
             }
 
@@ -152,6 +161,88 @@ namespace Svelto.ECS.Extensions.Unity
             }
 
             return startId;
+        }
+        
+        public delegate void CustomInitializer(EntityComponentInitializer init, IEntityDescriptor descriptor);
+
+        // Start at 1000 to not collide with IDs specified in holders, which usually come from enums
+        private static uint _nextGeneratedId = 1000;
+
+        // Use this to build GUI entities which are entirely described in prefab, in a single call.
+        // Use custom initializer and check descriptor type if you want to initialize extra stuff.
+        // If your prefabs are nested within another one:
+        // - You may want to instantiate them dynamically,
+        // - Expect the parent to build yours,
+        // - Or use a marker to stop recursion (not implemented)
+        // If you want even more special building for your widget, better do it manually instead of using this helper.
+        public static void BuildAll(
+            IEntityFactory factory, Transform root, uint? customRootId = null, CustomInitializer customInitializer = null)
+        {
+            // Starting high to make sure we separate the range of generated IDs and the specified ones
+            var holders = new List<IEntityDescriptorHolder>();
+            var implementors = new List<IImplementor>();
+            
+            holders.Clear();
+            root.GetComponentsInChildren(true, holders);
+
+            if (holders.Count == 0)
+            {
+                throw new Exception($"Could not find any descriptor holder in {root.gameObject.name}");
+            }
+
+            for (uint iHolder = 0; iHolder < holders.Count; ++iHolder)
+            {
+                var holder = holders[(int)iHolder];
+                var holderMb = (MonoBehaviour) holder;
+                implementors.Clear();
+                holderMb.GetComponents(implementors);
+
+                if (string.IsNullOrEmpty(holder.groupName))
+                {
+                    throw new Exception($"Descriptor holder on game object {holderMb.gameObject.name} " +
+                                        $"does not specify a group");
+                }
+
+                ExclusiveGroupStruct groupStruct;
+                try
+                {
+                    groupStruct = ExclusiveGroup.Search(holder.groupName);
+                }
+                catch (Exception ex)
+                {
+                    // Rethrow with more context information to help debugging
+                    throw new Exception($"Descriptor holder on game object {holderMb.gameObject.name} " +
+                                        $"does not specify a valid group: \"{holder.groupName}\"", ex);
+                }
+
+                EGID egid;
+                if (customRootId != null && holderMb.transform == root)
+                {
+                    // The ID is hardcoded
+                    egid = new EGID(holder.id, groupStruct);
+                }
+                else if (holder.id != 0)
+                {
+                    // The ID is specified in prefab
+                    egid = new EGID(holder.id, groupStruct);
+                }
+                else
+                {
+                    // The ID does not matter, generate a new one
+                    egid = new EGID(_nextGeneratedId++, groupStruct);
+                }
+
+                var descriptor = holder.GetDescriptor();
+                var init = factory.BuildEntity(egid, descriptor, implementors);
+
+                // TODO May need a constructor taking as struct
+                //init.Init(new EntityHierarchyComponent(groupStruct));
+
+                if (customInitializer != null)
+                {
+                    customInitializer(init, descriptor);
+                }
+            }
         }
     }
 }

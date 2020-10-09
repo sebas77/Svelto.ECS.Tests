@@ -116,30 +116,6 @@ namespace Svelto.ECS.Experimental
             return 0;
         }
         
-        public QueryResult WithEntity<T>(EntitiesDB entitiesDB, uint entityId)
-            where T : struct, IEntityComponent
-        {
-            var group       = groups.Value.reference;
-            var groupsCount = group.count;
-
-            var found = false;
-            for (var i = 0; i < groupsCount; i++)
-            {
-                if (found || entitiesDB.Exists<T>(entityId, group[i]) == false)
-                {
-                    group.UnorderedRemoveAt(i);
-                    i--;
-                    groupsCount--;
-                }
-                else
-                {
-                    found = true;
-                }
-            }
-
-            return new QueryResult(group);
-        }
-
         public QueryResult WithAny<T>(EntitiesDB entitiesDB)
             where T : struct, IEntityComponent
         {

@@ -38,7 +38,7 @@ namespace Svelto.DataStructures
             Alloc(size, nativeAllocator);
         }
 
-        public void Resize(uint newCapacity)
+        public void Resize(uint newCapacity, bool copyContent = true)
         {
 #if DEBUG && !PROFILE_SVELTO            
             if (!(newCapacity > 0))
@@ -49,14 +49,13 @@ namespace Svelto.DataStructures
             var pointer = _realBuffer.ToNativeArray(out _);
             var sizeOf  = MemoryUtilities.SizeOf<T>();
             pointer = MemoryUtilities.Realloc(pointer, (uint) (capacity * sizeOf), (uint) (newCapacity * sizeOf)
-                                            , Allocator.Persistent);
+                                            , _nativeAllocator, copyContent);
             NB<T> b = new NB<T>(pointer, newCapacity);
-            _buffer     = default;
-            _realBuffer = b;
+            _realBuffer    = b;
+            _invalidHandle = true;
         }
 
         public void Clear()     => _realBuffer.Clear();
-
         public void FastClear() => _realBuffer.FastClear();
 
         public ref T this[uint index]
@@ -75,13 +74,13 @@ namespace Svelto.DataStructures
         {
             //To use this struct in Burst it cannot hold interfaces. This weird looking code is to
             //be able to store _realBuffer as a c# reference.
-            if (_invalidHandle)
+            if (_invalidHandle == true && ((IntPtr)_buffer != IntPtr.Zero))
             {
-                _invalidHandle = false;
                 _buffer.Free();
                 _buffer = default;
             }
-            if ((IntPtr)_buffer == IntPtr.Zero)
+            _invalidHandle = false;
+            if (((IntPtr)_buffer == IntPtr.Zero))
             {
                 _buffer = GCHandle.Alloc(_realBuffer, GCHandleType.Normal);
             }
@@ -96,6 +95,9 @@ namespace Svelto.DataStructures
 
         public void Dispose()
         {
+            if ((IntPtr)_buffer != IntPtr.Zero)
+                _buffer.Free();
+            
             if (_realBuffer.ToNativeArray(out _) != IntPtr.Zero)
             {
                 MemoryUtilities.Free(_realBuffer.ToNativeArray(out _), Allocator.Persistent);
@@ -103,8 +105,8 @@ namespace Svelto.DataStructures
             else
                 throw new Exception("trying to dispose disposed buffer");
 
+            _buffer     = default;
             _realBuffer = default;
-            _invalidHandle = true;
         }
         
         Allocator _nativeAllocator;
@@ -113,8 +115,6 @@ namespace Svelto.DataStructures
         [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         GCHandle _buffer;
-
         bool _invalidHandle;
-
     }
 }

@@ -82,6 +82,9 @@ namespace Svelto.ECS
         }
 
         /// <summary>
+        /// Filters were initially designed to be used for tagging operations within submissions of entities.
+        /// They were designed as a fast tagging mechanism to be used within the submission frame. However I then
+        /// extended it, but the extension includes a drawback:
         ///If filters are not in sync with the operations of remove and swap, filters may end up pointing to
         ///invalid indices. I need to put in place a way to be able to recognised an invalid filter.
         ///This is currently a disadvantage of the filters. The filters are not updated by the framework

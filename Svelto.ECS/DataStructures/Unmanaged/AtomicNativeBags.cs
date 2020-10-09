@@ -7,10 +7,10 @@ using Allocator = Svelto.Common.Allocator;
 
 namespace Svelto.ECS.DataStructures.Unity
 {
-    public unsafe readonly struct AtomicNativeBags:IDisposable
+    public unsafe struct AtomicNativeBags:IDisposable
     {
         [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
-        readonly NativeBag* _data;
+        NativeBag* _data;
         readonly Allocator _allocator;
         readonly uint _threadsCount;
 
@@ -26,7 +26,7 @@ namespace Svelto.ECS.DataStructures.Unity
             var allocationSize = bufferSize * bufferCount;
 
             var ptr = (byte*)MemoryUtilities.Alloc((uint) allocationSize, allocator);
-            MemoryUtilities.MemClear((IntPtr) ptr, (uint) allocationSize);
+           // MemoryUtilities.MemClear((IntPtr) ptr, (uint) allocationSize);
 
             for (int i = 0; i < bufferCount; i++)
             {
@@ -41,20 +41,27 @@ namespace Svelto.ECS.DataStructures.Unity
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref NativeBag GetBuffer(int index)
         {
+            DBC.ECS.Check.Require(_data != null, "using invalid AtomicNativeBags");
+            
             return ref MemoryUtilities.ArrayElementAsRef<NativeBag>((IntPtr) _data, index);
         }
 
         public void Dispose()
         {
+            DBC.ECS.Check.Require(_data != null, "using invalid AtomicNativeBags");
+            
             for (int i = 0; i < _threadsCount; i++)
             {
                 GetBuffer(i).Dispose();
             }
             MemoryUtilities.Free((IntPtr) _data, _allocator);
+            _data = null;
         }
 
         public void Clear()
         {
+            DBC.ECS.Check.Require(_data != null, "using invalid AtomicNativeBags");
+            
             for (int i = 0; i < _threadsCount; i++)
             {
                 GetBuffer(i).Clear();

@@ -21,16 +21,12 @@ namespace Svelto.ECS.Internal
         public TypeSafeDictionary(uint size)
         {
             if (IsUnmanaged)
-                implUnmgd =
-                    new SveltoDictionary<uint, TValue, NativeStrategy<FasterDictionaryNode<uint>>,
-                        NativeStrategy<TValue>, NativeStrategy<int>>(
-                        size);
+                implUnmgd = new SveltoDictionary<uint, TValue, NativeStrategy<FasterDictionaryNode<uint>>,
+                        NativeStrategy<TValue>, NativeStrategy<int>>(size);
             else
             {
-                implMgd =
-                    new SveltoDictionary<uint, TValue, NativeStrategy<FasterDictionaryNode<uint>>,
-                        ManagedStrategy<TValue>, ManagedStrategy<int>>(
-                        size);
+                implMgd = new SveltoDictionary<uint, TValue, NativeStrategy<FasterDictionaryNode<uint>>,
+                        ManagedStrategy<TValue>, ManagedStrategy<int>>(size);
             }
         }
 

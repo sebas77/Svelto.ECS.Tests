@@ -294,12 +294,14 @@ namespace Svelto.DataStructures
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Insert(int index, in T item)
         {
-            DBC.Common.Check.Require(index < _count, "out of bound index");
+            DBC.Common.Check.Require(index <= _count, "out of bound index");
 
             if (_count == _buffer.Length) AllocateMore();
 
             Array.Copy(_buffer, index, _buffer, index + 1, _count - index);
             ++_count;
+            
+            _buffer[index] = item;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

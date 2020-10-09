@@ -157,6 +157,21 @@ namespace Svelto.ECS
         {
             return (ec.Item1._nativedBuffer, ec.Item2._managedBuffer, ec.Item3._managedBuffer, ec.count);
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Deconstruct<T1, T2, T3, T4>(in this EntityCollection<T1, T2, T3, T4> ec, out NB<T1> buffer1,
+                                                       out NB<T2> buffer2, out NB<T3> buffer3, out MB<T4> buffer4, out int count) 
+            where T1 : unmanaged, IEntityComponent
+            where T2 : unmanaged, IEntityComponent
+            where T3 : unmanaged, IEntityComponent
+            where T4 : struct, IEntityViewComponent
+        {
+            buffer1 = ec.Item1._nativedBuffer;
+            buffer2 = ec.Item2._nativedBuffer;
+            buffer3 = ec.Item3._nativedBuffer;
+            buffer4 = ec.Item4._managedBuffer;
+            count   = (int) ec.count;
+        }
     }
     
     public static class EntityCollectionExtensionD
@@ -191,6 +206,21 @@ namespace Svelto.ECS
             where T4 : unmanaged, IEntityComponent
         {
             return new BT<NB<T1>, NB<T2>, NB<T3>, NB<T4>>(ec.Item1._nativedBuffer, ec.Item2._nativedBuffer, ec.Item3._nativedBuffer, ec.Item4._nativedBuffer, ec.count);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Deconstruct<T1, T2, T3, T4>(in this EntityCollection<T1, T2, T3, T4> ec, out NB<T1> buffer1,
+                                                       out NB<T2> buffer2, out MB<T3> buffer3, out MB<T4> buffer4, out int count) 
+            where T1 : unmanaged, IEntityComponent
+            where T2 : unmanaged, IEntityComponent
+            where T3 : struct, IEntityViewComponent
+            where T4 : struct, IEntityViewComponent
+        {
+            buffer1 = ec.Item1._nativedBuffer;
+            buffer2 = ec.Item2._nativedBuffer;
+            buffer3 = ec.Item3._managedBuffer;
+            buffer4 = ec.Item4._managedBuffer;
+            count   = (int) ec.count;
         }
     }
 }

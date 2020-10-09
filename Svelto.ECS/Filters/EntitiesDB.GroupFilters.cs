@@ -42,21 +42,20 @@ namespace Svelto.ECS
 
             public bool HasFiltersForGroup<T>(ExclusiveGroupStruct groupID) where T : struct, IEntityComponent
             {
-                if (_filters.ContainsKey(TypeRefWrapper<T>.wrapper) == false)
+                if (_filters.TryGetValue(TypeRefWrapper<T>.wrapper, out var fasterDictionary) == false)
                     return false;
-                return _filters[TypeRefWrapper<T>.wrapper].ContainsKey(groupID);
+                
+                return fasterDictionary.ContainsKey(groupID);
             }
 
             public bool HasFiltersForGroup<T>(ExclusiveGroupStruct groupID, int filterID)
                 where T : struct, IEntityComponent
             {
-                if (_filters.ContainsKey(TypeRefWrapper<T>.wrapper) == false)
+                if (_filters.TryGetValue(TypeRefWrapper<T>.wrapper, out var fasterDictionary) == false)
                     return false;
 
-                if (_filters[TypeRefWrapper<T>.wrapper].TryGetValue(groupID, out var result))
-                {
+                if (fasterDictionary.TryGetValue(groupID, out var result))
                     return result.HasFilter(filterID);
-                }
 
                 return false;
             }
@@ -95,10 +94,10 @@ namespace Svelto.ECS
             {
                 groupFilter = default;
 
-                if (_filters.ContainsKey(TypeRefWrapper<T>.wrapper) == false)
+                if (_filters.TryGetValue(TypeRefWrapper<T>.wrapper, out var fasterDictionary) == false)
                     return false;
 
-                if (_filters[TypeRefWrapper<T>.wrapper].TryGetValue(groupID, out var groupFilters) == false)
+                if (fasterDictionary.TryGetValue(groupID, out var groupFilters) == false)
                     return false;
 
                 if (groupFilters.TryGetFilter(filterId, out groupFilter) == false)
@@ -112,43 +111,47 @@ namespace Svelto.ECS
             {
                 groupFilters = default;
 
-                if (_filters.ContainsKey(TypeRefWrapper<T>.wrapper) == false)
+                if (_filters.TryGetValue(TypeRefWrapper<T>.wrapper, out var fasterDictionary) == false)
                     return false;
 
-                return _filters[TypeRefWrapper<T>.wrapper].TryGetValue(groupID, out groupFilters);
+                return fasterDictionary.TryGetValue(groupID, out groupFilters);
             }
 
             public void ClearFilters<T>(int filterID, ExclusiveGroupStruct exclusiveGroupStruct)
             {
-                if (_filters.ContainsKey(TypeRefWrapper<T>.wrapper) == true)
+                if (_filters.TryGetValue(TypeRefWrapper<T>.wrapper, out var fasterDictionary) == true)
                 {
-                    FasterDictionary<ExclusiveGroupStruct, GroupFilters> fasterDictionary =
-                        _filters[TypeRefWrapper<T>.wrapper];
-
                     fasterDictionary[exclusiveGroupStruct].ClearFilter(filterID);
+                }
+            }
+            
+            public void DeleteFilters<T>(ExclusiveGroupStruct exclusiveGroupStruct)
+            {
+                if (_filters.TryGetValue(TypeRefWrapper<T>.wrapper, out var fasterDictionary) == true)
+                {
+                    fasterDictionary[exclusiveGroupStruct].DeleteFilters();
+                    fasterDictionary.Remove(exclusiveGroupStruct);
                 }
             }
 
             public void ClearFilters<T>(int filterID)
             {
-                if (_filters.ContainsKey(TypeRefWrapper<T>.wrapper) == true)
+                if (_filters.TryGetValue(TypeRefWrapper<T>.wrapper, out var fasterDictionary) == true)
                 {
-                    var fasterDictionary = _filters[TypeRefWrapper<T>.wrapper];
-
                     foreach (var filtersPerGroup in fasterDictionary)
                         filtersPerGroup.Value.ClearFilter(filterID);
                 }
             }
 
-            public void ClearFilters<T>()
+            public void DeleteFilters<T>()
             {
-                if (_filters.ContainsKey(TypeRefWrapper<T>.wrapper) == true)
+                if (_filters.TryGetValue(TypeRefWrapper<T>.wrapper, out var fasterDictionary) == true)
                 {
-                    var fasterDictionary = _filters[TypeRefWrapper<T>.wrapper];
-
                     foreach (var filtersPerGroup in fasterDictionary)
-                        filtersPerGroup.Value.ClearFilters();
+                        filtersPerGroup.Value.DeleteFilters();
                 }
+
+                _filters.Remove(TypeRefWrapper<T>.wrapper);
             }
 
             public bool TryRemoveEntity<T>(int filtersID, EGID egid) where T : unmanaged, IEntityComponent
@@ -161,14 +164,14 @@ namespace Svelto.ECS
                 return false;
             }
 
-            public void RemoveEntity<T>(int filtersID, EGID egid) where T : unmanaged, IEntityComponent
+            public void RemoveEntityFromFilter<T>(int filtersID, EGID egid) where T : unmanaged, IEntityComponent
             {
                 ref var filter = ref GetFilterForGroup<T>(filtersID, egid.groupID);
 
                 filter.Remove(egid.entityID);
             }
 
-            public void AddEntity<N>(int filtersID, EGID egid, N mapper) where N:IEGIDMapper
+            public void AddEntityToFilter<N>(int filtersID, EGID egid, N mapper) where N:IEGIDMapper
             {
                 ref var filter = ref CreateOrGetFilterForGroup(filtersID, egid.groupID, new RefWrapper<Type>(mapper.entityType));
 

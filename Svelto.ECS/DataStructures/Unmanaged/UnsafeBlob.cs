@@ -31,7 +31,7 @@ namespace Svelto.ECS.DataStructures
         /// <summary>
         /// </summary>
         internal Allocator allocator;
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Write<T>(in T item) where T : struct
         {

@@ -83,7 +83,7 @@ namespace Svelto.ECS.DataStructures
                 var listData = (UnsafeBlob*) MemoryUtilities.Alloc((uint) sizeOf, allocator);
 
                 //clear to nullify the pointers
-                MemoryUtilities.MemClear((IntPtr) listData, (uint) sizeOf);
+                //MemoryUtilities.MemClear((IntPtr) listData, (uint) sizeOf);
                 listData->allocator = allocator;
                 _queue              = listData;
 #if ENABLE_DEBUG_CHEKS                
@@ -131,6 +131,7 @@ namespace Svelto.ECS.DataStructures
                 {
 #endif
                     _queue->Dispose();
+                    MemoryUtilities.Free((IntPtr) _queue, _queue->allocator);
                     _queue = null;
 #if ENABLE_DEBUG_CHEKS
                 }
