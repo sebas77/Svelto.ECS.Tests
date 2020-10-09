@@ -12,7 +12,7 @@ namespace Svelto.ECS
 
         static GroupCompound()
         {
-            if (_Groups == null)
+            if (GroupCompound<G1, G2, G4, G3>._Groups == null)
             {
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
 
@@ -89,7 +89,7 @@ namespace Svelto.ECS
 
         static GroupCompound()
         {
-            if (_Groups == null)
+            if (GroupCompound<G3, G1, G2>._Groups == null)
             {
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
 
@@ -137,7 +137,7 @@ namespace Svelto.ECS
 
         static GroupCompound()
         {
-            if (_Groups == null)
+            if (GroupCompound<G2, G1>._Groups == null)
             {
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
                 var Group = new ExclusiveGroup();
