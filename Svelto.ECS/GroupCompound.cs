@@ -12,29 +12,7 @@ namespace Svelto.ECS
 
         static GroupCompound()
         {
-            if ((_Groups = GroupCompound<G1, G2, G4, G3>._Groups) == null)
-            if ((_Groups = GroupCompound<G1, G3, G2, G4>._Groups) == null)
-            if ((_Groups = GroupCompound<G1, G3, G4, G2>._Groups) == null)
-            if ((_Groups = GroupCompound<G1, G4, G2, G3>._Groups) == null)
-            if ((_Groups = GroupCompound<G2, G1, G3, G4>._Groups) == null)
-            if ((_Groups = GroupCompound<G2, G3, G4, G1>._Groups) == null)
-            if ((_Groups = GroupCompound<G3, G1, G2, G4>._Groups) == null)
-            if ((_Groups = GroupCompound<G4, G1, G2, G3>._Groups) == null)
-            if ((_Groups = GroupCompound<G1, G4, G3, G2>._Groups) == null)
-            if ((_Groups = GroupCompound<G2, G1, G4, G3>._Groups) == null)
-            if ((_Groups = GroupCompound<G2, G4, G3, G1>._Groups) == null)
-            if ((_Groups = GroupCompound<G3, G1, G4, G2>._Groups) == null)
-            if ((_Groups = GroupCompound<G4, G1, G3, G2>._Groups) == null)
-            if ((_Groups = GroupCompound<G2, G3, G1, G4>._Groups) == null)
-            if ((_Groups = GroupCompound<G3, G4, G1, G2>._Groups) == null)
-            if ((_Groups = GroupCompound<G2, G4, G1, G3>._Groups) == null)
-            if ((_Groups = GroupCompound<G3, G2, G1, G4>._Groups) == null)
-            if ((_Groups = GroupCompound<G3, G2, G4, G1>._Groups) == null)
-            if ((_Groups = GroupCompound<G3, G4, G2, G1>._Groups) == null)
-            if ((_Groups = GroupCompound<G4, G2, G1, G3>._Groups) == null)
-            if ((_Groups = GroupCompound<G4, G2, G3, G1>._Groups) == null)
-            if ((_Groups = GroupCompound<G4, G3, G1, G2>._Groups) == null)
-            if ((_Groups = GroupCompound<G4, G3, G2, G1>._Groups) == null)
+            if (_Groups == null)
             {
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
 
@@ -63,6 +41,30 @@ namespace Svelto.ECS
 #if DEBUG
                 GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name}-{typeof(G4).Name}";
 #endif
+                //all the combinations must share the same group
+                GroupCompound<G1, G2, G4, G3>._Groups = _Groups;
+                GroupCompound<G1, G3, G2, G4>._Groups = _Groups;
+                GroupCompound<G1, G3, G4, G2>._Groups = _Groups;
+                GroupCompound<G1, G4, G2, G3>._Groups = _Groups;
+                GroupCompound<G2, G1, G3, G4>._Groups = _Groups;
+                GroupCompound<G2, G3, G4, G1>._Groups = _Groups;
+                GroupCompound<G3, G1, G2, G4>._Groups = _Groups;
+                GroupCompound<G4, G1, G2, G3>._Groups = _Groups;
+                GroupCompound<G1, G4, G3, G2>._Groups = _Groups;
+                GroupCompound<G2, G1, G4, G3>._Groups = _Groups;
+                GroupCompound<G2, G4, G3, G1>._Groups = _Groups;
+                GroupCompound<G3, G1, G4, G2>._Groups = _Groups;
+                GroupCompound<G4, G1, G3, G2>._Groups = _Groups;
+                GroupCompound<G2, G3, G1, G4>._Groups = _Groups;
+                GroupCompound<G3, G4, G1, G2>._Groups = _Groups;
+                GroupCompound<G2, G4, G1, G3>._Groups = _Groups;
+                GroupCompound<G3, G2, G1, G4>._Groups = _Groups;
+                GroupCompound<G3, G2, G4, G1>._Groups = _Groups;
+                GroupCompound<G3, G4, G2, G1>._Groups = _Groups;
+                GroupCompound<G4, G2, G1, G3>._Groups = _Groups;
+                GroupCompound<G4, G2, G3, G1>._Groups = _Groups;
+                GroupCompound<G4, G3, G1, G2>._Groups = _Groups;
+                GroupCompound<G4, G3, G2, G1>._Groups = _Groups;
             }
         }
         
@@ -87,11 +89,7 @@ namespace Svelto.ECS
 
         static GroupCompound()
         {
-            if ((_Groups = GroupCompound<G3, G1, G2>._Groups) == null)
-            if ((_Groups = GroupCompound<G2, G3, G1>._Groups) == null)
-            if ((_Groups = GroupCompound<G3, G2, G1>._Groups) == null)
-            if ((_Groups = GroupCompound<G1, G3, G2>._Groups) == null)
-            if ((_Groups = GroupCompound<G2, G1, G3>._Groups) == null)
+            if (_Groups == null)
             {
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
 
@@ -111,6 +109,12 @@ namespace Svelto.ECS
 #if DEBUG
                 GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name}";
 #endif
+                //all the combinations must share the same group
+                GroupCompound<G3, G1, G2>._Groups = _Groups;
+                GroupCompound<G2, G3, G1>._Groups = _Groups;
+                GroupCompound<G3, G2, G1>._Groups = _Groups;
+                GroupCompound<G1, G3, G2>._Groups = _Groups;
+                GroupCompound<G2, G1, G3>._Groups = _Groups;
             }
         }
         
@@ -133,8 +137,6 @@ namespace Svelto.ECS
 
         static GroupCompound()
         {
-            _Groups = GroupCompound<G2, G1>._Groups;
-            
             if (_Groups == null)
             {
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
@@ -148,6 +150,7 @@ namespace Svelto.ECS
 #if DEBUG        
                 GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}";
 #endif
+                GroupCompound<G2, G1>._Groups = _Groups;
             }
         } 
 
