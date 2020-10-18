@@ -37,7 +37,7 @@ namespace Svelto.ECS
                     fasterDictionary.GetOrCreate(
                         groupID, () => new GroupFilters(new SharedSveltoDictionaryNative<int, FilterGroup>(0), groupID));
 
-                return ref filters.CreateOrGetFilter(filterID, groupID);
+                return ref filters.CreateOrGetFilter(filterID);
             }
 
             public bool HasFiltersForGroup<T>(ExclusiveGroupStruct groupID) where T : struct, IEntityComponent
@@ -58,6 +58,17 @@ namespace Svelto.ECS
                     return result.HasFilter(filterID);
 
                 return false;
+            }
+            
+            public ref GroupFilters CreateOrGetFiltersForGroup<T>(ExclusiveGroupStruct groupID)
+                where T : struct, IEntityComponent
+            {
+                var fasterDictionary =
+                    _filters.GetOrCreate(TypeRefWrapper<T>.wrapper, () => new FasterDictionary<ExclusiveGroupStruct, GroupFilters>());
+
+                return ref
+                    fasterDictionary.GetOrCreate(
+                        groupID, () => new GroupFilters(new SharedSveltoDictionaryNative<int, FilterGroup>(0), groupID));
             }
 
             public ref GroupFilters GetFiltersForGroup<T>(ExclusiveGroupStruct groupID)

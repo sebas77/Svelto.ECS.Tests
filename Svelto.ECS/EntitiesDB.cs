@@ -6,7 +6,6 @@ using System;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
-using Svelto.ECS.Experimental;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
@@ -16,21 +15,6 @@ namespace Svelto.ECS
         internal EntitiesDB(EnginesRoot enginesRoot)
         {
             _enginesRoot = enginesRoot;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T QueryUniqueEntity<T>(ExclusiveGroupStruct group) where T : struct, IEntityComponent
-        {
-            var entities = QueryEntities<T>(group);
-
-#if DEBUG && !PROFILE_SVELTO
-            if (entities.count == 0)
-                throw new ECSException("Unique entity not found '".FastConcat(typeof(T).ToString()).FastConcat("'"));
-            if (entities.count != 1)
-                throw new ECSException("Unique entities must be unique! '".FastConcat(typeof(T).ToString())
-                   .FastConcat("'"));
-#endif
-            return ref entities[0];
         }
 
         EntityCollection<T> InternalQueryEntities<T>(FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> entitiesInGroupPerType)
@@ -154,35 +138,30 @@ namespace Svelto.ECS
             return new EntityCollection<T1, T2, T3, T4>(T1entities, T2entities, T3entities, T4entities);
         }
 
-        public TupleRef<T> QueryEntities<T>
+        public GroupsEnumerable<T> QueryEntities<T>
             (in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) where T : struct, IEntityComponent
         {
-            return new TupleRef<T>(new EntityCollections<T>(this, groups), new GroupsEnumerable<T>(this, groups));
+            return new GroupsEnumerable<T>(this, groups);
         }
 
-        public TupleRef<T1, T2> QueryEntities<T1, T2>(in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
+        public GroupsEnumerable<T1, T2> QueryEntities<T1, T2>(in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
             where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent
         {
-            return new TupleRef<T1, T2>(new EntityCollections<T1, T2>(this, groups)
-              , new GroupsEnumerable<T1, T2>(this, groups));
+            return new GroupsEnumerable<T1, T2>(this, groups);
         }
 
-        public TupleRef<T1, T2, T3> QueryEntities<T1, T2, T3>(in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
+        public GroupsEnumerable<T1, T2, T3> QueryEntities<T1, T2, T3>(in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
             where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent where T3 : struct, IEntityComponent
         {
-            return new TupleRef<T1, T2, T3>(new EntityCollections<T1, T2, T3>(this, groups)
-              , new GroupsEnumerable<T1, T2, T3>(this, groups));
+            return new GroupsEnumerable<T1, T2, T3>(this, groups);
         }
 
-        public TupleRef<T1, T2, T3, T4> QueryEntities<T1, T2, T3, T4>
+        public GroupsEnumerable<T1, T2, T3, T4> QueryEntities<T1, T2, T3, T4>
             (in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
-            where T1 : struct, IEntityComponent
-            where T2 : struct, IEntityComponent
-            where T3 : struct, IEntityComponent
-            where T4 : struct, IEntityComponent
+            where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent
+            where T3 : struct, IEntityComponent where T4 : struct, IEntityComponent
         {
-            return new TupleRef<T1, T2, T3, T4>(new EntityCollections<T1, T2, T3, T4>(this, groups)
-              , new GroupsEnumerable<T1, T2, T3, T4>(this, groups));
+            return new GroupsEnumerable<T1, T2, T3, T4>(this, groups);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -254,33 +233,6 @@ namespace Svelto.ECS
             return (int) typeSafeDictionary.count;
         }
 
-        [Obsolete("<color=orange>This Method will be removed soon. please use QueryEntities instead</color>")]
-        public void ExecuteOnAllEntities<T>(ExecuteOnAllEntitiesAction<T> action) where T : struct, IEntityComponent
-        {
-            if (groupsPerEntity.TryGetValue(TypeRefWrapper<T>.wrapper, out var dictionary))
-                foreach (var pair in dictionary)
-                {
-                    IBuffer<T> entities = (pair.Value as ITypeSafeDictionary<T>).GetValues(out var count);
-
-                    if (count > 0)
-                        action(entities, new ExclusiveGroupStruct(pair.Key), count, this);
-                }
-        }
-
-        [Obsolete("<color=orange>This Method will be removed soon. please use QueryEntities instead</color>")]
-        public void ExecuteOnAllEntities<T, W>(ref W value, ExecuteOnAllEntitiesAction<T, W> action)
-            where T : struct, IEntityComponent
-        {
-            if (groupsPerEntity.TryGetValue(TypeRefWrapper<T>.wrapper, out var dic))
-                foreach (var pair in dic)
-                {
-                    IBuffer<T> entities = (pair.Value as ITypeSafeDictionary<T>).GetValues(out var innerCount);
-
-                    if (innerCount > 0)
-                        action(entities, new ExclusiveGroupStruct(pair.Key), innerCount, this, ref value);
-                }
-        }
-
         public bool FoundInGroups<T1>() where T1 : IEntityComponent
         {
             return groupsPerEntity.ContainsKey(TypeRefWrapper<T1>.wrapper);
@@ -321,7 +273,7 @@ namespace Svelto.ECS
             return true;
         }
 
- [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool UnsafeQueryEntityDictionary(uint group, Type type, out ITypeSafeDictionary typeSafeDictionary)
         {
             //search for the group

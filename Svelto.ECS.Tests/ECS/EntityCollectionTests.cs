@@ -104,22 +104,15 @@ namespace Svelto.ECS.Tests.ECS
         {
             for (uint i = 0; i < _groupCount; i++)
             {
-                EntityCollection<TestEntityStruct> entities =
-                    _testEngine.entitiesDB.QueryEntities<TestEntityStruct>(_group + i);
-                EntityCollection<TestEntityViewStruct> entityViews =
-                    _testEngine.entitiesDB.QueryEntities<TestEntityViewStruct>(_group + i);
+                var (entityViewsManagedArray, count) = _testEngine.entitiesDB.QueryEntities<TestEntityViewStruct>(_group + i);
 
-                var entitiesBuffer = entities.ToBuffer();
-                // can't get a managed array from a native buffer
-                Assert.Throws<NotImplementedException>(() => entitiesBuffer.buffer.ToManagedArray());
+                // can't get a native array from a managed buffer
+                Assert.Throws<NotImplementedException>(() => entityViewsManagedArray.ToNativeArray(out _));
 
-                var entityViewsBuffer       = entityViews.ToBuffer();
-                var entityViewsManagedArray = entityViewsBuffer.buffer.ToManagedArray();
-
-                for (int j = 0; j < entityViews.count; j++)
+                for (int j = 0; j < count; j++)
                 {
-                    Assert.AreEqual(entityViews[j].ID.entityID + 1, entityViewsManagedArray[j].TestFloatValue.Value);
-                    Assert.AreEqual(entityViews[j].ID.entityID + 1, entityViewsManagedArray[j].TestIntValue.Value);
+                    Assert.AreEqual(entityViewsManagedArray[j].ID.entityID + 1, entityViewsManagedArray[j].TestFloatValue.Value);
+                    Assert.AreEqual(entityViewsManagedArray[j].ID.entityID + 1, entityViewsManagedArray[j].TestIntValue.Value);
                 }
             }
         }
@@ -129,65 +122,30 @@ namespace Svelto.ECS.Tests.ECS
         {
             for (uint i = 0; i < _groupCount; i++)
             {
-                EntityCollection<TestEntityStruct> entities =
-                    _testEngine.entitiesDB.QueryEntities<TestEntityStruct>(_group + i);
-                EntityCollection<TestEntityViewStruct> entityViews =
-                    _testEngine.entitiesDB.QueryEntities<TestEntityViewStruct>(_group + i);
+                var (entityComponents, count)       = _testEngine.entitiesDB.QueryEntities<TestEntityStruct>(_group + i);
+                
+                // can't get a managed array from a native buffer
+                Assert.Throws<NotImplementedException>(() => entityComponents.ToManagedArray());                
 
-                var entityViewsBuffer = entityViews.ToBuffer();
-                // can't get a native array from a managed buffer
-                Assert.Throws<NotImplementedException>(() => entityViewsBuffer.buffer.ToNativeArray(out _));
-
-                var entitiesBuffer      = entities.ToBuffer();
-                var entitiesNativeArray = entitiesBuffer.buffer.ToNativeArray(out _);
-                var sizeOfStruct        = Marshal.SizeOf<TestEntityStruct>();
-
-                for (int j = 0; j < entities.count; j++)
+                for (int j = 0; j < count; j++)
                 {
-                    var entity = Marshal.PtrToStructure<TestEntityStruct>(entitiesNativeArray + j * sizeOfStruct);
-                    Assert.AreEqual(entities[j].ID.entityID + 1, entity.floatValue);
-                    Assert.AreEqual(entities[j].ID.entityID + 1, entity.intValue);
+                    ref var entity = ref entityComponents[j];
+                    Assert.AreEqual(entityComponents[j].ID.entityID + 1, entity.floatValue);
+                    Assert.AreEqual(entityComponents[j].ID.entityID + 1, entity.intValue);
                 }
             }
         }
 
-        [TestCase(Description = "Test EntityCollection<T> ToNativeBuffer")]
-        public void TestEntityCollection1ToNativeBuffer()
-        {
-            for (uint i = 0; i < _groupCount; i++)
-            {
-                EntityCollection<TestEntityStruct> entities =
-                    _testEngine.entitiesDB.QueryEntities<TestEntityStruct>(_group + i);
-
-                var entitiesBuffer = entities.ToBuffer();
-                Assert.AreEqual(entities.count, entitiesBuffer.count);
-
-                var entitiesNativeArray = entitiesBuffer.buffer.ToNativeArray(out _);
-                var sizeOfStruct        = Marshal.SizeOf<TestEntityStruct>();
-
-                for (int j = 0; j < entities.count; j++)
-                {
-                    var entity = Marshal.PtrToStructure<TestEntityStruct>(entitiesNativeArray + j * sizeOfStruct);
-                    Assert.AreEqual(entities[j].ID.entityID + 1, entity.floatValue);
-                    Assert.AreEqual(entities[j].ID.entityID + 1, entity.intValue);
-                }
-            }
-        }
-        
         [TestCase(Description = "Test EntityCollection<T> String")]
         public void TestEntityCollection1WithString()
         {
             for (uint i = 0; i < _groupCount; i++)
             {
-                EntityCollection<TestEntityViewComponentString> entityViews =
-                    _testEngine.entitiesDB.QueryEntities<TestEntityViewComponentString>(_group + i);
+                var (entityViews, count) = _testEngine.entitiesDB.QueryEntities<TestEntityViewComponentString>(_group + i);
 
-                var entityViewsBuffer = entityViews.ToBuffer();
-                var entityViewsManagedArray = entityViewsBuffer.buffer.ToManagedArray();
-
-                for (int j = 0; j < entityViews.count; j++)
+                for (int j = 0; j < count; j++)
                 {
-                    Assert.AreEqual((entityViews[j].ID.entityID + 1).ToString(), entityViewsManagedArray[j].TestStringValue.Value);
+                    Assert.AreEqual((entityViews[j].ID.entityID + 1).ToString(), entityViews[j].TestStringValue.Value);
                 }
             }
         }

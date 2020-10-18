@@ -52,18 +52,18 @@ namespace Svelto.ECS.Schedulers.Unity
             }
         }
 
+        public bool paused { get; set; }
+
         void SubmitEntities()
         {
             if (paused == false)
                 _onTick.Invoke();
         }
-        
+
         EnginesRoot.EntitiesSubmitter IEntitiesSubmissionScheduler.onTick
         {
             set => _onTick = value;
         }
-        
-        public bool paused { get; set; }
 
         readonly Scheduler       _scheduler;
         EnginesRoot.EntitiesSubmitter _onTick;

@@ -326,8 +326,8 @@ namespace Svelto.ECS.Tests.Messy
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, group1)));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityStruct>(group1));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(group1));
-            Assert.AreSame(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(group1)[0].TestIt
-                         , testIt);
+            var (entityCollection, count) = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(group1);
+            Assert.AreSame(entityCollection[0].TestIt, testIt);
         }
 
         [TestCase((uint) 0)]
@@ -575,27 +575,29 @@ namespace Svelto.ECS.Tests.Messy
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            ExclusiveGroupStruct[] exclusiveGroups = {group0, group1};
             var iterators =
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct, TestEntityStruct2>(
-                    new FasterList<ExclusiveGroupStruct>(exclusiveGroups));
+                    new LocalFasterReadOnlyList<ExclusiveGroupStruct>(new FasterList<ExclusiveGroupStruct>(new ExclusiveGroupStruct[] {group0, group1})));
 
             uint index = 0;
 
-            foreach (var iterator in iterators.entities)
+            foreach (var ((iteratorentityComponentA, iteratorentityComponentB, count), exclusiveGroupStruct) in iterators)
             {
-                if (iterator.entityComponentA.ID.groupID == group0)
+                for (int i = 0; i < count; i++)
                 {
-                    Assert.IsTrue(iterator.entityComponentA.value == index);
-                    Assert.IsTrue(iterator.entityComponentB.value == index + 100);
+                    if (exclusiveGroupStruct == group0)
+                    {
+                        Assert.AreEqual(iteratorentityComponentA[i].value, index);
+                        Assert.AreEqual(iteratorentityComponentB[i].value, index + 100);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(iteratorentityComponentA[i].value, index + 200);
+                        Assert.AreEqual(iteratorentityComponentB[i].value, index + 300);
+                    }
+                    
+                    index = ++index % 100;
                 }
-                else
-                {
-                    Assert.IsTrue(iterator.entityComponentA.value == index + 200);
-                    Assert.IsTrue(iterator.entityComponentB.value == index + 300);
-                }
-
-                index = ++index % 100;
             }
         }
 
@@ -624,14 +626,17 @@ namespace Svelto.ECS.Tests.Messy
 
             uint index = 0;
 
-            foreach (var iterator in iterators.entities)
+            foreach (var ((iterator, count), exclusiveGroupStruct) in iterators)
             {
-                if (iterator.ID.groupID == group0)
-                    Assert.IsTrue(iterator.value == index);
-                else
-                    Assert.IsTrue(iterator.value == (index + 200));
+                for (int i = 0; i < count; i++)
+                {
+                    if (iterator[i].ID.groupID == group0)
+                        Assert.IsTrue(iterator[i].value == index);
+                    else
+                        Assert.IsTrue(iterator[i].value == (index + 200));
 
-                index = ++index % 100;
+                    index = ++index % 100;
+                }
             }
         }
 

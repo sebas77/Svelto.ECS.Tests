@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using Svelto.DataStructures;
+using Svelto.ECS.Experimental;
 
 namespace Svelto.ECS.Tests.ECS
 {
@@ -13,9 +14,9 @@ namespace Svelto.ECS.Tests.ECS
             _enginesRoot = new EnginesRoot(_scheduler);
             _factory = _enginesRoot.GenerateEntityFactory();
             _functions = _enginesRoot.GenerateEntityFunctions();
-            _engine = new TestEngine();
+            _neverdoThisEngine = new TestEngine();
 
-            _enginesRoot.AddEngine(_engine);
+            _enginesRoot.AddEngine(_neverdoThisEngine);
         }
 
         [TearDown]
@@ -36,10 +37,10 @@ namespace Svelto.ECS.Tests.ECS
             _functions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(0, GroupA);
             _scheduler.SubmitEntities();
 
-            var exists = _engine.entitiesDB.Exists<TestEntityStruct>(0, GroupA);
+            var exists = _neverdoThisEngine.entitiesDB.Exists<TestEntityStruct>(0, GroupA);
             Assert.IsFalse(exists, "Entity should be removed from target group");
 
-            var count = _engine.entitiesDB.Count<TestEntityStruct>(GroupA);
+            var count = _neverdoThisEngine.entitiesDB.Count<TestEntityStruct>(GroupA);
             Assert.AreEqual(1, count, "Other entities should not be removed");
 
             void RemoveEntityNotFound()
@@ -62,10 +63,10 @@ namespace Svelto.ECS.Tests.ECS
             _functions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(egid);
             _scheduler.SubmitEntities();
 
-            var exists = _engine.entitiesDB.Exists<TestEntityStruct>(0, GroupA);
+            var exists = _neverdoThisEngine.entitiesDB.Exists<TestEntityStruct>(0, GroupA);
             Assert.IsFalse(exists, "Entity should be removed from target group");
 
-            var count = _engine.entitiesDB.Count<TestEntityStruct>(GroupA);
+            var count = _neverdoThisEngine.entitiesDB.Count<TestEntityStruct>(GroupA);
             Assert.AreEqual(1, count, "Other entities should not be removed");
 
             void RemoveEntityNotFound()
@@ -88,13 +89,9 @@ namespace Svelto.ECS.Tests.ECS
             _functions.RemoveEntitiesFromGroup(GroupA);
             _scheduler.SubmitEntities();
 
-            var query = _engine.entitiesDB.QueryEntities<TestEntityStruct>(GroupAB);
-            var enumerator = query.entities.GetEnumerator();
-            var entityCount = 0;
-            while (enumerator.MoveNext())
-            {
-                entityCount++;
-            }
+            var query = new QueryGroups(GroupAB);
+            
+            var entityCount = query.Count<TestEntityStruct>(_neverdoThisEngine.entitiesDB);
             Assert.AreEqual(1, entityCount, "Entities in the target group should be removed");
         }
 
@@ -111,10 +108,10 @@ namespace Svelto.ECS.Tests.ECS
             _functions.SwapEntitiesInGroup<TestEntityWithComponentViewAndComponentStruct>(GroupA, GroupB);
             _scheduler.SubmitEntities();
 
-            var countA = _engine.entitiesDB.Count<TestEntityStruct>(GroupA);
+            var countA = _neverdoThisEngine.entitiesDB.Count<TestEntityStruct>(GroupA);
             Assert.AreEqual(0, countA, "Source group should be empty after swap");
 
-            var (componentsB, countB) = _engine.entitiesDB.QueryEntities<TestEntityStruct>(GroupB);
+            var (componentsB, countB) = _neverdoThisEngine.entitiesDB.QueryEntities<TestEntityStruct>(GroupB);
             Assert.AreEqual(3, countB, "All entities should exist in target group after swap");
             Assert.AreEqual(2, componentsB[2].intValue, "Values in components should be copied after swap");
 
@@ -134,7 +131,7 @@ namespace Svelto.ECS.Tests.ECS
 
             _scheduler.SubmitEntities();
 
-            var (componentB, componentViewB, countB) = _engine.entitiesDB.QueryEntities<TestEntityStruct, TestEntityViewStruct>(GroupB);
+            var (componentB, componentViewB, countB) = _neverdoThisEngine.entitiesDB.QueryEntities<TestEntityStruct, TestEntityViewStruct>(GroupB);
 
             Assert.AreEqual(1, countB, "An entity should exist in target Group");
             Assert.AreEqual(toEgid.entityID, componentB[0].ID.entityID, "Swapped entity should have the target entityID");
@@ -143,7 +140,7 @@ namespace Svelto.ECS.Tests.ECS
             Assert.AreEqual(1f, componentViewB[0].TestFloatValue.Value, "ViewComponent values should be copied");
             Assert.AreEqual(1, componentViewB[0].TestIntValue.Value, "ViewComponent values should be copied");
 
-            var existsA = _engine.entitiesDB.Exists<TestEntityStruct>(0, GroupA);
+            var existsA = _neverdoThisEngine.entitiesDB.Exists<TestEntityStruct>(0, GroupA);
             Assert.IsFalse(existsA, "Entity should not be present in source Group anymore");
 
             void SwapEntityAlreadyExists()
@@ -181,7 +178,7 @@ namespace Svelto.ECS.Tests.ECS
         EnginesRoot _enginesRoot;
         IEntityFactory _factory;
         IEntityFunctions _functions;
-        TestEngine _engine;
+        TestEngine _neverdoThisEngine;
 
         static ExclusiveGroup GroupA = new ExclusiveGroup();
         static ExclusiveGroup GroupB = new ExclusiveGroup();

@@ -4,12 +4,10 @@ namespace Svelto.ECS
 {
     public struct GroupFilters
     {
-        public GroupFilters(SharedSveltoDictionaryNative<int, FilterGroup> filters, ExclusiveGroupStruct group)
+        internal GroupFilters(SharedSveltoDictionaryNative<int, FilterGroup> filters, ExclusiveGroupStruct group)
         {
             this.filters = filters;
-#if DEBUG && !PROFILE_SVELTO            
             _group = @group;
-#endif            
         }
 
         public ref FilterGroup GetFilter(int filterIndex)
@@ -58,11 +56,11 @@ namespace Svelto.ECS
             return filters.GetEnumerator();
         }
 
-        public ref FilterGroup CreateOrGetFilter(int filterID, ExclusiveGroupStruct groupID)
+        public ref FilterGroup CreateOrGetFilter(int filterID)
         {
             if (filters.TryFindIndex(filterID, out var index) == false)
             {
-                var orGetFilterForGroup = new FilterGroup(groupID);
+                var orGetFilterForGroup = new FilterGroup(_group);
                 
                 filters[filterID] = orGetFilterForGroup;
 
@@ -82,9 +80,7 @@ namespace Svelto.ECS
             filters.Dispose();
         }
         
-#if DEBUG && !PROFILE_SVELTO
         readonly ExclusiveGroupStruct _group;
-#endif
         SharedSveltoDictionaryNative<int, FilterGroup> filters;
     }
 }

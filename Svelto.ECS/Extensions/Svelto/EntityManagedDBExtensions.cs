@@ -65,5 +65,20 @@ namespace Svelto.ECS
         {
             return ref entitiesDb.QueryEntity<T>(new EGID(id, group));
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T QueryUniqueEntity<T>(this EntitiesDB entitiesDb, ExclusiveGroupStruct group) where T : struct, IEntityViewComponent
+        {
+            var (entities, entitiescount) = entitiesDb.QueryEntities<T>(@group);
+
+#if DEBUG && !PROFILE_SVELTO
+            if (entitiescount == 0)
+                throw new ECSException("Unique entity not found '".FastConcat(typeof(T).ToString()).FastConcat("'"));
+            if (entitiescount != 1)
+                throw new ECSException("Unique entities must be unique! '".FastConcat(typeof(T).ToString())
+                                                                          .FastConcat("'"));
+#endif
+            return ref entities[0];
+        }
     }
 }

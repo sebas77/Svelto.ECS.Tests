@@ -29,7 +29,8 @@ namespace Svelto.DataStructures
                 new SveltoDictionary<TKey, TValue, NativeStrategy<FasterDictionaryNode<TKey>>, NativeStrategy<TValue>,
                 NativeStrategy<int>>(
                     size, nativeAllocator);
-            int structSize = Marshal.SizeOf(dictionary);
+            int structSize = MemoryUtilities.SizeOf<SveltoDictionary<TKey, TValue, NativeStrategy<FasterDictionaryNode<TKey>>, NativeStrategy<TValue>,
+                NativeStrategy<int>>>();
             _sharedDictionary = MemoryUtilities.Alloc((uint) structSize, Allocator.Persistent);
 
             _dictionary = dictionary;

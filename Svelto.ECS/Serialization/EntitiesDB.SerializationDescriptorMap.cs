@@ -61,9 +61,7 @@ namespace Svelto.ECS
             void RegisterEntityDescriptor(ISerializableEntityDescriptor descriptor, Type type, Type d1)
             {
                 if (descriptor == null)
-                {
                     return;
-                }
 
                 uint descriptorHash = descriptor.hash;
 
@@ -74,7 +72,6 @@ namespace Svelto.ECS
                                         $"'{_descriptors[descriptorHash]} ::: {descriptorHash}'");
                 }
 #endif
-
                 _descriptors[descriptorHash] = descriptor;
                 Type[] typeArgs = {type};
                 var makeGenericType = d1.MakeGenericType(typeArgs);
@@ -82,19 +79,25 @@ namespace Svelto.ECS
                 _factories.Add(descriptorHash,  instance as IDeserializationFactory);
             }
 
-            public ISerializableEntityDescriptor GetDescriptorFromHash(uint descriptorID)
+            public ISerializableEntityDescriptor GetDescriptorFromHash(uint descriptorHash)
             {
 #if DEBUG && !PROFILE_SVELTO
-                DBC.ECS.Check.Require(_descriptors.ContainsKey(descriptorID),
-                    $"Could not find descriptor with ID '{descriptorID}'!");
+                DBC.ECS.Check.Require(_descriptors.ContainsKey(descriptorHash),
+                                      $"Could not find descriptor linked to hash, wrong deserialization size? '{ descriptorHash}'!");
 #endif
 
-                return _descriptors[descriptorID];
+                return _descriptors[descriptorHash];
             }
 
-            public IDeserializationFactory GetSerializationFactory(uint descriptorID)
+            public IDeserializationFactory GetSerializationFactory(uint descriptorHash)
             {
-                return _factories[descriptorID];
+#if DEBUG && !PROFILE_SVELTO
+                DBC.ECS.Check.Require(_descriptors.ContainsKey(descriptorHash),
+                                      $"Could not find descriptor linked to descriptor hash, wrong deserialization size? '{ descriptorHash}'!");
+                DBC.ECS.Check.Require(_factories.ContainsKey(descriptorHash),
+                                      $"Could not find factory linked to hash '{ _descriptors[descriptorHash]}'!");
+#endif                
+                return _factories[descriptorHash];
             }
 
             public void RegisterSerializationFactory<Descriptor>(IDeserializationFactory deserializationFactory)

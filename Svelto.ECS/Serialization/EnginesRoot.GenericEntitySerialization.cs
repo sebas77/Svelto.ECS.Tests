@@ -1,14 +1,11 @@
 ﻿using System;
 using Svelto.DataStructures;
-using Svelto.ECS.Internal;
 using Svelto.ECS.Serialization;
 
 namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
-        readonly bool _isDeserializationOnly;
-
         sealed class EntitySerialization : IEntitySerialization
         {
             public void SerializeEntity(EGID egid, ISerializationData serializationData,
@@ -45,9 +42,9 @@ namespace Svelto.ECS
 
                 uint descriptorHash = serializableEntityHeader.descriptorHash;
                 SerializationDescriptorMap serializationDescriptorMap = _enginesRoot.serializationDescriptorMap;
-                IDeserializationFactory factory = serializationDescriptorMap.GetSerializationFactory(descriptorHash);
                 var entityDescriptor = serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
-
+                IDeserializationFactory factory = serializationDescriptorMap.GetSerializationFactory(descriptorHash);
+                
                 return factory.BuildDeserializedEntity(egid, serializationData, entityDescriptor, serializationType,
                     this, this._enginesRoot.GenerateEntityFactory(), _enginesRoot._isDeserializationOnly);
             }
@@ -189,5 +186,7 @@ namespace Svelto.ECS
         {
             return new EntitySerialization(this);
         }
+        
+        readonly bool _isDeserializationOnly;
     }
 }

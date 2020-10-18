@@ -52,7 +52,7 @@ namespace Svelto.ECS
 
                     var array  = entityCollection1;
                     var array2 = entityCollection2;
-                    _buffers = new EntityCollection<T1, T2, T3, T4>(array.Item1, array.Item2, array.Item3, array2);
+                    _buffers = new EntityCollection<T1, T2, T3, T4>(array.buffer1, array.buffer2, array.buffer3, array2);
                     break;
                 }
 
