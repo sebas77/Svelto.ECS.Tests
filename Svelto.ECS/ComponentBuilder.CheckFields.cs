@@ -4,12 +4,11 @@ using System.Diagnostics;
 #endif
 using System;
 using System.Reflection;
-using System.Text;
 using Svelto.Common;
 
 namespace Svelto.ECS
 {
-    internal static class ComponentBuilderUtilities
+    static class ComponentBuilderUtilities
     {
         const string MSG = "Entity Components and Entity View Components fields cannot hold managed fields outside the Svelto rules.";
 
@@ -18,7 +17,7 @@ namespace Svelto.ECS
 #endif
         public static void CheckFields(Type entityComponentType, bool needsReflection, bool isStringAllowed = false)
         {
-            if (entityComponentType == ENTITY_STRUCT_INFO_VIEW || entityComponentType == EGIDType ||
+            if (entityComponentType == ENTITY_INFO_COMPONENT || entityComponentType == EGIDType ||
                 entityComponentType == EXCLUSIVEGROUPSTRUCTTYPE || entityComponentType == SERIALIZABLE_ENTITY_STRUCT)
             {
                 return;
@@ -138,6 +137,6 @@ namespace Svelto.ECS
         static readonly Type STRINGTYPE                 = typeof(string);
         static readonly Type STRINGBUILDERTYPE          = typeof(System.Text.StringBuilder);
 
-        internal static readonly Type ENTITY_STRUCT_INFO_VIEW = typeof(EntityInfoViewComponent);
+        internal static readonly Type ENTITY_INFO_COMPONENT = typeof(EntityInfoComponent);
     }
 }

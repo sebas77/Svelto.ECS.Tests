@@ -80,5 +80,30 @@ namespace Svelto.ECS
 #endif
             return ref entities[0];
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static MB<T> GetArrayAndEntityIndex<T>(this EGIDMapper<T> mapper, uint entityID, out uint index)  where T : struct, IEntityViewComponent
+        {
+            if (mapper._map.TryFindIndex(entityID, out index))
+            {
+                return (MB<T>) mapper._map.GetValues(out _);
+            }
+
+            throw new ECSException("Entity not found");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryGetArrayAndEntityIndex<T>(this EGIDMapper<T> mapper, uint entityID, out uint index, out MB<T> array)  where T : struct, IEntityViewComponent
+        {
+            index = default;
+            if (mapper._map != null && mapper._map.TryFindIndex(entityID, out index))
+            {
+                array = (MB<T>) mapper._map.GetValues(out _);
+                return true;
+            }
+
+            array = default;
+            return false;
+        }
     }
 }

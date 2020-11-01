@@ -192,6 +192,9 @@ namespace Svelto.ECS.Tests.Messy
                 _entityFunctions.SwapEntityGroup<TestDescriptor>(4955, group1, group6);
                 _entityFunctions.SwapEntityGroup<TestDescriptor>(4954, group1, group6);
                 _entityFunctions.SwapEntityGroup<TestDescriptor>(4953, group1, group6);
+                
+                _simpleSubmissionEntityViewScheduler.SubmitEntities();
+                
                 _entityFunctions.SwapEntityGroup<TestDescriptor>(4974, group1, group6);
                 _entityFunctions.SwapEntityGroup<TestDescriptor>(4977, group1, group6);
                 _entityFunctions.SwapEntityGroup<TestDescriptor>(4980, group1, group6);
@@ -200,6 +203,7 @@ namespace Svelto.ECS.Tests.Messy
                 _entityFunctions.SwapEntityGroup<TestDescriptor>(4991, group1, group6);
                 _entityFunctions.SwapEntityGroup<TestDescriptor>(4995, group1, group6);
                 _entityFunctions.SwapEntityGroup<TestDescriptor>(4996, group1, group6);
+                _simpleSubmissionEntityViewScheduler.SubmitEntities();
                 _entityFunctions.SwapEntityGroup<TestDescriptor>(5000, group6, group7);
                 _entityFunctions.SwapEntityGroup<TestDescriptor>(4999, group6, group7);
                 _entityFunctions.SwapEntityGroup<TestDescriptor>(4998, group6, group7);
@@ -368,6 +372,7 @@ namespace Svelto.ECS.Tests.Messy
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4944, group1, group6);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4963, group2, group1);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4972, group2, group1);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
             _entityFunctions.SwapEntityGroup<TestDescriptor>(5000, group2, group0);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4998, group2, group0);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4980, group2, group1);
@@ -442,6 +447,7 @@ namespace Svelto.ECS.Tests.Messy
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4947, group6, group7);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4983, group2, group1);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4974, group2, group1);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4970, group2, group1);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4980, group2, group1);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4972, group2, group1);
@@ -459,6 +465,7 @@ namespace Svelto.ECS.Tests.Messy
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4974, group1, group6);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4970, group1, group6);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4971, group6, group7);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4969, group1, group6);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4978, group1, group6);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4970, group6, group7);
@@ -466,13 +473,17 @@ namespace Svelto.ECS.Tests.Messy
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4980, group6, group7);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4983, group6, group7);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4974, group6, group7);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4978, group6, group7);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4969, group6, group7);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4988, group7, group8);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4988, group8, group7);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4971, group7, group8);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4971, group8, group7);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4992, group7, group8);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4992, group8, group7);
             _entityFunctions.SwapEntityGroup<TestDescriptor>(4967, group7, group8);
 

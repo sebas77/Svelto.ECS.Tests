@@ -30,22 +30,46 @@ namespace Svelto.ECS
             public void RemoveEntity<T>(EGID entityEGID) where T : IEntityDescriptor, new()
             {
                 DBC.ECS.Check.Require(entityEGID.groupID != 0, "invalid group detected");
-                _enginesRoot.Target.CheckRemoveEntityID(entityEGID, TypeCache<T>.type);
+                var descriptorComponentsToBuild = EntityDescriptorTemplate<T>.descriptor.componentsToBuild;
+                _enginesRoot.Target.CheckRemoveEntityID(entityEGID, TypeCache<T>.type, this._enginesRoot.Target._entitiesDB, descriptorComponentsToBuild);
 
                 _enginesRoot.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityEGID, entityEGID,
-                        EntityDescriptorTemplate<T>.descriptor.componentsToBuild));
+                        descriptorComponentsToBuild));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void RemoveEntitiesFromGroup(ExclusiveGroupStruct groupID)
             {
-                _enginesRoot.Target.RemoveGroupID(groupID);
                 DBC.ECS.Check.Require(groupID != 0, "invalid group detected");
 
                 _enginesRoot.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, new EGID(0, groupID), new EGID()));
             }
+
+            // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            // void RemoveAllEntities<D, S>(ExclusiveGroup group)
+            //     where D : IEntityDescriptor, new() where S : unmanaged, IEntityComponent
+            // {
+            //     var targetEntitiesDB = _enginesRoot.Target._entitiesDB;
+            //     var (buffer, count) = targetEntitiesDB.QueryEntities<S>(@group);
+            //     for (uint i = 0; i < count; ++i)
+            //     {
+            //         RemoveEntity<D>(new EGID(i, group));
+            //     }
+            // }
+            //
+            // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            // void RemoveAllEntities<D, S>()
+            //     where D : IEntityDescriptor, new() where S : unmanaged, IEntityComponent
+            // {
+            //     var  targetEntitiesDB = _enginesRoot.Target._entitiesDB;
+            //     foreach (var ((buffer, count), exclusiveGroupStruct) in targetEntitiesDB.QueryEntities<S>())
+            //         for (uint i = 0; i < count; ++i)
+            //         {
+            //             RemoveEntity<D>(new EGID(i, exclusiveGroupStruct));
+            //         }
+            // }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void SwapEntitiesInGroup<T>(ExclusiveGroupStruct fromGroupID, ExclusiveGroupStruct toGroupID)
@@ -55,21 +79,20 @@ namespace Svelto.ECS
                 IComponentBuilder[] components = EntityDescriptorTemplate<T>.descriptor.componentsToBuild;
 
                 if (_enginesRoot.Target._groupEntityComponentsDB.TryGetValue(fromGroupID,
-                    out var entitiesInGroupPerType) == false)
+                    out FasterDictionary<RefWrapperType, ITypeSafeDictionary> entitiesInGroupPerType) == false)
                     throw new Exception("Entity Serialization failed");
 
-                foreach (var component in components)
-                {
-                    var dictionary = entitiesInGroupPerType[new RefWrapper<Type>(component.GetEntityComponentType())];
+                    var dictionary = entitiesInGroupPerType[new RefWrapperType(components[0].GetEntityComponentType())];
 
                     dictionary.KeysEvaluator((key) =>
                     {
-                        _enginesRoot.Target.CheckRemoveEntityID(new EGID(key, fromGroupID), component.GetType());
-                        _enginesRoot.Target.CheckAddEntityID(new EGID(key, fromGroupID), component.GetType());
+                        _enginesRoot.Target.CheckRemoveEntityID(new EGID(key, fromGroupID), TypeCache<T>.type
+                                                              , _enginesRoot.Target._entitiesDB, components);
+                        _enginesRoot.Target.CheckAddEntityID(new EGID(key, toGroupID), TypeCache<T>.type
+                                                           , _enginesRoot.Target._entitiesDB, components);
                     });
-                }
+                
 #endif
-
                 _enginesRoot.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.SwapGroup, new EGID(0, fromGroupID),
                         new EGID(0, toGroupID)));
@@ -131,12 +154,15 @@ namespace Svelto.ECS
                 DBC.ECS.Check.Require(fromID.groupID != 0, "invalid group detected");
                 DBC.ECS.Check.Require(toID.groupID != 0, "invalid group detected");
 
-                _enginesRoot.Target.CheckRemoveEntityID(fromID, TypeCache<T>.type);
-                _enginesRoot.Target.CheckAddEntityID(toID, TypeCache<T>.type);
+                var enginesRootTarget           = _enginesRoot.Target;
+                var descriptorComponentsToBuild = EntityDescriptorTemplate<T>.descriptor.componentsToBuild;
+                
+                enginesRootTarget.CheckRemoveEntityID(fromID, TypeCache<T>.type, enginesRootTarget._entitiesDB, descriptorComponentsToBuild);
+                enginesRootTarget.CheckAddEntityID(toID, TypeCache<T>.type, enginesRootTarget._entitiesDB, descriptorComponentsToBuild);
 
-                _enginesRoot.Target.QueueEntitySubmitOperation<T>(
+                enginesRootTarget.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Swap,
-                        fromID, toID, EntityDescriptorTemplate<T>.descriptor.componentsToBuild));
+                        fromID, toID, descriptorComponentsToBuild));
             }
 
             //enginesRoot is a weakreference because GenericEntityStreamConsumerFactory can be injected inside

@@ -1,7 +1,7 @@
 {
     "name": "Svelto.Services",
     "references": [
-        "Svelto.Common_3",
+        "Svelto.Common",
         "Svelto.Tasks",
         "Utf8Json"
     ],

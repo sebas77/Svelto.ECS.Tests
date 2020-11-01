@@ -116,10 +116,10 @@ namespace Svelto.ECS
 
         internal FasterDictionary<uint, ITypeSafeDictionary> FindGroups_INTERNAL(Type type) 
         {
-            if (groupsPerEntity.ContainsKey(new RefWrapper<Type>(type)) == false)
+            if (groupsPerEntity.ContainsKey(new RefWrapperType(type)) == false)
                 return _emptyDictionary;
 
-            return groupsPerEntity[new RefWrapper<Type>(type)];
+            return groupsPerEntity[new RefWrapperType(type)];
         }
 
         struct GroupsList

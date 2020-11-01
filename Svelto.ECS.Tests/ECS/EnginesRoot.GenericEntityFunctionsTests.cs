@@ -91,7 +91,7 @@ namespace Svelto.ECS.Tests.ECS
 
             var query = new QueryGroups(GroupAB);
             
-            var entityCount = query.Count<TestEntityStruct>(_neverdoThisEngine.entitiesDB);
+            var entityCount = query.Count<TestEntityStruct>(_neverdoThisEngine.entitiesDB, GroupAB);
             Assert.AreEqual(1, entityCount, "Entities in the target group should be removed");
         }
 

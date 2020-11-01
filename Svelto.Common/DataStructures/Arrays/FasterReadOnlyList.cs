@@ -44,6 +44,12 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T[] ToArrayFast(out uint count)
+        {
+            return _list.ToArrayFast(out count);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(T[] array, int arrayIndex)
         {
             _list.CopyTo(array, arrayIndex);
@@ -83,6 +89,12 @@ namespace Svelto.DataStructures
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => ref _list[index];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T[] ToArrayFast(out uint count)
+        {
+            return _list.ToArrayFast(out count);
         }
 
         readonly FasterList<T> _list;

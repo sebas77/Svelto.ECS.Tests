@@ -92,7 +92,7 @@ namespace Svelto.ECS.Internal
         }
 
         public void AddEntitiesToEngines
-        (FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityComponentEnginesDB
+        (FasterDictionary<RefWrapperType, FasterList<IEngine>> entityComponentEnginesDB
        , ITypeSafeDictionary realDic, ExclusiveGroupStruct group, in PlatformProfiler profiler)
         {
             if (IsUnmanaged)
@@ -263,7 +263,7 @@ namespace Svelto.ECS.Internal
 
         public void MoveEntityFromEngines
         (EGID fromEntityGid, EGID? toEntityID, ITypeSafeDictionary toGroup
-       , FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> engines, in PlatformProfiler profiler)
+       , FasterDictionary<RefWrapperType, FasterList<IEngine>> engines, in PlatformProfiler profiler)
         {
             if (IsUnmanaged)
             {
@@ -321,7 +321,7 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        public void RemoveEntitiesFromEngines(FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> engines
+        public void RemoveEntitiesFromEngines(FasterDictionary<RefWrapperType, FasterList<IEngine>> engines
                                             , in PlatformProfiler profiler, ExclusiveGroupStruct group)
         {
             if (IsUnmanaged)
@@ -454,10 +454,10 @@ namespace Svelto.ECS.Internal
         }
 
         static void RemoveEntityComponentFromEngines
-        (FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> engines, ref TValue entity, uint? previousGroup
+        (FasterDictionary<RefWrapperType, FasterList<IEngine>> engines, ref TValue entity, uint? previousGroup
        , in PlatformProfiler profiler, EGID egid)
         {
-            if (!engines.TryGetValue(new RefWrapper<Type>(_type), out var entityComponentsEngines))
+            if (!engines.TryGetValue(new RefWrapperType(_type), out var entityComponentsEngines))
                 return;
 
             if (previousGroup == null)
@@ -478,11 +478,11 @@ namespace Svelto.ECS.Internal
         }
 
         void AddEntityComponentToEngines
-        (FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> engines, ref TValue entity
+        (FasterDictionary<RefWrapperType, FasterList<IEngine>> engines, ref TValue entity
        , ExclusiveGroupStruct? previousGroup, in PlatformProfiler profiler, EGID egid)
         {
             //get all the engines linked to TValue
-            if (!engines.TryGetValue(new RefWrapper<Type>(_type), out var entityComponentsEngines))
+            if (!engines.TryGetValue(new RefWrapperType(_type), out var entityComponentsEngines))
                 return;
 
             if (previousGroup == null)

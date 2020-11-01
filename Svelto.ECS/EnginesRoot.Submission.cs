@@ -27,11 +27,22 @@ namespace Svelto.ECS
             }
         }
 
+        /// <summary>
+        /// Todo: it would be probably better to split even further the logic between submission and callbacks
+        /// Something to do when I will optimize the callbacks
+        /// </summary>
+        /// <param name="profiler"></param>
         void SingleSubmission(in PlatformProfiler profiler)
         {
 #if UNITY_BURST          
             NativeOperationSubmission(profiler);
 #endif
+#if DEBUG && !PROFILE_SVELTO
+            _multipleOperationOnSameEGIDChecker.FastClear();
+#endif
+
+            bool entitiesAreSubmitted = false;
+            
             if (_entitiesOperations.Count > 0)
             {
                 using (profiler.Sample("Remove and Swap operations"))
@@ -81,6 +92,8 @@ namespace Svelto.ECS
                         }
                     }
                 }
+
+                entitiesAreSubmitted = true;
             }
 
             _groupedEntityToAdd.Swap();
@@ -102,6 +115,15 @@ namespace Svelto.ECS
                         }
                     }
                 }
+                
+                entitiesAreSubmitted = true;
+            }
+
+            if (entitiesAreSubmitted)
+            {
+                var enginesCount = _reactiveEnginesSubmission.count;
+                for (int i = 0; i < enginesCount; i++)
+                    _reactiveEnginesSubmission[i].EntitiesSubmitted();
             }
         }
 
@@ -114,14 +136,14 @@ namespace Svelto.ECS
                 {
                     var groupID = groupOfEntitiesToSubmit.Key;
                     
-                    FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> groupDB = GetOrCreateGroup(groupID, profiler);
+                    var groupDB = GetOrCreateGroup(groupID, profiler);
 
                     //add the entityComponents in the group
                     foreach (var entityComponentsToSubmit in _groupedEntityToAdd.other[groupID])
                     {
                         var type = entityComponentsToSubmit.Key;
                         var targetTypeSafeDictionary = entityComponentsToSubmit.Value;
-                        var wrapper = new RefWrapper<Type>(type);
+                        var wrapper = new RefWrapperType(type);
 
                         ITypeSafeDictionary dbDic = GetOrCreateTypeSafeDictionary(groupID, groupDB, wrapper, 
                             targetTypeSafeDictionary);
@@ -143,7 +165,7 @@ namespace Svelto.ECS
 
                     foreach (var entityComponentsToSubmit in _groupedEntityToAdd.other[groupID])
                     {
-                        var realDic = groupDB[new RefWrapper<Type>(entityComponentsToSubmit.Key)];
+                        var realDic = groupDB[new RefWrapperType(entityComponentsToSubmit.Key)];
 
                         entityComponentsToSubmit.Value.AddEntitiesToEngines(_reactiveEnginesAddRemove, realDic,
                             new ExclusiveGroupStruct(groupToSubmit.Key), in profiler);

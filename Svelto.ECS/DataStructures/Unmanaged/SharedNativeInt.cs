@@ -14,6 +14,15 @@ namespace Svelto.ECS.DataStructures
 
         Allocator _allocator;
 
+        public SharedNativeInt(Allocator allocator)
+        {
+            unsafe
+            {
+                _allocator = allocator;
+                data       = (int*) MemoryUtilities.Alloc(sizeof(int), allocator);
+            }
+        }
+
         public static SharedNativeInt Create(int t, Allocator allocator)
         {
             unsafe
@@ -99,7 +108,7 @@ namespace Svelto.ECS.DataStructures
                     throw new Exception("null-access");
 #endif            
                 
-                Volatile.Write(ref *data, 0);
+                Volatile.Write(ref *data, val);
             }
         }
     }

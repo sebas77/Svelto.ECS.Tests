@@ -49,31 +49,6 @@ namespace Svelto.ECS
             return false;
         }
 
-        //todo: I still need to write the version that doesn't return IBuffer
-        public IBuffer<T> GetArrayAndEntityIndex(uint entityID, out uint index)
-        {
-            if (_map.TryFindIndex(entityID, out index))
-            {
-                return _map.GetValues(out _);
-            }
-
-            throw new ECSException("Entity not found");
-        }
-
-        //todo: I still need to write the version that doesn't return IBuffer
-        public bool TryGetArrayAndEntityIndex(uint entityID, out uint index, out IBuffer<T> array)
-        {
-            index = default;
-            if (_map != null && _map.TryFindIndex(entityID, out index))
-            {
-                array = _map.GetValues(out _);
-                return true;
-            }
-
-            array = default;
-            return false;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Exists(uint idEntityId)
         {
@@ -92,7 +67,7 @@ namespace Svelto.ECS
             return _map.TryFindIndex(valueKey, out index);
         }
 
-        readonly ITypeSafeDictionary<T> _map;
+        internal readonly ITypeSafeDictionary<T> _map;
     }
 
     public interface IEGIDMapper

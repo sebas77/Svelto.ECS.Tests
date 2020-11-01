@@ -108,8 +108,8 @@ namespace Svelto.ECS
                 var entitySubmitOperation = new EntitySubmitOperation(EntitySubmitOperationType.Swap,
                                                 localEgid, toEgid, entityDescriptor.componentsToBuild);
 
-                _enginesRoot.CheckRemoveEntityID(localEgid, entityDescriptor.realType);
-                _enginesRoot.CheckAddEntityID(toEgid, entityDescriptor.realType);
+                _enginesRoot.CheckRemoveEntityID(localEgid, entityDescriptor.realType, _enginesRoot._entitiesDB, entityDescriptor.componentsToBuild);
+                _enginesRoot.CheckAddEntityID(toEgid, entityDescriptor.realType, _enginesRoot._entitiesDB, entityDescriptor.componentsToBuild);
 
                 _enginesRoot.QueueEntitySubmitOperation(entitySubmitOperation);
             }
@@ -123,7 +123,7 @@ namespace Svelto.ECS
                 SerializationDescriptorMap serializationDescriptorMap = _enginesRoot.serializationDescriptorMap;
                 var entityDescriptor = serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
 
-                _enginesRoot.CheckRemoveEntityID(egid, entityDescriptor.realType);
+                _enginesRoot.CheckRemoveEntityID(egid, entityDescriptor.realType, this._enginesRoot._entitiesDB, entityDescriptor.componentsToBuild);
 
                 var entitySubmitOperation = new EntitySubmitOperation(
                     EntitySubmitOperationType.Remove,
@@ -171,7 +171,7 @@ namespace Svelto.ECS
 
                 foreach (var serializableEntityBuilder in entityDescriptor.entitiesToSerialize)
                 {
-                    entitiesInGroupPerType.TryGetValue(new RefWrapper<Type>(serializableEntityBuilder.GetEntityComponentType()), out var safeDictionary);
+                    entitiesInGroupPerType.TryGetValue(new RefWrapperType(serializableEntityBuilder.GetEntityComponentType()), out var safeDictionary);
 
                     serializationData.BeginNextEntityComponent();
                     serializableEntityBuilder.Deserialize(egid.entityID, safeDictionary, serializationData,

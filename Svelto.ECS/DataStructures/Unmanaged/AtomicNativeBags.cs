@@ -41,14 +41,16 @@ namespace Svelto.ECS.DataStructures.Unity
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref NativeBag GetBuffer(int index)
         {
-            DBC.ECS.Check.Require(_data != null, "using invalid AtomicNativeBags");
+            if (_data == null)
+                throw new Exception("using invalid AtomicNativeBags");
             
             return ref MemoryUtilities.ArrayElementAsRef<NativeBag>((IntPtr) _data, index);
         }
 
         public void Dispose()
         {
-            DBC.ECS.Check.Require(_data != null, "using invalid AtomicNativeBags");
+            if (_data == null)
+                throw new Exception("using invalid AtomicNativeBags");
             
             for (int i = 0; i < _threadsCount; i++)
             {
@@ -60,7 +62,8 @@ namespace Svelto.ECS.DataStructures.Unity
 
         public void Clear()
         {
-            DBC.ECS.Check.Require(_data != null, "using invalid AtomicNativeBags");
+            if (_data == null)
+                throw new Exception("using invalid AtomicNativeBags");
             
             for (int i = 0; i < _threadsCount; i++)
             {

@@ -16,7 +16,7 @@ namespace Svelto.ECS
        [MethodImpl(MethodImplOptions.AggressiveInlining)]
        public static NB<T> QueryEntitiesAndIndex<T>(this EntitiesDB entitiesDb, EGID entityGID, out uint index) where T : unmanaged, IEntityComponent
        {
-           if (entitiesDb.QueryEntitiesAndIndexInternal<T>(entityGID, out index, out NB<T> array) == true)
+           if (entitiesDb.QueryEntitiesAndIndexInternal(entityGID, out index, out NB<T> array) == true)
                return array;
 
            throw new EntityNotFoundException(entityGID, typeof(T));
@@ -26,7 +26,7 @@ namespace Svelto.ECS
        public static NB<T> QueryEntitiesAndIndex<T>(this EntitiesDB entitiesDb, uint id, ExclusiveGroupStruct group, out uint index) where T : unmanaged, IEntityComponent
        {
            EGID entityGID = new EGID(id, group);
-           if (entitiesDb.QueryEntitiesAndIndexInternal<T>(entityGID, out index, out NB<T> array) == true)
+           if (entitiesDb.QueryEntitiesAndIndexInternal(entityGID, out index, out NB<T> array) == true)
                return array;
 
            throw new EntityNotFoundException(entityGID, typeof(T));
@@ -36,7 +36,7 @@ namespace Svelto.ECS
        public static bool TryQueryEntitiesAndIndex<T>(this EntitiesDB entitiesDb, EGID entityGID, out uint index, out NB<T> array)
            where T : unmanaged, IEntityComponent
        {
-           if (entitiesDb.QueryEntitiesAndIndexInternal<T>(entityGID, out index, out array) == true)
+           if (entitiesDb.QueryEntitiesAndIndexInternal(entityGID, out index, out array) == true)
                return true;
 
            return false;
@@ -46,7 +46,7 @@ namespace Svelto.ECS
        public static bool TryQueryEntitiesAndIndex<T>(this EntitiesDB entitiesDb, uint id, ExclusiveGroupStruct group, out uint index, out NB<T> array)
            where T : unmanaged, IEntityComponent
        {
-           if (entitiesDb.QueryEntitiesAndIndexInternal<T>(new EGID(id, group), out index, out array) == true)
+           if (entitiesDb.QueryEntitiesAndIndexInternal(new EGID(id, group), out index, out array) == true)
                return true;
 
            return false;
@@ -95,6 +95,31 @@ namespace Svelto.ECS
                                                                          .FastConcat("'"));
 #endif
            return ref entities[0];
+       }
+       
+       [MethodImpl(MethodImplOptions.AggressiveInlining)]
+       public static NB<T> GetArrayAndEntityIndex<T>(this EGIDMapper<T> mapper, uint entityID, out uint index)  where T : unmanaged, IEntityComponent
+       {
+           if (mapper._map.TryFindIndex(entityID, out index))
+           {
+               return (NB<T>) mapper._map.GetValues(out _);
+           }
+
+           throw new ECSException("Entity not found");
+       }
+
+       [MethodImpl(MethodImplOptions.AggressiveInlining)]
+       public static bool TryGetArrayAndEntityIndex<T>(this EGIDMapper<T> mapper, uint entityID, out uint index, out NB<T> array)  where T : unmanaged, IEntityComponent
+       {
+           index = default;
+           if (mapper._map != null && mapper._map.TryFindIndex(entityID, out index))
+           {
+               array = (NB<T>) mapper._map.GetValues(out _);
+               return true;
+           }
+
+           array = default;
+           return false;
        }
     }
 }

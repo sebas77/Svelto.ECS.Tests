@@ -1,10 +1,23 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using DBC.Common;
 using Svelto.Common;
 
 namespace Svelto.DataStructures
 {
+    /// <summary>
+    /// This dictionary has been created for just one reason: I needed a dictionary that would have let me iterate
+    /// over the values as an array, directly, without generating one or using an iterator.
+    /// For this goal is N times faster than the standard dictionary. Faster dictionary is also faster than
+    /// the standard dictionary for most of the operations, but the difference is negligible. The only slower operation
+    /// is resizing the memory on add, as this implementation needs to use two separate arrays compared to the standard
+    /// one
+    /// note: SveltoDictionary is not thread safe. A thread safe version should take care of possible setting of
+    /// value with shared hash hence bucket list index.
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
     public struct
         SveltoDictionary<TKey, TValue, TKeyStrategy, TValueStrategy, TBucketStrategy> : ISveltoDictionary<TKey, TValue>
         where TKey : struct, IEquatable<TKey>
@@ -42,14 +55,23 @@ namespace Svelto.DataStructures
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(TKey key, in TValue value)
         {
-            if (AddValue(key, in value, out _) == false)
+            var ret = AddValue(key, in value, out _);
+            
+#if DEBUG && !PROFILE_SVELTO            
+            if (ret == false)
                 throw new SveltoDictionaryException("Key already present");
+#endif            
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set(TKey key, in TValue value)
         {
-            AddValue(key, in value, out _);
+            var ret = AddValue(key, in value, out _);
+            
+#if DEBUG && !PROFILE_SVELTO            
+            if (ret == true)
+              throw new SveltoDictionaryException("trying to set a value on a not existing key");
+#endif            
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -138,10 +160,17 @@ namespace Svelto.DataStructures
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetValueByRef(TKey key)
         {
+#if DEBUG && !PROFILE_SVELTO
             if (TryFindIndex(key, out var findIndex) == true)
                 return ref _values[(int) findIndex];
 
             throw new SveltoDictionaryException("Key not found");
+#else
+            //Burst is not able to vectorise code if throw is found, regardless if it's actually ever thrown
+            TryFindIndex(key, out var findIndex);
+
+            return ref _values[(int) findIndex];
+#endif
         }
 
         public void SetCapacity(uint size)
@@ -166,20 +195,15 @@ namespace Svelto.DataStructures
             int  hash        = key.GetHashCode();
             uint bucketIndex = Reduce((uint) hash, (uint) _buckets.capacity);
 
-            if (_freeValueCellIndex == _values.capacity)
-            {
-                var expandPrime = HashHelpers.ExpandPrime((int) _freeValueCellIndex);
-
-                _values.Resize((uint) expandPrime);
-                _valuesInfo.Resize((uint) expandPrime);
-            }
-
             //buckets value -1 means it's empty
             var valueIndex = _buckets[bucketIndex] - 1;
 
             if (valueIndex == -1)
+            {
+                ResizeIfNeeded();
                 //create the info node at the last position and fill it with the relevant information
                 _valuesInfo[_freeValueCellIndex] = new FasterDictionaryNode<TKey>(ref key, hash);
+            }
             else //collision or already exists
             {
                 int currentValueIndex = valueIndex;
@@ -199,6 +223,8 @@ namespace Svelto.DataStructures
                     currentValueIndex = fasterDictionaryNode.previous;
                 } while (currentValueIndex != -1); //-1 means no more values with key with the same hash
 
+                ResizeIfNeeded();
+                
                 //oops collision!
                 _collisions++;
                 //create a new node which previous index points to node currently pointed in the bucket
@@ -268,6 +294,17 @@ namespace Svelto.DataStructures
             return true;
         }
 
+        void ResizeIfNeeded()
+        {
+            if (_freeValueCellIndex == _values.capacity)
+            {
+                var expandPrime = HashHelpers.ExpandPrime((int) _freeValueCellIndex);
+
+                _values.Resize((uint) expandPrime);
+                _valuesInfo.Resize((uint) expandPrime);
+            }
+        }
+
         public bool Remove(TKey key)
         {
             int  hash        = key.GetHashCode();
@@ -288,7 +325,7 @@ namespace Svelto.DataStructures
                     {
 #if DEBUG && !PROFILE_SVELTO
                             if (fasterDictionaryNode.next != -1)	
-                                throw new PreconditionException("if the bucket points to the cell, next MUST NOT exists");
+                                throw new SveltoDictionaryException("if the bucket points to the cell, next MUST NOT exists");
 #endif
                         //the bucket will point to the previous cell. if a previous cell exists
                         //its next pointer must be updated!
@@ -304,7 +341,7 @@ namespace Svelto.DataStructures
                     else
                     {
                         if (fasterDictionaryNode.next == -1)
-                            throw new PreconditionException("if the bucket points to another cell, next MUST exists");
+                            throw new SveltoDictionaryException("if the bucket points to another cell, next MUST exists");
                         
                     }
 #endif
@@ -400,10 +437,17 @@ namespace Svelto.DataStructures
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint GetIndex(TKey key)
         {
+#if DEBUG && !PROFILE_SVELTO            
             if (TryFindIndex(key, out var findIndex))
                 return findIndex;
 
             throw new SveltoDictionaryException("Key not found");
+#else
+            //Burst is not able to vectorise code if throw is found, regardless if it's actually ever thrown
+            TryFindIndex(key, out var findIndex);
+            
+            return findIndex;
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -541,9 +585,9 @@ namespace Svelto.DataStructures
         TKeyStrategy    _valuesInfo;
         TBucketStrategy _buckets;
 
-        uint                    _freeValueCellIndex;
-        uint                    _collisions;
-        internal TValueStrategy _values;
+        uint                                   _freeValueCellIndex;
+        uint                                   _collisions;
+        internal TValueStrategy                _values;
     }
 
     public class SveltoDictionaryException : Exception

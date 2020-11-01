@@ -1,10 +1,34 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Svelto.Common;
 
 namespace Svelto.DataStructures
 {
-    /// <summary>
+    internal sealed class NBDebugProxy<T> where T : struct
+    {
+        private NB<T> m_Array;
+
+        public NBDebugProxy(NB<T> array)
+        {
+            this.m_Array = array;
+        }
+
+        public T[] Items
+        {
+            get
+            {
+                T[] array = new T[m_Array.capacity];
+                
+                m_Array.CopyTo(0, array, 0, (uint) m_Array.capacity);
+
+                return array;
+            }
+        }
+    }
+
+/// <summary>
     /// NB stands for NB
     /// NativeBuffers are current designed to be used inside Jobs. They wrap an EntityDB array of components
     /// but do not track it. Hence it's meant to be used temporary and locally as the array can become invalid
@@ -18,6 +42,8 @@ namespace Svelto.DataStructures
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    
+    [DebuggerTypeProxy(typeof(NBDebugProxy<>))]
     public struct NB<T>:IBuffer<T> where T:struct
     {
         static NB()
@@ -32,7 +58,13 @@ namespace Svelto.DataStructures
             _capacity = capacity;
         }
 
-        public void CopyTo(uint sourceStartIndex, T[] destination, uint destinationStartIndex, uint size) { throw new NotImplementedException(); }
+        public void CopyTo(uint sourceStartIndex, T[] destination, uint destinationStartIndex, uint count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                destination[i] = this[i];
+            }
+        }
         public void Clear()
         {
             MemoryUtilities.MemClear(_ptr, (uint) (_capacity * MemoryUtilities.SizeOf<T>()));

@@ -245,7 +245,7 @@ namespace Svelto.ECS.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Clear()
+        public void FastClear()
         {
             unsafe
             {

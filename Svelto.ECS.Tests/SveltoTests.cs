@@ -184,10 +184,10 @@ namespace Svelto.ECS.Tests.Messy
         {
             void CheckFunction()
             {
-                _entityFactory.BuildEntity<TestDescriptor7>(new EGID(id, group0));
+                _entityFactory.BuildEntity<TestDescriptor3>(new EGID(id, group0), new[] {new TestIt(2)});
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-                _entityFactory.BuildEntity<TestDescriptor3>(new EGID(id, group0), new[] {new TestIt(2)});
+                _entityFactory.BuildEntity<TestDescriptor4>(new EGID(id, group0), new[] {new TestIt(2)});
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
             }
 
@@ -205,7 +205,6 @@ namespace Svelto.ECS.Tests.Messy
             {
                 _entityFactory.BuildEntity<TestDescriptor7>(new EGID(id, group0), new[] {new TestIt(2)});
                 _entityFactory.BuildEntity<TestDescriptor3>(new EGID(id, group0), new[] {new TestIt(2)});
-                _simpleSubmissionEntityViewScheduler.SubmitEntities();
             }
             catch
             {
@@ -467,61 +466,62 @@ namespace Svelto.ECS.Tests.Messy
               , (ulong) group0);
         }
 
-        // [TestCase((uint)0, (uint)1, (uint)2, (uint)3)]
-        // [TestCase((uint)4, (uint)5, (uint)6, (uint)7)]
-        // [TestCase((uint)8, (uint)9, (uint)10, (uint)11)]
-        // public void TestExecuteOnAllTheEntities(uint id, uint id2, uint id3, uint id4)
-        // {
-        //     _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id, groupR4), new[] { new TestIt(2) });
-        //     _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id2, groupR4 + 1), new[] { new TestIt(2) });
-        //     _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id3, groupR4 + 2), new[] { new TestIt(2) });
-        //     _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id4, groupR4 + 3), new[] { new TestIt(2) });
-        //     _simpleSubmissionEntityViewScheduler.SubmitEntities();
-        //
-        //     _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityViewStruct>((entity, group, groupCount, db) =>
-        //     {
-        //         for (int i = 0; i < groupCount; i++)
-        //             entity[i].TestIt.value = entity[i].ID.entityID;
-        //     });
-        //
-        //     _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityStruct>((entity, group, groupCount, db) =>
-        //     {
-        //         for (int i = 0; i < groupCount; i++)
-        //             entity[i].value = entity[i].ID.entityID;
-        //     });
-        //
-        //
-        //     for (uint i = 0; i < 4; i++)
-        //     {
-        //         EntityCollection<TestEntityStruct> buffer1 = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>(groupR4 + i);
-        //         EntityCollection<TestEntityViewStruct> buffer2 = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(groupR4 + i);
-        //
-        //         Assert.AreEqual(buffer1.count, 1);
-        //         Assert.AreEqual(buffer2.count, 1);
-        //
-        //         for (int j = 0; j < buffer1.count; j++)
-        //         {
-        //             Assert.AreEqual(buffer1[j].value, buffer1[j].ID.entityID);
-        //             Assert.AreEqual(buffer2[j].TestIt.value, buffer2[j].ID.entityID);
-        //         }
-        //     }
-        //
-        //     _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id, groupR4));
-        //     _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id2, groupR4 + 1));
-        //     _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id3, groupR4 + 2));
-        //     _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id4, groupR4 + 3));
-        //     _simpleSubmissionEntityViewScheduler.SubmitEntities();
-        //
-        //     _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityViewStruct>((entity, group,  groupCount, db) =>
-        //     {
-        //         Assert.Fail();
-        //     });
-        //
-        //     _neverDoThisIsJustForTheTest.entitiesDB.ExecuteOnAllEntities<TestEntityStruct>((entity, group,  groupCount, db) =>
-        //     {
-        //         Assert.Fail();
-        //     });
-        // }
+        [TestCase((uint)0, (uint)1, (uint)2, (uint)3)]
+        [TestCase((uint)4, (uint)5, (uint)6, (uint)7)]
+        [TestCase((uint)8, (uint)9, (uint)10, (uint)11)]
+        public void TestExecuteOnAllTheEntities(uint id, uint id2, uint id3, uint id4)
+        {
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id, groupR4), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id2, groupR4 + 1), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id3, groupR4 + 2), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id4, groupR4 + 3), new[] { new TestIt(2) });
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+        
+            
+            foreach (var ((entity, groupCount), exclusiveGroupStruct) in _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>())
+            {
+                for (int i = 0; i < groupCount; i++)
+                    entity[i].TestIt.value = entity[i].ID.entityID;
+            };
+        
+            foreach (var ((entity, groupCount), exclusiveGroupStruct) in _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>())
+            {
+                for (int i = 0; i < groupCount; i++)
+                    entity[i].value = entity[i].ID.entityID;
+            };
+        
+        
+            for (uint i = 0; i < 4; i++)
+            {
+                var (buffer1, count) = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>(groupR4 + i);
+                var (buffer2, count2) = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(groupR4 + i);
+        
+                Assert.AreEqual(count, 1);
+                Assert.AreEqual(count2, 1);
+        
+                for (int j = 0; j < count; j++)
+                {
+                    Assert.AreEqual(buffer1[j].value, buffer1[j].ID.entityID);
+                    Assert.AreEqual(buffer2[j].TestIt.value, buffer2[j].ID.entityID);
+                }
+            }
+        
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id, groupR4));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id2, groupR4 + 1));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id3, groupR4 + 2));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id4, groupR4 + 3));
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+        
+            foreach (var (_, _) in _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>())
+            {
+                Assert.Fail();
+            };
+        
+            foreach (var (_, _) in _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>())
+            {
+                Assert.Fail();
+            };
+        }
 
         [TestCase]
         public void QueryingNotExistingViewsInAnExistingGroupMustNotCrash()
@@ -760,7 +760,7 @@ namespace Svelto.ECS.Tests.Messy
 
     struct TestEntityStruct : IEntityComponent, INeedEGID
     {
-        public readonly uint value;
+        public uint value;
 
         public TestEntityStruct(uint value) : this() { this.value = value; }
 

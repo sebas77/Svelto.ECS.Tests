@@ -50,14 +50,6 @@ namespace Svelto.ECS
         EntityComponentInitializer BuildEntity<T>(EGID egid, IEnumerable<object> implementors = null)
             where T : IEntityDescriptor, new();
 
-        /// <summary>
-        ///     When the type of the entity is not known (this is a special case!) an EntityDescriptorInfo
-        ///     can be built in place of the generic parameter T.
-        /// </summary>
-        /// <param name="entityID"></param>
-        /// <param name="entityDescriptor"></param>
-        /// <param name="implementors"></param>
-        ///
         EntityComponentInitializer BuildEntity<T>(uint entityID, ExclusiveGroupStruct groupStructId,
                                                T    descriptorEntity, IEnumerable<object>  implementors = null)
             where T : IEntityDescriptor;

@@ -50,7 +50,7 @@ namespace Svelto.ECS
                  GroupTag<G4>.Add(Group);
  
  #if DEBUG
-                 GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name}-{typeof(G4).Name}";
+                 GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name}-{typeof(G4).Name} ID {(uint)Group}";
  #endif
                  GroupCompoundInitializer.isInitializing4.Value = true;
                  //all the combinations must share the same group
@@ -132,7 +132,7 @@ namespace Svelto.ECS
                  GroupTag<G3>.Add(Group);
  
  #if DEBUG
-                 GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name}";
+                 GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name} ID {(uint)Group}";
  #endif
                  //all the combinations must share the same group
                  GroupCompoundInitializer.isInitializing3.Value = true;
@@ -178,7 +178,7 @@ namespace Svelto.ECS
                  GroupTag<G2>.Add(Group);
  
  #if DEBUG
-                 GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}";
+                 GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name} ID {(uint)Group}";
  #endif
                  GroupCompoundInitializer.isInitializing2.Value = true;
                  GroupCompound<G2, G1>._Groups                 = _Groups;
@@ -209,7 +209,7 @@ namespace Svelto.ECS
              _Groups.Add(group);
  
  #if DEBUG
-             GroupMap.idToName[(uint) group] = $"Compound: {typeof(T).Name}";
+             GroupMap.idToName[(uint) group] = $"Compound: {typeof(T).Name} ID {(uint)group}";
  #endif
          }
  

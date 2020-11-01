@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Svelto.Common;
 using Svelto.DataStructures;
 
@@ -21,13 +20,13 @@ namespace Svelto.ECS.Internal
         uint                count { get; }
         ITypeSafeDictionary Create();
 
-        void AddEntitiesToEngines(FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityComponentEnginesDb,
+        void AddEntitiesToEngines(FasterDictionary<RefWrapperType, FasterList<IEngine>> entityComponentEnginesDb,
             ITypeSafeDictionary realDic, ExclusiveGroupStruct @group, in PlatformProfiler profiler);
-        void RemoveEntitiesFromEngines(FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityComponentEnginesDB,
+        void RemoveEntitiesFromEngines(FasterDictionary<RefWrapperType, FasterList<IEngine>> entityComponentEnginesDB,
             in PlatformProfiler profiler, ExclusiveGroupStruct @group);
         void AddEntitiesFromDictionary(ITypeSafeDictionary entitiesToSubmit, uint groupId);
         void MoveEntityFromEngines(EGID fromEntityGid, EGID? toEntityID, ITypeSafeDictionary toGroup,
-            FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> engines, in PlatformProfiler profiler);
+            FasterDictionary<RefWrapperType, FasterList<IEngine>> engines, in PlatformProfiler profiler);
         void AddEntityToDictionary(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup);
         void RemoveEntityFromDictionary(EGID fromEntityGid);
 

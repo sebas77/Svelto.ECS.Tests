@@ -16,7 +16,7 @@ namespace Svelto.ECS
     /// </summary>
     public struct FilterGroup
     {
-        internal FilterGroup(ExclusiveGroupStruct exclusiveGroupStruct)
+        internal FilterGroup(ExclusiveGroupStruct exclusiveGroupStruct, int ID)
         {
             _denseListOfIndicesToEntityComponentArray =
                 new NativeDynamicArrayCast<uint>(NativeDynamicArray.Alloc<uint>(Allocator.Persistent));
@@ -25,6 +25,7 @@ namespace Svelto.ECS
             //from the entityID, find the index
             _indexOfEntityInDenseList                 = new SharedSveltoDictionaryNative<uint, uint>(0, Allocator.Persistent);
             _exclusiveGroupStruct = exclusiveGroupStruct;
+            _ID = ID;
         }
 
         /// <summary>
@@ -39,7 +40,10 @@ namespace Svelto.ECS
                 throw new ECSException($"using an invalid filter");
             if (_indexOfEntityInDenseList.ContainsKey(entityID) == true)
                 throw new ECSException(
-                    $"trying to add an existing entity {entityID} to filter {mapper.entityType} with group {mapper.groupID}");
+                    $"trying to add an existing entity {entityID} to filter {mapper.entityType} - {_ID} with group {mapper.groupID}");
+            if (mapper.Exists(entityID) == false)
+                throw new ECSException(
+                    $"trying adding an entity {entityID} to filter {mapper.entityType} - {_ID} with group {mapper.groupID}, but entity is not found! ");
 #endif
             //Get the index of the Entity in the component array
             var indexOfEntityInBufferComponent = mapper.GetIndex(entityID);
@@ -91,7 +95,8 @@ namespace Svelto.ECS
         ///but they must be updated by the user.
         ///When to use this method: Add and Removed should be used to add and remove entities in the filters. This is
         /// valid as long as no structural changes happen in the group of entities involved.
-        /// IF structural changes happen, the indices stored in the filters won't be valid anymore. On structural changes
+        /// IF structural changes happen, the indices stored in the filters won't be valid anymore as they will possibly
+        /// point to entities that were not the original ones. On structural changes
         /// (specifically entities swapped or removed)
         /// the filters must then be rebuilt. It would be too slow to add this in the standard flow of Svelto in
         /// the current state, so calling this method is a user responsibility. 
@@ -184,5 +189,6 @@ namespace Svelto.ECS
         SharedSveltoDictionaryNative<uint, uint> _indexOfEntityInDenseList;
 
         readonly ExclusiveGroupStruct _exclusiveGroupStruct;
+        int                          _ID;
     }
 }

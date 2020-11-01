@@ -289,5 +289,23 @@ namespace Svelto.Common
             }
 #endif
         }
+
+        public static void Memmove<T>(IntPtr source, uint sourceStartIndex, IntPtr destination, uint destinationStartIndex, uint size)
+            where T : struct
+        {
+            unsafe
+            {
+                Unsafe.CopyBlock((void*) (destination + (int) destinationStartIndex), (void*) (source + (int) sourceStartIndex), size);
+            }
+        }
+        
+        public static void Memcpy<T>(IntPtr source, uint sourceStartIndex, IntPtr destination, uint destinationStartIndex, uint size)
+            where T : struct
+        {
+            unsafe
+            {
+                Buffer.MemoryCopy((void*) (source + (int) sourceStartIndex), (void*) (destination + (int) destinationStartIndex), size, size);
+            }
+        }
     }
 }
