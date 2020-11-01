@@ -145,9 +145,7 @@ namespace Svelto.ECS
 
                 _entitiesOperations.Clear();
                 _transientEntitiesOperations.Clear();
-#if DEBUG && !PROFILE_SVELTO
-                _multipleOperationOnSameEGIDChecker.Clear();
-#endif
+                
                 _groupedEntityToAdd.Dispose();
                 _entityStreams.Dispose();
                 

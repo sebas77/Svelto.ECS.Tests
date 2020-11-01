@@ -33,7 +33,7 @@ namespace Svelto.ECS
         (EGID entityID, IComponentBuilder[] componentsToBuild, Type descriptorType,
             IEnumerable<object> implementors = null)
         {
-            CheckAddEntityID(entityID, descriptorType, _entitiesDB, componentsToBuild);
+            CheckAddEntityID(entityID, descriptorType);
             Check.Require(entityID.groupID != 0, "invalid group detected");
 
             var dic = EntityFactory.BuildGroupedEntities(entityID, _groupedEntityToAdd, componentsToBuild

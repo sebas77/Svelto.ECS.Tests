@@ -108,8 +108,8 @@ namespace Svelto.ECS
                 var entitySubmitOperation = new EntitySubmitOperation(EntitySubmitOperationType.Swap,
                                                 localEgid, toEgid, entityDescriptor.componentsToBuild);
 
-                _enginesRoot.CheckRemoveEntityID(localEgid, entityDescriptor.realType, _enginesRoot._entitiesDB, entityDescriptor.componentsToBuild);
-                _enginesRoot.CheckAddEntityID(toEgid, entityDescriptor.realType, _enginesRoot._entitiesDB, entityDescriptor.componentsToBuild);
+                _enginesRoot.CheckRemoveEntityID(localEgid, entityDescriptor.realType);
+                _enginesRoot.CheckAddEntityID(toEgid, entityDescriptor.realType);
 
                 _enginesRoot.QueueEntitySubmitOperation(entitySubmitOperation);
             }
@@ -123,7 +123,7 @@ namespace Svelto.ECS
                 SerializationDescriptorMap serializationDescriptorMap = _enginesRoot.serializationDescriptorMap;
                 var entityDescriptor = serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
 
-                _enginesRoot.CheckRemoveEntityID(egid, entityDescriptor.realType, this._enginesRoot._entitiesDB, entityDescriptor.componentsToBuild);
+                _enginesRoot.CheckRemoveEntityID(egid, entityDescriptor.realType);
 
                 var entitySubmitOperation = new EntitySubmitOperation(
                     EntitySubmitOperationType.Remove,

@@ -1,11 +1,10 @@
 ﻿#if DEBUG && !PROFILE_SVELTO
-using System;
-using Svelto.DataStructures;
-
-#else
-using System;
-using System.Diagnostics;
+#define CHECK_ALL
 #endif
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
@@ -15,10 +14,8 @@ namespace Svelto.ECS
     /// </summary>
     public partial class EnginesRoot
     {
-#if DEBUG && !PROFILE_SVELTO
-        void CheckRemoveEntityID
-        (EGID egid, Type entityDescriptorType, EntitiesDB entitiesDB
-       , IComponentBuilder[] descriptorComponentsToVerify, string caller = "")
+        [Conditional("CHECK_ALL")]
+        void CheckRemoveEntityID(EGID egid, Type entityDescriptorType, string caller = "")
         {
             if (_multipleOperationOnSameEGIDChecker.ContainsKey(egid) == true)
                 throw new ECSException(
@@ -29,21 +26,23 @@ namespace Svelto.ECS
                        .FastConcat(" operation was: ")
                        .FastConcat(_multipleOperationOnSameEGIDChecker[egid] == 1 ? "add" : "remove"));
 
-            if (_idChecker.ContainsKey(egid) == false)
-                throw new ECSException("Trying to remove an Entity never submitted in the database "
-                                      .FastConcat(" caller: ", caller, " ").FastConcat(egid.entityID)
-                                      .FastConcat(" groupid: ").FastConcat(egid.groupID.ToName()).FastConcat(" type: ")
-                                      .FastConcat(entityDescriptorType != null
-                                                      ? entityDescriptorType.Name
-                                                      : "not available"));
+            if (_idChecker.TryGetValue(egid.groupID, out var hash))
+                if (hash.Contains(egid.entityID) == false)
+                    throw new ECSException("Trying to remove an Entity never submitted in the database "
+                                          .FastConcat(" caller: ", caller, " ").FastConcat(egid.entityID)
+                                          .FastConcat(" groupid: ").FastConcat(egid.groupID.ToName())
+                                          .FastConcat(" type: ")
+                                          .FastConcat(entityDescriptorType != null
+                                                          ? entityDescriptorType.Name
+                                                          : "not available"));
+                else
+                    hash.Remove(egid.entityID);
 
             _multipleOperationOnSameEGIDChecker.Add(egid, 0);
-            _idChecker.Remove(egid);
         }
 
-        void CheckAddEntityID
-        (EGID egid, Type entityDescriptorType, EntitiesDB entitiesDB
-       , IComponentBuilder[] descriptorComponentsToVerify, string caller = "")
+        [Conditional("CHECK_ALL")]
+        void CheckAddEntityID(EGID egid, Type entityDescriptorType, string caller = "")
         {
             if (_multipleOperationOnSameEGIDChecker.ContainsKey(egid) == true)
                 throw new ECSException(
@@ -54,32 +53,26 @@ namespace Svelto.ECS
                        .FastConcat(" operation was: ")
                        .FastConcat(_multipleOperationOnSameEGIDChecker[egid] == 1 ? "add" : "remove"));
 
-            if (_idChecker.ContainsKey(egid) == true)
+            var hash = _idChecker.GetOrCreate(egid.groupID, () => new HashSet<uint>());
+            if (hash.Contains(egid.entityID) == true)
                 throw new ECSException("Trying to add an Entity already submitted to the database "
                                       .FastConcat(" caller: ", caller, " ").FastConcat(egid.entityID)
                                       .FastConcat(" groupid: ").FastConcat(egid.groupID.ToName()).FastConcat(" type: ")
                                       .FastConcat(entityDescriptorType != null
                                                       ? entityDescriptorType.Name
                                                       : "not available"));
-
+            hash.Add(egid.entityID);
             _multipleOperationOnSameEGIDChecker.Add(egid, 1);
-            _idChecker.Add(egid, 1);
+            
         }
+
+        [Conditional("CHECK_ALL")]
+        void RemoveGroupID(ExclusiveGroupStruct groupID) { _idChecker.Remove(groupID); }
+
+        [Conditional("CHECK_ALL")]
+        void ClearChecks() { _multipleOperationOnSameEGIDChecker.FastClear(); }
 
         readonly FasterDictionary<EGID, uint> _multipleOperationOnSameEGIDChecker = new FasterDictionary<EGID, uint>();
-        readonly FasterDictionary<EGID, uint> _idChecker                          = new FasterDictionary<EGID, uint>();
-#else
-        [Conditional("_CHECKS_DISABLED")]
-        void CheckRemoveEntityID(EGID egid, Type entityDescriptorType, EntitiesDB entitiesDB, IComponentBuilder descriptorComponentToVerify
-, string caller = "")
-        {
-        }
-
-        [Conditional("_CHECKS_DISABLED")]
-        void CheckAddEntityID(EGID egid, Type entityDescriptorType, EntitiesDB entitiesDB, IComponentBuilder descriptorComponentToVerify
-, string caller = "")
-        {
-        }
-#endif
+        readonly FasterDictionary<uint, HashSet<uint>> _idChecker = new FasterDictionary<uint, HashSet<uint>>();
     }
 }

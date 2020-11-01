@@ -37,9 +37,7 @@ namespace Svelto.ECS
 #if UNITY_BURST          
             NativeOperationSubmission(profiler);
 #endif
-#if DEBUG && !PROFILE_SVELTO
-            _multipleOperationOnSameEGIDChecker.FastClear();
-#endif
+            ClearChecks();
 
             bool entitiesAreSubmitted = false;
             

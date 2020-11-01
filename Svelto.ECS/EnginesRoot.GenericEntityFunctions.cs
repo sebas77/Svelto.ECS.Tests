@@ -31,7 +31,7 @@ namespace Svelto.ECS
             {
                 DBC.ECS.Check.Require(entityEGID.groupID != 0, "invalid group detected");
                 var descriptorComponentsToBuild = EntityDescriptorTemplate<T>.descriptor.componentsToBuild;
-                _enginesRoot.Target.CheckRemoveEntityID(entityEGID, TypeCache<T>.type, this._enginesRoot.Target._entitiesDB, descriptorComponentsToBuild);
+                _enginesRoot.Target.CheckRemoveEntityID(entityEGID, TypeCache<T>.type);
 
                 _enginesRoot.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityEGID, entityEGID,
@@ -42,6 +42,7 @@ namespace Svelto.ECS
             public void RemoveEntitiesFromGroup(ExclusiveGroupStruct groupID)
             {
                 DBC.ECS.Check.Require(groupID != 0, "invalid group detected");
+                _enginesRoot.Target.RemoveGroupID(groupID);
 
                 _enginesRoot.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, new EGID(0, groupID), new EGID()));
@@ -86,10 +87,8 @@ namespace Svelto.ECS
 
                     dictionary.KeysEvaluator((key) =>
                     {
-                        _enginesRoot.Target.CheckRemoveEntityID(new EGID(key, fromGroupID), TypeCache<T>.type
-                                                              , _enginesRoot.Target._entitiesDB, components);
-                        _enginesRoot.Target.CheckAddEntityID(new EGID(key, toGroupID), TypeCache<T>.type
-                                                           , _enginesRoot.Target._entitiesDB, components);
+                        _enginesRoot.Target.CheckRemoveEntityID(new EGID(key, fromGroupID), TypeCache<T>.type);
+                        _enginesRoot.Target.CheckAddEntityID(new EGID(key, toGroupID), TypeCache<T>.type);
                     });
                 
 #endif
@@ -157,8 +156,8 @@ namespace Svelto.ECS
                 var enginesRootTarget           = _enginesRoot.Target;
                 var descriptorComponentsToBuild = EntityDescriptorTemplate<T>.descriptor.componentsToBuild;
                 
-                enginesRootTarget.CheckRemoveEntityID(fromID, TypeCache<T>.type, enginesRootTarget._entitiesDB, descriptorComponentsToBuild);
-                enginesRootTarget.CheckAddEntityID(toID, TypeCache<T>.type, enginesRootTarget._entitiesDB, descriptorComponentsToBuild);
+                enginesRootTarget.CheckRemoveEntityID(fromID, TypeCache<T>.type);
+                enginesRootTarget.CheckAddEntityID(toID, TypeCache<T>.type);
 
                 enginesRootTarget.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Swap,

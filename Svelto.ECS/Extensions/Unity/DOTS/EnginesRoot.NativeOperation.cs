@@ -59,7 +59,7 @@ namespace Svelto.ECS
                         var componentsIndex       = buffer.Dequeue<uint>();
                         var entityEGID            = buffer.Dequeue<EGID>();
                         var nativeRemoveOperation = _nativeRemoveOperations[componentsIndex];
-                        CheckRemoveEntityID(entityEGID, nativeRemoveOperation.entityDescriptorType, _entitiesDB, nativeRemoveOperation.components[0]); 
+                        CheckRemoveEntityID(entityEGID, nativeRemoveOperation.entityDescriptorType); 
                         QueueEntitySubmitOperation(new EntitySubmitOperation(
                                                        EntitySubmitOperationType.Remove, entityEGID, entityEGID
                                                      , nativeRemoveOperation.components));
@@ -77,8 +77,8 @@ namespace Svelto.ECS
                         
                         var componentBuilders = _nativeSwapOperations[componentsIndex].components;
 
-                        CheckRemoveEntityID(entityEGID.@from, _nativeSwapOperations[componentsIndex].entityDescriptorType, this._entitiesDB, componentBuilders[0], _nativeSwapOperations[componentsIndex].caller );
-                        CheckAddEntityID(entityEGID.to, _nativeSwapOperations[componentsIndex].entityDescriptorType, this._entitiesDB, componentBuilders[0], _nativeSwapOperations[componentsIndex].caller);
+                        CheckRemoveEntityID(entityEGID.@from, _nativeSwapOperations[componentsIndex].entityDescriptorType, _nativeSwapOperations[componentsIndex].caller );
+                        CheckAddEntityID(entityEGID.to, _nativeSwapOperations[componentsIndex].entityDescriptorType, _nativeSwapOperations[componentsIndex].caller);
 
                         QueueEntitySubmitOperation(new EntitySubmitOperation(
                                                        EntitySubmitOperationType.Swap, entityEGID.@from, entityEGID.to
