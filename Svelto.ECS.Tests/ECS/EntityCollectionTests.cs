@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using NUnit.Framework;
+using Svelto.ECS.Schedulers;
 using Assert = NUnit.Framework.Assert;
 
 namespace Svelto.ECS.Tests.ECS

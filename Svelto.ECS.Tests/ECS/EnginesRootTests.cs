@@ -15,7 +15,7 @@ namespace Svelto.ECS.Tests.ECS
         public void Init()
         {
             _scheduler   = new SimpleEntitiesSubmissionScheduler();
-            _enginesRoot = new EnginesRoot(_scheduler);
+            _enginesRoot = new EnginesRoot((EntitiesSubmissionScheduler) _scheduler);
         }
 
         [TestCase(Description = "Test that engines are disposed when the EngineRoot is disposed")]

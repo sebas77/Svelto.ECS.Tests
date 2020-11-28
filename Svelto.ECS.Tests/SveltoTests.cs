@@ -5,7 +5,8 @@ using Svelto.DataStructures;
 using Svelto.ECS;
 using Svelto.ECS.Experimental;
 using Svelto.ECS.Hybrid;
-using Assert = NUnit.Framework.Assert;
+ using Svelto.ECS.Schedulers;
+ using Assert = NUnit.Framework.Assert;
 
 namespace Svelto.ECS.Tests.Messy
 {

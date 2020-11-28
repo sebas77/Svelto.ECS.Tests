@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using Svelto.ECS.Schedulers;
 
 namespace Svelto.ECS.Tests.ECS.Filters
 {
@@ -53,7 +54,6 @@ namespace Svelto.ECS.Tests.ECS.Filters
         SimpleEntitiesSubmissionScheduler _scheduler;
         EnginesRoot _root;
         IEntityFactory _factory;
-        IEntityFunctions _functions;
         TestEngine _engine;
 
         class TestEntityDescriptor : GenericEntityDescriptor<TestEntityStruct> {}

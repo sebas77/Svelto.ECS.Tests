@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using Svelto.DataStructures;
 using Svelto.ECS.Experimental;
+using Svelto.ECS.Schedulers;
 
 namespace Svelto.ECS.Tests.ECS
 {

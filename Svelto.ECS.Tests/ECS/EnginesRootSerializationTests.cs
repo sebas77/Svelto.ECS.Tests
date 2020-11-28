@@ -15,7 +15,7 @@ namespace Svelto.ECS.Tests.ECS
         public void Init()
         {
             _scheduler       = new SimpleEntitiesSubmissionScheduler();
-            _enginesRoot     = new EnginesRoot(_scheduler);
+            _enginesRoot     = new EnginesRoot((EntitiesSubmissionScheduler) _scheduler);
             _entityFactory   = _enginesRoot.GenerateEntityFactory();
             _entityFunctions = _enginesRoot.GenerateEntityFunctions();
         }
