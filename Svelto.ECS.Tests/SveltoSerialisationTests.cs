@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+﻿﻿using NUnit.Framework;
 using Svelto.DataStructures;
 using Svelto.ECS;
 using Svelto.ECS.Hybrid;
@@ -258,8 +258,7 @@ namespace Svelto.ECS.Tests.Serialization
             generateEntitySerializer.SerializeEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData
                                                    , (int) SerializationType.Storage);
 
-            var serializerSubmissionScheduler = new SimpleEntitiesSubmissionScheduler();
-            var newEnginesRoot = new EnginesRoot(serializerSubmissionScheduler);
+            var newEnginesRoot = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
             _neverDoThisIsJustForTheTest = new TestEngine();
 
             newEnginesRoot.AddEngine(_neverDoThisIsJustForTheTest);
@@ -272,7 +271,7 @@ namespace Svelto.ECS.Tests.Serialization
             generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData
                                                         , (int) SerializationType.Storage);
 
-            serializerSubmissionScheduler.SubmitEntities();
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.That(
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(0, NamedGroup1.Group).value
