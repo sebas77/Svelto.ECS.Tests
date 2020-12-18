@@ -9,7 +9,7 @@ namespace Svelto.ECS.Tests.ECS
     [TestFixture(0u, 100)]
     [TestFixture(20u, 100)]
     [TestFixture(123u, 100)]
-    class EntityCollectionTests
+    public class EntityCollectionTests
     {
         public EntityCollectionTests(uint idStart, int entityCountPerGroup)
         {
@@ -24,11 +24,11 @@ namespace Svelto.ECS.Tests.ECS
         IEntityFactory                    _entityFactory;
         IEntityFunctions                  _entityFunctions;
         SimpleEntitiesSubmissionScheduler _simpleSubmissionEntityViewScheduler;
-        TestEngine                        _testEngine;
+        protected TestEngine              _testEngine;
 
-        static   ushort         numberOfGroups = 10;
-        static   ExclusiveGroup _group         = new ExclusiveGroup(numberOfGroups);
-        readonly ushort         _groupCount    = numberOfGroups;
+        static             ushort         numberOfGroups = 10;
+        protected static   ExclusiveGroup _group         = new ExclusiveGroup(numberOfGroups);
+        protected readonly ushort         _groupCount    = numberOfGroups;
 
 
         [SetUp]
@@ -48,18 +48,18 @@ namespace Svelto.ECS.Tests.ECS
             {
                 for (int j = 0; j < _entityCountPerGroup; j++)
                 {
-                    _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(
+                    _entityFactory.BuildEntity<EntityDescriptorWithComponentAndViewComponent>(
                         new EGID(id++, _group + i), new object[] {new TestFloatValue(1f), new TestIntValue(1)});
                     
-                    _entityFactory.BuildEntity<TestEntityViewComponentWithString>(
+                    _entityFactory.BuildEntity<EntityDescriptorViewComponentWithString>(
                         new EGID(id++, _group + i), new object[] {new TestStringValue("test")});
                 }
             }
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            foreach (var ((buffer, count), exclusiveGroupStruct) in _testEngine
-                                                                   .entitiesDB.QueryEntities<TestEntityViewStruct>())
+            foreach (var ((buffer, count), _) in _testEngine
+                                                .entitiesDB.QueryEntities<TestEntityViewComponent>())
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -68,8 +68,8 @@ namespace Svelto.ECS.Tests.ECS
                 }
             }
 
-            foreach (var ((buffer, count), exclusiveGroupStruct) in _testEngine
-                                                                   .entitiesDB.QueryEntities<TestEntityStruct>())
+            foreach (var ((buffer, count), _) in _testEngine
+                                                .entitiesDB.QueryEntities<TestEntityComponent>())
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -93,7 +93,7 @@ namespace Svelto.ECS.Tests.ECS
         {
             void TestNotAcceptedEntityComponent()
             {
-                _entityFactory.BuildEntity<TestEntityViewComponentWithCustomStruct>(
+                _entityFactory.BuildEntity<EntityDescriptorViewComponentWithCustomStruct>(
                     new EGID(0, _group), new object[] {new TestCustomStructWithString("test")});
             }
 
@@ -105,7 +105,7 @@ namespace Svelto.ECS.Tests.ECS
         {
             for (uint i = 0; i < _groupCount; i++)
             {
-                var (entityViewsManagedArray, count) = _testEngine.entitiesDB.QueryEntities<TestEntityViewStruct>(_group + i);
+                var (entityViewsManagedArray, count) = _testEngine.entitiesDB.QueryEntities<TestEntityViewComponent>(_group + i);
 
                 // can't get a native array from a managed buffer
                 Assert.Throws<NotImplementedException>(() => entityViewsManagedArray.ToNativeArray(out _));
@@ -123,7 +123,7 @@ namespace Svelto.ECS.Tests.ECS
         {
             for (uint i = 0; i < _groupCount; i++)
             {
-                var (entityComponents, count)       = _testEngine.entitiesDB.QueryEntities<TestEntityStruct>(_group + i);
+                var (entityComponents, count)       = _testEngine.entitiesDB.QueryEntities<TestEntityComponent>(_group + i);
                 
                 // can't get a managed array from a native buffer
                 Assert.Throws<NotImplementedException>(() => entityComponents.ToManagedArray());                

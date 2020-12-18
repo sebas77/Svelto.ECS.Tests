@@ -1,6 +1,6 @@
 ﻿namespace Svelto.ECS.Tests
 {
-    class TestEngine : IQueryingEntitiesEngine
+    public class TestEngine : IQueryingEntitiesEngine
     {
         public EntitiesDB entitiesDB { get; set; }
         public void       Ready()    { }
