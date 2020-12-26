@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using NUnit.Framework;
 using Assert = NUnit.Framework.Assert;
-using Svelto.ECS;
 using Svelto.ECS.Schedulers;
 
 namespace Svelto.ECS.Tests.ECS
@@ -15,7 +13,7 @@ namespace Svelto.ECS.Tests.ECS
         public void Init()
         {
             _scheduler   = new SimpleEntitiesSubmissionScheduler();
-            _enginesRoot = new EnginesRoot((EntitiesSubmissionScheduler) _scheduler);
+            _enginesRoot = new EnginesRoot(_scheduler);
         }
 
         [TestCase(Description = "Test that engines are disposed when the EngineRoot is disposed")]
@@ -44,7 +42,7 @@ namespace Svelto.ECS.Tests.ECS
             "Test that engines are disposed when the EngineRoot is disposed, using engines of the same type")]
         public void TestDisposeEngineMultiples()
         {
-            var engines = new DisposableEngineMultiple[]
+            var engines = new[]
             {
                 new DisposableEngineMultiple(), new DisposableEngineMultiple(), new DisposableEngineMultiple()
             };
@@ -79,7 +77,7 @@ namespace Svelto.ECS.Tests.ECS
         [AllowMultiple]
         class DisposableEngineMultiple : DisposableEngineBase { }
 
-        IEntitiesSubmissionScheduler _scheduler;
+        SimpleEntitiesSubmissionSchedulerInterface _scheduler;
         EnginesRoot                  _enginesRoot;
     }
 }

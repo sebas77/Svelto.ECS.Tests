@@ -1,4 +1,5 @@
-﻿using Svelto.Common;
+﻿using System.Collections;
+using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
@@ -6,14 +7,18 @@ namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
-        void SubmitEntityComponents()
+        readonly FasterList<EntitySubmitOperation> _transientEntitiesOperations;
+
+        IEnumerator SubmitEntityComponents(uint maxNumberOfOperations)
         {
             using (var profiler = new PlatformProfiler("Svelto.ECS - Entities Submission"))
             {
                 int iterations = 0;
                 do
                 {
-                    SingleSubmission(profiler);
+                    var submitEntityComponents = SingleSubmission(profiler, maxNumberOfOperations);
+                    while (submitEntityComponents.MoveNext() == true)
+                        yield return null;
                 } while ((_groupedEntityToAdd.currentEntitiesCreatedPerGroup.count > 0 ||
                           _entitiesOperations.Count > 0) && ++iterations < 5);
 
@@ -29,7 +34,8 @@ namespace Svelto.ECS
         /// Something to do when I will optimize the callbacks
         /// </summary>
         /// <param name="profiler"></param>
-        void SingleSubmission(in PlatformProfiler profiler)
+        /// <param name="maxNumberOfOperations"></param>
+        IEnumerator SingleSubmission(PlatformProfiler profiler, uint maxNumberOfOperations)
         {
 #if UNITY_NATIVE          
             NativeOperationSubmission(profiler);
@@ -37,6 +43,8 @@ namespace Svelto.ECS
             ClearChecks();
 
             bool entitiesAreSubmitted = false;
+    
+            uint numberOfOperations = 0;
             
             if (_entitiesOperations.Count > 0)
             {
@@ -85,6 +93,16 @@ namespace Svelto.ECS
 
                             throw;
                         }
+
+                        ++numberOfOperations;
+
+                        if ((uint)numberOfOperations >= (uint)maxNumberOfOperations)
+                        {
+                            yield return null;
+                            
+                            numberOfOperations = 0;
+                            
+                        }
                     }
                 }
 
@@ -99,11 +117,61 @@ namespace Svelto.ECS
                 {
                     try
                     {
-                        AddEntityComponentsToTheDBAndSuitableEngines(profiler);
+                        using (profiler.Sample("Add entities to database"))
+                        {
+                            //each group is indexed by entity view type. for each type there is a dictionary indexed by entityID
+                            foreach (var groupToSubmit in _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
+                            {
+                                var groupID = groupToSubmit.Key;
+                                var groupDB = GetOrCreateGroup(groupID, profiler);
+
+                                //add the entityComponents in the group
+                                foreach (var entityComponentsToSubmit in _groupedEntityToAdd.other[groupID])
+                                {
+                                    var type                     = entityComponentsToSubmit.Key;
+                                    var targetTypeSafeDictionary = entityComponentsToSubmit.Value;
+                                    var wrapper                  = new RefWrapperType(type);
+
+                                    ITypeSafeDictionary dbDic = GetOrCreateTypeSafeDictionary(groupID, groupDB, wrapper, 
+                                        targetTypeSafeDictionary);
+
+                                    //Fill the DB with the entity components generate this frame.
+                                    dbDic.AddEntitiesFromDictionary(targetTypeSafeDictionary, groupID);
+                                }
+                            }
+                        }
+
+                        //then submit everything in the engines, so that the DB is up to date with all the entity components
+                        //created by the entity built
+                        using (profiler.Sample("Add entities to engines"))
+                        {
+                            foreach (var groupToSubmit in _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
+                            {
+                                var groupID = groupToSubmit.Key;
+                                var groupDB = _groupEntityComponentsDB[groupID];
+
+                                foreach (var entityComponentsToSubmit in _groupedEntityToAdd.other[groupID])
+                                {
+                                    var realDic = groupDB[new RefWrapperType(entityComponentsToSubmit.Key)];
+
+                                    entityComponentsToSubmit.Value.ExecuteEnginesAddOrSwapCallbacks(_reactiveEnginesAddRemove, realDic,
+                                        null, new ExclusiveGroupStruct(groupID), in profiler);
+                                    
+                                    ++numberOfOperations;
+
+                                    if (numberOfOperations >= maxNumberOfOperations)
+                                    {
+                                        yield return null;
+                                        
+                                        numberOfOperations = 0;
+                                    }
+                                }
+                            }
+                        }
                     }
                     finally
                     {
-                        using (profiler.Sample("clear 6operates double buffering"))
+                        using (profiler.Sample("clear double buffering"))
                         {
                             //other can be cleared now, but let's avoid deleting the dictionary every time
                             _groupedEntityToAdd.ClearOther();
@@ -122,55 +190,7 @@ namespace Svelto.ECS
             }
         }
 
-        void AddEntityComponentsToTheDBAndSuitableEngines(in PlatformProfiler profiler)
-        {
-            using (profiler.Sample("Add entities to database"))
-            {
-                //each group is indexed by entity view type. for each type there is a dictionary indexed by entityID
-                foreach (var groupOfEntitiesToSubmit in _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
-                {
-                    var groupID = groupOfEntitiesToSubmit.Key;
-                    
-                    var groupDB = GetOrCreateGroup(groupID, profiler);
-
-                    //add the entityComponents in the group
-                    foreach (var entityComponentsToSubmit in _groupedEntityToAdd.other[groupID])
-                    {
-                        var type = entityComponentsToSubmit.Key;
-                        var targetTypeSafeDictionary = entityComponentsToSubmit.Value;
-                        var wrapper = new RefWrapperType(type);
-
-                        ITypeSafeDictionary dbDic = GetOrCreateTypeSafeDictionary(groupID, groupDB, wrapper, 
-                            targetTypeSafeDictionary);
-
-                        //Fill the DB with the entity components generate this frame.
-                        dbDic.AddEntitiesFromDictionary(targetTypeSafeDictionary, groupID);
-                    }
-                }
-            }
-
-            //then submit everything in the engines, so that the DB is up to date with all the entity components
-            //created by the entity built
-            using (profiler.Sample("Add entities to engines"))
-            {
-                foreach (var groupToSubmit in _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
-                {
-                    var groupID = groupToSubmit.Key;
-                    var groupDB = _groupEntityComponentsDB[groupID];
-
-                    foreach (var entityComponentsToSubmit in _groupedEntityToAdd.other[groupID])
-                    {
-                        var realDic = groupDB[new RefWrapperType(entityComponentsToSubmit.Key)];
-
-                        entityComponentsToSubmit.Value.ExecuteEnginesAddOrSwapCallbacks(_reactiveEnginesAddRemove, realDic,
-                            null, new ExclusiveGroupStruct(groupToSubmit.Key), in profiler);
-                    }
-                }
-            }
-        }
-
         readonly DoubleBufferedEntitiesToAdd                        _groupedEntityToAdd;
         readonly ThreadSafeDictionary<ulong, EntitySubmitOperation> _entitiesOperations;
-        readonly FasterList<EntitySubmitOperation>                  _transientEntitiesOperations;
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Svelto.Common;
 using Svelto.DataStructures;
@@ -9,26 +10,36 @@ namespace Svelto.ECS
 {
     public sealed partial class EnginesRoot
     {
-        public readonly struct EntitiesSubmitter
+        public struct EntitiesSubmitter
         {
-            public EntitiesSubmitter(EnginesRoot enginesRoot)
+            public EntitiesSubmitter(EnginesRoot enginesRoot):this()
             {
                 _weakReference = new Svelto.DataStructures.WeakReference<EnginesRoot>(enginesRoot);
             }
 
             public bool IsUnused => _weakReference.IsValid == false;
 
-            public void Invoke()
+            public IEnumerator Invoke(uint maxNumberOfOperationsPerFrame)
             {
-                if (_weakReference.IsValid && _weakReference.Target._scheduler.paused == false)
-                    _weakReference.Target.SubmitEntityComponents();
+                var entitiesSubmissionScheduler = _weakReference.Target._scheduler;
+                if (_weakReference.IsValid && entitiesSubmissionScheduler.paused == false)
+                {
+                    var submitEntityComponents = _weakReference.Target.SubmitEntityComponents(maxNumberOfOperationsPerFrame);
+                    DBC.ECS.Check.Require(entitiesSubmissionScheduler.isRunning == false, "A submission started while the previous one was still flushing");
+                    entitiesSubmissionScheduler.isRunning = true;
+                    while (submitEntityComponents.MoveNext() == true)
+                        yield return null;
+
+                    entitiesSubmissionScheduler.isRunning = false;
+                    ++entitiesSubmissionScheduler.iteration;
+                }
             }
 
             readonly Svelto.DataStructures.WeakReference<EnginesRoot> _weakReference;
         }
 
         readonly EntitiesSubmissionScheduler  _scheduler;
-        public   IEntitiesSubmissionScheduler scheduler => _scheduler;
+        public   EntitiesSubmissionScheduler scheduler => _scheduler;
 
         /// <summary>
         /// Engines root contextualize your engines and entities. You don't need to limit yourself to one EngineRoot

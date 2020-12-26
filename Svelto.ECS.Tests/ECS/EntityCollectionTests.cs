@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using NUnit.Framework;
 using Svelto.ECS.Schedulers;
 using Assert = NUnit.Framework.Assert;
@@ -22,13 +21,12 @@ namespace Svelto.ECS.Tests.ECS
 
         EnginesRoot                       _enginesRoot;
         IEntityFactory                    _entityFactory;
-        IEntityFunctions                  _entityFunctions;
         SimpleEntitiesSubmissionScheduler _simpleSubmissionEntityViewScheduler;
-        protected TestEngine              _testEngine;
+        TestEngine                        _testEngine;
 
-        static             ushort         numberOfGroups = 10;
-        protected static   ExclusiveGroup _group         = new ExclusiveGroup(numberOfGroups);
-        protected readonly ushort         _groupCount    = numberOfGroups;
+        static   ushort         numberOfGroups = 10;
+        static   ExclusiveGroup _group         = new ExclusiveGroup(numberOfGroups);
+        readonly ushort         _groupCount    = numberOfGroups;
 
 
         [SetUp]
@@ -41,7 +39,7 @@ namespace Svelto.ECS.Tests.ECS
             _enginesRoot.AddEngine(_testEngine);
 
             _entityFactory   = _enginesRoot.GenerateEntityFactory();
-            _entityFunctions = _enginesRoot.GenerateEntityFunctions();
+            _enginesRoot.GenerateEntityFunctions();
 
             var id = _idStart;
             for (uint i = 0; i < _groupCount; i++)
@@ -58,8 +56,7 @@ namespace Svelto.ECS.Tests.ECS
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            foreach (var ((buffer, count), _) in _testEngine
-                                                .entitiesDB.QueryEntities<TestEntityViewComponent>())
+            foreach (var ((buffer, count), _) in _testEngine.entitiesDB.QueryEntities<TestEntityViewComponent>())
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -78,8 +75,8 @@ namespace Svelto.ECS.Tests.ECS
                 }
             }
             
-            foreach (var ((buffer, count), exclusiveGroupStruct) in _testEngine
-                .entitiesDB.QueryEntities<TestEntityViewComponentString>())
+            foreach (var ((buffer, count), _) in _testEngine
+                                                .entitiesDB.QueryEntities<TestEntityViewComponentString>())
             {
                 for (int i = 0; i < count; i++)
                 {

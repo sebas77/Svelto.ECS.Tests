@@ -1,7 +1,6 @@
 ﻿﻿using NUnit.Framework;
 using Svelto.DataStructures;
-using Svelto.ECS;
-using Svelto.ECS.Hybrid;
+ using Svelto.ECS.Hybrid;
 using Svelto.ECS.Schedulers;
 using Svelto.ECS.Serialization;
 
@@ -280,10 +279,9 @@ namespace Svelto.ECS.Tests.Serialization
             Assert.That(
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(0, NamedGroup1.Group).value
               , Is.EqualTo(4));
-            Assert.That(
-                _neverDoThisIsJustForTheTest
-                   .entitiesDB.QueryEntity<EntityStructPartiallySerialized>(0, NamedGroup1.Group).value1
-              , Is.EqualTo(3));
+            Assert.That(_neverDoThisIsJustForTheTest
+                       .entitiesDB.QueryEntity<EntityStructPartiallySerialized>(0, NamedGroup1.Group).value1
+                      , Is.EqualTo(3));
 
             newEnginesRoot.Dispose();
         }
@@ -386,18 +384,6 @@ namespace Svelto.ECS.Tests.Serialization
         {
             public EntitiesDB entitiesDB { get; set; }
             public void       Ready()    { }
-
-            public bool HasEntity<T>(EGID ID) where T : struct, IEntityComponent { return entitiesDB.Exists<T>(ID); }
-
-            public bool HasAnyEntityInGroup<T>(ExclusiveGroup groupID) where T : struct, IEntityComponent
-            {
-                return entitiesDB.QueryEntities<T>(groupID).count > 0;
-            }
-
-            public bool HasAnyEntityInGroupArray<T>(ExclusiveGroup groupID) where T : struct, IEntityComponent
-            {
-                return entitiesDB.QueryEntities<T>(groupID).count > 0;
-            }
         }
 
         struct EntityStructNotSerialized : IEntityComponent { }
@@ -443,7 +429,7 @@ namespace Svelto.ECS.Tests.Serialization
 
         class DeserializationFactory : IDeserializationFactory
         {
-            public EntityComponentInitializer BuildDeserializedEntity
+            public EntityInitializer BuildDeserializedEntity
             (EGID egid, ISerializationData serializationData, ISerializableEntityDescriptor entityDescriptor
            , int serializationType, IEntitySerialization entitySerialization, IEntityFactory factory
            , bool enginesRootIsDeserializationOnly)

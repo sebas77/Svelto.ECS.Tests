@@ -10,6 +10,7 @@ namespace Svelto.ECS
         
         public EntityCollection(IBuffer<T> buffer, uint count):this()
         {
+            DBC.ECS.Check.Require(count == 0 || buffer.isValid, "Buffer is found in impossible state");
             if (IsUnmanaged)
                 _nativedBuffer = (NB<T>) buffer;
             else

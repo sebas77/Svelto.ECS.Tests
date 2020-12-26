@@ -20,18 +20,18 @@ namespace Svelto.ECS
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void RemoveEntity<T>(uint entityID, ExclusiveBuildGroup groupID) where T :
+            public void RemoveEntity<T>(uint entityID, ExclusiveBuildGroup groupID, [CallerMemberName] string memberName = "") where T :
                 IEntityDescriptor, new()
             {
-                RemoveEntity<T>(new EGID(entityID, groupID));
+                RemoveEntity<T>(new EGID(entityID, groupID), memberName);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void RemoveEntity<T>(EGID entityEGID) where T : IEntityDescriptor, new()
+            public void RemoveEntity<T>(EGID entityEGID, [CallerMemberName] string memberName = "") where T : IEntityDescriptor, new()
             {
                 DBC.ECS.Check.Require(entityEGID.groupID != 0, "invalid group detected");
                 var descriptorComponentsToBuild = EntityDescriptorTemplate<T>.descriptor.componentsToBuild;
-                _enginesRoot.Target.CheckRemoveEntityID(entityEGID, TypeCache<T>.type);
+                _enginesRoot.Target.CheckRemoveEntityID(entityEGID, TypeCache<T>.type, memberName);
 
                 _enginesRoot.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityEGID, entityEGID,

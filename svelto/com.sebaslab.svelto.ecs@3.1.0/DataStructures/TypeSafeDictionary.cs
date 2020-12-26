@@ -106,8 +106,9 @@ namespace Svelto.ECS.Internal
 
                 //this can be optimized, should pass all the entities and not restart the process for each one
                 foreach (var value in implUnmgd)
-                    ExecuteEnginesAddOrSwapCallbacksOnSingleEntity(entityComponentEnginesDB, ref typeSafeDictionary[value.Key]
-                                                        , fromGroup, in profiler, new EGID(value.Key, toGroup));
+                    ExecuteEnginesAddOrSwapCallbacksOnSingleEntity(entityComponentEnginesDB
+                                                                 , ref typeSafeDictionary[value.Key], fromGroup
+                                                                 , in profiler, new EGID(value.Key, toGroup));
             }
             else
             {
@@ -115,8 +116,9 @@ namespace Svelto.ECS.Internal
 
                 //this can be optimized, should pass all the entities and not restart the process for each one
                 foreach (var value in implMgd)
-                    ExecuteEnginesAddOrSwapCallbacksOnSingleEntity(entityComponentEnginesDB, ref typeSafeDictionary[value.Key]
-                                                        , fromGroup, in profiler, new EGID(value.Key, toGroup));
+                    ExecuteEnginesAddOrSwapCallbacksOnSingleEntity(entityComponentEnginesDB
+                                                                 , ref typeSafeDictionary[value.Key], fromGroup
+                                                                 , in profiler, new EGID(value.Key, toGroup));
             }
         }
 

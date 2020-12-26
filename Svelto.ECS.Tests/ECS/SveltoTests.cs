@@ -1,12 +1,12 @@
-﻿﻿using System;
+﻿using System;
+using System.Runtime.InteropServices;
 using System.Text;
 using NUnit.Framework;
+using Svelto.Common;
 using Svelto.DataStructures;
-using Svelto.ECS;
-using Svelto.ECS.Experimental;
 using Svelto.ECS.Hybrid;
- using Svelto.ECS.Schedulers;
- using Assert = NUnit.Framework.Assert;
+using Svelto.ECS.Schedulers;
+using Assert = NUnit.Framework.Assert;
 
 namespace Svelto.ECS.Tests.Messy
 {
@@ -36,7 +36,7 @@ namespace Svelto.ECS.Tests.Messy
         }
 
         [TearDown]
-        public void Dipose() { _enginesRoot.Dispose(); }
+        public void Dispose() { _enginesRoot.Dispose(); }
 
         [TestCase]
         public void TestBuildEntityViewStructWithoutImplementors()
@@ -58,8 +58,10 @@ namespace Svelto.ECS.Tests.Messy
 
             Assert.Throws(typeof(TypeInitializationException), CheckFunction); //it's TypeInitializationException because the Type is not being constructed due to the ECSException
         }
-        
-        [TestCase((uint) 0)] [TestCase((uint) 1)] [TestCase((uint) 2)]
+
+        [TestCase((uint) 0)]
+        [TestCase((uint) 1)]
+        [TestCase((uint) 2)]
         public void TestExceptionTwoEntitiesCannotHaveTheSameIDInTheSameGroupInterleaved(uint id)
         {
             void CheckFunction()
@@ -72,6 +74,21 @@ namespace Svelto.ECS.Tests.Messy
             }
 
             Assert.Throws(typeof(ECSException), CheckFunction);
+        }
+
+        [TestCase]
+        public void TestValueReference()
+        {
+            var init = _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(
+                new EGID(0, group1), new[] {new TestIt(2)});
+
+            init.Get<TestEntityViewStruct>().TestIt.reference = new ValueReference<Transform>(new Transform(4));
+
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<TestEntityViewStruct>(new EGID(0, group1))
+                                                    .TestIt.testValue == 4);
+
         }
 
         [TestCase((uint) 0)]
@@ -326,7 +343,8 @@ namespace Svelto.ECS.Tests.Messy
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewStruct>(new EGID(id, group1)));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityStruct>(group1));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewStruct>(group1));
-            var (entityCollection, count) = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(group1);
+            var (entityCollection, count) =
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(group1);
             Assert.AreSame(entityCollection[0].TestIt, testIt);
         }
 
@@ -447,8 +465,7 @@ namespace Svelto.ECS.Tests.Messy
                     new EGID(id, group3), out var index)[index].ID.entityID, id);
             Assert.AreEqual(
                 (ulong) _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewStruct>(
-                    new EGID(id, group3), out index)[index].ID.groupID
-              , (ulong) group3);
+                    new EGID(id, group3), out index)[index].ID.groupID, (ulong) group3);
 
             _entityFunctions.SwapEntityGroup<TestDescriptor>(id, group3, group0);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
@@ -463,65 +480,78 @@ namespace Svelto.ECS.Tests.Messy
                     new EGID(id, group0), out index)[index].ID.entityID, id);
             Assert.AreEqual(
                 (ulong) _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewStruct>(
-                    new EGID(id, group0), out index)[index].ID.groupID
-              , (ulong) group0);
+                    new EGID(id, group0), out index)[index].ID.groupID, (ulong) group0);
         }
 
-        [TestCase((uint)0, (uint)1, (uint)2, (uint)3)]
-        [TestCase((uint)4, (uint)5, (uint)6, (uint)7)]
-        [TestCase((uint)8, (uint)9, (uint)10, (uint)11)]
+        [TestCase((uint) 0, (uint) 1, (uint) 2, (uint) 3)]
+        [TestCase((uint) 4, (uint) 5, (uint) 6, (uint) 7)]
+        [TestCase((uint) 8, (uint) 9, (uint) 10, (uint) 11)]
         public void TestExecuteOnAllTheEntities(uint id, uint id2, uint id3, uint id4)
         {
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id, groupR4), new[] { new TestIt(2) });
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id2, groupR4 + 1), new[] { new TestIt(2) });
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id3, groupR4 + 2), new[] { new TestIt(2) });
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id4, groupR4 + 3), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(
+                new EGID(id, groupR4), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(
+                new EGID(id2, groupR4 + 1), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(
+                new EGID(id3, groupR4 + 2), new[] {new TestIt(2)});
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(
+                new EGID(id4, groupR4 + 3), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
-        
-            
-            foreach (var ((entity, groupCount), exclusiveGroupStruct) in _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>())
+
+            foreach (var ((entity, groupCount), exclusiveGroupStruct) in _neverDoThisIsJustForTheTest.entitiesDB
+               .QueryEntities<TestEntityViewStruct>())
             {
                 for (int i = 0; i < groupCount; i++)
                     entity[i].TestIt.value = entity[i].ID.entityID;
-            };
-        
-            foreach (var ((entity, groupCount), exclusiveGroupStruct) in _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>())
+            }
+
+            ;
+
+            foreach (var ((entity, groupCount), exclusiveGroupStruct) in _neverDoThisIsJustForTheTest.entitiesDB
+               .QueryEntities<TestEntityStruct>())
             {
                 for (int i = 0; i < groupCount; i++)
                     entity[i].value = entity[i].ID.entityID;
-            };
-        
-        
+            }
+
+            ;
+
             for (uint i = 0; i < 4; i++)
             {
-                var (buffer1, count) = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>(groupR4 + i);
-                var (buffer2, count2) = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(groupR4 + i);
-        
+                var (buffer1, count) =
+                    _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>(groupR4 + i);
+                var (buffer2, count2) =
+                    _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>(groupR4 + i);
+
                 Assert.AreEqual(count, 1);
                 Assert.AreEqual(count2, 1);
-        
+
                 for (int j = 0; j < count; j++)
                 {
                     Assert.AreEqual(buffer1[j].value, buffer1[j].ID.entityID);
                     Assert.AreEqual(buffer2[j].TestIt.value, buffer2[j].ID.entityID);
                 }
             }
-        
+
             _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id, groupR4));
             _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id2, groupR4 + 1));
             _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id3, groupR4 + 2));
             _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id4, groupR4 + 3));
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
-        
+
             foreach (var (_, _) in _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewStruct>())
             {
                 Assert.Fail();
-            };
-        
+            }
+
+            ;
+
             foreach (var (_, _) in _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct>())
             {
                 Assert.Fail();
-            };
+            }
+
+            ;
         }
 
         [TestCase]
@@ -576,13 +606,14 @@ namespace Svelto.ECS.Tests.Messy
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            var iterators =
-                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct, TestEntityStruct2>(
-                    new LocalFasterReadOnlyList<ExclusiveGroupStruct>(new FasterList<ExclusiveGroupStruct>(new ExclusiveGroupStruct[] {group0, group1})));
+            var iterators = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityStruct, TestEntityStruct2>(
+                new LocalFasterReadOnlyList<ExclusiveGroupStruct>(
+                    new FasterList<ExclusiveGroupStruct>(new ExclusiveGroupStruct[] {group0, group1})));
 
             uint index = 0;
 
-            foreach (var ((iteratorentityComponentA, iteratorentityComponentB, count), exclusiveGroupStruct) in iterators)
+            foreach (var ((iteratorentityComponentA, iteratorentityComponentB, count), exclusiveGroupStruct) in
+                iterators)
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -596,7 +627,7 @@ namespace Svelto.ECS.Tests.Messy
                         Assert.AreEqual(iteratorentityComponentA[i].value, index + 200);
                         Assert.AreEqual(iteratorentityComponentB[i].value, index + 300);
                     }
-                    
+
                     index = ++index % 100;
                 }
             }
@@ -735,7 +766,8 @@ namespace Svelto.ECS.Tests.Messy
 
     class TestDescriptorEntityViewWithGenerics : GenericEntityDescriptor<TestDescriptorEntityViewThatWorks> { }
 
-    class TestDescriptorEntityViewWithWrongGenerics : GenericEntityDescriptor<TestDescriptorEntityViewThatCannotWork> { }
+    class
+        TestDescriptorEntityViewWithWrongGenerics : GenericEntityDescriptor<TestDescriptorEntityViewThatCannotWork> { }
 
     struct TestDescriptorEntityViewThatWorks : IEntityViewComponent
     {
@@ -786,20 +818,45 @@ namespace Svelto.ECS.Tests.Messy
 
     interface ITestIt
     {
-        float? testNullable { get; set; }
+        float?        testNullable      { get; set; }
         StringBuilder testStringBuilder { get; set; }
-        string testStrings { get; set; }
-        
-        float value { get; set; }
+        string        testStrings       { get; set; }
+
+        float                     value     { get; set; }
+        ValueReference<Transform> reference { set; }
+        int                       testValue { get; }
+    }
+
+    class Transform
+    {
+        public readonly int value;
+        public Transform(int i) { value = i; }
+    }
+
+    struct ValueReference<T>
+    {
+        public ValueReference(Object obj) { _pointer = GCHandle.Alloc(obj, GCHandleType.Normal); }
+
+        public static implicit operator T(ValueReference<T> t) => (T) t._pointer.Target;
+
+        GCHandle _pointer;
     }
 
     class TestIt : ITestIt
     {
+        Transform _reference;
         public TestIt(int i) { value = i; }
 
-        public float? testNullable { get; set; }
+        public float?        testNullable      { get; set; }
         public StringBuilder testStringBuilder { get; set; }
-        public string testStrings { get; set; }
-        public float value { get; set; }
+        public string        testStrings       { get; set; }
+        public float         value             { get; set; }
+
+        public ValueReference<Transform> reference
+        {
+            set => _reference = value;
+        }
+
+        public int testValue => _reference.value;
     }
 }

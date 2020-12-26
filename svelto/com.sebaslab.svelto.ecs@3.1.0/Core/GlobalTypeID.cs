@@ -5,7 +5,7 @@ using Svelto.ECS.DataStructures;
 
 namespace Svelto.ECS
 {
-    public class GlobalTypeID
+    public static class GlobalTypeID
     {
         internal static uint NextID<T>() { return (uint) (Interlocked.Increment(ref value) - 1); }
 
@@ -16,7 +16,7 @@ namespace Svelto.ECS
 
     interface IFiller
     {
-        void FillFromByteArray(EntityComponentInitializer init, NativeBag buffer);
+        void FillFromByteArray(EntityInitializer init, NativeBag buffer);
     }
 
     class Filler<T> : IFiller where T : struct, IEntityComponent
@@ -27,7 +27,7 @@ namespace Svelto.ECS
         }
 
         //it's an internal interface
-        public void FillFromByteArray(EntityComponentInitializer init, NativeBag buffer)
+        public void FillFromByteArray(EntityInitializer init, NativeBag buffer)
         {
             var component = buffer.Dequeue<T>();
 

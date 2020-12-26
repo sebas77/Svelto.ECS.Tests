@@ -7,24 +7,34 @@ using Unity.Jobs;
 namespace Svelto.ECS.Extensions.Unity
 {
     /// <summary>
-    /// This very high level class helps to wrap the complexity of the initialization of a UECS world to be used with Svelto.
-    /// This class is not necessary at all, it's just a out of the box solution for simple scenarios.
-    /// If used, it must be part of a SortedJobifiedEngineGroup and it must run always after all the jobified Svelto
-    /// Engines
+    /// This is a high level class to abstract the complexity of creating a Svelto ECS application that interacts
+    /// with UECS. However this is designed to make it work almost out of the box, but it should be eventually
+    /// substituted by project customized code.
+    /// This is a JobifiedEngine and as such it expect to be ticked. Normally it must be executed in a
+    /// SortedEnginesGroup as step that happens after the Svelto jobified engines run. The flow should be:
+    /// Svelto Engines Run
+    /// This Engine runs, which causeS:
+    /// Jobs to be completed (it's a sync point)
+    /// Synchronizations engines to be executed (Svelto to UECS)
+    /// Submission of Entities to be executed
+    /// Svelto Add/Remove callbacks to be called
+    /// ISubmissionEngines to be executed
+    /// UECS engines to executed
+    /// Synchronizations engines to be executed (UECS To Svelto)
     /// </summary>
     [Sequenced(nameof(JobifiedSveltoEngines.SveltoOverUECS))]
     public class SveltoOverUECSEnginesGroup: IJobifiedEngine
     {
         public SveltoOverUECSEnginesGroup(EnginesRoot enginesRoot)
         {
-            DBC.ECS.Check.Require(enginesRoot.scheduler is ISimpleEntitiesSubmissionScheduler, "The Engines root must use a EntitiesSubmissionScheduler scheduler implementation");
+            DBC.ECS.Check.Require(enginesRoot.scheduler is SimpleEntitiesSubmissionScheduler, "The Engines root must use a EntitiesSubmissionScheduler scheduler implementation");
 
-            CreateUnityECSWorldForSvelto(enginesRoot.scheduler as ISimpleEntitiesSubmissionScheduler, enginesRoot);
+            CreateUnityECSWorldForSvelto(enginesRoot.scheduler as SimpleEntitiesSubmissionScheduler, enginesRoot);
         }
 
         public World world { get; private set; }
 
-        void CreateUnityECSWorldForSvelto(ISimpleEntitiesSubmissionScheduler scheduler, EnginesRoot enginesRoot)
+        void CreateUnityECSWorldForSvelto(SimpleEntitiesSubmissionScheduler scheduler, EnginesRoot enginesRoot)
         {
             world = new World("Svelto<>UECS world");
 

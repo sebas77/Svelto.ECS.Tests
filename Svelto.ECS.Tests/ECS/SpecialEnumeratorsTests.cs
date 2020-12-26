@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using Svelto.ECS.Schedulers;
 
 namespace Svelto.ECS.Tests.ECS
 {
@@ -149,7 +148,7 @@ namespace Svelto.ECS.Tests.ECS
                 }
             }
 
-            var dynamicEntities = new DoubleEntitiesEnumerator<TestEntityComponent, TestEntityViewComponent>(
+            var dynamicEntities = new DoubleIterationEnumerator<TestEntityComponent, TestEntityViewComponent>(
                 _neverdoThisEngine.entitiesDB.QueryEntities<TestEntityComponent, TestEntityViewComponent>(GroupAB));
 
             var iteration = 0;

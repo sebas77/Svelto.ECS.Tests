@@ -1,4 +1,5 @@
 #if UNITY_ECS
+using System.Collections;
 using Svelto.ECS.Schedulers;
 using Unity.Entities;
 using Unity.Jobs;
@@ -18,7 +19,7 @@ namespace Svelto.ECS.Extensions.Unity
     public class SveltoUECSEntitiesSubmissionGroup : JobifiedEnginesGroup<IUECSSubmissionEngine>
     {
         public SveltoUECSEntitiesSubmissionGroup
-            (ISimpleEntitiesSubmissionScheduler submissionScheduler, World UECSWorld)
+            (SimpleEntitiesSubmissionSchedulerInterface submissionScheduler, World UECSWorld)
         {
             _submissionScheduler = submissionScheduler;
             _ECBSystem           = UECSWorld.CreateSystem<SubmissionEntitiesCommandBufferSystem>();
@@ -44,15 +45,16 @@ namespace Svelto.ECS.Extensions.Unity
             //Submit Svelto Entities, calls Add/Remove/MoveTo that can be used by the IUECSSubmissionEngines
             _submissionScheduler.SubmitEntities();
 
-            //execute submission engines and complete jobs
+            //execute submission engines and complete jobs because of this I don't need to do _ECBSystem.AddJobHandleForProducer(Dependency);
             base.Execute(default).Complete();
 
             //flush command buffer
             _ECBSystem.Update();
         }
 
-        readonly ISimpleEntitiesSubmissionScheduler    _submissionScheduler;
-        readonly SubmissionEntitiesCommandBufferSystem _ECBSystem;
+        readonly SimpleEntitiesSubmissionSchedulerInterface _submissionScheduler;
+        readonly SubmissionEntitiesCommandBufferSystem      _ECBSystem;
+        IEnumerator                                         _submission;
 
         [DisableAutoCreation]
         class SubmissionEntitiesCommandBufferSystem : EntityCommandBufferSystem { }

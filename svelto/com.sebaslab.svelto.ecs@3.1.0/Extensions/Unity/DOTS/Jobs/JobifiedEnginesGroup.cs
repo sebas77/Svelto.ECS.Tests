@@ -58,7 +58,7 @@ namespace Svelto.ECS.Extensions.Unity
             return combinedHandles;
         }
 
-        public void Add(Interface engine)
+        public virtual void Add(Interface engine)
         {
             _engines.Add(engine);
         }

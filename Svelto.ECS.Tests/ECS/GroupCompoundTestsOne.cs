@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using Svelto.ECS;
 
 namespace Svelto.ECS.Tests.GroupCompounds
 {

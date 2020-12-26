@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using NUnit.Framework;
 using Svelto.Common;
-using Svelto.ECS;
 using Svelto.ECS.DataStructures;
 
 namespace Svelto.ECS.Tests.Native

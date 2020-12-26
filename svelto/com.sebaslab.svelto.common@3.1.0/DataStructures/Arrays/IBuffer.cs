@@ -16,5 +16,6 @@ namespace Svelto.DataStructures
         IntPtr ToNativeArray(out int capacity);
 
         int capacity { get; }
+        bool isValid  { get; }
     }
 }

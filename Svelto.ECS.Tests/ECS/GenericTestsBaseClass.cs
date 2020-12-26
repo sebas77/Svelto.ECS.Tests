@@ -26,7 +26,7 @@ namespace Svelto.ECS.Tests.ECS
             _scheduler.SubmitEntities();
         }
 
-        protected EntityComponentInitializer CreateTestEntity(uint entityId, ExclusiveGroupStruct group, int value = 1)
+        protected EntityInitializer CreateTestEntity(uint entityId, ExclusiveGroupStruct group, int value = 1)
         {
             var initializer = _factory.BuildEntity<EntityDescriptorWithComponentAndViewComponent>
                 (entityId, group, new object[] {new TestFloatValue(value), new TestIntValue(value)});
