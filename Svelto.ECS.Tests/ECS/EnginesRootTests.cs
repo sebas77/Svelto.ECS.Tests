@@ -77,7 +77,7 @@ namespace Svelto.ECS.Tests.ECS
         [AllowMultiple]
         class DisposableEngineMultiple : DisposableEngineBase { }
 
-        SimpleEntitiesSubmissionSchedulerInterface _scheduler;
+        SimpleEntitiesSubmissionScheduler _scheduler;
         EnginesRoot                  _enginesRoot;
     }
 }

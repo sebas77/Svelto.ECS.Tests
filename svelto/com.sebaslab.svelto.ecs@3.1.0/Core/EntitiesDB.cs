@@ -17,6 +17,18 @@ namespace Svelto.ECS
             _enginesRoot = enginesRoot;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool FindEGID(EntityReference entityReference, out EGID egid)
+        {
+            return _referenceLocatorMap.TryGetEGID(entityReference, out egid);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public EntityReference GetEntityReference(EGID egid)
+        {
+            return _referenceLocatorMap.GetEntityReference(egid);
+        }
+
         EntityCollection<T> InternalQueryEntities<T>(FasterDictionary<RefWrapperType, ITypeSafeDictionary> entitiesInGroupPerType)
             where T : struct, IEntityComponent
         {
@@ -61,7 +73,7 @@ namespace Svelto.ECS
                 return new EntityCollection<T1, T2>(new EntityCollection<T1>(RetrieveEmptyEntityComponentArray<T1>(), 0),
                     new EntityCollection<T2>(RetrieveEmptyEntityComponentArray<T2>(), 0));
             }
-            
+
             var T1entities = InternalQueryEntities<T1>(entitiesInGroupPerType);
             var T2entities = InternalQueryEntities<T2>(entitiesInGroupPerType);
 #if DEBUG && !PROFILE_SVELTO
@@ -86,7 +98,7 @@ namespace Svelto.ECS
                     new EntityCollection<T2>(RetrieveEmptyEntityComponentArray<T2>(), 0),
                     new EntityCollection<T3>(RetrieveEmptyEntityComponentArray<T3>(), 0));
             }
-            
+
             var T1entities = InternalQueryEntities<T1>(entitiesInGroupPerType);
             var T2entities = InternalQueryEntities<T2>(entitiesInGroupPerType);
             var T3entities = InternalQueryEntities<T3>(entitiesInGroupPerType);
@@ -104,7 +116,7 @@ namespace Svelto.ECS
 
             return new EntityCollection<T1, T2, T3>(T1entities, T2entities, T3entities);
         }
-        
+
         public EntityCollection<T1, T2, T3, T4> QueryEntities<T1, T2, T3, T4>(ExclusiveGroupStruct groupStruct)
             where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent where T3 : struct, IEntityComponent where T4 : struct, IEntityComponent
         {
@@ -116,7 +128,7 @@ namespace Svelto.ECS
                     new EntityCollection<T3>(RetrieveEmptyEntityComponentArray<T3>(), 0),
                     new EntityCollection<T4>(RetrieveEmptyEntityComponentArray<T4>(), 0));
             }
-            
+
             var T1entities = InternalQueryEntities<T1>(entitiesInGroupPerType);
             var T2entities = InternalQueryEntities<T2>(entitiesInGroupPerType);
             var T3entities = InternalQueryEntities<T3>(entitiesInGroupPerType);
@@ -254,7 +266,7 @@ namespace Svelto.ECS
 
             return true;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool SafeQueryEntityDictionary<T>(ExclusiveGroupStruct group, out ITypeSafeDictionary typeSafeDictionary)
             where T : IEntityComponent
@@ -290,7 +302,7 @@ namespace Svelto.ECS
             EGID entityGID = new EGID(entityID, @group);
 
             index = default;
-            
+
             if (UnsafeQueryEntityDictionary(@group, type, out var safeDictionary) == false)
                 return false;
 
@@ -303,7 +315,7 @@ namespace Svelto.ECS
         internal uint GetIndex(uint entityID, ExclusiveGroupStruct @group, Type type)
         {
             EGID entityGID = new EGID(entityID, @group);
-            
+
             if (UnsafeQueryEntityDictionary(@group, type, out var safeDictionary) == false)
             {
                 throw new EntityNotFoundException(entityGID, type);
@@ -347,19 +359,22 @@ namespace Svelto.ECS
 
         readonly EnginesRoot _enginesRoot;
 
+        IEntityReferenceLocatorMap _referenceLocatorMap => _enginesRoot;
+
         EntitiesStreams _entityStream => _enginesRoot._entityStreams;
 
         //grouped set of entity components, this is the standard way to handle entity components are grouped per
         //group, then indexable per type, then indexable per EGID. however the TypeSafeDictionary can return an array of
         //values directly, that can be iterated over, so that is possible to iterate over all the entity components of
         //a specific type inside a specific group.
-FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>
-            groupEntityComponentsDB => _enginesRoot._groupEntityComponentsDB;
 
-//for each entity view type, return the groups (dictionary of entities indexed by entity id) where they are
-//found indexed by group id. TypeSafeDictionary are never created, they instead point to the ones hold
-//by _groupEntityComponentsDB
-//                        <EntityComponentType                            <groupID  <entityID, EntityComponent>>>  
+        FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>
+                    groupEntityComponentsDB => _enginesRoot._groupEntityComponentsDB;
+
+        //for each entity view type, return the groups (dictionary of entities indexed by entity id) where they are
+        //found indexed by group id. TypeSafeDictionary are never created, they instead point to the ones hold
+        //by _groupEntityComponentsDB
+        //                        <EntityComponentType                            <groupID  <entityID, EntityComponent>>>
         FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>> groupsPerEntity =>
             _enginesRoot._groupsPerEntity;
     }

@@ -827,7 +827,7 @@ namespace Svelto.ECS.Tests.Messy
         int                       testValue { get; }
     }
 
-    class Transform
+    class Transform : IImplementor
     {
         public readonly int value;
         public Transform(int i) { value = i; }
@@ -845,7 +845,7 @@ namespace Svelto.ECS.Tests.Messy
 
         public ValueReference<Transform> reference
         {
-            set => _reference = value;
+            set => _reference = (Transform)value;
         }
 
         public int testValue => _reference.value;

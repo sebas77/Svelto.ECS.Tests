@@ -15,7 +15,7 @@ namespace Svelto.ECS.Tests.Common.DataStructures
             test.Add(1, "one.a");
             void TestAddDup() { test.Add(1, "one.b"); }
 
-            Assert.Throws(typeof(FasterDictionaryException), TestAddDup);
+            Assert.Throws(typeof(SveltoDictionaryException), TestAddDup);
         }
     }
 }
