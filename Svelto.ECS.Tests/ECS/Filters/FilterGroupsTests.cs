@@ -32,8 +32,8 @@ namespace Svelto.ECS.Tests.ECS.Filters
 
             _scheduler.SubmitEntities();
 
-            var filter = _engine.entitiesDB.GetFilters().CreateOrGetFilterForGroup<TestEntityStruct>(FilterIdA, GroupA);
-            var mapper = _engine.entitiesDB.QueryMappedEntities<TestEntityStruct>(GroupA);
+            var filter = _engine.entitiesDB.GetFilters().CreateOrGetFilterForGroup<TestEntityComponent>(FilterIdA, GroupA);
+            var mapper = _engine.entitiesDB.QueryMappedEntities<TestEntityComponent>(GroupA);
 
             filter.Add(egid0.entityID, mapper);
             filter.Add(egid1.entityID, mapper);
@@ -56,7 +56,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         IEntityFactory _factory;
         TestEngine _engine;
 
-        class TestEntityDescriptor : GenericEntityDescriptor<TestEntityStruct> {}
+        class TestEntityDescriptor : GenericEntityDescriptor<TestEntityComponent> {}
 
         static ExclusiveGroup GroupA = new ExclusiveGroup();
         const int FilterIdA = 0;
