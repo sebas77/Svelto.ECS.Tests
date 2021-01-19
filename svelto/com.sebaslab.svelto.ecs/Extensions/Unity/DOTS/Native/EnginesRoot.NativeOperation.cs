@@ -110,6 +110,7 @@ namespace Svelto.ECS
                         var componentBuilders    = _nativeAddOperations[componentsIndex].components;
                         var entityDescriptorType = _nativeAddOperations[componentsIndex].entityDescriptorType;
                         CheckAddEntityID(egid, entityDescriptorType, _nativeAddOperations[componentsIndex].caller);
+                        CreateReferenceLocator(egid.entityID);
 
                         Check.Require(egid.groupID != 0, "invalid group detected, are you using new ExclusiveGroupStruct() instead of new ExclusiveGroup()?");
 

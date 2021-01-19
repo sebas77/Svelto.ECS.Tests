@@ -45,7 +45,7 @@ namespace Svelto.ECS
 
         public bool Equals(EntityReference x, EntityReference y)
         {
-            return x == y;
+            return x._GID == y._GID;
         }
 
         public override string ToString()

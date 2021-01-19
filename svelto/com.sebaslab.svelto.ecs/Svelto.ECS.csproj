@@ -21,12 +21,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\com.sebaslab.svelto.common\Svelto.Common.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="System.Memory" Version="4.5.2" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.6.0-preview8.19405.3" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="*.meta" />
+    <None Remove="**\*.meta" />
   </ItemGroup>
 </Project>

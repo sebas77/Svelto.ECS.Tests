@@ -8,103 +8,63 @@ namespace Svelto.ECS
     // find the last known EGID from last entity submission.
     public partial class EnginesRoot
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void CreateReferenceLocator(EGID egid)
         {
             // Check if we need to create a new EntityLocator or whether we can recycle an existing one.s
             EntityReference reference;
-            if (_nextEntityId == _entityLocatorMap.count)
+            if (_nextReferenceIndex == _entityReferenceMap.count)
             {
-                _entityLocatorMap.Add(new EntityLocatorMapElement(egid));
-                reference = new EntityReference(_nextEntityId++);
+                _entityReferenceMap.Add(new EntityLocatorMapElement(egid));
+                reference = new EntityReference(_nextReferenceIndex++);
             }
+            //if _nextEntityId is not equivalent to the count of entity references added so far, it is 
+            //pointing to the first deleted entity. A tombstone system recycles the entityID field to point
+            //it to the next deleted entity, similar to a linked list algorithm.
             else
             {
-                ref var element = ref _entityLocatorMap[_nextEntityId];
-                reference = new EntityReference(_nextEntityId, element.version);
+                ref var element = ref _entityReferenceMap[_nextReferenceIndex];
+                reference = new EntityReference(_nextReferenceIndex, element.version);
                 // The recycle entities form a linked list, using the egid.entityID to store the next element.
-                _nextEntityId = element.egid.entityID;
+                _nextReferenceIndex = element.egid.entityID;
                 element.egid  = egid;
             }
 
-            // When we create a new one there is nothing to recycle anymore, so we need to update the last recycle entityId.
-            if (_nextEntityId == _entityLocatorMap.count)
-            {
-                _lastEntityId = (uint) _entityLocatorMap.count;
-            }
-
             // Update reverse map from egid to locator.
-            if (_egidToLocatorMap.TryGetValue(egid.groupID, out var groupMap) == false)
-            {
-                groupMap                        = new FasterDictionary<uint, EntityReference>();
-                _egidToLocatorMap[egid.groupID] = groupMap;
-            }
-
+            var groupMap = _egidToReferenceMap.GetOrCreate(egid.groupID, () => new FasterDictionary<uint, EntityReference>());
+            
             groupMap[egid.entityID] = reference;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void UpdateReferenceLocator(EGID from, EGID to)
         {
-            var locator = GetAndRemoveReferenceLocator(from);
+            var egidToReference = _egidToReferenceMap[@from.groupID];
+            var reference       = egidToReference[from.entityID];
+            egidToReference.Remove(from.entityID);
 
-#if DEBUG && !PROFILE_SVELTO
-            if (locator.Equals(EntityReference.Invalid))
-            {
-                throw new ECSException("Unable to update locator from egid: ".FastConcat(from.ToString(), "to egid: ")
-                                                                             .FastConcat(
-                                                                                  to.ToString()
-                                                                                , ". Locator was not found"));
-            }
-#endif
+            _entityReferenceMap[reference.uniqueID].egid = to;
+            
+            var groupMap = _egidToReferenceMap.GetOrCreate(to.groupID, () => new FasterDictionary<uint, EntityReference>());
 
-            _entityLocatorMap[locator.uniqueID].egid = to;
-
-            if (_egidToLocatorMap.TryGetValue(to.groupID, out var groupMap) == false)
-            {
-                groupMap                      = new FasterDictionary<uint, EntityReference>();
-                _egidToLocatorMap[to.groupID] = groupMap;
-            }
-
-            groupMap[to.entityID] = locator;
+            groupMap[to.entityID] = reference;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void RemoveReferenceLocator(EGID egid)
         {
-            var locator = GetAndRemoveReferenceLocator(egid);
-
-#if DEBUG && !PROFILE_SVELTO
-            if (locator.Equals(EntityReference.Invalid))
-            {
-                throw new ECSException(
-                    "Unable to remove locator for egid: ".FastConcat(egid.ToString(), ". Locator was not found"));
-            }
-#endif
-
-            // Check if this is the first recycled element.
-            if (_lastEntityId == _entityLocatorMap.count)
-            {
-                _nextEntityId = locator.uniqueID;
-            }
-            // Otherwise add it as the last recycled element.
-            else
-            {
-                _entityLocatorMap[_lastEntityId].egid = new EGID(locator.uniqueID, 0);
-            }
+            var egidToReference = _egidToReferenceMap[@egid.groupID];
+            var reference       = egidToReference[egid.entityID];
+            egidToReference.Remove(egid.entityID);
 
             // Invalidate the entity locator element by bumping its version and setting the egid to point to a unexisting element.
-            _entityLocatorMap[locator.uniqueID].egid = new EGID((uint) _entityLocatorMap.count, 0);
-            _entityLocatorMap[locator.uniqueID].version++;
+            _entityReferenceMap[reference.uniqueID].egid = new EGID((uint) _entityReferenceMap.count, 0);
+            _entityReferenceMap[reference.uniqueID].version++;
 
             // Mark the element as the last element used.
-            _lastEntityId = locator.uniqueID;
+            _nextReferenceIndex = reference.uniqueID;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void RemoveAllGroupReferenceLocators(uint groupId)
         {
-            if (_egidToLocatorMap.TryGetValue(groupId, out var groupMap) == false)
+            if (_egidToReferenceMap.TryGetValue(groupId, out var groupMap) == false)
             {
                 return;
             }
@@ -119,13 +79,12 @@ namespace Svelto.ECS
                     break;
             }
 
-            _egidToLocatorMap.Remove(groupId);
+            _egidToReferenceMap.Remove(groupId);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void UpdateAllGroupReferenceLocators(uint fromGroupId, uint toGroupId)
         {
-            if (_egidToLocatorMap.TryGetValue(fromGroupId, out var groupMap) == false)
+            if (_egidToReferenceMap.TryGetValue(fromGroupId, out var groupMap) == false)
             {
                 return;
             }
@@ -140,27 +99,12 @@ namespace Svelto.ECS
                     break;
             }
 
-            _egidToLocatorMap.Remove(fromGroupId);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        EntityReference GetAndRemoveReferenceLocator(EGID egid)
-        {
-            if (_egidToLocatorMap.TryGetValue(egid.groupID, out var groupMap))
-            {
-                if (groupMap.TryGetValue(egid.entityID, out var locator))
-                {
-                    groupMap.Remove(egid.entityID);
-                    return locator;
-                }
-            }
-
-            return EntityReference.Invalid;
+            _egidToReferenceMap.Remove(fromGroupId);
         }
 
         internal EntityReference GetEntityReference(EGID egid)
         {
-            if (_egidToLocatorMap.TryGetValue(egid.groupID, out var groupMap))
+            if (_egidToReferenceMap.TryGetValue(egid.groupID, out var groupMap))
             {
                 if (groupMap.TryGetValue(egid.entityID, out var locator))
                 {
@@ -178,18 +122,17 @@ namespace Svelto.ECS
                 return false;
             // Make sure we are querying for the current version of the locator.
             // Otherwise the locator is pointing to a removed entity.
-            if (_entityLocatorMap[reference.uniqueID].version == reference.version)
+            if (_entityReferenceMap[reference.uniqueID].version == reference.version)
             {
-                egid = _entityLocatorMap[reference.uniqueID].egid;
+                egid = _entityReferenceMap[reference.uniqueID].egid;
                 return true;
             }
 
             return false;
         }
 
-        uint                                                                     _nextEntityId;
-        uint                                                                     _lastEntityId;
-        readonly FasterList<EntityLocatorMapElement>                             _entityLocatorMap;
-        readonly FasterDictionary<uint, FasterDictionary<uint, EntityReference>> _egidToLocatorMap;
+        uint                                                                     _nextReferenceIndex;
+        readonly FasterList<EntityLocatorMapElement>                             _entityReferenceMap;
+        readonly FasterDictionary<uint, FasterDictionary<uint, EntityReference>> _egidToReferenceMap;
     }
 }

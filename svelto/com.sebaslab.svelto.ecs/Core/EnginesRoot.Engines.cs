@@ -69,8 +69,8 @@ namespace Svelto.ECS
             _groupsPerEntity =
                 new FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>>();
             _groupedEntityToAdd = new DoubleBufferedEntitiesToAdd();
-            _entityLocatorMap = new FasterList<EntityLocatorMapElement>();
-            _egidToLocatorMap = new FasterDictionary<uint, FasterDictionary<uint, EntityReference>>();
+            _entityReferenceMap = new FasterList<EntityLocatorMapElement>();
+            _egidToReferenceMap = new FasterDictionary<uint, FasterDictionary<uint, EntityReference>>();
 
             _entityStreams = EntitiesStreams.Create();
             _groupFilters =
@@ -167,8 +167,8 @@ namespace Svelto.ECS
 
                 _groupedEntityToAdd.Dispose();
 
-                _entityLocatorMap.Clear();
-                _egidToLocatorMap.Clear();
+                _entityReferenceMap.Clear();
+                _egidToReferenceMap.Clear();
 
                 _entityStreams.Dispose();
                 scheduler.Dispose();
