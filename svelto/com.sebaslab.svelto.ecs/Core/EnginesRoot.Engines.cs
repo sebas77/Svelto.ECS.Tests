@@ -69,7 +69,7 @@ namespace Svelto.ECS
             _groupsPerEntity =
                 new FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>>();
             _groupedEntityToAdd = new DoubleBufferedEntitiesToAdd();
-            _entityReferenceMap = new FasterList<EntityLocatorMapElement>();
+            _entityReferenceMap = new FasterList<EntityReferenceMapElement>();
             _egidToReferenceMap = new FasterDictionary<uint, FasterDictionary<uint, EntityReference>>();
 
             _entityStreams = EntitiesStreams.Create();

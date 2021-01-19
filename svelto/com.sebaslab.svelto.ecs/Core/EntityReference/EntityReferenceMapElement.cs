@@ -2,12 +2,12 @@
 
 namespace Svelto.ECS
 {
-    struct EntityLocatorMapElement
+    struct EntityReferenceMapElement
     {
         internal EGID egid;
         internal uint version;
 
-        internal EntityLocatorMapElement(EGID egid)
+        internal EntityReferenceMapElement(EGID egid)
         {
             this.egid = egid;
             version = 0;

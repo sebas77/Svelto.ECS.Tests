@@ -104,7 +104,7 @@ namespace Svelto.ECS
                 if (toEntityGID.HasValue)
                 {
                     var entityGid = toEntityGID.Value;
-                    UpdateReferenceLocator(fromEntityGID, entityGid);
+                    UpdateEntityReference(fromEntityGID, entityGid);
                     
                     var toGroupID = entityGid.groupID;
 
@@ -117,7 +117,7 @@ namespace Svelto.ECS
                 }
                 else
                 {
-                    RemoveReferenceLocator(fromEntityGID);
+                    RemoveEntityReference(fromEntityGID);
                 }
 
                 //call all the callbacks

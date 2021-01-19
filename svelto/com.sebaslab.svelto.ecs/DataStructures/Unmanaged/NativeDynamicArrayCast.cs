@@ -44,6 +44,9 @@ namespace Svelto.ECS.DataStructures
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T AddAt(uint lastIndex) { return ref _array.AddAt<T>(lastIndex); }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public NativeDynamicArray ToNativeArray() { return _array; }
 
         public bool isValid => _array.isValid;
 
