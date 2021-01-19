@@ -127,12 +127,14 @@ namespace Svelto.ECS.Tests.ECS
         [Test]
         public void TestAssortedCreationAndRemoval()
         {
+            // First submission
             _factory.BuildEntity<TestDescriptor>(0, TestGroupA);
             _factory.BuildEntity<TestDescriptor>(1, TestGroupA);
             _factory.BuildEntity<TestDescriptor>(2, TestGroupA);
             _factory.BuildEntity<TestDescriptor>(0, TestGroupB);
             _scheduler.SubmitEntities();
 
+            // Second submission
             _functions.RemoveEntity<TestDescriptor>(1, TestGroupA);
             _functions.RemoveEntity<TestDescriptor>(0, TestGroupB);
             _factory.BuildEntity<TestDescriptor>(3, TestGroupA);
@@ -140,21 +142,36 @@ namespace Svelto.ECS.Tests.ECS
             _factory.BuildEntity<TestDescriptor>(1, TestGroupB);
             _scheduler.SubmitEntities();
 
+            // Third submission
             _functions.RemoveEntity<TestDescriptor>(3, TestGroupA);
             _functions.RemoveEntity<TestDescriptor>(1, TestGroupB);
             _factory.BuildEntity<TestDescriptor>(5, TestGroupA);
             _factory.BuildEntity<TestDescriptor>(2, TestGroupB);
             _scheduler.SubmitEntities();
 
+            // Fourth submission
             _factory.BuildEntity<TestDescriptor>(3, TestGroupB);
+            _factory.BuildEntity<TestDescriptor>(4, TestGroupB);
+            _factory.BuildEntity<TestDescriptor>(6, TestGroupA);
+            _factory.BuildEntity<TestDescriptor>(7, TestGroupA);
             _scheduler.SubmitEntities();
 
+            // First submission entities.
             Assert.AreEqual(new EntityReference(0, 0), _engine.entitiesDB.GetEntityReference(new EGID(0, TestGroupA)));
             Assert.AreEqual(new EntityReference(2, 0), _engine.entitiesDB.GetEntityReference(new EGID(2, TestGroupA)));
+
+            // Second submission entities.
             Assert.AreEqual(new EntityReference(5, 0), _engine.entitiesDB.GetEntityReference(new EGID(4, TestGroupA)));
-            Assert.AreEqual(new EntityReference(1, 1), _engine.entitiesDB.GetEntityReference(new EGID(5, TestGroupA)));
-            Assert.AreEqual(new EntityReference(3, 1), _engine.entitiesDB.GetEntityReference(new EGID(2, TestGroupB)));
-            Assert.AreEqual(new EntityReference(4, 1), _engine.entitiesDB.GetEntityReference(new EGID(3, TestGroupB)));
+
+            // Third submission entities.
+            Assert.AreEqual(new EntityReference(3, 1), _engine.entitiesDB.GetEntityReference(new EGID(5, TestGroupA)));
+            Assert.AreEqual(new EntityReference(1, 1), _engine.entitiesDB.GetEntityReference(new EGID(2, TestGroupB)));
+
+            // Fourth submission entities.
+            Assert.AreEqual(new EntityReference(6, 1), _engine.entitiesDB.GetEntityReference(new EGID(3, TestGroupB)));
+            Assert.AreEqual(new EntityReference(4, 1), _engine.entitiesDB.GetEntityReference(new EGID(4, TestGroupB)));
+            Assert.AreEqual(new EntityReference(7, 0), _engine.entitiesDB.GetEntityReference(new EGID(6, TestGroupA)));
+            Assert.AreEqual(new EntityReference(8, 0), _engine.entitiesDB.GetEntityReference(new EGID(7, TestGroupA)));
         }
 
         public static readonly ExclusiveGroup TestGroupA = new ExclusiveGroup();
