@@ -147,7 +147,7 @@ namespace Svelto.DataStructures
             if (count == 0) return;
 
             if (_count + count > _buffer.Length)
-                AllocateMore(_count + count);
+                AllocateTo(_count + count);
 
             Array.Copy(items, 0, _buffer, _count, count);
             _count += count;
@@ -292,7 +292,7 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Insert(int index, in T item)
+        public void InsertAt(uint index, in T item)
         {
             DBC.Common.Check.Require(index <= _count, "out of bound index");
 
@@ -305,7 +305,7 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RemoveAt(int index)
+        public void RemoveAt(uint index)
         {
             DBC.Common.Check.Require(index < _count, "out of bound index");
 
@@ -341,15 +341,15 @@ namespace Svelto.DataStructures
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T[] ToArrayFast(out uint count)
+        public T[] ToArrayFast(out int count)
         {
-            count = _count;
+            count = (int) _count;
 
             return _buffer;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool UnorderedRemoveAt(int index)
+        public bool UnorderedRemoveAt(uint index)
         {
             DBC.Common.Check.Require(index < _count && _count > 0, "out of bound index");
 
@@ -386,7 +386,7 @@ namespace Svelto.DataStructures
             uint count = _count + increment;
 
             if (_buffer.Length < count)
-                AllocateMore(count);
+                AllocateTo(count);
 
             _count = count;
         }
@@ -394,8 +394,7 @@ namespace Svelto.DataStructures
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ExpandTo(uint newSize)
         {
-            if (_buffer.Length < newSize)
-                AllocateMore(newSize);
+            EnsureCapacity(newSize);
 
             if (_count < newSize)
                 _count = newSize;
@@ -404,7 +403,13 @@ namespace Svelto.DataStructures
         public void EnsureCapacity(uint newSize)
         {
             if (_buffer.Length < newSize)
-                AllocateMore(newSize);
+                AllocateTo(newSize);
+        }
+        
+        public void EnsureExtraCapacity(uint newSize)
+        {
+            if (_buffer.Length < _count + newSize)
+                AllocateTo(_count + newSize);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -450,6 +455,16 @@ namespace Svelto.DataStructures
             int newLength = (int) (newSize * 1.5f);
 
             var newList = new T[newLength];
+            if (_count > 0) Array.Copy(_buffer, newList, _count);
+            _buffer = newList;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void AllocateTo(uint newSize)
+        {
+            DBC.Common.Check.Require(newSize > _buffer.Length);
+            
+            var newList = new T[newSize];
             if (_count > 0) Array.Copy(_buffer, newList, _count);
             _buffer = newList;
         }

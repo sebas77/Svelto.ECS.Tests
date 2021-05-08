@@ -19,18 +19,18 @@ namespace Svelto.ECS
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void RemoveEntity<T>(uint entityID, ExclusiveBuildGroup groupID, [CallerMemberName] string memberName = "") where T :
+            public void RemoveEntity<T>(uint entityID, ExclusiveBuildGroup groupID) where T :
                 IEntityDescriptor, new()
             {
-                RemoveEntity<T>(new EGID(entityID, groupID), memberName);
+                RemoveEntity<T>(new EGID(entityID, groupID));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void RemoveEntity<T>(EGID entityEGID, [CallerMemberName] string memberName = "") where T : IEntityDescriptor, new()
+            public void RemoveEntity<T>(EGID entityEGID) where T : IEntityDescriptor, new()
             {
                 DBC.ECS.Check.Require(entityEGID.groupID != 0, "invalid group detected");
                 var descriptorComponentsToBuild = EntityDescriptorTemplate<T>.descriptor.componentsToBuild;
-                _enginesRoot.Target.CheckRemoveEntityID(entityEGID, TypeCache<T>.type, memberName);
+                _enginesRoot.Target.CheckRemoveEntityID(entityEGID, TypeCache<T>.type);
 
                 _enginesRoot.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityEGID, entityEGID,
@@ -112,34 +112,32 @@ namespace Svelto.ECS
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void SwapEntityGroup<T>(EGID fromID, ExclusiveBuildGroup toGroupID
-              , ExclusiveBuildGroup mustBeFromGroup)
+            public void SwapEntityGroup<T>(EGID fromID, ExclusiveBuildGroup mustBeFromGroup, ExclusiveBuildGroup toGroupID)
                 where T : IEntityDescriptor, new()
             {
                 if (fromID.groupID != mustBeFromGroup)
-                    throw new ECSException("Entity is not coming from the expected group");
+                    throw new ECSException($"Entity is not coming from the expected group. Expected {mustBeFromGroup} is {fromID.groupID}");
 
                 SwapEntityGroup<T>(fromID, toGroupID);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void SwapEntityGroup<T>(EGID fromID, EGID toID
-              , ExclusiveBuildGroup mustBeFromGroup)
+            public void SwapEntityGroup<T>(EGID fromID, EGID toID, ExclusiveBuildGroup mustBeFromGroup)
                 where T : IEntityDescriptor, new()
             {
                 if (fromID.groupID != mustBeFromGroup)
-                    throw new ECSException("Entity is not coming from the expected group");
+                    throw new ECSException($"Entity is not coming from the expected group Expected {mustBeFromGroup} is {fromID.groupID}");
 
                 SwapEntityGroup<T>(fromID, toID);
             }
 
 #if UNITY_NATIVE
-            public NativeEntityRemove ToNativeRemove<T>(string memberName) where T : IEntityDescriptor, new()
+            public Svelto.ECS.Native.NativeEntityRemove ToNativeRemove<T>(string memberName) where T : IEntityDescriptor, new()
             {
                 return _enginesRoot.Target.ProvideNativeEntityRemoveQueue<T>(memberName);
             }
 
-            public NativeEntitySwap ToNativeSwap<T>(string memberName) where T : IEntityDescriptor, new()
+            public Svelto.ECS.Native.NativeEntitySwap ToNativeSwap<T>(string memberName) where T : IEntityDescriptor, new()
             {
                 return _enginesRoot.Target.ProvideNativeEntitySwapQueue<T>(memberName);
             }

@@ -1,6 +1,6 @@
 using Svelto.ECS.DataStructures;
 
-namespace Svelto.ECS
+namespace Svelto.ECS.Native
 {
     public readonly ref struct NativeEntityInitializer
     {

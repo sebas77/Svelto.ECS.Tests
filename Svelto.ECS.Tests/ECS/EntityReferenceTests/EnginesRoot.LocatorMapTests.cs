@@ -50,12 +50,12 @@ namespace Svelto.ECS.Tests.ECS
             var entityReference = _engine.entitiesDB.GetEntityReference(egid);
             _functions.RemoveEntity<TestDescriptor>(egid);
 
-            var found = _engine.entitiesDB.FindEGID(entityReference, out var foundEgid);
+            var found = _engine.entitiesDB.TryGetEGID(entityReference, out var foundEgid);
             Assert.IsTrue(found, "Entity reference should still be valid before submit.");
 
             _scheduler.SubmitEntities();
 
-            found = _engine.entitiesDB.FindEGID(entityReference, out foundEgid);
+            found = _engine.entitiesDB.TryGetEGID(entityReference, out foundEgid);
             Assert.IsFalse(found, "Entity reference should be invalidated after removal submission");
         }
 
@@ -90,13 +90,13 @@ namespace Svelto.ECS.Tests.ECS
             _functions.SwapEntityGroup<TestDescriptor>(egidA, TestGroupB);
             _scheduler.SubmitEntities();
 
-            var found = _engine.entitiesDB.FindEGID(entityReference, out var foundEgid);
+            var found = _engine.entitiesDB.TryGetEGID(entityReference, out var foundEgid);
             Assert.AreEqual(egidB, foundEgid);
 
             _functions.SwapEntityGroup<TestDescriptor>(egidB, TestGroupA);
             _scheduler.SubmitEntities();
 
-            found = _engine.entitiesDB.FindEGID(entityReference, out foundEgid);
+            found = _engine.entitiesDB.TryGetEGID(entityReference, out foundEgid);
             Assert.AreEqual(egidA, foundEgid);
         }
 
@@ -119,7 +119,7 @@ namespace Svelto.ECS.Tests.ECS
 
             for (var i = 0; i < 10; i++)
             {
-                var found = _engine.entitiesDB.FindEGID(references[i], out var foundEgid);
+                var found = _engine.entitiesDB.TryGetEGID(references[i], out var foundEgid);
                 Assert.AreEqual((uint)TestGroupB, (uint)foundEgid.groupID);
             }
         }

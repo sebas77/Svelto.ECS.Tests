@@ -1,80 +1,11 @@
 using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using NUnit.Framework;
 using Svelto.Common;
 using Svelto.ECS.DataStructures;
 
-namespace Svelto.ECS.Tests.Native
+namespace Svelto.ECS.Tests.NativeDataStructures
 {
-    [TestFixture]
-    public class NativeArrayTests
-    {
-        [Test]
-        public void TestByteReallocWorks()
-        {
-            using (var _simpleNativeBag = NativeDynamicArray.Alloc<uint>(Allocator.Temp))
-            {
-                for (var i = 0; i < 33; i++)
-                    _simpleNativeBag.Add<uint>((byte) 0);
-
-                Assert.That(_simpleNativeBag.Count<uint>(), Is.EqualTo(33));
-            }
-        }
-
-        [Test]
-        public void TestSetOutOfTheIndex()
-        {
-            using (var _simpleNativeBag = NativeDynamicArray.Alloc<uint>(Allocator.Temp, 20))
-            {
-                _simpleNativeBag.Set<uint>(10, 10);
-
-                Assert.That(_simpleNativeBag.Get<uint>(10), Is.EqualTo(10));
-                Assert.That(_simpleNativeBag.Count<uint>(), Is.EqualTo(11));
-            }
-        }
-
-        [Test]
-        public void TestSetOutOfTheCapacity()
-        {
-            using (var _simpleNativeBag = NativeDynamicArray.Alloc<uint>(Allocator.Temp))
-            {
-                Assert.Throws<Exception>(() => _simpleNativeBag.Set<uint>(10, 10));
-            }
-        }
-    }
-
-    [TestFixture]
-    public class MemoryUtilitiesTests
-    {
-        struct Test
-        {
-            public int a;
-            public int b;
-        }
-
-        [Test]
-        public void TestResize()
-        {
-            unsafe
-            {
-                var ptr = MemoryUtilities.Alloc(10, Allocator.Persistent);
-                Unsafe.Write((void*) ptr, new Test()
-                {
-                    a = 3
-                  , b = 1
-                });
-                Unsafe.Write((void*) (ptr + 8), (short) -10);
-                ptr = MemoryUtilities.Realloc(ptr, 10, 16, Allocator.Persistent);
-                var test = Unsafe.Read<Test>((void*) ptr);
-                Assert.That(test.a == 3);
-                Assert.That(test.b == 1);
-                Assert.That(Unsafe.Read<short>((void*) (ptr + 8)) == -10);
-                MemoryUtilities.Free(ptr, Allocator.Persistent);
-            }
-        }
-    }
-
     [TestFixture]
     public class NativeBagTests
     {
@@ -84,7 +15,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestByteReallocWorks()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 for (var i = 0; i < 32; i++)
                     _simpleNativeBag.Enqueue((byte) 0);
@@ -98,7 +29,7 @@ namespace Svelto.ECS.Tests.Native
         {
             Assert.Throws<Exception>(() =>
             {
-                using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+                using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
                 {
                     _simpleNativeBag.Enqueue((byte) 0);
                     _simpleNativeBag.Enqueue((byte) 0);
@@ -121,7 +52,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestDoofusesScenario()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 for (var i = 0; i < 32; i++)
                 {
@@ -142,11 +73,36 @@ namespace Svelto.ECS.Tests.Native
                 }
             }
         }
+        
+        [Test]
+        public void TestDoofusesScenarioByte()
+        {
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
+            {
+                for (var i = 0; i < 32; i++)
+                {
+                    _simpleNativeBag.Enqueue((byte) i);
+                    _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct()));
+                }
+
+                var index = 0;
+
+                while (_simpleNativeBag.IsEmpty() == false)
+                {
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(index));
+                    var dequeue = _simpleNativeBag.Dequeue<EGID>();
+                    index++;
+                    Assert.That(_simpleNativeBag.count == 32 * 12 - index * 12);
+                    Assert.That(dequeue.entityID, Is.EqualTo(1));
+                    Assert.That((uint) dequeue.groupID, Is.EqualTo(0));
+                }
+            }
+        }
 
         [Test]
         public void TestDoofusesScenario2()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct()));
@@ -196,7 +152,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestDoofusesScenario3()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct()));
@@ -320,7 +276,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestDoofusesScenario4()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(1)));
@@ -415,7 +371,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestDoofusesScenario4Unaligned()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGIDU(1, new ExclusiveGroupStructU(1)));
@@ -488,7 +444,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestDoofusesScenario5()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 _simpleNativeBag.Enqueue((uint) 1);
                 _simpleNativeBag.Enqueue(new EGID(1, new ExclusiveGroupStruct(1)));
@@ -627,7 +583,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestEnqueueDequeueWontAlloc()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 for (var i = 0; i < 32; i++)
                 {
@@ -642,7 +598,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestEnqueueDequeueWontAllocTooMuch()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 for (var i = 0; i < 32; i++)
                 {
@@ -663,7 +619,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestEnqueueDequeueWontAllocTooMuchOnce()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 {
                     _simpleNativeBag.Enqueue((byte) 0);
@@ -693,7 +649,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestEnqueueDequeueWontAllocTooMuchWithWeirdStruct()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 for (var i = 0; i < 32; i++)
                 {
@@ -714,7 +670,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestEnqueueDequeueWontAllocTooMuchWithWeirdStructOnce()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 {
                     _simpleNativeBag.Enqueue(new Weird()); //8
@@ -744,7 +700,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestEnqueueDequeueWontAllocTooMuchWithWeirdStructUnalignedOnce()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 {
                     _simpleNativeBag.Enqueue(new Weird2()); //8
@@ -767,7 +723,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestEnqueueTwiceDequeueOnceLeavesWithHalfOfTheEntities()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 for (var i = 0; i < 32; i++)
                 {
@@ -783,7 +739,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestLongReallocWorks()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 for (var i = 0; i < 32; i++)
                     _simpleNativeBag.Enqueue((long) 0);
@@ -795,7 +751,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestMixedReallocWorks()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 for (var i = 0; i < 2; i++)
                 {
@@ -811,7 +767,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestUintReallocWorks()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 for (var i = 0; i < 32; i++)
                     _simpleNativeBag.Enqueue((uint) 0);
@@ -823,7 +779,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestWhatYouEnqueueIsWhatIDequeue()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 for (var i = 0; i < 32; i++)
                 {
@@ -844,7 +800,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestWhatYouEnqueueIsWhatIDequeueMixed()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 for (var i = 0; i < 32; i++)
                 {
@@ -889,7 +845,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestWhatYouEnqueueIsWhatIDequeue2()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 for (var i = 0; i < 32; i++)
                 {
@@ -946,7 +902,7 @@ namespace Svelto.ECS.Tests.Native
         [Test]
         public void TestReaderGreaterThanWriter()
         {
-            using (var _simpleNativeBag = new NativeBag(Allocator.Temp))
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 //write 16 uint. The writerHead will be at the end of the array
                 for (var i = 0; i < 16; i++)

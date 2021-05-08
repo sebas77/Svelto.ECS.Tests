@@ -108,7 +108,7 @@ namespace Svelto.Common.Tests.Datastructures
         public void TestSveltoDictionary(int dictionarysize)
         {
             SveltoDictionary<int, Test, NativeStrategy<SveltoDictionaryNode<int>>, NativeStrategy<Test>, NativeStrategy<int>> test =
-                new SveltoDictionary<int, Test, NativeStrategy<SveltoDictionaryNode<int>>, NativeStrategy<Test>, NativeStrategy<int>>(1);
+                new SveltoDictionary<int, Test, NativeStrategy<SveltoDictionaryNode<int>>, NativeStrategy<Test>, NativeStrategy<int>>(1, Allocator.Persistent);
 
             int[] numbers = new int[dictionarysize];
 

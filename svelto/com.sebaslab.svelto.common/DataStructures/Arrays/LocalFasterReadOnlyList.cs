@@ -14,7 +14,7 @@ namespace Svelto.DataStructures
         LocalFasterReadOnlyList(T[] list)
         {
             _list  = list;
-            _count = (uint) list.Length;
+            _count = list.Length;
         }
         
         public static implicit operator LocalFasterReadOnlyList<T>(FasterList<T> list)
@@ -46,7 +46,7 @@ namespace Svelto.DataStructures
         }
 
         readonly T[]  _list;
-        readonly uint _count;
+        readonly int _count;
     }
 
     public struct LocalFasterReadonlyListEnumerator<T>

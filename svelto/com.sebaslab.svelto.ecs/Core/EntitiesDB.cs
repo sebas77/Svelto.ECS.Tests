@@ -17,18 +17,6 @@ namespace Svelto.ECS
             _enginesRoot = enginesRoot;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool FindEGID(EntityReference entityReference, out EGID egid)
-        {
-            return _enginesRoot.TryGetEGID(entityReference, out egid);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public EntityReference GetEntityReference(EGID egid)
-        {
-            return _enginesRoot.GetEntityReference(egid);
-        }
-
         EntityCollection<T> InternalQueryEntities<T>(FasterDictionary<RefWrapperType, ITypeSafeDictionary> entitiesInGroupPerType)
             where T : struct, IEntityComponent
         {
@@ -365,7 +353,6 @@ namespace Svelto.ECS
         //group, then indexable per type, then indexable per EGID. however the TypeSafeDictionary can return an array of
         //values directly, that can be iterated over, so that is possible to iterate over all the entity components of
         //a specific type inside a specific group.
-
         FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>
                     groupEntityComponentsDB => _enginesRoot._groupEntityComponentsDB;
 

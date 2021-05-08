@@ -9,16 +9,20 @@ namespace Svelto.ECS.Tests.ECS
     [TestFixture]
     class EnginesRootTests
     {
-        [SetUp]
-        public void Init()
+        [TestCase(Description = "Test that engines are disposed when the EngineRoot is disposed")]
+        public void TestDisposeEnginesRoot()
         {
             _scheduler   = new SimpleEntitiesSubmissionScheduler();
             _enginesRoot = new EnginesRoot(_scheduler);
-        }
 
+            Assert.DoesNotThrow(_enginesRoot.Dispose);
+        }
+        
         [TestCase(Description = "Test that engines are disposed when the EngineRoot is disposed")]
         public void TestDisposeEngines()
         {
+            _scheduler   = new SimpleEntitiesSubmissionScheduler();
+            _enginesRoot = new EnginesRoot(_scheduler);
             var engines = new DisposableEngineBase[]
             {
                 new DisposableEngine1(), new DisposableEngine2(), new DisposableEngine3()
@@ -42,6 +46,9 @@ namespace Svelto.ECS.Tests.ECS
             "Test that engines are disposed when the EngineRoot is disposed, using engines of the same type")]
         public void TestDisposeEngineMultiples()
         {
+            _scheduler   = new SimpleEntitiesSubmissionScheduler();
+            _enginesRoot = new EnginesRoot(_scheduler);
+            
             var engines = new[]
             {
                 new DisposableEngineMultiple(), new DisposableEngineMultiple(), new DisposableEngineMultiple()

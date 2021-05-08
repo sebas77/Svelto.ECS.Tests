@@ -292,7 +292,6 @@ namespace Svelto.ECS.Tests.Serialization
         SimpleEntitiesSubmissionScheduler _simpleSubmissionEntityViewScheduler;
         TestEngine                        _neverDoThisIsJustForTheTest;
 
-        //todo: this should not be at framework level
         public enum SerializationType
         {
             Network

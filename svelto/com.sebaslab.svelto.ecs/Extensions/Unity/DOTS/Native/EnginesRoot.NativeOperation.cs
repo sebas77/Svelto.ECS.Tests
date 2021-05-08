@@ -5,6 +5,7 @@ using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.DataStructures;
 using Svelto.ECS.Internal;
+using Svelto.ECS.Native;
 
 namespace Svelto.ECS
 {
@@ -47,11 +48,12 @@ namespace Svelto.ECS
             return new NativeEntityFactory(_nativeAddOperationQueue, _nativeAddOperations.count - 1);
         }
 
-        void NativeOperationSubmission(in PlatformProfiler profiler)
+        void FlushNativeOperations(in PlatformProfiler profiler)
         {
             using (profiler.Sample("Native Remove/Swap Operations"))
             {
                 var removeBuffersCount = _nativeRemoveOperationQueue.count;
+                //todo, I don't like that this scans all the queues even if they are empty
                 for (int i = 0; i < removeBuffersCount; i++)
                 {
                     ref var buffer = ref _nativeRemoveOperationQueue.GetBuffer(i);
@@ -107,17 +109,24 @@ namespace Svelto.ECS
                         var egid            = buffer.Dequeue<EGID>();
                         var componentCounts = buffer.Dequeue<uint>();
                         
+                        Check.Require(egid.groupID != 0, "invalid group detected, are you using new ExclusiveGroupStruct() instead of new ExclusiveGroup()?");
+                        
                         var componentBuilders    = _nativeAddOperations[componentsIndex].components;
+#if DEBUG && !PROFILE_SVELTO                        
                         var entityDescriptorType = _nativeAddOperations[componentsIndex].entityDescriptorType;
                         CheckAddEntityID(egid, entityDescriptorType, _nativeAddOperations[componentsIndex].caller);
-                        CreateReferenceLocator(egid.entityID);
-
-                        Check.Require(egid.groupID != 0, "invalid group detected, are you using new ExclusiveGroupStruct() instead of new ExclusiveGroup()?");
+#endif
+                        
+                        var reference = CreateReferenceLocator(egid);
 
                         var dic = EntityFactory.BuildGroupedEntities(egid, _groupedEntityToAdd, componentBuilders
-                                                                   , null, entityDescriptorType);
+                                                                   , null
+#if DEBUG && !PROFILE_SVELTO                                                                     
+                                                                   , entityDescriptorType
+#endif
+                                                                     );
 
-                        var init = new EntityInitializer(egid, dic);
+                        var init = new EntityInitializer(egid, dic, reference);
 
                         //only called if Init is called on the initialized (there is something to init)
                         while (componentCounts > 0)
