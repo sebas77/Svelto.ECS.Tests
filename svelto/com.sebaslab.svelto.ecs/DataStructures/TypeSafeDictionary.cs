@@ -106,7 +106,7 @@ namespace Svelto.ECS.Internal
                         
                         if (_hasReference)
                             SetEGIDWithoutBoxing<TValue>.SetRefWithoutBoxing(
-                                ref tuple.Value, enginesRoot.GetEntityReference(egid));
+                                ref tuple.Value, enginesRoot.entityLocator.GetEntityReference(egid));
 
                         implUnmgd.Add(tuple.Key, tuple.Value);
                     }

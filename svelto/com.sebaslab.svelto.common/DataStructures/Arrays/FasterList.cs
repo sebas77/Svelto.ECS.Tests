@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Svelto.DataStructures
 {
+    //Warning: the burst compatible version of a dynamic array is found in Svelto.ECS and is called NativeDynamicArray/Cast
     public class FasterList<T>
     {
         internal static readonly FasterList<T> DefaultEmptyList = new FasterList<T>();

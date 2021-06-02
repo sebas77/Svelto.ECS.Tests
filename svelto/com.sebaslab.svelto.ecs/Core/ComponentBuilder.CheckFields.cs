@@ -4,7 +4,6 @@ using System.Diagnostics;
 #endif
 using System;
 using System.Reflection;
-using Svelto.Common;
 
 namespace Svelto.ECS
 {

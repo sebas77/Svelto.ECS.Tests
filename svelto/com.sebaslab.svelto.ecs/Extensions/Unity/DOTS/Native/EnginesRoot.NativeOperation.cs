@@ -117,7 +117,7 @@ namespace Svelto.ECS
                         CheckAddEntityID(egid, entityDescriptorType, _nativeAddOperations[componentsIndex].caller);
 #endif
                         
-                        var reference = CreateReferenceLocator(egid);
+                        var reference = _entityLocator.CreateReferenceLocator(egid);
 
                         var dic = EntityFactory.BuildGroupedEntities(egid, _groupedEntityToAdd, componentBuilders
                                                                    , null

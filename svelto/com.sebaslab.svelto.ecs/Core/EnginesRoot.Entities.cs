@@ -29,7 +29,7 @@ namespace Svelto.ECS
             DBC.ECS.Check.Require(entityID.groupID != 0
                         , "invalid group detected, are you using new ExclusiveGroupStruct() instead of new ExclusiveGroup()?");
             
-            var reference = CreateReferenceLocator(entityID);
+            var reference = _entityLocator.CreateReferenceLocator(entityID);
 
             var dic = EntityFactory.BuildGroupedEntities(entityID, _groupedEntityToAdd, componentsToBuild, implementors
 #if DEBUG && !PROFILE_SVELTO
@@ -74,7 +74,7 @@ namespace Svelto.ECS
 
             PreallocateDBGroup();
             PreallocateEntitiesToAdd();
-            PreallocateReferenceMaps(groupID, numberOfEntities);
+            _entityLocator.PreallocateReferenceMaps(groupID, numberOfEntities);
         }
 
         ///--------------------------------------------
@@ -113,7 +113,7 @@ namespace Svelto.ECS
                 if (toEntityGID.HasValue)
                 {
                     var entityGid = toEntityGID.Value;
-                    UpdateEntityReference(fromEntityGID, entityGid);
+                    _entityLocator.UpdateEntityReference(fromEntityGID, entityGid);
                     
                     var toGroupID = entityGid.groupID;
 
@@ -126,7 +126,7 @@ namespace Svelto.ECS
                 }
                 else
                 {
-                    RemoveEntityReference(fromEntityGID);
+                    _entityLocator.RemoveEntityReference(fromEntityGID);
                 }
 
                 //call all the callbacks
@@ -223,7 +223,7 @@ namespace Svelto.ECS
                 FasterDictionary<RefWrapperType, ITypeSafeDictionary> fromGroup = GetDBGroup(fromIdGroupId);
                 FasterDictionary<RefWrapperType, ITypeSafeDictionary> toGroup   = GetOrCreateDBGroup(toGroupId);
 
-                UpdateAllGroupReferenceLocators(fromIdGroupId, toGroupId);
+                _entityLocator.UpdateAllGroupReferenceLocators(fromIdGroupId, toGroupId);
 
                 foreach (var dictionaryOfEntities in fromGroup)
                 {
@@ -300,7 +300,7 @@ namespace Svelto.ECS
 
         void RemoveEntitiesFromGroup(ExclusiveGroupStruct groupID, in PlatformProfiler profiler)
         {
-            RemoveAllGroupReferenceLocators(groupID);
+            _entityLocator.RemoveAllGroupReferenceLocators(groupID);
 
             if (_groupEntityComponentsDB.TryGetValue(groupID, out var dictionariesOfEntities))
             {

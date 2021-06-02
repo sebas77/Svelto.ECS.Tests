@@ -50,6 +50,8 @@ namespace Svelto.ECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EGID ToEGID(EntitiesDB entitiesDB)
         {
+            DBC.ECS.Check.Require(this != Invalid, "Invalid Reference Used");
+            
             return entitiesDB.GetEGID(this);
         }
         

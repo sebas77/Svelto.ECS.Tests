@@ -40,9 +40,8 @@ namespace Svelto.ECS
             _entityStreams = EntitiesStreams.Create();
             _groupFilters =
                 new FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, GroupFilters>>();
-            _entitiesDB = new EntitiesDB(this);
-
-            InitEntityReferenceMap();
+            _entityLocator.InitEntityReferenceMap();
+            _entitiesDB = new EntitiesDB(this,_entityLocator);
 
             scheduler        = entitiesComponentScheduler;
             scheduler.onTick = new EntitiesSubmitter(this);
@@ -130,8 +129,8 @@ namespace Svelto.ECS
 
                 _groupedEntityToAdd.Dispose();
 
-                DisposeEntityReferenceMap();
-
+                _entityLocator.DisposeEntityReferenceMap();
+                
                 _entityStreams.Dispose();
                 scheduler.Dispose();
             }

@@ -20,23 +20,23 @@ namespace Svelto.Common
     public enum Allocator
     {
         Invalid
-       ,
+     ,
 
         //no allocation needed
         None
-       ,
+     ,
 
         //temporary allocation, it doesn't have any meaning outside unity atm
         Temp
-       ,
+     ,
 
         //temporary allocation, it doesn't have any meaning outside unity atm
         TempJob
-       ,
+     ,
 
         //persistent native allocation, must be disposed of
         Persistent
-       ,
+     ,
 
         //managed allocation
         Managed
@@ -47,25 +47,37 @@ namespace Svelto.Common
         /// <summary>
         ///   <para>Invalid allocation.</para>
         /// </summary>
-        Invalid = Unity.Collections.Allocator.Invalid,
+        Invalid = Unity.Collections.Allocator.Invalid
+
+       ,
+
         /// <summary>
         ///   <para>No allocation.</para>
         /// </summary>
-        None = Unity.Collections.Allocator.None,
+        None = Unity.Collections.Allocator.None
+
+       ,
+
         /// <summary>
         ///   <para>Temporary allocation.</para>
         /// </summary>
-        Temp = Unity.Collections.Allocator.Temp,
+        Temp = Unity.Collections.Allocator.Temp
+
+       ,
+
         /// <summary>
         ///   <para>Temporary job allocation.</para>
         /// </summary>
-        TempJob = Unity.Collections.Allocator.TempJob,
+        TempJob = Unity.Collections.Allocator.TempJob
+
+       ,
+
         /// <summary>
         ///   <para>Persistent allocation.</para>
         /// </summary>
-        Persistent = Unity.Collections.Allocator.Persistent,
-        
-        Managed
+        Persistent = Unity.Collections.Allocator.Persistent
+
+      , Managed
     }
 #endif
 
@@ -74,12 +86,19 @@ namespace Svelto.Common
         public static IntPtr Alloc(uint newCapacityInBytes, Allocator allocator, bool clear = true)
         {
             var signedCapacity = (int) SignedCapacity(newCapacityInBytes);
+            IntPtr newPointer = IntPtr.Zero;
 #if UNITY_2019_3_OR_NEWER
-                var allocator1 = (Unity.Collections.Allocator) allocator;
-                var newPointer =
-                    Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Malloc(signedCapacity, (int) OptimalAlignment.alignment, allocator1);
+            var allocator1 = (Unity.Collections.Allocator) allocator;
+            unsafe
+            {
+                var tempPointer =
+                    Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Malloc(
+                        signedCapacity, (int) OptimalAlignment.alignment, allocator1);
+
+                newPointer = (IntPtr) tempPointer;
+            }
 #else
-            var newPointer = Marshal.AllocHGlobal(signedCapacity);
+            newPointer = Marshal.AllocHGlobal(signedCapacity);
 #endif
             //Note MemClear is actually necessary
             if (clear && newCapacityInBytes > 0)
@@ -110,7 +129,7 @@ namespace Svelto.Common
                         Unsafe.CopyBlock((void*) signedPointer, (void*) realBuffer, numberOfElementsToCopyInBytes);
                         if (memClear)
                         {
-                            var bytesToClear = newCapacityInBytes - numberOfElementsToCopyInBytes;
+                            var bytesToClear               = newCapacityInBytes - numberOfElementsToCopyInBytes;
                             var startingBytePointerToClear = signedPointer + (int) numberOfElementsToCopyInBytes;
                             MemClear(startingBytePointerToClear, bytesToClear);
                         }
@@ -124,7 +143,7 @@ namespace Svelto.Common
                 return signedPointer;
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IntPtr Alloc<T>(uint newCapacity, Allocator allocator, bool clear = true) where T : struct
         {
@@ -141,8 +160,7 @@ namespace Svelto.Common
             var newCapacityInBytes            = (uint) (sizeOf * newCapacity);
             var numberOfElementsToCopyInBytes = (uint) (sizeOf * numberOfElementsToCopy);
 
-            return Realloc(realBuffer, newCapacityInBytes, allocator, numberOfElementsToCopyInBytes, copy
-                         , memClear);
+            return Realloc(realBuffer, newCapacityInBytes, allocator, numberOfElementsToCopyInBytes, copy, memClear);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -151,7 +169,11 @@ namespace Svelto.Common
             ptr = CheckAndReturnPointerToFree(ptr);
 
 #if UNITY_2019_3_OR_NEWER
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Free((void*) ptr, (Unity.Collections.Allocator) allocator);
+            unsafe
+            {
+                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Free(
+                    (void*) ptr, (Unity.Collections.Allocator) allocator);
+            }
 #else
             Marshal.FreeHGlobal(ptr);
 #endif
@@ -195,8 +217,8 @@ namespace Svelto.Common
                 var sizeOf        = SizeOf<T>();
                 var sizeOfInBytes = (uint) (sizeOf * size);
                 //issues cpblk that assumes that both the source and destination addressed are aligned to the natural size of the machine.
-                Unsafe.CopyBlock((void*) (source + (int) destinationStartIndex* sizeOf)
-                               , (void*) (source + (int) sourceStartIndex* sizeOf), sizeOfInBytes);
+                Unsafe.CopyBlock((void*) (source + (int) destinationStartIndex * sizeOf)
+                               , (void*) (source + (int) sourceStartIndex * sizeOf), sizeOfInBytes);
             }
         }
 
@@ -208,8 +230,9 @@ namespace Svelto.Common
             {
                 var sizeOf        = SizeOf<T>();
                 var sizeOfInBytes = (uint) (sizeOf * size);
-                Buffer.MemoryCopy((void*) (source + (int) sourceStartIndex* sizeOf)
-                                , (void*) (destination + (int) destinationStartIndex* sizeOf), sizeOfInBytes, sizeOfInBytes);
+                Buffer.MemoryCopy((void*) (source + (int) sourceStartIndex * sizeOf)
+                                , (void*) (destination + (int) destinationStartIndex * sizeOf), sizeOfInBytes
+                                , sizeOfInBytes);
             }
         }
 
@@ -218,10 +241,7 @@ namespace Svelto.Common
         {
             internal static readonly uint alignment;
 
-            static OptimalAlignment()
-            {
-                alignment = (uint) (Environment.Is64BitProcess ? 16 : 8);
-            }
+            static OptimalAlignment() { alignment = (uint) (Environment.Is64BitProcess ? 16 : 8); }
         }
 #endif
         static class CachedSize<T> where T : struct

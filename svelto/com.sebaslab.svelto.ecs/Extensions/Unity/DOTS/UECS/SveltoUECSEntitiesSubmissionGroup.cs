@@ -1,5 +1,4 @@
 #if UNITY_ECS
-using System;
 using System.Collections;
 using Svelto.Common;
 using Svelto.DataStructures;

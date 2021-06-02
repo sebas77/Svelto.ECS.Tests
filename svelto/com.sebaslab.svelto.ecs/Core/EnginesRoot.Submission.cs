@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Svelto.Common;
 using Svelto.DataStructures;
-using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
