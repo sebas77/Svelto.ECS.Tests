@@ -73,7 +73,7 @@ namespace Svelto.ECS.Tests.ECS
             _factory.BuildEntity<TestDescriptor>(egidB.entityID, egidB.groupID);
             _scheduler.SubmitEntities();
 
-            Assert.AreEqual(new EntityReference(0, 1), _engine.entitiesDB.GetEntityReference(egidB));
+            Assert.AreEqual(new EntityReference(1, 1), _engine.entitiesDB.GetEntityReference(egidB));
         }
 
         [Test]
