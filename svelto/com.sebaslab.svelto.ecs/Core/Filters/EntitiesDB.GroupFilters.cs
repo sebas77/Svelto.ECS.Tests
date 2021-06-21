@@ -174,7 +174,7 @@ namespace Svelto.ECS
                 }
             }
 
-            public bool TryRemoveEntityFromFilter<T>(int filtersID, EGID egid) where T : unmanaged, IEntityComponent
+            public bool TryRemoveEntityFromFilter<T>(int filtersID, EGID egid) where T : struct, IEntityComponent
             {
                 if (TryGetFilterForGroup<T>(filtersID, egid.groupID, out var filter))
                 {
@@ -184,7 +184,7 @@ namespace Svelto.ECS
                 return false;
             }
 
-            public void RemoveEntityFromFilter<T>(int filtersID, EGID egid) where T : unmanaged, IEntityComponent
+            public void RemoveEntityFromFilter<T>(int filtersID, EGID egid) where T : struct, IEntityComponent
             {
                 ref var filter = ref GetFilterForGroup<T>(filtersID, egid.groupID);
 
@@ -203,6 +203,16 @@ namespace Svelto.ECS
         }
 
         public Filters GetFilters() { return new Filters(_filters); }
+
+        // public abstract class QueryPredicate<T1, T2> where T1: struct, IEntityComponent where T2: struct, IEntityComponent
+        // {
+        //     public abstract bool Predicate(in EntityCollection<T1, T2> components);
+        // }
+        //
+        // public abstract class QueryPredicate<T1> where T1: struct, IEntityComponent
+        // {
+        //     public abstract bool Predicate(in EntityCollection<T1> components);
+        // }
 
         FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, GroupFilters>> _filters =>
             _enginesRoot._groupFilters;

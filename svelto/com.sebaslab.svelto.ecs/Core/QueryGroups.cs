@@ -54,6 +54,13 @@ namespace Svelto.ECS.Experimental
 
             return QueryResult(groupsToIgnore, ignoreCount);
         }
+        
+        public QueryResult Except(LocalFasterReadOnlyList<ExclusiveGroupStruct> groupsToIgnore)
+        {
+            var ignoreCount = groupsToIgnore.count;
+
+            return QueryResult(groupsToIgnore.ToArrayFast(out var count), (int) count);
+        }
 
         public QueryResult Except(FasterList<ExclusiveGroupStruct> groupsToIgnore)
         {

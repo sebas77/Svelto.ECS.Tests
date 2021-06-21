@@ -45,8 +45,14 @@ namespace Svelto.DataStructures
             get => ref _list[index];
         }
 
-        readonly T[]  _list;
-        readonly int _count;
+        public T[] ToArrayFast(out int count)
+        {
+            count = _count;
+            return _list;
+        }
+
+        readonly T[]                      _list;
+        readonly int                      _count;
     }
 
     public struct LocalFasterReadonlyListEnumerator<T>

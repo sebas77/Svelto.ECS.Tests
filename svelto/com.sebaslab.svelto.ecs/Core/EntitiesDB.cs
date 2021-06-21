@@ -79,7 +79,7 @@ namespace Svelto.ECS
 
             return new EntityCollection<T1, T2>(T1entities, T2entities);
         }
-
+        
         public EntityCollection<T1, T2, T3> QueryEntities<T1, T2, T3>(ExclusiveGroupStruct groupStruct)
             where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent where T3 : struct, IEntityComponent
         {
@@ -155,6 +155,45 @@ namespace Svelto.ECS
         {
             return new GroupsEnumerable<T1, T2>(this, groups);
         }
+        
+        // public EntityCollection<T1, T2> QueryEntities<T1, T2>
+        //     (FasterReadOnlyList<ExclusiveGroupStruct> groups, QueryPredicate<T1, T2> predicate) 
+        //     where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent
+        // {
+        //     var filters        = GetFilters();
+        //     var preditcateType = predicate.GetType();
+        //     foreach (var (buffers, exclusiveGroupStruct) in QueryEntities<T1, T2>(groups))
+        //     {
+        //         if (predicate.Predicate(buffers))
+        //         {
+        //             
+        //         }
+        //     }
+        //
+        //     throw new Exception();
+        // }
+        //
+        //I Decided to stop because I realised that to do this maybe I even need a QueryEntitiesAndEGIDs first
+        //
+        // public EntityCollection<T1> QueryEntities<T1>
+        //     (FasterReadOnlyList<ExclusiveGroupStruct> groups, QueryPredicate<T1> predicate) 
+        //     where T1 : struct, IEntityComponent
+        // {
+        //     var filters        = GetFilters();
+        //     var preditcateType = predicate.GetType().GetHashCode();
+        //     foreach (var (buffers, group) in QueryEntities<T1>(groups))
+        //     {
+        //         var filter     = filters.CreateOrGetFilterForGroup<T1>(preditcateType, group);
+        //         var egidMapper = QueryMappedEntities<T1>(group);
+        //
+        //         if (predicate.Predicate(buffers))
+        //         {
+        //             filter.Add(egidMapper);     
+        //         }
+        //     }
+        //
+        //     throw new Exception();
+        // }
 
         public GroupsEnumerable<T1, T2, T3> QueryEntities<T1, T2, T3>
             (in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)

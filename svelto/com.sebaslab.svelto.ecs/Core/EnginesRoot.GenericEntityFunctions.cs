@@ -28,7 +28,7 @@ namespace Svelto.ECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void RemoveEntity<T>(EGID entityEGID) where T : IEntityDescriptor, new()
             {
-                DBC.ECS.Check.Require(entityEGID.groupID != 0, "invalid group detected");
+                DBC.ECS.Check.Require((uint)entityEGID.groupID != 0, "invalid group detected");
                 var descriptorComponentsToBuild = EntityDescriptorTemplate<T>.descriptor.componentsToBuild;
                 _enginesRoot.Target.CheckRemoveEntityID(entityEGID, TypeCache<T>.type);
 
@@ -40,7 +40,7 @@ namespace Svelto.ECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void RemoveEntitiesFromGroup(ExclusiveBuildGroup groupID)
             {
-                DBC.ECS.Check.Require(groupID != 0, "invalid group detected");
+                DBC.ECS.Check.Require((uint)groupID != 0, "invalid group detected");
                 _enginesRoot.Target.RemoveGroupID(groupID);
 
                 _enginesRoot.Target.QueueEntitySubmitOperation(
@@ -147,8 +147,8 @@ namespace Svelto.ECS
             public void SwapEntityGroup<T>(EGID fromID, EGID toID)
                 where T : IEntityDescriptor, new()
             {
-                DBC.ECS.Check.Require(fromID.groupID != 0, "invalid group detected");
-                DBC.ECS.Check.Require(toID.groupID != 0, "invalid group detected");
+                DBC.ECS.Check.Require((uint)fromID.groupID != 0, "invalid group detected");
+                DBC.ECS.Check.Require((uint)toID.groupID != 0, "invalid group detected");
 
                 var enginesRootTarget           = _enginesRoot.Target;
                 var descriptorComponentsToBuild = EntityDescriptorTemplate<T>.descriptor.componentsToBuild;

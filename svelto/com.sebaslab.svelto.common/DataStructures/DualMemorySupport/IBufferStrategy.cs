@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Svelto.Common;
 
 namespace Svelto.DataStructures

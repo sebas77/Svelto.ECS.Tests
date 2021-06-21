@@ -8,8 +8,7 @@ namespace Svelto.DataStructures
             FasterList<T>.DefaultEmptyList);
 
         public int  count    => (int) _list.count;
-        public uint capacity => _list.capacity;
-
+        
         public FasterReadOnlyList(FasterList<T> list)
         {
             _list = list;

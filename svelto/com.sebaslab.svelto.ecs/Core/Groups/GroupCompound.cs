@@ -126,17 +126,7 @@ namespace Svelto.ECS
             _GroupsHashSet.Add(group);
         }
 
-        public static void AddTransition<G1, G2, G3, G4>()  where G1 : GroupTag<G1>
-                                               where G2 : GroupTag<G2>
-                                               where G3 : GroupTag<G3>
-                                               where G4 : GroupTag<G4>
-        {
-            GroupCompound<G1, G2, G4, G3>.Init();
-        }
-
-        static void Init() { }
-
-        public static bool IsPartOf(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
+        public static bool IsFoundIn(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
     }
 
     public abstract class GroupCompound<G1, G2, G3>
@@ -160,7 +150,7 @@ namespace Svelto.ECS
             _GroupsHashSet.Add(group);
         }
 
-        public static bool IsPartOf(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
+        public static bool IsFoundIn(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
 
         static GroupCompound()
         {
@@ -226,7 +216,7 @@ namespace Svelto.ECS
             _GroupsHashSet.Add(group);
         }
 
-        public static bool IsPartOf(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
+        public static bool IsFoundIn(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
 
         static GroupCompound()
         {
@@ -292,6 +282,6 @@ namespace Svelto.ECS
             _GroupsHashSet.Add(group);
         }
 
-        public static bool IsPartOf(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
+        public static bool IsFoundIn(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
     }
 }

@@ -126,7 +126,7 @@ namespace Svelto.DataStructures
         }
 
         readonly uint _capacity;
-#if UNITY_NATIVE
+#if UNITY_COLLECTIONS
         //todo can I remove this from here? it should be used outside
         [Unity.Burst.NoAlias]
         [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]

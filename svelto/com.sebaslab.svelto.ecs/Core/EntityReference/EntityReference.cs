@@ -15,6 +15,8 @@ namespace Svelto.ECS
         [FieldOffset(4)] public readonly uint version;
         [FieldOffset(0)] readonly ulong _GID;
 
+        internal uint index => uniqueID - 1;
+
         public static bool operator ==(EntityReference obj1, EntityReference obj2)
         {
             return obj1._GID == obj2._GID;
@@ -51,15 +53,15 @@ namespace Svelto.ECS
         public EGID ToEGID(EntitiesDB entitiesDB)
         {
             DBC.ECS.Check.Require(this != Invalid, "Invalid Reference Used");
-            
+
             return entitiesDB.GetEGID(this);
         }
-        
+
         static ulong MAKE_GLOBAL_ID(uint uniqueId, uint version)
         {
             return (ulong)version << 32 | ((ulong)uniqueId & 0xFFFFFFFF);
         }
 
-        public static EntityReference Invalid => new EntityReference(uint.MaxValue, uint.MaxValue);
+        public static EntityReference Invalid => new EntityReference(0, 0);
     }
 }

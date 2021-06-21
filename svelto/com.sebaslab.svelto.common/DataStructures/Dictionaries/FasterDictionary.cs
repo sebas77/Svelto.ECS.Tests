@@ -149,7 +149,7 @@ namespace Svelto.DataStructures
             Array.Copy(GetValues(out var count).ToManagedArray(), 0, values, index, count);
         }
 
-#if UNITY_NATIVE
+#if UNITY_COLLECTIONS
         [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
 

@@ -83,7 +83,7 @@ namespace Svelto.ECS
             DBC.ECS.Check.Ensure(_id < _globalId, "Invalid group ID deserialiased");
         }
 
-        public static implicit operator uint(ExclusiveGroupStruct groupStruct)
+        public static explicit operator uint(ExclusiveGroupStruct groupStruct)
         {
             return groupStruct._id;
         }

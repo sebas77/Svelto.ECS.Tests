@@ -1,6 +1,6 @@
 ﻿namespace Svelto.ECS.Tests
 {
-    struct TestEntityComponent : IEntityComponent, INeedEGID
+    public struct TestEntityComponent : IEntityComponent, INeedEGID
     {
         public float floatValue;
         public int   intValue;

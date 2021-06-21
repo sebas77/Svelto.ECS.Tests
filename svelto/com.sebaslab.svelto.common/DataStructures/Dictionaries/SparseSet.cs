@@ -1,5 +1,3 @@
-using Svelto.DataStructures;
-
 namespace Svelto.DataStructures
 {
     /// <summary>
