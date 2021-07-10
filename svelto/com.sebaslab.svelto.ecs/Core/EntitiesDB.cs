@@ -12,10 +12,10 @@ namespace Svelto.ECS
 {
     public partial class EntitiesDB
     {
-        internal EntitiesDB(EnginesRoot enginesRoot, EnginesRoot.LocatorMap entityLocator)
+        internal EntitiesDB(EnginesRoot enginesRoot, EnginesRoot.LocatorMap entityReferencesMap)
         {
             _enginesRoot   = enginesRoot;
-            _entityLocator = entityLocator;
+            _entityReferencesMap = entityReferencesMap;
         }
 
         EntityCollection<T> InternalQueryEntities<T>
@@ -150,6 +150,11 @@ namespace Svelto.ECS
             return new GroupsEnumerable<T>(this, groups);
         }
 
+        /// <summary>
+        /// Note: Remember that EntityViewComponents are always put at the end of the generic parameters tuple.
+        /// It won't compile otherwise
+        /// </summary>
+        /// <returns></returns>
         public GroupsEnumerable<T1, T2> QueryEntities<T1, T2>(in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
             where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent
         {
@@ -293,7 +298,7 @@ namespace Svelto.ECS
         (out ITypeSafeDictionary typeSafeDictionary
        , FasterDictionary<RefWrapperType, ITypeSafeDictionary> entitiesInGroupPerType) where T : IEntityComponent
         {
-            if (entitiesInGroupPerType.TryGetValue(new RefWrapperType(TypeCache<T>.type), out var safeDictionary)
+            if (entitiesInGroupPerType.TryGetValue(new RefWrapperType(TypeCache<T>.Type), out var safeDictionary)
              == false)
             {
                 typeSafeDictionary = default;
@@ -310,7 +315,7 @@ namespace Svelto.ECS
         internal bool SafeQueryEntityDictionary<T>
             (ExclusiveGroupStruct group, out ITypeSafeDictionary typeSafeDictionary) where T : IEntityComponent
         {
-            if (UnsafeQueryEntityDictionary(group, TypeCache<T>.type, out var safeDictionary) == false)
+            if (UnsafeQueryEntityDictionary(group, TypeCache<T>.Type, out var safeDictionary) == false)
             {
                 typeSafeDictionary = default;
                 return false;
@@ -415,7 +420,6 @@ namespace Svelto.ECS
         FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>> groupsPerEntity =>
             _enginesRoot._groupsPerEntity;
 
-        EnginesRoot.LocatorMap _entityLocator;
-        
+        EnginesRoot.LocatorMap _entityReferencesMap;
     }
 }

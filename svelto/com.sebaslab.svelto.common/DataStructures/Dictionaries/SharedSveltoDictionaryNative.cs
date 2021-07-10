@@ -111,7 +111,7 @@ namespace Svelto.DataStructures
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetCapacity(uint size)
         {
-            _dictionary.SetCapacity(size);
+            _dictionary.ExpandTo(size);
         }
 
         public TValue this[TKey key]

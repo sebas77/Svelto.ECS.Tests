@@ -126,7 +126,7 @@ namespace Svelto.ECS
             _GroupsHashSet.Add(group);
         }
 
-        public static bool IsFoundIn(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
+        public static bool Includes(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
     }
 
     public abstract class GroupCompound<G1, G2, G3>
@@ -150,7 +150,7 @@ namespace Svelto.ECS
             _GroupsHashSet.Add(group);
         }
 
-        public static bool IsFoundIn(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
+        public static bool Includes(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
 
         static GroupCompound()
         {
@@ -216,7 +216,7 @@ namespace Svelto.ECS
             _GroupsHashSet.Add(group);
         }
 
-        public static bool IsFoundIn(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
+        public static bool Includes(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
 
         static GroupCompound()
         {
@@ -282,6 +282,6 @@ namespace Svelto.ECS
             _GroupsHashSet.Add(group);
         }
 
-        public static bool IsFoundIn(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
+        public static bool Includes(ExclusiveGroupStruct @group) { return _GroupsHashSet.Contains(@group); }
     }
 }

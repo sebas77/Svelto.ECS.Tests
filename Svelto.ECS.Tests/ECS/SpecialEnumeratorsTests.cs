@@ -12,7 +12,7 @@ namespace Svelto.ECS.Tests.ECS
         {
             var dynamicEntities =
                 new DoubleEntitiesEnumerator<TestEntityComponent>(
-                    _neverdoThisEngine.entitiesDB.QueryEntities<TestEntityComponent>(GroupAB));
+                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(GroupAB));
 
             foreach (var none in dynamicEntities)
             {
@@ -38,7 +38,7 @@ namespace Svelto.ECS.Tests.ECS
 
             var dynamicEntities =
                 new DoubleEntitiesEnumerator<TestEntityComponent>(
-                    _neverdoThisEngine.entitiesDB.QueryEntities<TestEntityComponent>(GroupAB));
+                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(GroupAB));
 
             var iteration = 0;
 
@@ -94,7 +94,7 @@ namespace Svelto.ECS.Tests.ECS
 
             var dynamicEntities =
                 new DoubleEntitiesEnumerator<TestEntityComponent>(
-                    _neverdoThisEngine.entitiesDB.QueryEntities<TestEntityComponent>(GroupAB));
+                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(GroupAB));
 
             var iteration = 0;
 
@@ -149,7 +149,7 @@ namespace Svelto.ECS.Tests.ECS
             }
 
             var dynamicEntities = new DoubleIterationEnumerator<TestEntityComponent, TestEntityViewComponent>(
-                _neverdoThisEngine.entitiesDB.QueryEntities<TestEntityComponent, TestEntityViewComponent>(GroupAB));
+                _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent, TestEntityViewComponent>(GroupAB));
 
             var iteration = 0;
 
@@ -203,7 +203,7 @@ namespace Svelto.ECS.Tests.ECS
 
             var dynamicEntities =
                 new DoubleEntitiesEnumerator<TestEntityComponent, TestEntityComponentWithProperties,
-                    TestEntityViewComponent>(_neverdoThisEngine.entitiesDB
+                    TestEntityViewComponent>(_entitiesDB.entitiesForTesting
                                                                .QueryEntities<TestEntityComponent,
                                                                     TestEntityComponentWithProperties,
                                                                     TestEntityViewComponent>(

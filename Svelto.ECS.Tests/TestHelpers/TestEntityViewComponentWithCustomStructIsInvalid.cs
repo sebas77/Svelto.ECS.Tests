@@ -2,7 +2,7 @@ using Svelto.ECS.Hybrid;
 
 namespace Svelto.ECS.Tests
 {
-    struct TestEntityViewComponentWithCustomStruct : IEntityViewComponent
+    struct TestEntityViewComponentWithCustomStructIsInvalid : IEntityViewComponent
     {
 #pragma warning disable 649
         public TestCustomStructWithString TestCustomStructString;

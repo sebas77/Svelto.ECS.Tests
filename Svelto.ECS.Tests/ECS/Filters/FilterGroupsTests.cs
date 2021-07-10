@@ -4,24 +4,8 @@ using Svelto.ECS.Schedulers;
 namespace Svelto.ECS.Tests.ECS.Filters
 {
     [TestFixture]
-    public class FilterGroupsTests
+    public class FilterGroupsTests: GenericTestsBaseClass
     {
-        [SetUp]
-        public void Init()
-        {
-            _scheduler = new SimpleEntitiesSubmissionScheduler();
-            _root = new EnginesRoot(_scheduler);
-            _factory = _root.GenerateEntityFactory();
-            _engine = new TestEngine();
-            _root.AddEngine(_engine);
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            _root.Dispose();
-        }
-
         [Test]
         public void Test_Removing_Last_Added_Entity_And_Adding_It_Back()
         {
@@ -32,8 +16,8 @@ namespace Svelto.ECS.Tests.ECS.Filters
 
             _scheduler.SubmitEntities();
 
-            var filter = _engine.entitiesDB.GetFilters().CreateOrGetFilterForGroup<TestEntityComponent>(FilterIdA, GroupA);
-            var mapper = _engine.entitiesDB.QueryMappedEntities<TestEntityComponent>(GroupA);
+            var filter = _entitiesDB.entitiesForTesting.GetFilters().CreateOrGetFilterForGroup<TestEntityComponent>(FilterIdA, GroupA);
+            var mapper = _entitiesDB.entitiesForTesting.QueryMappedEntities<TestEntityComponent>(GroupA);
 
             filter.Add(egid0.entityID, mapper);
             filter.Add(egid1.entityID, mapper);
@@ -51,14 +35,8 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(3, filter.filteredIndices.Get(3));
         }
 
-        SimpleEntitiesSubmissionScheduler _scheduler;
-        EnginesRoot _root;
-        IEntityFactory _factory;
-        TestEngine _engine;
-
         class TestEntityDescriptor : GenericEntityDescriptor<TestEntityComponent> {}
 
-        static ExclusiveGroup GroupA = new ExclusiveGroup();
         const int FilterIdA = 0;
     }
 }

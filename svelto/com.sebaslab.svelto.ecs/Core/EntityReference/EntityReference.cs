@@ -6,6 +6,9 @@ using System.Runtime.InteropServices;
 
 namespace Svelto.ECS
 {
+    /// <summary>
+    /// Todo: EntityReference shouldn't map EGIDs as dictionaries keys but directly the indices in the EntityDB arrays
+    /// </summary>
     [Serialization.DoNotSerialize]
     [Serializable]
     [StructLayout(LayoutKind.Explicit)]
@@ -54,7 +57,15 @@ namespace Svelto.ECS
         {
             DBC.ECS.Check.Require(this != Invalid, "Invalid Reference Used");
 
-            return entitiesDB.GetEGID(this);
+            return entitiesDB.GetEntityLocator().GetEGID(this);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool ToEGID(EntitiesDB entitiesDB, out EGID egid)
+        {
+            DBC.ECS.Check.Require(this != Invalid, "Invalid Reference Used");
+
+            return entitiesDB.TryGetEGID(this, out egid);
         }
 
         static ulong MAKE_GLOBAL_ID(uint uniqueId, uint version)

@@ -14,10 +14,17 @@
         public EGID ID { get; set; }
     }
     
+    public struct TestEntityComponentInt : IEntityComponent, INeedEGID
+    {
+        public int   intValue;
+
+        public EGID ID { get; set; }
+    }
+    
     struct TestEntityComponentWithProperties : IEntityComponent, INeedEGID
     {
-        public float floatValue;
-        public int   intValue;
+        public float floatValue { get; set; }
+        public int   intValue   { get; set; }
 
         public TestEntityComponentWithProperties(float floatValue, int intValue) : this()
         {

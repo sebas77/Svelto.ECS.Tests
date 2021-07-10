@@ -9,13 +9,11 @@ namespace Svelto.ECS.Tests.ECS
         [SetUp]
         public void Init()
         {
-            _scheduler         = new SimpleEntitiesSubmissionScheduler();
-            _enginesRoot       = new EnginesRoot(_scheduler);
-            _factory           = _enginesRoot.GenerateEntityFactory();
-            _functions         = _enginesRoot.GenerateEntityFunctions();
-            _neverdoThisEngine = new TestEngine();
-
-            _enginesRoot.AddEngine(_neverdoThisEngine);
+            _scheduler   = new SimpleEntitiesSubmissionScheduler();
+            _enginesRoot = new EnginesRoot(_scheduler);
+            _factory     = _enginesRoot.GenerateEntityFactory();
+            _functions   = _enginesRoot.GenerateEntityFunctions();
+            _entitiesDB  = _enginesRoot;
         }
 
         [TearDown]
@@ -36,9 +34,9 @@ namespace Svelto.ECS.Tests.ECS
 
         protected SimpleEntitiesSubmissionScheduler _scheduler;
         EnginesRoot                                 _enginesRoot;
-        IEntityFactory                              _factory;
+        protected IEntityFactory                    _factory;
         protected IEntityFunctions                  _functions;
-        protected TestEngine                        _neverdoThisEngine;
+        protected IUnitTestingInterface             _entitiesDB;
 
         protected static ExclusiveGroup                   GroupA  = new ExclusiveGroup();
         protected static ExclusiveGroup                   GroupB  = new ExclusiveGroup();

@@ -714,14 +714,10 @@ namespace Svelto.ECS.Tests.Messy
     }
 
     struct EVS1 : IEntityComponent
-    {
-        public EGID ID { get; set; }
-    }
+    { }
 
     struct EVS2 : IEntityComponent
-    {
-        public EGID ID { get; set; }
-    }
+    { }
 
     class A : GenericEntityDescriptor<EVS1> { }
 
@@ -747,14 +743,10 @@ namespace Svelto.ECS.Tests.Messy
 
     class TestDescriptorEntityView : GenericEntityDescriptor<TestEntityViewComponent> { }
     class TestDescriptorEntityView2 : GenericEntityDescriptor<TestEntityViewComponent> { }
-
     class TestDescriptorEntity : GenericEntityDescriptor<TestEntityComponent> { }
-
     class TestEntityWithComponentViewAndComponentStruct : GenericEntityDescriptor<TestEntityViewComponent, TestEntityComponent
     > { }
-
     class TestDescriptorWith2Components : GenericEntityDescriptor<TestEntityComponent, TestEntityComponent2> { }
-
     class TestDescriptorEntityViewWrong : GenericEntityDescriptor<TestWrongComponent> { }
     class TestDescriptorWrongEntityView : GenericEntityDescriptor<TestWrongComponent2> { }
     class TestDescriptorWrongEntityViewInterface : GenericEntityDescriptor<TestEntityViewComponentWrongInterface> { }

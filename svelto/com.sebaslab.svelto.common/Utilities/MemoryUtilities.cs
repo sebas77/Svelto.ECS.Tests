@@ -5,8 +5,13 @@
 #if UNITY_5_3_OR_NEWER
 #if !UNITY_2019_3_OR_NEWER
 #error Svelto.ECS 3.0 supports Unity 2019_3 and above only
-#endif
 #else
+// Unity.Collections.LowLevel.Unsafe.UnsafeUtility is not part of Unity Collection but it comes with Unity
+#define UNITY_COLLECTIONS
+#endif
+#endif
+
+#if !UNITY_COLLECTIONS
 using System.Runtime.InteropServices;
 #endif
 
@@ -180,11 +185,11 @@ namespace Svelto.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void MemClear<T>(IntPtr destination, uint sizeOf) where T : struct
+        public static void MemClear<T>(IntPtr destination, uint size) where T : struct
         {
             unsafe
             {
-                var sizeOfInBytes = (uint) (SizeOf<T>() * sizeOf);
+                var sizeOfInBytes = (uint) (SizeOf<T>() * size);
 #if UNITY_COLLECTIONS
                 Unity.Collections.LowLevel.Unsafe.UnsafeUtility.MemClear((void*) destination, sizeOfInBytes);
 #else
@@ -236,7 +241,7 @@ namespace Svelto.Common
             }
         }
 
-#if UNITY_NATIVE
+#if UNITY_COLLECTIONS
         static class OptimalAlignment
         {
             internal static readonly uint alignment;

@@ -22,7 +22,7 @@ namespace Svelto.ECS.Tests.ECS
         EnginesRoot                       _enginesRoot;
         IEntityFactory                    _entityFactory;
         SimpleEntitiesSubmissionScheduler _simpleSubmissionEntityViewScheduler;
-        TestEngine                        _testEngine;
+        IUnitTestingInterface             _entitiesDB;
 
         static   ushort         numberOfGroups = 10;
         static   ExclusiveGroup _group         = new ExclusiveGroup(numberOfGroups);
@@ -34,9 +34,7 @@ namespace Svelto.ECS.Tests.ECS
         {
             _simpleSubmissionEntityViewScheduler = new SimpleEntitiesSubmissionScheduler();
             _enginesRoot                         = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
-            _testEngine                          = new TestEngine();
-
-            _enginesRoot.AddEngine(_testEngine);
+            _entitiesDB                          = _enginesRoot;
 
             _entityFactory   = _enginesRoot.GenerateEntityFactory();
             _enginesRoot.GenerateEntityFunctions();
@@ -56,7 +54,7 @@ namespace Svelto.ECS.Tests.ECS
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            foreach (var ((buffer, count), _) in _testEngine.entitiesDB.QueryEntities<TestEntityViewComponent>())
+            foreach (var ((buffer, count), _) in _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponent>())
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -65,8 +63,7 @@ namespace Svelto.ECS.Tests.ECS
                 }
             }
 
-            foreach (var ((buffer, count), _) in _testEngine
-                                                .entitiesDB.QueryEntities<TestEntityComponent>())
+            foreach (var ((buffer, count), _) in _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>())
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -75,8 +72,7 @@ namespace Svelto.ECS.Tests.ECS
                 }
             }
             
-            foreach (var ((buffer, count), _) in _testEngine
-                                                .entitiesDB.QueryEntities<TestEntityViewComponentString>())
+            foreach (var ((buffer, count), _) in _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponentString>())
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -102,7 +98,7 @@ namespace Svelto.ECS.Tests.ECS
         {
             for (uint i = 0; i < _groupCount; i++)
             {
-                var (entityViewsManagedArray, count) = _testEngine.entitiesDB.QueryEntities<TestEntityViewComponent>(_group + i);
+                var (entityViewsManagedArray, count) = _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponent>(_group + i);
 
                 // can't get a native array from a managed buffer
                 Assert.Throws<NotImplementedException>(() => entityViewsManagedArray.ToNativeArray(out _));
@@ -120,7 +116,7 @@ namespace Svelto.ECS.Tests.ECS
         {
             for (uint i = 0; i < _groupCount; i++)
             {
-                var (entityComponents, count)       = _testEngine.entitiesDB.QueryEntities<TestEntityComponent>(_group + i);
+                var (entityComponents, count)       = _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(_group + i);
                 
                 // can't get a managed array from a native buffer
                 Assert.Throws<NotImplementedException>(() => entityComponents.ToManagedArray());                
@@ -139,7 +135,7 @@ namespace Svelto.ECS.Tests.ECS
         {
             for (uint i = 0; i < _groupCount; i++)
             {
-                var (entityViews, count) = _testEngine.entitiesDB.QueryEntities<TestEntityViewComponentString>(_group + i);
+                var (entityViews, count) = _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponentString>(_group + i);
 
                 for (int j = 0; j < count; j++)
                 {

@@ -25,7 +25,7 @@ namespace Svelto.ECS.Tests.Serialization
         }
 
         [TearDown]
-        public void Dipose() { _enginesRoot.Dispose(); }
+        public void Dispose() { _enginesRoot.Dispose(); }
 
         [TestCase]
         public void TestSerializingToByteArrayRemoveGroup()

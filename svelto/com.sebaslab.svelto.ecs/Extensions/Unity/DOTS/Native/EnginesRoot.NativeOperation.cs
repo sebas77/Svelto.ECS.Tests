@@ -114,7 +114,6 @@ namespace Svelto.ECS
 #endif
 
                         _entityLocator.SetReference(reference, egid);
-
                         var dic = EntityFactory.BuildGroupedEntities(egid, _groupedEntityToAdd, componentBuilders
                                                                    , null
 #if DEBUG && !PROFILE_SVELTO
@@ -132,7 +131,6 @@ namespace Svelto.ECS
                             var typeID = buffer.Dequeue<uint>();
 
                             IFiller entityBuilder = EntityComponentIDMap.GetTypeFromID(typeID);
-
                             //after the typeID, I expect the serialized component
                             entityBuilder.FillFromByteArray(init, buffer);
                         }

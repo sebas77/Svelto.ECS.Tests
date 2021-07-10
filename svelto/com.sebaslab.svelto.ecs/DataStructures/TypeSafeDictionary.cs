@@ -369,11 +369,11 @@ namespace Svelto.ECS.Internal
         {
             if (IsUnmanaged)
             {
-                implUnmgd.SetCapacity(size);
+                implUnmgd.ExpandTo(size);
             }
             else
             {
-                implMgd.SetCapacity(size);
+                implMgd.ExpandTo(size);
             }
         }
 

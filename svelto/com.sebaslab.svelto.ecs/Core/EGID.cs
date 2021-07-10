@@ -77,6 +77,7 @@ namespace Svelto.ECS
         public override string ToString()
         {
             var value = groupID.ToName();
+            
             return "id ".FastConcat(entityID).FastConcat(" group ").FastConcat(value);
         }
     }

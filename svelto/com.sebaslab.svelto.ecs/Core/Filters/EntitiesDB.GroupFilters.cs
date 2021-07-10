@@ -191,12 +191,12 @@ namespace Svelto.ECS
                 filter.Remove(egid.entityID);
             }
 
-            public void AddEntityToFilter<N>(int filtersID, EGID egid, N mapper) where N : IEGIDMapper
+            public bool AddEntityToFilter<N>(int filtersID, EGID egid, N mapper) where N : IEGIDMapper
             {
                 ref var filter =
                     ref CreateOrGetFilterForGroup(filtersID, egid.groupID, new RefWrapperType(mapper.entityType));
 
-                filter.Add(egid.entityID, mapper);
+                return filter.Add(egid.entityID, mapper);
             }
 
             readonly FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, GroupFilters>> _filters;

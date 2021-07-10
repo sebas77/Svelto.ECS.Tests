@@ -1,4 +1,5 @@
 using Svelto.ECS.DataStructures;
+using Svelto.ECS.Reference;
 
 namespace Svelto.ECS.Native
 {

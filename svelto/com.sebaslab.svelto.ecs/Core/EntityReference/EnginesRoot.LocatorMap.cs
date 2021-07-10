@@ -1,6 +1,8 @@
-﻿using Svelto.Common;
+﻿using System.Runtime.CompilerServices;
+using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.DataStructures;
+using Svelto.ECS.Reference;
 
 namespace Svelto.ECS
 {
@@ -102,7 +104,7 @@ namespace Svelto.ECS
                 // Mark the element as the last element used.
                 _nextFreeIndex.Set((int)reference.index);
             }
-
+            
             EntityReference FetchAndRemoveReference(EGID @from)
             {
                 var egidToReference = _egidToReferenceMap[@from.groupID];

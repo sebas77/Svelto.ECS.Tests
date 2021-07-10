@@ -31,7 +31,7 @@ namespace Svelto.ECS.Tests.Messy
         }
 
         [TearDown]
-        public void Dipose() { _enginesRoot.Dispose(); }
+        public void Dispose() { _enginesRoot.Dispose(); }
 
         [TestCase]
         public void TestMegaEntitySwap()

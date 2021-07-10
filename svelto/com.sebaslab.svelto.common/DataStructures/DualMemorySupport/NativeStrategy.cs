@@ -89,6 +89,11 @@ namespace Svelto.DataStructures
             _invalidHandle = true;
         }
 
+        public void CopyTo(IBufferStrategy<T> destBuffer)
+        {
+            
+        }
+
         public void Clear() => _realBuffer.Clear();
 
         public ref T this[uint index]
