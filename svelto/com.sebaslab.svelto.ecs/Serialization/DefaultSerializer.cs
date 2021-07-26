@@ -1,45 +1,61 @@
+using System.Linq;
+using System.Runtime.InteropServices;
+using Serialization;
+using Svelto.Common;
+using Svelto.DataStructures;
+
 namespace Svelto.ECS.Serialization
 {
-    public class DefaultSerializer<T> : IComponentSerializer<T> where T : unmanaged, IEntityComponent
+    public class DefaultSerializer<T> : IComponentSerializer<T>, IEntityReferenceSerializer
+        where T : unmanaged, IEntityComponent
     {
-        static readonly uint SIZEOFT = SerializableComponentBuilder<T>.SIZE;
-
         static DefaultSerializer()
         {
             var _type = typeof(T);
+            var fields = _type.GetFields().OrderBy(MemoryUtilities.GetFieldOffset).ToArray();
 
-            foreach (var field in _type.GetFields())
+            var blocks = new FasterList<SerializationBlock>();
+
+            foreach (var field in fields)
             {
-                var fieldFieldType = field.FieldType;
-                if (fieldFieldType.ContainsCustomAttribute(typeof(DoNotSerializeAttribute)) &&
+                var fieldType = field.FieldType;
+                if (fieldType.ContainsCustomAttribute(typeof(DoNotSerializeAttribute)) &&
                     field.IsPrivate == false)
-                    throw new ECSException($"field cannot be serialised {fieldFieldType} in {_type.FullName}");
+                    throw new ECSException($"field cannot be serialised {fieldType} in {_type.FullName}");
+
+                var block = DefaultSerializerUtils.GetSerializationBlock(field);
+
+                _totalSize += block.size;
+                blocks.Add(block);
             }
+
+            _blocks = blocks.ToArrayFast(out _);
 
             if (_type.GetProperties().Length > (ComponentBuilder<T>.HAS_EGID ? 1 : 0))
                 throw new ECSException("serializable entity struct must be property less ".FastConcat(_type.FullName));
         }
 
-        public uint size => SIZEOFT;
+        public uint size => _totalSize;
 
         public bool Serialize(in T value, ISerializationData serializationData)
         {
-            DefaultSerializerUtils.CopyToByteArray(value, serializationData.data.ToArrayFast(out _),
-                serializationData.dataPos);
-
-            serializationData.dataPos += SIZEOFT;
-
+            serializationData.dataPos += DefaultSerializerUtils.SerializeBlocksToByteArray(value,
+                serializationData.data.ToArrayFast(out _), serializationData.dataPos, _blocks, referenceSerializer);
             return true;
         }
 
         public bool Deserialize(ref T value, ISerializationData serializationData)
         {
-            value = DefaultSerializerUtils.CopyFromByteArray<T>(serializationData.data.ToArrayFast(out _),
-                serializationData.dataPos);
-
-            serializationData.dataPos += SIZEOFT;
+            serializationData.dataPos +=
+                DefaultSerializerUtils.DeserializeBlocksFromByteArray(serializationData.data.ToArrayFast(out _),
+                    serializationData.dataPos, ref value, _blocks, referenceSerializer);
 
             return true;
         }
+
+        public EntityReferenceSerializer referenceSerializer { get; set; }
+
+        static readonly uint _totalSize = 0;
+        static readonly SerializationBlock[] _blocks;
     }
 }

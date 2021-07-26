@@ -20,11 +20,11 @@ namespace Svelto.ECS
         public EnginesRoot(EntitiesSubmissionScheduler entitiesComponentScheduler)
         {
             _entitiesOperations            = new FasterDictionary<ulong, EntitySubmitOperation>();
-#if UNITY_NATIVE //because of the thread count, ATM this is only for unity            
+#if UNITY_NATIVE //because of the thread count, ATM this is only for unity
             _nativeSwapOperationQueue   = new DataStructures.AtomicNativeBags(Allocator.Persistent);
             _nativeRemoveOperationQueue = new DataStructures.AtomicNativeBags(Allocator.Persistent);
             _nativeAddOperationQueue    = new DataStructures.AtomicNativeBags(Allocator.Persistent);
-#endif            
+#endif
             serializationDescriptorMap     = new SerializationDescriptorMap();
             _maxNumberOfOperationsPerFrame = uint.MaxValue;
             _reactiveEnginesAddRemove      = new FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer>>();
@@ -135,7 +135,7 @@ namespace Svelto.ECS
                 _groupedEntityToAdd.Dispose();
 
                 _entityLocator.DisposeEntityReferenceMap();
-                
+
                 _entityStreams.Dispose();
                 scheduler.Dispose();
             }

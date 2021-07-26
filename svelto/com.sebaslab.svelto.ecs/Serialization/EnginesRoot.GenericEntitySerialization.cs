@@ -1,4 +1,5 @@
 ﻿using System;
+using Serialization;
 using Svelto.DataStructures;
 using Svelto.ECS.Serialization;
 
@@ -72,7 +73,8 @@ namespace Svelto.ECS
                 foreach (var serializableEntityBuilder in entityDescriptor.componentsToSerialize)
                 {
                     serializationData.BeginNextEntityComponent();
-                    serializableEntityBuilder.Deserialize(serializationData, initializer, serializationType);
+                    serializableEntityBuilder.Deserialize(serializationData, _entityRefSerializer, initializer
+                        , serializationType);
                 }
             }
 
@@ -154,7 +156,11 @@ namespace Svelto.ECS
                 serializationDescriptorMap.RegisterSerializationFactory<T>(deserializationFactory);
             }
 
-            internal EntitySerialization(EnginesRoot enginesRoot) { _enginesRoot = enginesRoot; }
+            internal EntitySerialization(EnginesRoot enginesRoot)
+            {
+                _enginesRoot = enginesRoot;
+                _entityRefSerializer = new EntityReferenceSerializer(enginesRoot._entityLocator);
+            }
 
             void SerializeEntityComponent
             (EGID entityGID, ISerializableComponentBuilder componentBuilder, ISerializationData serializationData
@@ -167,7 +173,8 @@ namespace Svelto.ECS
                     throw new Exception("Entity Serialization failed");
                 }
 
-                componentBuilder.Serialize(entityGID.entityID, safeDictionary, serializationData, serializationType);
+                componentBuilder.Serialize(entityGID.entityID, safeDictionary, _entityRefSerializer
+                    , serializationData, serializationType);
             }
 
             void DeserializeEntityInternal
@@ -187,12 +194,13 @@ namespace Svelto.ECS
                         new RefWrapperType(serializableEntityBuilder.GetEntityComponentType()), out var safeDictionary);
 
                     serializationData.BeginNextEntityComponent();
-                    serializableEntityBuilder.Deserialize(egid.entityID, safeDictionary, serializationData
-                                                        , serializationType);
+                    serializableEntityBuilder.Deserialize(egid.entityID, safeDictionary, _entityRefSerializer
+                        , serializationData, serializationType);
                 }
             }
 
             readonly EnginesRoot _enginesRoot;
+            readonly EntityReferenceSerializer _entityRefSerializer;
         }
 
         public IEntitySerialization GenerateEntitySerializer() { return new EntitySerialization(this); }

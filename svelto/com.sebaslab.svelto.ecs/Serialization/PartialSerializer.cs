@@ -1,6 +1,9 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Serialization;
+using Svelto.Common;
 using Svelto.DataStructures;
 using Attribute = System.Attribute;
 
@@ -10,82 +13,61 @@ namespace Svelto.ECS.Serialization
     public class PartialSerializerFieldAttribute : Attribute
     {}
 
-    public class PartialSerializer<T> : IComponentSerializer<T>
+    public class PartialSerializer<T> : IComponentSerializer<T>, IEntityReferenceSerializer
         where T : unmanaged, IEntityComponent
     {
         static PartialSerializer()
         {
-            Type myType = typeof(T);
-            FieldInfo[] myMembers = myType.GetFields();
+            Type type = typeof(T);
+            FieldInfo[] fields = type.GetFields().OrderBy(MemoryUtilities.GetFieldOffset).ToArray();
 
-            for (int i = 0; i < myMembers.Length; i++)
+            var blocks = new FasterList<SerializationBlock>();
+            foreach (var field in fields)
             {
-                Object[] myAttributes = myMembers[i].GetCustomAttributes(true);
-                for (int j = 0; j < myAttributes.Length; j++)
+                var attributes = field.GetCustomAttributes(true);
+                foreach (var attribute in attributes)
                 {
-                    if (myAttributes[j] is PartialSerializerFieldAttribute)
+                    if (attribute is PartialSerializerFieldAttribute)
                     {
-                        var fieldType = myMembers[i].FieldType;
+                        var fieldType = field.FieldType;
                         if (fieldType.ContainsCustomAttribute(typeof(DoNotSerializeAttribute)) &&
-                            myMembers[i].IsPrivate == false)
-                                throw new ECSException($"field cannot be serialised {fieldType} in {myType.FullName}");
+                            field.IsPrivate == false)
+                            throw new ECSException($"field cannot be serialised {fieldType} in {type.FullName}");
 
-                        var offset = Marshal.OffsetOf<T>(myMembers[i].Name);
-                        var sizeOf = (uint)Marshal.SizeOf(fieldType);
-                        offsets.Add(((uint) offset.ToInt32(), sizeOf));
-                        totalSize += sizeOf;
+                        var block = DefaultSerializerUtils.GetSerializationBlock(field);
+                        _totalSize += block.size;
+                        blocks.Add(block);
                     }
                 }
             }
 
-            if (myType.GetProperties().Length > (ComponentBuilder<T>.HAS_EGID ? 1 : 0))
-                throw new ECSException("serializable entity struct must be property less ".FastConcat(myType.FullName));
+            if (type.GetProperties().Length > (ComponentBuilder<T>.HAS_EGID ? 1 : 0))
+                throw new ECSException("serializable entity struct must be property less ".FastConcat(type.FullName));
+
+            _blocks = blocks.ToArrayFast(out _);
         }
 
         public bool Serialize(in T value, ISerializationData serializationData)
         {
-            unsafe
-            {
-                fixed (byte* dataptr = serializationData.data.ToArrayFast(out _))
-                {
-                    var entityComponent = value;
-                    foreach ((uint offset, uint size) offset in offsets)
-                    {
-                        byte* srcPtr = (byte*) &entityComponent + offset.offset;
-                        //todo move to Unsafe Copy when available as it is faster
-                        Buffer.MemoryCopy(srcPtr, dataptr + serializationData.dataPos,
-                            serializationData.data.count - serializationData.dataPos, offset.size);
-                        serializationData.dataPos += offset.size;
-                    }
-                }
-            }
-
+            serializationData.dataPos +=
+                DefaultSerializerUtils.SerializeBlocksToByteArray(value, serializationData.data.ToArrayFast(out _),
+                    serializationData.dataPos, _blocks, referenceSerializer);
             return true;
         }
 
         public bool Deserialize(ref T value, ISerializationData serializationData)
         {
-            unsafe
-            {
-                T tempValue = value; //todo: temporary solution I want to get rid of this copy
-                fixed (byte* dataptr = serializationData.data.ToArrayFast(out _))
-                    foreach ((uint offset, uint size) offset in offsets)
-                    {
-                        byte* dstPtr = (byte*) &tempValue + offset.offset;
-                        //todo move to Unsafe Copy when available as it is faster
-                        Buffer.MemoryCopy(dataptr + serializationData.dataPos, dstPtr, offset.size, offset.size);
-                        serializationData.dataPos += offset.size;
-                    }
-
-                value = tempValue; //todo: temporary solution I want to get rid of this copy
-            }
+            serializationData.dataPos +=
+                DefaultSerializerUtils.DeserializeBlocksFromByteArray(serializationData.data.ToArrayFast(out _),
+                    serializationData.dataPos, ref value, _blocks, referenceSerializer);
 
             return true;
         }
 
-        public uint size => totalSize;
+        public uint size => _totalSize;
+        public EntityReferenceSerializer referenceSerializer { get; set; }
 
-        static readonly FasterList<(uint, uint)> offsets = new FasterList<(uint, uint)>();
-        static readonly uint totalSize;
+        static readonly SerializationBlock[] _blocks;
+        static readonly uint _totalSize;
     }
 }

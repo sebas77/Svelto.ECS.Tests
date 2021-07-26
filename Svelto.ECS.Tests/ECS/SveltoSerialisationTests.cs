@@ -1,4 +1,6 @@
-﻿﻿using NUnit.Framework;
+﻿﻿using System;
+ using System.Runtime.InteropServices;
+ using NUnit.Framework;
 using Svelto.DataStructures;
  using Svelto.ECS.Hybrid;
 using Svelto.ECS.Schedulers;
@@ -79,26 +81,28 @@ namespace Svelto.ECS.Tests.Serialization
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
+            var queryEGID0 = new EGID(0, NamedGroup1.Group);
             Assert.That(
-                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(0, NamedGroup1.Group).value
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(queryEGID0).value
               , Is.EqualTo(5));
             Assert.That(
-                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(0, NamedGroup1.Group).value
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(queryEGID0).value
               , Is.EqualTo(4));
             Assert.That(
                 _neverDoThisIsJustForTheTest
-                   .entitiesDB.QueryEntity<EntityStructPartiallySerialized>(0, NamedGroup1.Group).value1
+                   .entitiesDB.QueryEntity<EntityStructPartiallySerialized>(queryEGID0).value1
               , Is.EqualTo(3));
 
+            var queryEGID1 = new EGID(1, NamedGroup1.Group);
             Assert.That(
-                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(1, NamedGroup1.Group).value
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(queryEGID1).value
               , Is.EqualTo(4));
             Assert.That(
-                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(1, NamedGroup1.Group).value
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(queryEGID1).value
               , Is.EqualTo(3));
             Assert.That(
                 _neverDoThisIsJustForTheTest
-                   .entitiesDB.QueryEntity<EntityStructPartiallySerialized>(1, NamedGroup1.Group).value1
+                   .entitiesDB.QueryEntity<EntityStructPartiallySerialized>(queryEGID1).value1
               , Is.EqualTo(2));
         }
 
@@ -286,6 +290,156 @@ namespace Svelto.ECS.Tests.Serialization
             newEnginesRoot.Dispose();
         }
 
+        [TestCase]
+        public void TestSerializingWithEntityReferences()
+        {
+            var egid0 = new EGID(0, NamedGroup1.Group);
+            var init0 = _entityFactory.BuildEntity<SerializableEntityDescriptorWithReferences>(egid0);
+            var egid1 = new EGID(1, NamedGroup1.Group);
+            var init1 = _entityFactory.BuildEntity<SerializableEntityDescriptorWithReferences>(egid1);
+
+            init0.Init(new EntityStructSerialized()
+            {
+                value = 2
+            });
+            init0.Init(new EntityStructSerialized2()
+            {
+                value = 4
+            });
+            init0.Init(new EntityReferenceParatiallySerialized()
+            {
+                value = int.MinValue,
+                reference = init1.reference,
+            });
+            init0.Init(new EntityReferenceSerialized
+            {
+                value1 = int.MinValue,
+                reference = init0.reference,
+                value2 = long.MinValue
+            });
+
+            init1.Init(new EntityStructSerialized()
+            {
+                value = 1
+            });
+            init1.Init(new EntityStructSerialized2()
+            {
+                value = 3
+            });
+            init1.Init(new EntityReferenceParatiallySerialized()
+            {
+                value = int.MaxValue,
+                reference = init0.reference,
+            });
+            init1.Init(new EntityReferenceSerialized
+            {
+                value1 = int.MaxValue,
+                reference = init1.reference,
+                value2 = long.MaxValue
+            });
+
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            FasterList<byte> bytes                    = new FasterList<byte>();
+            var              generateEntitySerializer = _enginesRoot.GenerateEntitySerializer();
+            var              simpleSerializationData  = new SimpleSerializationData(bytes);
+            generateEntitySerializer.SerializeEntity(egid0, simpleSerializationData, (int) SerializationType.Storage);
+            generateEntitySerializer.SerializeEntity(egid1, simpleSerializationData, (int) SerializationType.Storage);
+
+            _entityFunctions.RemoveEntitiesFromGroup(NamedGroup1.Group);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            simpleSerializationData.Reset();
+
+            generateEntitySerializer.DeserializeNewEntity(egid0, simpleSerializationData, (int) SerializationType.Storage);
+            generateEntitySerializer.DeserializeNewEntity(egid1, simpleSerializationData, (int) SerializationType.Storage);
+
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            // Entity 0 assertions.
+            Assert.AreEqual(2,
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(egid0).value);
+            Assert.AreEqual(4,
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(egid0).value);
+
+            var entityRefPartially =
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityReferenceParatiallySerialized>(egid0);
+            // Assert.AreEqual(0, entityRefPartially.value);
+            Assert.AreEqual(egid1, _neverDoThisIsJustForTheTest.entitiesDB.GetEGID(entityRefPartially.reference));
+
+            var entityRefStruct =
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityReferenceSerialized>(egid0);
+            Assert.AreEqual(int.MinValue, entityRefStruct.value1);
+            Assert.AreEqual(long.MinValue, entityRefStruct.value2);
+            Assert.AreEqual(egid0, _neverDoThisIsJustForTheTest.entitiesDB.GetEGID(entityRefStruct.reference));
+
+            // Entity 1 assertions.
+            Assert.AreEqual(
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(egid1).value, 1);
+            Assert.AreEqual(
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized2>(egid1).value, 3);
+
+            entityRefPartially =
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityReferenceParatiallySerialized>(egid1);
+            // Assert.AreEqual(0, entityRefPartially.value);
+            Assert.AreEqual(egid0, _neverDoThisIsJustForTheTest.entitiesDB.GetEGID(entityRefPartially.reference));
+
+            entityRefStruct =
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityReferenceSerialized>(egid1);
+            Assert.AreEqual(int.MaxValue, entityRefStruct.value1);
+            Assert.AreEqual(long.MaxValue, entityRefStruct.value2);
+            Assert.AreEqual(egid1, _neverDoThisIsJustForTheTest.entitiesDB.GetEGID(entityRefStruct.reference));
+        }
+
+        [TestCase]
+        public void TestSerializingWithStructLayout()
+        {
+            var egid0 = new EGID(0, NamedGroup1.Group);
+            var init0 = _entityFactory.BuildEntity<SerializableEntityDescriptorWithLayout>(egid0);
+
+            init0.Init(new EntityStructExplicitLayoutSerialized()
+            {
+                uintValue = 32,
+                longValue = 512,
+                intValue = -32
+            });
+            init0.Init(new EntityStructSequentialLayoutSerialized()
+            {
+                uintValue = 64,
+                longValue = 1024,
+                intValue = -64
+            });
+
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            FasterList<byte> bytes                    = new FasterList<byte>();
+            var              generateEntitySerializer = _enginesRoot.GenerateEntitySerializer();
+            var              simpleSerializationData  = new SimpleSerializationData(bytes);
+            generateEntitySerializer.SerializeEntity(egid0, simpleSerializationData, (int) SerializationType.Storage);
+
+            _entityFunctions.RemoveEntitiesFromGroup(NamedGroup1.Group);
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            simpleSerializationData.Reset();
+
+            generateEntitySerializer.DeserializeNewEntity(egid0, simpleSerializationData, (int) SerializationType.Storage);
+
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            // Entity 0 assertions.
+            var explicitLayout =
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructExplicitLayoutSerialized>(egid0);
+            Assert.AreEqual(32, explicitLayout.uintValue);
+            Assert.AreEqual(-32, explicitLayout.intValue);
+            Assert.AreEqual(512, explicitLayout.longValue);
+
+            var sequentialLayout =
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSequentialLayoutSerialized>(egid0);
+            Assert.AreEqual(64, sequentialLayout.uintValue);
+            Assert.AreEqual(-64, sequentialLayout.intValue);
+            Assert.AreEqual(1024, sequentialLayout.longValue);
+        }
+
         EnginesRoot                       _enginesRoot;
         IEntityFactory                    _entityFactory;
         IEntityFunctions                  _entityFunctions;
@@ -379,6 +533,40 @@ namespace Svelto.ECS.Tests.Serialization
             }
         }
 
+        class SerializableEntityDescriptorWithReferences : SerializableEntityDescriptor<
+            SerializableEntityDescriptorWithReferences.DefaultPatternForEntityDescriptor>
+        {
+            [HashName("DefaultPatternForEntityDescriptorWithReferences")]
+            internal class DefaultPatternForEntityDescriptor : IEntityDescriptor
+            {
+                public IComponentBuilder[] componentsToBuild => ComponentsToBuild;
+
+                static readonly IComponentBuilder[] ComponentsToBuild =
+                {
+                    new SerializableComponentBuilder<SerializationType, EntityStructSerialized>()
+                    , new SerializableComponentBuilder<SerializationType, EntityReferenceSerialized>()
+                    , new SerializableComponentBuilder<SerializationType, EntityStructSerialized2>()
+                    , new SerializableComponentBuilder<SerializationType, EntityReferenceParatiallySerialized>()
+                };
+            }
+        }
+
+        class SerializableEntityDescriptorWithLayout : SerializableEntityDescriptor<
+            SerializableEntityDescriptorWithLayout.DefaultPatternForEntityDescriptor>
+        {
+            [HashName("DefaultPatternForEntityDescriptorWithLayou")]
+            internal class DefaultPatternForEntityDescriptor : IEntityDescriptor
+            {
+                public IComponentBuilder[] componentsToBuild => ComponentsToBuild;
+
+                static readonly IComponentBuilder[] ComponentsToBuild =
+                {
+                    new SerializableComponentBuilder<SerializationType, EntityStructExplicitLayoutSerialized>()
+                    , new SerializableComponentBuilder<SerializationType, EntityStructSequentialLayoutSerialized>()
+                };
+            }
+        }
+
         class TestEngine : IQueryingEntitiesEngine
         {
             public EntitiesDB entitiesDB { get; set; }
@@ -412,6 +600,35 @@ namespace Svelto.ECS.Tests.Serialization
 #pragma warning restore 649
 
             public EGID ID { get; set; }
+        }
+
+        struct EntityReferenceSerialized : IEntityComponent
+        {
+            public int value1;
+            public EntityReference reference;
+            public long value2;
+        }
+
+        struct EntityReferenceParatiallySerialized : IEntityComponent
+        {
+            public long value;
+            [PartialSerializerField] public EntityReference reference;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        struct EntityStructExplicitLayoutSerialized : IEntityComponent
+        {
+            [FieldOffset(4)] public long longValue;
+            [FieldOffset(0)] public uint uintValue;
+            [FieldOffset(12)] public int intValue;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 8)]
+        struct EntityStructSequentialLayoutSerialized : IEntityComponent
+        {
+            public uint uintValue;
+            public long longValue;
+            public int intValue;
         }
 
         interface ITestIt
