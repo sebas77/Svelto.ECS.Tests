@@ -211,6 +211,15 @@ namespace Svelto.Common
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void MemSet(IntPtr destination, uint sizeOfInBytes, byte value)
+        {
+            unsafe
+            {
+                Unsafe.InitBlock((void*) destination, value, sizeOfInBytes);
+            }
+        }
+
         /// <summary>
         /// Like Memcpy but safe when memory overlaps
         /// </summary>
@@ -228,16 +237,24 @@ namespace Svelto.Common
         }
 
         public static void Memcpy<T>
-            (IntPtr source, uint sourceStartIndex, IntPtr destination, uint destinationStartIndex, uint size)
+            (IntPtr source, uint sourceStartIndex, IntPtr destination, uint destinationStartIndex, uint length)
             where T : struct
         {
             unsafe
             {
                 var sizeOf        = SizeOf<T>();
-                var sizeOfInBytes = (uint) (sizeOf * size);
+                var sizeOfInBytes = (uint) (sizeOf * length);
                 Buffer.MemoryCopy((void*) (source + (int) sourceStartIndex * sizeOf)
                                 , (void*) (destination + (int) destinationStartIndex * sizeOf), sizeOfInBytes
                                 , sizeOfInBytes);
+            }
+        }
+
+        public static void MemcpyUnaligned(IntPtr source, IntPtr destination, uint sizeInBytes)
+        {
+            unsafe
+            {
+                Unsafe.CopyBlockUnaligned((void*)destination, (void*)source, sizeInBytes);
             }
         }
 

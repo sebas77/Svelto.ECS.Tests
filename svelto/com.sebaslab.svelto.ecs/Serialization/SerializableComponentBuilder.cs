@@ -1,4 +1,5 @@
 using System;
+using Serialization;
 using Svelto.Common;
 using Svelto.ECS.Internal;
 
@@ -15,9 +16,9 @@ namespace Svelto.ECS.Serialization
         where T : unmanaged, IEntityComponent
     {
         public static readonly uint SIZE = (uint) MemoryUtilities.SizeOf<T>();
-        
-          public void Serialize(uint entityID, ITypeSafeDictionary dictionary, ISerializationData serializationData
-                              , int serializationType)
+
+          public void Serialize(uint entityID, ITypeSafeDictionary dictionary, EntityReferenceSerializer referenceSerializer
+              , ISerializationData serializationData, int serializationType)
         {
             IComponentSerializer<T> componentSerializer = _serializers[serializationType];
 
@@ -25,6 +26,11 @@ namespace Svelto.ECS.Serialization
             if (safeDictionary.TryFindIndex(entityID, out uint index) == false)
             {
                 throw new ECSException("Entity Serialization failed");
+            }
+
+            if (componentSerializer is IEntityReferenceSerializer componentRefSerializer)
+            {
+                componentRefSerializer.referenceSerializer = referenceSerializer;
             }
 
             ref T val    = ref safeDictionary.GetDirectValueByRef(index);
@@ -35,8 +41,8 @@ namespace Svelto.ECS.Serialization
             componentSerializer.SerializeSafe(val, serializationData);
         }
 
-        public void Deserialize(uint entityID, ITypeSafeDictionary dictionary, ISerializationData serializationData
-                              , int serializationType)
+        public void Deserialize(uint entityID, ITypeSafeDictionary dictionary, EntityReferenceSerializer referenceSerializer
+            , ISerializationData serializationData, int serializationType)
         {
             IComponentSerializer<T> componentSerializer = _serializers[(int) serializationType];
 
@@ -47,16 +53,25 @@ namespace Svelto.ECS.Serialization
                 throw new ECSException("Entity Deserialization failed");
             }
 
+            if (componentSerializer is IEntityReferenceSerializer componentRefSerializer)
+            {
+                componentRefSerializer.referenceSerializer = referenceSerializer;
+            }
+
             ref T val    = ref safeDictionary.GetDirectValueByRef(index);
 
             componentSerializer.DeserializeSafe(ref val, serializationData);
         }
 
-        public void Deserialize
-        (ISerializationData serializationData, in EntityInitializer initializer
-       , int serializationType)
+        public void Deserialize(ISerializationData serializationData, EntityReferenceSerializer referenceSerializer
+            , in EntityInitializer initializer, int serializationType)
         {
             IComponentSerializer<T> componentSerializer = _serializers[(int) serializationType];
+
+            if (componentSerializer is IEntityReferenceSerializer componentRefSerializer)
+            {
+                componentRefSerializer.referenceSerializer = referenceSerializer;
+            }
 
             componentSerializer.DeserializeSafe(ref initializer.GetOrCreate<T>(), serializationData);
         }
@@ -75,8 +90,8 @@ namespace Svelto.ECS.Serialization
 
         private protected IComponentSerializer<T>[] _serializers;
     }
-    
-    public class SerializableComponentBuilder<SerializationType, T> :  SerializableComponentBuilder<T> 
+
+    public class SerializableComponentBuilder<SerializationType, T> :  SerializableComponentBuilder<T>
         where T : unmanaged, IEntityComponent where SerializationType : Enum
     {
         static SerializableComponentBuilder() { }
@@ -84,7 +99,7 @@ namespace Svelto.ECS.Serialization
         public SerializableComponentBuilder(params ValueTuple<int, IComponentSerializer<T>>[] serializers)
         {
             var length = new SerializersInfo<SerializationType>().numberOfSerializationTypes;
-            
+
             _serializers = new IComponentSerializer<T>[(int)length];
             for (int i = 0; i < serializers.Length; i++)
             {

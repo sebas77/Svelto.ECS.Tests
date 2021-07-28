@@ -13,6 +13,51 @@ namespace Svelto.ECS
     {
         public struct LocatorMap
         {
+            public EntityReference GetEntityReference(EGID egid)
+            {
+                if (_egidToReferenceMap.TryGetValue(egid.groupID, out var groupMap))
+                {
+                    if (groupMap.TryGetValue(egid.entityID, out var locator))
+                        return locator;
+                #if DEBUG && !SVELTO_PROFILE
+                    else throw new ECSException($"Entity {egid} does not exist. Are you creating it? Try getting it from initializer.reference.");
+                #endif
+                }
+
+                return EntityReference.Invalid;
+            }
+
+            public bool TryGetEGID(EntityReference reference, out EGID egid)
+            {
+                egid = default;
+                if (reference == EntityReference.Invalid)
+                    return false;
+                // Make sure we are querying for the current version of the locator.
+                // Otherwise the locator is pointing to a removed entity.
+                if (_entityReferenceMap[reference.index].version == reference.version)
+                {
+                    egid = _entityReferenceMap[reference.index].egid;
+                    return true;
+                }
+
+                return false;
+            }
+
+            public EGID GetEGID(EntityReference reference)
+            {
+                if (reference == EntityReference.Invalid)
+                    throw new ECSException("Invalid Reference");
+                // Make sure we are querying for the current version of the locator.
+                // Otherwise the locator is pointing to a removed entity.
+                if (_entityReferenceMap[reference.index].version != reference.version)
+                    throw new ECSException("outdated Reference");
+
+                return _entityReferenceMap[reference.index].egid;
+            }
+
+            // NOTE: Creation of an EntityReference is split into a Claim and a Set step. This is to allow multithreaded
+            // creation of entities to return an EntityReference ready to be stored. Claim is thread-safe and reserves an
+            // entry in the locator map that can only be used partially until the Set step is performed.
             internal EntityReference ClaimReference()
             {
                 int tempFreeIndex;
@@ -48,6 +93,9 @@ namespace Svelto.ECS
                 return new EntityReference((uint)tempFreeIndex + 1, version);
             }
 
+            // NOTE: As noted above the creation of an EntityReference is split into a Claim and a Set step.
+            // The set step is not thread-safe and needs to be performed as soon as all the claims have been performed.
+            // In a single threaded entity creation there is no reason to not call claim and set immediately.
             internal void SetReference(EntityReference reference, EGID egid)
             {
                 // Since references can be claimed in parallel now, it might happen that they are set out of order,
@@ -104,7 +152,7 @@ namespace Svelto.ECS
                 // Mark the element as the last element used.
                 _nextFreeIndex.Set((int)reference.index);
             }
-            
+
             EntityReference FetchAndRemoveReference(EGID @from)
             {
                 var egidToReference = _egidToReferenceMap[@from.groupID];
@@ -140,46 +188,20 @@ namespace Svelto.ECS
                 _egidToReferenceMap.Remove(fromGroupId);
             }
 
-            public EntityReference GetEntityReference(EGID egid)
+            internal EntityReference GetOrCreateEntityReference(EGID egid)
             {
+                EntityReference reference;
                 if (_egidToReferenceMap.TryGetValue(egid.groupID, out var groupMap))
                 {
-                    if (groupMap.TryGetValue(egid.entityID, out var locator))
-                        return locator;
-                #if DEBUG && !SVELTO_PROFILE
-                    else throw new ECSException($"Entity {egid} does not exist. Are you creating it? Try getting it from initializer.reference.");
-                #endif
+                    if (groupMap.TryGetValue(egid.entityID, out reference))
+                    {
+                        return reference;
+                    }
                 }
 
-                return EntityReference.Invalid;
-            }
-
-            public bool TryGetEGID(EntityReference reference, out EGID egid)
-            {
-                egid = default;
-                if (reference == EntityReference.Invalid)
-                    return false;
-                // Make sure we are querying for the current version of the locator.
-                // Otherwise the locator is pointing to a removed entity.
-                if (_entityReferenceMap[reference.index].version == reference.version)
-                {
-                    egid = _entityReferenceMap[reference.index].egid;
-                    return true;
-                }
-
-                return false;
-            }
-
-            public EGID GetEGID(EntityReference reference)
-            {
-                if (reference == EntityReference.Invalid)
-                    throw new ECSException("Invalid Reference");
-                // Make sure we are querying for the current version of the locator.
-                // Otherwise the locator is pointing to a removed entity.
-                if (_entityReferenceMap[reference.index].version != reference.version)
-                    throw new ECSException("outdated Reference");
-
-                return _entityReferenceMap[reference.index].egid;
+                reference = ClaimReference();
+                SetReference(reference, egid);
+                return reference;
             }
 
             internal void PreallocateReferenceMaps(ExclusiveGroupStruct groupID, uint size)
