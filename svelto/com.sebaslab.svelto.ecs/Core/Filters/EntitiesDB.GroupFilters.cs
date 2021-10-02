@@ -1,5 +1,4 @@
 using Svelto.DataStructures;
-using Svelto.ECS.Native;
 
 namespace Svelto.ECS
 {
@@ -28,7 +27,7 @@ namespace Svelto.ECS
                 return ref CreateOrGetFilterForGroup(filterID, groupID, refWrapper);
             }
 
-            internal ref FilterGroup CreateOrGetFilterForGroup
+            ref FilterGroup CreateOrGetFilterForGroup
                 (int filterID, ExclusiveGroupStruct groupID, RefWrapperType refWrapper)
             {
                 var fasterDictionary =

@@ -7,7 +7,7 @@ namespace Svelto.ECS
 {
     [StructLayout(LayoutKind.Explicit, Size = 4)]
     //the type doesn't implement IEqualityComparer, what implements it is a custom comparer
-    public struct ExclusiveGroupStruct : IEquatable<ExclusiveGroupStruct>, IComparable<ExclusiveGroupStruct>
+    public struct ExclusiveGroupStruct : IEquatable<ExclusiveGroupStruct>, IComparable<ExclusiveGroupStruct>, IConvertToUInt
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
@@ -49,6 +49,9 @@ namespace Svelto.ECS
         {
             return this.ToName();
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public uint ToUint() { return _id;  }
 
         internal static ExclusiveGroupStruct Generate(byte bitmask = 0)
         {
@@ -108,6 +111,6 @@ namespace Svelto.ECS
         [FieldOffset(0)] uint _id;
         [FieldOffset(3)] byte _bytemask;
 
-        static           uint _globalId = 1; //it starts from 1 because default EGID is considered not initialized value
+        static           uint _globalId = 1; //it starts from 1 because default EGID is considered not initalized value
     }
 }

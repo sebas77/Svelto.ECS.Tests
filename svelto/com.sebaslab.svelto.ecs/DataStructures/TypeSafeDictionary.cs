@@ -9,10 +9,11 @@ namespace Svelto.ECS.Internal
     sealed class TypeSafeDictionary<TValue> : ITypeSafeDictionary<TValue> where TValue : struct, IEntityComponent
     {
         static readonly Type   _type         = typeof(TValue);
+        static readonly string _typeName     = _type.Name;
         static readonly bool   _hasEgid      = typeof(INeedEGID).IsAssignableFrom(_type);
         static readonly bool   _hasReference = typeof(INeedEntityReference).IsAssignableFrom(_type);
 
-        internal static readonly bool isUnmanaged =
+        internal static readonly bool IsUnmanaged =
             _type.IsUnmanagedEx() && (typeof(IEntityViewComponent).IsAssignableFrom(_type) == false);
 
         internal SveltoDictionary<uint, TValue, ManagedStrategy<SveltoDictionaryNode<uint>>, ManagedStrategy<TValue>,
@@ -24,7 +25,7 @@ namespace Svelto.ECS.Internal
 
         public TypeSafeDictionary(uint size)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
                 implUnmgd = new SveltoDictionary<uint, TValue, NativeStrategy<SveltoDictionaryNode<uint>>,
                     NativeStrategy<TValue>, NativeStrategy<int>>(size, Allocator.Persistent);
             else
@@ -37,7 +38,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(uint egidEntityId, in TValue entityComponent)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
                 implUnmgd.Add(egidEntityId, entityComponent);
             else
                 implMgd.Add(egidEntityId, entityComponent);
@@ -46,7 +47,7 @@ namespace Svelto.ECS.Internal
         /// todo: Is this really needed, cannot I just use AddEntitiesFromDictionary? Needs to be checked
         public void AddEntityToDictionary(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 var valueIndex = implUnmgd.GetIndex(fromEntityGid.entityID);
 
@@ -91,7 +92,7 @@ namespace Svelto.ECS.Internal
             (ITypeSafeDictionary entitiesToSubmit, uint groupId, EnginesRoot enginesRoot)
         {
             var safeDictionary = (entitiesToSubmit as TypeSafeDictionary<TValue>);
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 var typeSafeDictionary = safeDictionary.implUnmgd;
 
@@ -145,7 +146,7 @@ namespace Svelto.ECS.Internal
        , ITypeSafeDictionary realDic, ExclusiveGroupStruct? fromGroup, ExclusiveGroupStruct toGroup
        , in PlatformProfiler profiler)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 var typeSafeDictionary = realDic as ITypeSafeDictionary<TValue>;
 
@@ -170,7 +171,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 implUnmgd.Clear();
             }
@@ -183,7 +184,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void FastClear()
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 implUnmgd.FastClear();
             }
@@ -196,7 +197,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ContainsKey(uint egidEntityId)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 return implUnmgd.ContainsKey(egidEntityId);
             }
@@ -212,7 +213,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint GetIndex(uint valueEntityId)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 return implUnmgd.GetIndex(valueEntityId);
             }
@@ -225,7 +226,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetOrCreate(uint idEntityId)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 return ref implUnmgd.GetOrCreate(idEntityId);
             }
@@ -238,7 +239,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IBuffer<TValue> GetValues(out uint count)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 return implUnmgd.GetValues(out count);
             }
@@ -251,7 +252,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetDirectValueByRef(uint key)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 return ref implUnmgd.GetDirectValueByRef(key);
             }
@@ -264,7 +265,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(uint key)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 return implUnmgd.ContainsKey(key);
             }
@@ -278,7 +279,7 @@ namespace Svelto.ECS.Internal
         (EGID fromEntityGid, EGID? toEntityID, ITypeSafeDictionary toGroup
        , FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer>> engines, in PlatformProfiler profiler)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 var valueIndex = implUnmgd.GetIndex(fromEntityGid.entityID);
 
@@ -336,7 +337,7 @@ namespace Svelto.ECS.Internal
         (FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer>> engines, in PlatformProfiler profiler
        , ExclusiveGroupStruct group)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 foreach (var value in implUnmgd)
                     ExecuteEnginesRemoveCallbackOnSingleEntity(engines, ref implUnmgd.GetValueByRef(value.Key)
@@ -353,7 +354,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveEntityFromDictionary(EGID fromEntityGid)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 implUnmgd.Remove(fromEntityGid.entityID);
             }
@@ -366,7 +367,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetCapacity(uint size)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 implUnmgd.ExpandTo(size);
             }
@@ -379,7 +380,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Trim()
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 implUnmgd.Trim();
             }
@@ -392,7 +393,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryFindIndex(uint entityId, out uint index)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 return implUnmgd.TryFindIndex(entityId, out index);
             }
@@ -404,7 +405,7 @@ namespace Svelto.ECS.Internal
 
         public void KeysEvaluator(Action<uint> action)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 foreach (var key in implUnmgd.keys)
                 {
@@ -423,7 +424,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetValue(uint entityId, out TValue item)
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
             {
                 return implUnmgd.TryGetValue(entityId, out item);
             }
@@ -438,7 +439,7 @@ namespace Svelto.ECS.Internal
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (isUnmanaged)
+                if (IsUnmanaged)
                 {
                     return (uint) implUnmgd.count;
                 }
@@ -454,7 +455,7 @@ namespace Svelto.ECS.Internal
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (isUnmanaged)
+                if (IsUnmanaged)
                 {
                     return ref implUnmgd.GetValueByRef(idEntityId);
                 }
@@ -538,7 +539,7 @@ namespace Svelto.ECS.Internal
 
         public void Dispose()
         {
-            if (isUnmanaged)
+            if (IsUnmanaged)
                 implUnmgd.Dispose();
             else
                 implMgd.Dispose();

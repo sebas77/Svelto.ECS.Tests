@@ -566,6 +566,19 @@ namespace Svelto.DataStructures
 
         uint        _freeValueCellIndex;
         uint        _collisions;
+
+        // public void CopyValuesTo(SveltoDictionary<TKey, TValue, TKeyStrategy, TValueStrategy, TBucketStrategy> destDic)
+        // {
+        //     destDic.ExpandTo((uint) count);
+        //     destDic.FastClear();
+        //
+        //     destDic._freeValueCellIndex = _freeValueCellIndex;
+        //     destDic._collisions         = _collisions;
+        //
+        //     _valuesInfo.CopyTo(destDic._valuesInfo);
+        //     _values.CopyTo(destDic._values);
+        //     _buckets.CopyTo(destDic._buckets);
+        // }
     }
 
     public class SveltoDictionaryException : Exception

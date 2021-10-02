@@ -9,6 +9,7 @@ namespace Svelto.ECS
     /// <summary>
     /// Todo: EntityReference shouldn't map EGIDs as dictionaries keys but directly the indices in the EntityDB arrays
     /// </summary>
+    [Serialization.DoNotSerialize]
     [Serializable]
     [StructLayout(LayoutKind.Explicit)]
     public struct EntityReference : IEquatable<EntityReference>
@@ -58,7 +59,7 @@ namespace Svelto.ECS
 
             return entitiesDB.GetEntityLocator().GetEGID(this);
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ToEGID(EntitiesDB entitiesDB, out EGID egid)
         {

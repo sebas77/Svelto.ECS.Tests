@@ -95,29 +95,6 @@ namespace Svelto.ECS
             return localEntitiesToBuild;
         }
 
-        public void Add<T>() where T : struct, IEntityComponent
-        {
-            IComponentBuilder[] extraEntities = { new ComponentBuilder<T>() };
-            ComponentsToBuild = Construct(extraEntities.Length, extraEntities, ComponentsToBuild);
-        }
-
-        public void Add<T, U>() 
-            where T : struct, IEntityComponent
-            where U : struct, IEntityComponent
-        {
-            IComponentBuilder[] extraEntities = { new ComponentBuilder<T>(), new ComponentBuilder<U>() };
-            ComponentsToBuild = Construct(extraEntities.Length, extraEntities, ComponentsToBuild);
-        }
-
-        public void Add<T, U, V>() 
-            where T : struct, IEntityComponent
-            where U : struct, IEntityComponent
-            where V : struct, IEntityComponent
-        {
-            IComponentBuilder[] extraEntities = { new ComponentBuilder<T>(), new ComponentBuilder<U>(), new ComponentBuilder<V>() };
-            ComponentsToBuild = Construct(extraEntities.Length, extraEntities, ComponentsToBuild);
-        }
-
         static int SetupEntityInfoComponent(IComponentBuilder[] defaultEntities, out IComponentBuilder[] componentsToBuild,
             int extraLenght)
         {

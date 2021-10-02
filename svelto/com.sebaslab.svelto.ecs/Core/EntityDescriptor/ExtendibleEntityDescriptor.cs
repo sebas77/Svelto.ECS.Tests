@@ -21,7 +21,7 @@ namespace Svelto.ECS
     /// }
     /// </summary>
     /// <typeparam name="TType"></typeparam>
-    public abstract class ExtendibleEntityDescriptor<TType> : IDynamicEntityDescriptor where TType : IEntityDescriptor, new()
+    public class ExtendibleEntityDescriptor<TType> : IDynamicEntityDescriptor where TType : IEntityDescriptor, new()
     {
         static ExtendibleEntityDescriptor()
         {
@@ -30,42 +30,28 @@ namespace Svelto.ECS
                     $"SerializableEntityDescriptors cannot be used as base entity descriptor: {typeof(TType)}");
         }
 
-        protected ExtendibleEntityDescriptor(IComponentBuilder[] extraEntities)
+        public ExtendibleEntityDescriptor(IComponentBuilder[] extraEntities)
         {
             _dynamicDescriptor = new DynamicEntityDescriptor<TType>(extraEntities);
         }
 
-        protected ExtendibleEntityDescriptor()
+        public ExtendibleEntityDescriptor()
         {
             _dynamicDescriptor = new DynamicEntityDescriptor<TType>(true);
         }
 
-        protected ExtendibleEntityDescriptor<TType> ExtendWith<T>() where T : IEntityDescriptor, new()
+        public ExtendibleEntityDescriptor<TType> ExtendWith<T>() where T : IEntityDescriptor, new()
         {
             _dynamicDescriptor.ExtendWith<T>();
 
             return this;
         }
 
-        protected ExtendibleEntityDescriptor<TType> ExtendWith(IComponentBuilder[] extraEntities)
+        public ExtendibleEntityDescriptor<TType> ExtendWith(IComponentBuilder[] extraEntities)
         {
             _dynamicDescriptor.ExtendWith(extraEntities);
 
             return this;
-        }
-
-
-        protected void Add<T>() where T : struct, IEntityComponent
-        {
-            _dynamicDescriptor.Add<T>();
-        }
-        protected void Add<T, U>() where T : struct,  IEntityComponent where U : struct,  IEntityComponent
-        {
-            _dynamicDescriptor.Add<T, U>();
-        }
-        protected void Add<T, U, V>() where T : struct,  IEntityComponent where U : struct,  IEntityComponent where V : struct,  IEntityComponent
-        {
-            _dynamicDescriptor.Add<T, U, V>();
         }
 
         public IComponentBuilder[] componentsToBuild => _dynamicDescriptor.componentsToBuild;

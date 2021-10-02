@@ -29,10 +29,8 @@ namespace Svelto.ECS
             DBC.ECS.Check.Require((uint)entityID.groupID != 0
                         , "invalid group detected, are you using new ExclusiveGroupStruct() instead of new ExclusiveGroup()?");
 
-            // NOTE: since we added EntityReference serialization it could happen that a deserialized entity created
-            // the reference to another pre-emptively. So when creating entities we need to check if there is a reference
-            // for it already claimed.
-            var reference = _entityLocator.GetOrCreateEntityReference(entityID);
+            var reference = _entityLocator.ClaimReference();
+            _entityLocator.SetReference(reference, entityID);
 
             var dic = EntityFactory.BuildGroupedEntities(entityID, _groupedEntityToAdd, componentsToBuild, implementors
 #if DEBUG && !PROFILE_SVELTO

@@ -150,6 +150,12 @@ namespace Svelto.DataStructures
             Array.Copy(GetValues(out var count).ToManagedArray(), 0, values, index, count);
         }
 
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // public void CopyValuesTo(FasterDictionary<TKey, TValue> destDic)
+        // {
+        //     _dictionary.CopyValuesTo(destDic._dictionary);            
+        // }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ExpandTo(uint newSize) { _dictionary.ExpandTo(newSize); }
 

@@ -48,7 +48,7 @@ namespace Svelto.DataStructures
     {
         static NB()
         {
-            if (TypeCache<T>.isUnmanaged == false)
+            if (TypeCache<T>.IsUnmanaged == false)
                 throw new Exception("NativeBuffer (NB) supports only unmanaged types");
         }
         

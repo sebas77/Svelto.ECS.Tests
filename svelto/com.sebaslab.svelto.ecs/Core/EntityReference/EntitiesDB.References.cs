@@ -10,13 +10,13 @@ namespace Svelto.ECS
         {
             return _entityReferencesMap.TryGetEGID(entityReference, out egid);
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EGID GetEGID(EntityReference entityReference)
         {
             return _entityReferencesMap.GetEGID(entityReference);
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EnginesRoot.LocatorMap GetEntityLocator()
         {

@@ -8,7 +8,7 @@ namespace Svelto.DataStructures
     public class FasterList<T>
     {
         public int count => (int) _count;
-        public int capacity => _buffer.Length;
+        public uint capacity => (uint) _buffer.Length;
         
         public static explicit operator FasterList<T>(T[] array)
         {
@@ -100,7 +100,7 @@ namespace Svelto.DataStructures
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                DBC.Common.Check.Require(index < _count, $"out of bound index. index {index} - count {_count}");
+                DBC.Common.Check.Require(index < _count, "out of bound index");
                 return ref _buffer[index];
             }
         }
@@ -186,7 +186,7 @@ namespace Svelto.DataStructures
         public void FastClear()
         {
 #if DEBUG && !PROFILE_SVELTO
-            if (Svelto.Common.TypeCache<T>.type.IsClass)
+            if (Svelto.Common.TypeCache<T>.Type.IsClass)
                 Console.LogWarning(
                     "Warning: objects held by this list won't be garbage collected. Use ResetToReuse or Clear " +
                     "to avoid this warning");
