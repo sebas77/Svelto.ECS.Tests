@@ -116,19 +116,6 @@ namespace Svelto.ECS.Tests.Messy
             Assert.Throws(typeof(ECSException), CheckFunction);
         }
 
-        [TestCase]
-        public void TestValueReference()
-        {
-            var init = _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(
-                new EGID(0, group1), new[] {new TestIt(2)});
-
-            _simpleSubmissionEntityViewScheduler.SubmitEntities();
-
-            Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<TestEntityViewComponent>(new EGID(0, group1))
-                                                    .TestIt.testValue == 4);
-
-        }
-
         [TestCase((uint) 0)]
         [TestCase((uint) 1)]
         [TestCase((uint) 2)]
@@ -273,7 +260,7 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint) 2)]
         public void TestBuildEntityWithImplementor(uint id)
         {
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(
                 new EGID(id, group1), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
@@ -334,7 +321,7 @@ namespace Svelto.ECS.Tests.Messy
         public void TestBuildEntityMixed(uint id)
         {
             TestIt testIt = new TestIt(2);
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(
                 new EGID(id, group1), new[] {testIt});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
@@ -486,13 +473,13 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint) 8, (uint) 9, (uint) 10, (uint) 11)]
         public void TestExecuteOnAllTheEntities(uint id, uint id2, uint id3, uint id4)
         {
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(
                 new EGID(id, groupR4), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(
                 new EGID(id2, groupR4 + 1), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(
                 new EGID(id3, groupR4 + 2), new[] {new TestIt(2)});
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(
                 new EGID(id4, groupR4 + 3), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
@@ -531,10 +518,10 @@ namespace Svelto.ECS.Tests.Messy
                 }
             }
 
-            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id, groupR4));
-            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id2, groupR4 + 1));
-            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id3, groupR4 + 2));
-            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponentStruct>(new EGID(id4, groupR4 + 3));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id, groupR4));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id2, groupR4 + 1));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id3, groupR4 + 2));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id4, groupR4 + 3));
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             foreach (var (_, _) in _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewComponent>())
@@ -742,7 +729,7 @@ namespace Svelto.ECS.Tests.Messy
     class TestDescriptorEntityView : GenericEntityDescriptor<TestEntityViewComponent> { }
     class TestDescriptorEntityView2 : GenericEntityDescriptor<TestEntityViewComponent> { }
     class TestDescriptorEntity : GenericEntityDescriptor<TestEntityComponent> { }
-    class TestEntityWithComponentViewAndComponentStruct : GenericEntityDescriptor<TestEntityViewComponent, TestEntityComponent
+    class TestEntityWithComponentViewAndComponent : GenericEntityDescriptor<TestEntityViewComponent, TestEntityComponent
     > { }
     class TestDescriptorWith2Components : GenericEntityDescriptor<TestEntityComponent, TestEntityComponent2> { }
     class TestDescriptorEntityViewWrong : GenericEntityDescriptor<TestWrongComponent> { }

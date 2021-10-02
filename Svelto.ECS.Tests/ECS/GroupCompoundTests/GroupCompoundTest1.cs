@@ -62,10 +62,12 @@ namespace Svelto.ECS.Tests.GroupCompounds
 
             Assert.AreNotEqual(EatingRedDoofuses5, NoEatingRedDoofuses6);
 
-            Assert.That(GroupTag<DOOFUSES>.Groups.count, Is.EqualTo(19));
-            Assert.That(GroupTag<EATING>.Groups.count, Is.EqualTo(11));
-            Assert.That(GroupTag<RED>.Groups.count, Is.EqualTo(19));
-            Assert.That(GroupTag<NOTEATING>.Groups.count, Is.EqualTo(11));
+            //The number of groups I expected linked to each tag is not the number of permutation, but the number
+            //of unique combinations
+            Assert.That(GroupTag<DOOFUSES>.Groups.count, Is.EqualTo(6));
+            Assert.That(GroupTag<EATING>.Groups.count, Is.EqualTo(4));
+            Assert.That(GroupTag<RED>.Groups.count, Is.EqualTo(6));
+            Assert.That(GroupTag<NOTEATING>.Groups.count, Is.EqualTo(4));
         }
     }
 }
