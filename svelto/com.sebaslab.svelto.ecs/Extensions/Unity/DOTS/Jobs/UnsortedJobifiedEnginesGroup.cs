@@ -34,7 +34,7 @@ namespace Svelto.ECS.Extensions.Unity
                     ref var engine = ref engines[index];
                     using (profiler.Sample(engine.name))
                     {
-                        combinedHandles = engine.Execute(inputHandles);
+                        combinedHandles = JobHandle.CombineDependencies(combinedHandles, engine.Execute(inputHandles));
                     }
                 }
             }
@@ -69,7 +69,8 @@ namespace Svelto.ECS.Extensions.Unity
                 for (var index = 0; index < engines.count; index++)
                 {
                     var engine = engines[index];
-                    using (profiler.Sample(engine.name)) combinedHandles = engine.Execute(combinedHandles, ref _param);
+                    using (profiler.Sample(engine.name))
+                        combinedHandles = JobHandle.CombineDependencies(combinedHandles, engine.Execute(combinedHandles, ref _param));
                 }
             }
 

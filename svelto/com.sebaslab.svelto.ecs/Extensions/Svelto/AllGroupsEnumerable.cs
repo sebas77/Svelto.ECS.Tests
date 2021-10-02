@@ -6,7 +6,7 @@ namespace Svelto.ECS
 {
     /// <summary>
     /// ToDo it would be interesting to have a version of this dedicated to unmanaged, IEntityComponent
-    /// that can be burstifiable 
+    /// that can be burstifiable
     /// </summary>
     /// <typeparam name="T1"></typeparam>
     public readonly struct AllGroupsEnumerable<T1> where T1 : struct, IEntityComponent
@@ -29,7 +29,7 @@ namespace Svelto.ECS
         {
             public GroupsIterator(EntitiesDB db) : this()
             {
-                _db = db.FindGroups_INTERNAL(TypeCache<T1>.Type).GetEnumerator();
+                _db = db.FindGroups_INTERNAL(TypeCache<T1>.type).GetEnumerator();
             }
 
             public bool MoveNext()
@@ -38,6 +38,9 @@ namespace Svelto.ECS
                 while (_db.MoveNext() == true)
                 {
                     var group = _db.Current;
+                    if (group.Key.IsEnabled() == false)
+                        continue;
+
                     ITypeSafeDictionary<T1> typeSafeDictionary = @group.Value as ITypeSafeDictionary<T1>;
 
                     if (typeSafeDictionary.count == 0)

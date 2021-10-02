@@ -94,10 +94,10 @@ namespace Svelto.ECS.Tests.GroupCompounds
             //Doofuses, ENABLED, EATING
             //Doofuses, EATING, RED
             //Doofuses, EATING, RED, ENABLED
-            Assert.That(GroupTag<DOOFUSES>.Groups.count, Is.EqualTo(8));
-            Assert.That(GroupTag<EATING>.Groups.count, Is.EqualTo(8));
-            Assert.That(GroupTag<RED>.Groups.count, Is.EqualTo(8));
-            Assert.That(GroupTag<ENABLED>.Groups.count, Is.EqualTo(8));
+            Assert.That(GroupTag<DOOFUSES>.Groups.count, Is.EqualTo(49));
+            Assert.That(GroupTag<EATING>.Groups.count, Is.EqualTo(49));
+            Assert.That(GroupTag<RED>.Groups.count, Is.EqualTo(49));
+            Assert.That(GroupTag<ENABLED>.Groups.count, Is.EqualTo(49));
         }
     }
 }

@@ -5,16 +5,6 @@ using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
-    /// <summary>
-    /// Very naive fail safe, but at least it's simple to understand and safe
-    /// </summary>
-    static class GroupCompoundInitializer
-    {
-        internal static readonly ThreadLocal<bool> isInitializing4 = new ThreadLocal<bool>();
-        internal static readonly ThreadLocal<bool> isInitializing3 = new ThreadLocal<bool>();
-        internal static readonly ThreadLocal<bool> isInitializing2 = new ThreadLocal<bool>();
-    }
-
     public abstract class GroupCompound<G1, G2, G3, G4> where G1 : GroupTag<G1>
                                                         where G2 : GroupTag<G2>
                                                         where G3 : GroupTag<G3>
@@ -28,9 +18,11 @@ namespace Svelto.ECS
 
         public static ExclusiveBuildGroup BuildGroup => new ExclusiveBuildGroup(_Groups[0]);
 
+        static int isInitializing;
+
         static GroupCompound()
         {
-            if (GroupCompoundInitializer.isInitializing4.Value == false)
+            if (Interlocked.CompareExchange(ref isInitializing, 1, 0) == 0)
             {
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
 
@@ -56,12 +48,12 @@ namespace Svelto.ECS
                 GroupTag<G2>.Add(Group);
                 GroupTag<G3>.Add(Group);
                 GroupTag<G4>.Add(Group);
-
+                
+                var name = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name}-{typeof(G4).Name} ID {(uint) Group}";
 #if DEBUG
-                GroupMap.idToName[(uint) Group] =
-                    $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name}-{typeof(G4).Name} ID {(uint) Group}";
+                GroupNamesMap.idToName[(uint) Group] = name;
 #endif
-                GroupCompoundInitializer.isInitializing4.Value = true;
+                 GroupHashMap.RegisterGroup(BuildGroup, name);
 
                 //all the combinations must share the same group and group hashset
                 GroupCompound<G1, G2, G4, G3>._Groups = _Groups;
@@ -111,8 +103,6 @@ namespace Svelto.ECS
                 GroupCompound<G4, G2, G3, G1>._GroupsHashSet = _GroupsHashSet;
                 GroupCompound<G4, G3, G1, G2>._GroupsHashSet = _GroupsHashSet;
                 GroupCompound<G4, G3, G2, G1>._GroupsHashSet = _GroupsHashSet;
-
-                GroupCompoundInitializer.isInitializing4.Value = false;
             }
         }
 
@@ -139,6 +129,8 @@ namespace Svelto.ECS
             new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
 
         public static ExclusiveBuildGroup BuildGroup => new ExclusiveBuildGroup(_Groups[0]);
+        
+        static int isInitializing;
 
         internal static void Add(ExclusiveGroupStruct group)
         {
@@ -154,7 +146,7 @@ namespace Svelto.ECS
 
         static GroupCompound()
         {
-            if (GroupCompoundInitializer.isInitializing3.Value == false)
+            if (Interlocked.CompareExchange(ref isInitializing, 1, 0) == 0)
             {
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
 
@@ -172,13 +164,13 @@ namespace Svelto.ECS
                 GroupTag<G2>.Add(Group);
                 GroupTag<G3>.Add(Group);
 
+                var name = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name} ID {(uint) Group}";
 #if DEBUG
-                GroupMap.idToName[(uint) Group] =
-                    $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name} ID {(uint) Group}";
+                GroupNamesMap.idToName[(uint) Group] = name;
 #endif
+                GroupHashMap.RegisterGroup(BuildGroup, name);
+                
                 //all the combinations must share the same group and group hashset
-                GroupCompoundInitializer.isInitializing3.Value = true;
-
                 GroupCompound<G3, G1, G2>._Groups = _Groups;
                 GroupCompound<G2, G3, G1>._Groups = _Groups;
                 GroupCompound<G3, G2, G1>._Groups = _Groups;
@@ -190,8 +182,6 @@ namespace Svelto.ECS
                 GroupCompound<G3, G2, G1>._GroupsHashSet = _GroupsHashSet;
                 GroupCompound<G1, G3, G2>._GroupsHashSet = _GroupsHashSet;
                 GroupCompound<G2, G1, G3>._GroupsHashSet = _GroupsHashSet;
-
-                GroupCompoundInitializer.isInitializing3.Value = false;
             }
         }
     }
@@ -205,6 +195,8 @@ namespace Svelto.ECS
             new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
 
         public static ExclusiveBuildGroup BuildGroup => new ExclusiveBuildGroup(_Groups[0]);
+        
+        static int isInitializing;
 
         internal static void Add(ExclusiveGroupStruct group)
         {
@@ -220,7 +212,7 @@ namespace Svelto.ECS
 
         static GroupCompound()
         {
-            if (GroupCompoundInitializer.isInitializing2.Value == false)
+            if (Interlocked.CompareExchange(ref isInitializing, 1, 0) == 0)
             {
                 var Group = new ExclusiveGroup();
 
@@ -231,14 +223,15 @@ namespace Svelto.ECS
                 //every abstract group preemptively adds this group, it may or may not be empty in future
                 GroupTag<G1>.Add(Group);
                 GroupTag<G2>.Add(Group);
-
+                
+                var groupName = $"Compound: {typeof(G1).Name}-{typeof(G2).Name} ID {(uint) Group}";
 #if DEBUG
-                GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name} ID {(uint) Group}";
+                GroupNamesMap.idToName[(uint) Group] = groupName;
 #endif
-                GroupCompoundInitializer.isInitializing2.Value = true;
+                GroupHashMap.RegisterGroup(BuildGroup, groupName);
+
                 GroupCompound<G2, G1>._Groups                  = _Groups;
                 GroupCompound<G2, G1>._GroupsHashSet           = _GroupsHashSet;
-                GroupCompoundInitializer.isInitializing2.Value = false;
             }
         }
     }
@@ -259,16 +252,27 @@ namespace Svelto.ECS
             new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
 
         public static ExclusiveBuildGroup BuildGroup => new ExclusiveBuildGroup(_Groups[0]);
+        
+        static readonly int isInitializing;
 
         static GroupTag()
         {
-            var group = new ExclusiveGroup();
-            _Groups.Add(group);
-            _GroupsHashSet = new HashSet<ExclusiveGroupStruct>(_Groups.ToArrayFast(out _));
+            if (Interlocked.CompareExchange(ref isInitializing, 1, 0) == 0)
+            {
+                var group = new ExclusiveGroup();
+                _Groups.Add(group);
+                _GroupsHashSet = new HashSet<ExclusiveGroupStruct>(_Groups.ToArrayFast(out _));
 
 #if DEBUG
-            GroupMap.idToName[(uint) group] = $"Compound: {typeof(T).Name} ID {(uint) group}";
+                var typeInfo         = typeof(T);
+                var typeInfoBaseType = typeInfo.BaseType;
+                if (typeInfoBaseType.GenericTypeArguments[0] != typeInfo)
+                    throw new ECSException("Invalid Group Tag declared");
+
+                GroupNamesMap.idToName[(uint)group] = $"Compound: {typeInfo.Name} ID {(uint)group}";
 #endif
+                GroupHashMap.RegisterGroup(BuildGroup, $"Compound: {typeof(T).FullName}");
+            }
         }
 
         //Each time a new combination of group tags is found a new group is added.

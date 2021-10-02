@@ -9,6 +9,11 @@ namespace Svelto.ECS
 {
     public sealed partial class EnginesRoot
     {
+        static EnginesRoot()
+        {
+            GroupHashMap.Init();
+            SerializationDescriptorMap.Init();
+        }
         /// <summary>
         ///     Engines root contextualize your engines and entities. You don't need to limit yourself to one EngineRoot
         ///     as multiple engines root could promote separation of scopes. The EntitySubmissionScheduler checks
@@ -25,7 +30,7 @@ namespace Svelto.ECS
             _nativeRemoveOperationQueue = new DataStructures.AtomicNativeBags(Allocator.Persistent);
             _nativeAddOperationQueue    = new DataStructures.AtomicNativeBags(Allocator.Persistent);
 #endif            
-            serializationDescriptorMap     = new SerializationDescriptorMap();
+            _serializationDescriptorMap     = new SerializationDescriptorMap();
             _maxNumberOfOperationsPerFrame = uint.MaxValue;
             _reactiveEnginesAddRemove      = new FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer>>();
             _reactiveEnginesAddRemoveOnDispose =
@@ -251,7 +256,7 @@ namespace Svelto.ECS
             {
                 _enginesRoot = new Svelto.DataStructures.WeakReference<EnginesRoot>(enginesRoot);
                 _privateSubmitEntities =
-                    _enginesRoot.Target.SingleSubmission(new PlatformProfiler("Svelto.ECS - Entities Submission"));
+                    _enginesRoot.Target.SingleSubmission(new PlatformProfiler());
                 submitEntities = Invoke(); //this must be last to capture all the variables
             }
 

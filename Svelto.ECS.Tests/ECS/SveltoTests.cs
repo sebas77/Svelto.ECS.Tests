@@ -122,8 +122,6 @@ namespace Svelto.ECS.Tests.Messy
             var init = _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponentStruct>(
                 new EGID(0, group1), new[] {new TestIt(2)});
 
-            init.Get<TestEntityViewComponent>().TestIt.reference = new ValueReference<Transform>(new Transform(4));
-
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.That(_neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<TestEntityViewComponent>(new EGID(0, group1))
@@ -797,18 +795,6 @@ namespace Svelto.ECS.Tests.Messy
         public EGID ID { get; set; }
     }
 
-    interface ITestIt
-    {
-        float?        testNullable      { get; set; }
-        StringBuilder testStringBuilder { get; set; }
-        string        testStrings       { get; set; }
-        DispatchOnChange<uint> doc         { get; set; }
-
-        float                     value     { get; set; }
-        ValueReference<Transform> reference { set; }
-        int                       testValue { get; }
-    }
-    
     interface ITestItWrong
     {
         object doc               { get; set; } //field necessary for tests
@@ -825,22 +811,20 @@ namespace Svelto.ECS.Tests.Messy
         public object doc { get; set; }
     }
 
-    class TestIt : ITestIt
+    interface ITestIt
     {
-        Transform _reference;
-        public TestIt(int i) { value = i; }
+        float                  value     { get; set; }
+        int                    testValue { get; }
+    }
 
-        public float?                 testNullable      { get; set; }
-        public StringBuilder          testStringBuilder { get; set; }
-        public string                 testStrings       { get; set; }
-        public DispatchOnChange<uint> doc               { get; set; }
-        public float                  value             { get; set; }
-
-        public ValueReference<Transform> reference
+    class TestIt : ITestIt, IImplementor
+    {
+        public TestIt(int i)
         {
-            set => _reference = (Transform)value;
+            value = i;
         }
 
-        public int testValue => _reference.value;
+        public float value     { get; set; }
+        public int   testValue { get; }
     }
 }
