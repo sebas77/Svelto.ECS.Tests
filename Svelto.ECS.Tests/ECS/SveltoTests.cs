@@ -449,8 +449,8 @@ namespace Svelto.ECS.Tests.Messy
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
                     new EGID(id, group3), out var index)[index].ID.entityID, id);
             Assert.AreEqual(
-                (ulong) _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
-                    new EGID(id, group3), out index)[index].ID.groupID, (ulong) group3);
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
+                    new EGID(id, group3), out index)[index].ID.groupID.id, (group3.id));
 
             _entityFunctions.SwapEntityGroup<TestDescriptorEntityView>(id, group3, group0);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
@@ -464,8 +464,8 @@ namespace Svelto.ECS.Tests.Messy
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
                     new EGID(id, group0), out index)[index].ID.entityID, id);
             Assert.AreEqual(
-                (ulong) _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
-                    new EGID(id, group0), out index)[index].ID.groupID, (ulong) group0);
+                  _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
+                    new EGID(id, group0), out index)[index].ID.groupID.id, group0.id);
         }
 
         [TestCase((uint) 0, (uint) 1, (uint) 2, (uint) 3)]
@@ -483,7 +483,7 @@ namespace Svelto.ECS.Tests.Messy
                 new EGID(id4, groupR4 + 3), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            foreach (var ((entity, groupCount), exclusiveGroupStruct) in _neverDoThisIsJustForTheTest.entitiesDB
+            foreach (var ((entity, groupCount), _) in _neverDoThisIsJustForTheTest.entitiesDB
                .QueryEntities<TestEntityViewComponent>())
             {
                 for (int i = 0; i < groupCount; i++)
@@ -492,7 +492,7 @@ namespace Svelto.ECS.Tests.Messy
 
             ;
 
-            foreach (var ((entity, groupCount), exclusiveGroupStruct) in _neverDoThisIsJustForTheTest.entitiesDB
+            foreach (var ((entity, groupCount), _) in _neverDoThisIsJustForTheTest.entitiesDB
                .QueryEntities<TestEntityComponent>())
             {
                 for (int i = 0; i < groupCount; i++)

@@ -1,13 +1,13 @@
 using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using DBC.Common;
 using Svelto.Common;
 
 namespace Svelto.DataStructures
 {
     /// <summary>
-    /// They are called strategy to 
+    /// They are called strategy because they abstract the handling of the memory type used.
+    /// Through the IBufferStrategy interface, external datastructure can use interchangeably native and managed memory. 
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public struct ManagedStrategy<T> : IBufferStrategy<T>
@@ -17,7 +17,7 @@ namespace Svelto.DataStructures
         public bool isValid => _buffer != null;
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Alloc(uint size)
+        void Alloc(uint size)
         {
             var b =  default(MB<T>);
             b.Set(new T[size]);
@@ -26,7 +26,7 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void IBufferStrategy<T>.Alloc(uint size, Allocator allocator, bool clear = true)
+        public void Alloc(uint size, Allocator allocator, bool clear)
         {
             var b =  default(MB<T>);
             b.Set(new T[size]);
@@ -39,11 +39,10 @@ namespace Svelto.DataStructures
         {
             if (newSize != capacity)
             {
-                var realBuffer = _realBuffer.ToManagedArray();
+                var realBuffer = new T[newSize];
+                
                 if (copyContent == true)
-                    Array.Resize(ref realBuffer, (int) newSize);
-                else
-                    realBuffer = new T[newSize];
+                    _realBuffer.CopyTo(0, realBuffer, 0, (uint) Math.Min((int)_realBuffer.capacity, (int)newSize));
 
                 var b = default(MB<T>);
                 b.Set(realBuffer);
@@ -94,13 +93,19 @@ namespace Svelto.DataStructures
         public ref T this[uint index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref _realBuffer[index];
+            get
+            {
+                return ref _realBuffer[index];
+            }
         }
 
         public ref T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref _realBuffer[index];
+            get
+            {
+                return ref _realBuffer[index];
+            }
         }
 
         public Allocator allocationStrategy => Allocator.Managed;

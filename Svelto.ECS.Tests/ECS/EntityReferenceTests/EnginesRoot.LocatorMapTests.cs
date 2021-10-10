@@ -103,7 +103,7 @@ namespace Svelto.ECS.Tests.ECS
             for (var i = 0; i < 10; i++)
             {
                 var found = _entitiesDB.entitiesForTesting.TryGetEGID(references[i], out var foundEgid);
-                Assert.AreEqual((uint)TestGroupB, (uint)foundEgid.groupID);
+                Assert.AreEqual((uint)TestGroupB.id, (uint)foundEgid.groupID.id);
             }
         }
 

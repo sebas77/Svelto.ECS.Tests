@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using Svelto.DataStructures;
+using Svelto.DataStructures.Native;
 
 namespace Svelto.Common.Tests.Datastructures
 {

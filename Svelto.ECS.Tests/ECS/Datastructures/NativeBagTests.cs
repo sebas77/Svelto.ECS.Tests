@@ -9,8 +9,104 @@ namespace Svelto.ECS.Tests.NativeDataStructures
     [TestFixture]
     public class NativeBagTests
     {
+        [StructLayout(LayoutKind.Explicit, Size = 7)]
+        struct weidStruct
+        {
+            [FieldOffset(0)] public byte  a; 
+            [FieldOffset(3)] public uint  b;
+            [FieldOffset(1)] public short c;
+        }
+        
+        [StructLayout(LayoutKind.Sequential, Pack=1, Size = 7)]
+        struct weidStruct2
+        {
+            public byte  a; 
+            public uint  b;
+            public short c;
+        }
+        
+        struct normal
+        {
+            public byte  a; 
+            public uint  b;
+            public short c;
+        }
+        
         [SetUp]
         public void Init() { }
+        
+        [Test]
+        public void TestWeirdStract()
+        {
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
+            {
+                for (var i = 0; i < 16; i++)
+                {
+                    _simpleNativeBag.Enqueue((byte) 0);
+                    _simpleNativeBag.Enqueue((byte) 1);
+                    _simpleNativeBag.Enqueue((byte) 2);
+                    _simpleNativeBag.Enqueue((byte) 3);
+                }
+                
+                for (var i = 0; i < 16; i++)
+                {
+                    _simpleNativeBag.Enqueue(new weidStruct
+                    {
+                        a = 13, b = 1023, c = 2356
+                    });
+                    _simpleNativeBag.Enqueue(new weidStruct2
+                    {
+                        a = 13, b = 1023, c = 2356
+                    });
+                    _simpleNativeBag.Enqueue(new normal
+                    {
+                        a = 13, b = 1023, c = 2356
+                    });
+                    _simpleNativeBag.Enqueue(i);
+                }
+                
+                for (var i = 0; i < 16; i++)
+                {
+                    _simpleNativeBag.Enqueue((byte) 0);
+                    _simpleNativeBag.Enqueue((byte) 1);
+                    _simpleNativeBag.Enqueue((byte) 2);
+                    _simpleNativeBag.Enqueue((byte) 3);
+                }
+                
+                for (var i = 0; i < 16; i++)
+                {
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(0));
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(1));
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(2));
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(3));
+                }
+                
+                for (var i = 0; i < 16; i++)
+                {
+                    Assert.That(_simpleNativeBag.Dequeue<weidStruct>(), Is.EqualTo(new weidStruct
+                    {
+                        a = 13, b = 1023, c = 2356
+                    }));
+                    Assert.That(_simpleNativeBag.Dequeue<weidStruct2>(), Is.EqualTo(new weidStruct2
+                    {
+                        a = 13, b = 1023, c = 2356
+                    }));
+                    Assert.That(_simpleNativeBag.Dequeue<normal>(), Is.EqualTo(new normal
+                    {
+                        a = 13, b = 1023, c = 2356
+                    }));
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(i));
+                }
+                
+                for (var i = 0; i < 16; i++)
+                {
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(0));
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(1));
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(2));
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(3));
+                }
+            }
+        }
 
         [Test]
         public void TestByteReallocWorks()
@@ -581,17 +677,17 @@ namespace Svelto.ECS.Tests.NativeDataStructures
         }
 
         [Test]
-        public void TestEnqueueDequeueWontAlloc()
+        public void TestEnqueueDequeueWontResize()
         {
             using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
             {
                 for (var i = 0; i < 32; i++)
                 {
-                    _simpleNativeBag.Enqueue((byte) 0);
+                    _simpleNativeBag.Enqueue<byte>(0);
                     _simpleNativeBag.Dequeue<byte>();
                 }
 
-                Assert.That(_simpleNativeBag.capacity, Is.EqualTo(8));
+                Assert.That(_simpleNativeBag.capacity, Is.EqualTo(4));
             }
         }
 
@@ -612,7 +708,7 @@ namespace Svelto.ECS.Tests.NativeDataStructures
                     _simpleNativeBag.Dequeue<byte>();
                 }
 
-                Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24));
+                Assert.That(_simpleNativeBag.capacity, Is.EqualTo(28));
             }
         }
 
@@ -623,20 +719,20 @@ namespace Svelto.ECS.Tests.NativeDataStructures
             {
                 {
                     _simpleNativeBag.Enqueue((byte) 0);
-                    Assert.That(_simpleNativeBag.capacity, Is.EqualTo(8));
+                    Assert.That(_simpleNativeBag.capacity, Is.EqualTo(4));
                     _simpleNativeBag.Enqueue((byte) 0);
-                    Assert.That(_simpleNativeBag.capacity, Is.EqualTo(8));
+                    Assert.That(_simpleNativeBag.capacity, Is.EqualTo(12));
                     _simpleNativeBag.Enqueue((byte) 0);
-                    Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24)); //(8 + 1) * 2 = 18 => aligned 24
+                    Assert.That(_simpleNativeBag.capacity, Is.EqualTo(12));
                     _simpleNativeBag.Enqueue((byte) 0);
-                    Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24));
+                    Assert.That(_simpleNativeBag.capacity, Is.EqualTo(28));
                     _simpleNativeBag.Dequeue<byte>();
                     _simpleNativeBag.Dequeue<byte>();
                     _simpleNativeBag.Dequeue<byte>();
                     _simpleNativeBag.Dequeue<byte>();
                 }
 
-                Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24));
+                Assert.That(_simpleNativeBag.capacity, Is.EqualTo(28));
             }
         }
 
@@ -732,7 +828,7 @@ namespace Svelto.ECS.Tests.NativeDataStructures
                     _simpleNativeBag.Dequeue<byte>();
                 }
 
-                Assert.That(_simpleNativeBag.count, Is.EqualTo(208));
+                Assert.That(_simpleNativeBag.count, Is.EqualTo(128));
             }
         }
 
@@ -793,7 +889,7 @@ namespace Svelto.ECS.Tests.NativeDataStructures
                     Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(3));
                 }
 
-                Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24));
+                Assert.That(_simpleNativeBag.capacity, Is.EqualTo(28));
             }
         }
 
@@ -838,7 +934,218 @@ namespace Svelto.ECS.Tests.NativeDataStructures
                     }));
                 }
 
-                Assert.That(_simpleNativeBag.capacity, Is.EqualTo(24));
+                Assert.That(_simpleNativeBag.capacity, Is.EqualTo(16));
+            }
+        }
+        
+        
+        [Test]
+        public void TestWriteIndexIsDecoupledFromWrapping()
+        {
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
+            {
+                for (var i = 0; i < 32; i++)
+                {
+                    _simpleNativeBag.Enqueue((byte) 0);
+                    _simpleNativeBag.Enqueue((byte) 1);
+                    _simpleNativeBag.Enqueue((byte) 2);
+                    _simpleNativeBag.Enqueue((byte) 3);
+                }
+                
+                for (var i = 0; i < 8; i++)
+                {
+                    _simpleNativeBag.Dequeue<byte>();
+                }
+                
+                var currentCapacity = _simpleNativeBag.capacity;
+                
+                _simpleNativeBag.Enqueue<byte>(0);
+                _simpleNativeBag.Enqueue<byte>(1);
+                _simpleNativeBag.Enqueue<byte>(2);
+                _simpleNativeBag.Enqueue<byte>(3);
+                _simpleNativeBag.Enqueue<byte>(4);
+                _simpleNativeBag.Enqueue<byte>(5);
+                _simpleNativeBag.Enqueue<byte>(6);
+                _simpleNativeBag.Enqueue<byte>(7);
+
+                Assert.That(_simpleNativeBag.capacity == currentCapacity);
+                currentCapacity = _simpleNativeBag.capacity;
+                
+                for (var i = 0; i < 32; i++)
+                {
+                    _simpleNativeBag.Enqueue((byte) 255);
+                    _simpleNativeBag.Enqueue((byte) 255);
+                    _simpleNativeBag.Enqueue((byte) 255);
+                    _simpleNativeBag.Enqueue((byte) 255);
+                }
+                
+                Assert.That(_simpleNativeBag.capacity > currentCapacity);
+                
+                for (var i = 0; i < 30; i++)
+                {
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(0));
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(1));
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(2));
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(3));
+                }
+                
+                Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(0));
+                Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(1));
+                Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(2));
+                Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(3));
+                Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(4));
+                Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(5));
+                Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(6));
+                Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(7));
+                
+                for (var i = 0; i < 32; i++)
+                {
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(255));
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(255));
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(255));
+                    Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(255));
+                }
+            }
+        }
+
+        [Test]
+        public void TestReallocReserved()
+        {
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
+            {
+                for (var i = 0; i < 32; i++)
+                {
+                    _simpleNativeBag.Enqueue((byte) 0);
+                    _simpleNativeBag.Enqueue((byte) 1);
+                    _simpleNativeBag.Enqueue((byte) 2);
+                    _simpleNativeBag.Enqueue((byte) 3);
+                }
+                
+                for (var i = 0; i < 8; i++)
+                {
+                    _simpleNativeBag.Dequeue<byte>();
+                }
+                
+                var currentCapacity = _simpleNativeBag.capacity;
+                
+                _simpleNativeBag.ReserveEnqueue<byte>(out var index0) = (byte) 0;
+                _simpleNativeBag.ReserveEnqueue<byte>(out var index1) = (byte) 1;
+                _simpleNativeBag.ReserveEnqueue<byte>(out var index2) = (byte) 2;
+                _simpleNativeBag.ReserveEnqueue<byte>(out var index3) = (byte) 3;
+                _simpleNativeBag.ReserveEnqueue<byte>(out var index4) = (byte) 4;
+                _simpleNativeBag.ReserveEnqueue<byte>(out var index5) = (byte) 5;
+                _simpleNativeBag.ReserveEnqueue<byte>(out var index6) = (byte) 6;
+                _simpleNativeBag.ReserveEnqueue<byte>(out var index7) = (byte) 7;
+
+                Assert.That(_simpleNativeBag.capacity == currentCapacity);
+                currentCapacity = _simpleNativeBag.capacity;
+                
+                for (var i = 0; i < 32; i++)
+                {
+                    _simpleNativeBag.Enqueue((byte) 255);
+                    _simpleNativeBag.Enqueue((byte) 255);
+                    _simpleNativeBag.Enqueue((byte) 255);
+                    _simpleNativeBag.Enqueue((byte) 255);
+                }
+                
+                Assert.That(_simpleNativeBag.capacity > currentCapacity);
+                
+                Assert.That(_simpleNativeBag.AccessReserved<byte>(index0), Is.EqualTo((byte) 0));
+                Assert.That(_simpleNativeBag.AccessReserved<byte>(index1), Is.EqualTo((byte) 1));
+                Assert.That(_simpleNativeBag.AccessReserved<byte>(index2), Is.EqualTo((byte) 2));
+                Assert.That(_simpleNativeBag.AccessReserved<byte>(index3), Is.EqualTo((byte) 3));
+                Assert.That(_simpleNativeBag.AccessReserved<byte>(index4), Is.EqualTo((byte) 4));
+                Assert.That(_simpleNativeBag.AccessReserved<byte>(index5), Is.EqualTo((byte) 5));
+                Assert.That(_simpleNativeBag.AccessReserved<byte>(index6), Is.EqualTo((byte) 6));
+                Assert.That(_simpleNativeBag.AccessReserved<byte>(index7), Is.EqualTo((byte) 7));
+            }
+        }
+        
+        [Test]
+        public void TestWrappedAndReallocReserved()
+        {
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
+            {
+                for (var i = 0; i < 16; i++)
+                {
+                    _simpleNativeBag.Enqueue((byte) 0);
+                    _simpleNativeBag.Enqueue((byte) 1);
+                    _simpleNativeBag.Enqueue((byte) 2);
+                    _simpleNativeBag.Enqueue((byte) 3);
+                }
+                
+                for (var i = 0; i < 8; i++)
+                {
+                    _simpleNativeBag.Dequeue<byte>();
+                    _simpleNativeBag.Dequeue<byte>();
+                    _simpleNativeBag.Dequeue<byte>();
+                    _simpleNativeBag.Dequeue<byte>();
+                }
+                
+                var currentCapacity = _simpleNativeBag.capacity;
+
+                var indices = new UnsafeArrayIndex[32 * 4]; 
+                
+                for (var i = 0; i < 16 * 4; i++)
+                {
+                    _simpleNativeBag.ReserveEnqueue<byte>(out indices[i]) = (byte) i;
+                }
+                
+                Assert.That(_simpleNativeBag.capacity == currentCapacity); //we want to wrap, not realloc
+                
+                for (var i = 0; i < 32; i++)
+                {
+                    _simpleNativeBag.Enqueue((byte) 255);
+                    _simpleNativeBag.Enqueue((byte) 255);
+                    _simpleNativeBag.Enqueue((byte) 255);
+                    _simpleNativeBag.Enqueue((byte) 255);
+                }
+                
+                Assert.That(_simpleNativeBag.capacity > currentCapacity); //we want to wrap, not realloc
+                
+                for (var i = 0; i < 16 * 4; i++)
+                {
+                    Assert.That(_simpleNativeBag.AccessReserved<byte>(indices[i]), Is.EqualTo((byte) i));
+                }
+            }
+        }
+        
+        [Test]
+        public void TestWrappedReserved()
+        {
+            using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
+            {
+                for (var i = 0; i < 16; i++)
+                {
+                    _simpleNativeBag.Enqueue((byte) 0);
+                    _simpleNativeBag.Enqueue((byte) 1);
+                    _simpleNativeBag.Enqueue((byte) 2);
+                    _simpleNativeBag.Enqueue((byte) 3);
+                }
+                
+                for (var i = 0; i < 8; i++)
+                {
+                    _simpleNativeBag.Dequeue<byte>();
+                    _simpleNativeBag.Dequeue<byte>();
+                    _simpleNativeBag.Dequeue<byte>();
+                    _simpleNativeBag.Dequeue<byte>();
+                }
+                
+                var currentCapacity = _simpleNativeBag.capacity;
+
+                var indices = new UnsafeArrayIndex[32 * 4]; 
+                
+                for (var i = 0; i < 16 * 4; i++)
+                {
+                    _simpleNativeBag.ReserveEnqueue<byte>(out indices[i]) = (byte) i;
+                }
+                
+                Assert.That(_simpleNativeBag.capacity == currentCapacity); //we want to wrap, not realloc
+                
+                for (var i = 0; i < 16 * 4; i++)
+                {
+                    Assert.That(_simpleNativeBag.AccessReserved<byte>(indices[i]), Is.EqualTo((byte) i));
+                }
             }
         }
 
@@ -895,7 +1202,7 @@ namespace Svelto.ECS.Tests.NativeDataStructures
                     Assert.That(_simpleNativeBag.Dequeue<byte>(), Is.EqualTo(3));
                 }
 
-                Assert.That(_simpleNativeBag.capacity, Is.EqualTo(1016));
+                Assert.That(_simpleNativeBag.capacity, Is.EqualTo(1020));
             }
         }
 
