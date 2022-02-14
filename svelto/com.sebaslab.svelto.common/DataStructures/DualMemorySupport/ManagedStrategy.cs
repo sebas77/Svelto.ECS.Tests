@@ -39,10 +39,11 @@ namespace Svelto.DataStructures
         {
             if (newSize != capacity)
             {
-                var realBuffer = new T[newSize];
-                
+                var realBuffer = _realBuffer.ToManagedArray();
                 if (copyContent == true)
-                    _realBuffer.CopyTo(0, realBuffer, 0, (uint) Math.Min((int)_realBuffer.capacity, (int)newSize));
+                    Array.Resize(ref realBuffer, (int) newSize);
+                else
+                    realBuffer = new T[newSize];
 
                 var b = default(MB<T>);
                 b.Set(realBuffer);
@@ -93,19 +94,13 @@ namespace Svelto.DataStructures
         public ref T this[uint index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                return ref _realBuffer[index];
-            }
+            get => ref _realBuffer[index];
         }
 
         public ref T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                return ref _realBuffer[index];
-            }
+            get => ref _realBuffer[index];
         }
 
         public Allocator allocationStrategy => Allocator.Managed;

@@ -41,9 +41,9 @@ namespace Svelto.Common.Tests.Datastructures
         {
             FasterList<int> list = new FasterList<int>(0);
             
-            list.ExpandTo(10);
+            list.SetCountTo(10);
 
-            Assert.That(list.capacity, Is.EqualTo(10));
+            Assert.That(list.capacity, Is.EqualTo(15));
             Assert.That(list.count, Is.EqualTo(10));
         }
         
@@ -52,9 +52,9 @@ namespace Svelto.Common.Tests.Datastructures
         {
             FasterList<int> list = new FasterList<int>(0);
             
-            list.ExpandBy(10);
+            list.SetCountTo(10);
 
-            Assert.That(list.capacity, Is.EqualTo(10));
+            Assert.That(list.capacity, Is.EqualTo(15));
             Assert.That(list.count, Is.EqualTo(10));
         }
         
@@ -63,7 +63,7 @@ namespace Svelto.Common.Tests.Datastructures
         {
             FasterList<int> list = new FasterList<int>(0);
             
-            list.ExpandTo(10);
+            list.IncrementCountBy(10);
             
             for (int i = 0; i < 10; i++)
                 list[i] = i;
@@ -97,9 +97,9 @@ namespace Svelto.Common.Tests.Datastructures
             list.Add(1);
             list.Add(2);
             
-            list.ExpandBy(10);
+            list.IncrementCountBy(10);
 
-            Assert.That(list.capacity, Is.EqualTo(13));
+            Assert.That(list.capacity, Is.EqualTo(19));
             Assert.That(list.count, Is.EqualTo(13));
         }
 
@@ -129,7 +129,7 @@ namespace Svelto.Common.Tests.Datastructures
         {
             FasterList<int> listA = new FasterList<int>();
             
-            listA.EnsureCapacity(10);
+            listA.Resize(10);
             
             Assert.That(listA.capacity, Is.EqualTo(10));
             Assert.That(listA.count, Is.EqualTo(0));
@@ -140,10 +140,10 @@ namespace Svelto.Common.Tests.Datastructures
         {
             FasterList<int> listA = new FasterList<int>();
             
-            listA.ExpandBy(10);
-            listA.EnsureExtraCapacity(10);
+            listA.IncrementCountBy(10);
+            listA.IncreaseCapacityBy(10);
             
-            Assert.That(listA.capacity, Is.EqualTo(20));
+            Assert.That(listA.capacity, Is.EqualTo(25));
             Assert.That(listA.count, Is.EqualTo(10));
         }
         
@@ -271,7 +271,7 @@ namespace Svelto.Common.Tests.Datastructures
             
             Assert.That(list[10], Is.EqualTo(10));
             
-            Assert.That(list.capacity, Is.EqualTo(11));
+            Assert.That(list.capacity, Is.EqualTo(16));
             Assert.That(list.count, Is.EqualTo(11));
         }
         
@@ -297,7 +297,7 @@ namespace Svelto.Common.Tests.Datastructures
             
             Assert.That(list[3], Is.EqualTo(10));
             
-            Assert.That(list.capacity, Is.EqualTo(4));
+            Assert.That(list.capacity, Is.EqualTo(6));
             Assert.That(list.count, Is.EqualTo(4));
         }
         

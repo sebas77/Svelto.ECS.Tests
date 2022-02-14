@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using Svelto.DataStructures;
@@ -34,7 +33,7 @@ namespace Svelto.ECS
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
                 _Groups.Add(group);
                 
-#if DEBUG
+#if DEBUG && !PROFILE_SVELTO
                 var name =
                     $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name}-{typeof(G4).Name} ID {(uint) group.id}";
                 GroupNamesMap.idToName[group] = name;
@@ -136,7 +135,7 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILE_SVELTO            
             for (var i = 0; i < _Groups.count; ++i)
                 if (_Groups[i] == group)
-                    throw new Exception("this test must be transformed in unit test");
+                    throw new System.Exception("this test must be transformed in unit test");
 #endif
 
             _Groups.Add(group);
@@ -163,7 +162,7 @@ namespace Svelto.ECS
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
                 _Groups.Add(group);
 
-#if DEBUG
+#if DEBUG && !PROFILE_SVELTO
                 var name = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name} ID {(uint) group.id}";
                 GroupNamesMap.idToName[group] = name;
 #endif
@@ -218,7 +217,7 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILE_SVELTO            
             for (var i = 0; i < _Groups.count; ++i)
                 if (_Groups[i] == group)
-                    throw new Exception("this test must be transformed in unit test");
+                    throw new System.Exception("this test must be transformed in unit test");
 #endif
 
             _Groups.Add(group);
@@ -244,7 +243,7 @@ namespace Svelto.ECS
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
                 _Groups.Add(group);
 
-#if DEBUG
+#if DEBUG && !PROFILE_SVELTO
                 GroupNamesMap.idToName[group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name} ID {group.id}";
 #endif
                 //The hashname is independent from the actual group ID. this is fundamental because it is want
@@ -279,7 +278,7 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILE_SVELTO            
             for (var i = 0; i < _Groups.count; ++i)
                 if (_Groups[i] == group)
-                    throw new Exception("this test must be transformed in unit test");
+                    throw new System.Exception("this test must be transformed in unit test");
 #endif            
 
             _Groups.Add(group);
@@ -308,7 +307,7 @@ namespace Svelto.ECS
                 var group = new ExclusiveGroup();
                 _Groups.Add(group);
 
-#if DEBUG
+#if DEBUG && !PROFILE_SVELTO
                 var typeInfo         = typeof(T);
                 var name             = $"Compound: {typeInfo.Name} ID {(uint) group.id}";
                 
@@ -342,7 +341,7 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILE_SVELTO            
             for (var i = 0; i < _Groups.count; ++i)
                 if (_Groups[i] == group)
-                    throw new Exception("this test must be transformed in unit test");
+                    throw new System.Exception("this test must be transformed in unit test");
 #endif
 
             _Groups.Add(group);

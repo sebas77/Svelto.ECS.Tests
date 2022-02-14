@@ -22,7 +22,7 @@ namespace Svelto.Common.Tests.Datastructures
             uint                        dictionarysize = 10000;
             int[]                       numbers        = new int[dictionarysize];
             for (int i = 1; i < dictionarysize; i++)
-                numbers[i] = numbers[i - 1] + i * HashHelpers.ExpandPrime((int) dictionarysize);
+                numbers[i] = numbers[i - 1] + i * HashHelpers.Expand((int) dictionarysize);
 
             for (int i = 0; i < dictionarysize; i++)
                 test[i] = new Test(numbers[i]);
@@ -90,7 +90,7 @@ namespace Svelto.Common.Tests.Datastructures
             uint                        dictionarysize = 10000;
             int[]                       numbers        = new int[dictionarysize];
             for (int i = 1; i < dictionarysize; i++)
-                numbers[i] = numbers[i - 1] + i * HashHelpers.ExpandPrime((int) dictionarysize);
+                numbers[i] = numbers[i - 1] + i * HashHelpers.Expand((int) dictionarysize);
 
             for (int i = 0; i < dictionarysize; i++)
                 test[numbers[i]] = new Test(i);
@@ -114,7 +114,7 @@ namespace Svelto.Common.Tests.Datastructures
             int[] numbers = new int[dictionarysize];
 
             for (int i = 1; i < dictionarysize; i++)
-                numbers[i] = numbers[i - 1] + i * HashHelpers.ExpandPrime((int) dictionarysize);
+                numbers[i] = numbers[i - 1] + i * HashHelpers.Expand((int) dictionarysize);
 
             for (int i = 0; i < dictionarysize; i++)
                 test[i] = new Test(numbers[i]);

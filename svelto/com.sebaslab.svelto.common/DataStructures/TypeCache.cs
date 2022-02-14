@@ -2,13 +2,25 @@ using System;
 
 namespace Svelto.Common
 {
-    public class TypeCache<T>
+    public static class TypeCache<T>
     {
         public static readonly Type type        = typeof(T);
-        public static readonly bool isUnmanaged = type.IsUnmanagedEx();
+        public static readonly string name        = type.Name;
+    }
+    
+    public static class TypeType
+    {
+        public static bool isUnmanaged<T>() 
+        {
+#if !UNITY_BURST
+            return TypeCache<T>.type.IsUnmanagedEx();
+#else
+            return UnsafeUtility.IsUnmanaged<T>();
+#endif
+        }
     }
 
-    public class TypeHash<T>
+    public static class TypeHash<T>
     {
 #if !UNITY_BURST        
         public static readonly int hash = TypeCache<T>.type.GetHashCode();

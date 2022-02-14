@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Svelto.ObjectPool
 {
-    public class MonoBehaviourPool<T> : ObjectPool<T> where T:MonoBehaviour
+    public class MonoBehaviourPool<T> : ThreadSafeObjectPool<T> where T:MonoBehaviour
     {
 #if POOL_DEBUGGER
     public MonoBehaviourPool()
@@ -13,9 +13,9 @@ namespace Svelto.ObjectPool
         poolDebugger.AddComponent<PoolDebugger>().SetPool(this);
     }
 #endif
-        public override void OnDispose()
+        protected override void OnDispose()
         {
-            for (var enumerator = _pools.GetEnumerator(); enumerator.MoveNext();)
+            for (var enumerator = _recycledPools.GetEnumerator(); enumerator.MoveNext();)
                 foreach (var obj in enumerator.Current.Value)
                     GameObject.Destroy(obj);
         }

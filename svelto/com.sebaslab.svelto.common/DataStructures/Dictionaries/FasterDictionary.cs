@@ -1,10 +1,38 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.Utilities;
 
 namespace Svelto.DataStructures
 {
+    sealed class FasterDictionaryDebugProxy<TKey, TValue> where TKey : struct, IEquatable<TKey>
+    {
+        public FasterDictionaryDebugProxy(FasterDictionary<TKey, TValue> dic)
+        {
+            this._dic = dic;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        public KeyValuePairFast<TKey, TValue, ManagedStrategy<TValue>>[] keyValues
+        {
+            get
+            {
+                var array = new KeyValuePairFast<TKey, TValue, ManagedStrategy<TValue>>[_dic.count];
+
+                int i = 0;
+                foreach (var keyValue in _dic)
+                {
+                    array[i++] = keyValue;
+                }
+
+                return array;
+            }
+        }
+
+        readonly FasterDictionary<TKey, TValue> _dic;
+    }
+
     /// <summary>
     ///     This dictionary has been created for just one reason: I needed a dictionary that would have let me iterate
     ///     over the values as an array, directly, without generating one or using an iterator.
@@ -16,10 +44,12 @@ namespace Svelto.DataStructures
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
-    public sealed class FasterDictionary<TKey, TValue> : ISveltoDictionary<TKey, TValue>
-        where TKey : struct, IEquatable<TKey>
+    [DebuggerTypeProxy(typeof(FasterDictionaryDebugProxy<,>))]
+    public sealed class FasterDictionary<TKey, TValue> where TKey : struct, IEquatable<TKey>
     {
-        public FasterDictionary() : this(1) { }
+        public FasterDictionary() : this(1)
+        {
+        }
 
         public FasterDictionary(uint size)
         {
@@ -110,6 +140,26 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref TValue GetOrCreate<W>(TKey key, FuncRef<W, TValue> builder, ref W parameter)
+        {
+            return ref _dictionary.GetOrCreate(key, builder, ref parameter);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref TValue RecycleOrCreate<TValueProxy>(TKey key, Func<TValueProxy> builder,
+            ActionRef<TValueProxy> recycler) where TValueProxy : class, TValue
+        {
+            return ref _dictionary.RecycleOrCreate(key, builder, recycler);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref TValue RecycleOrCreate<TValueProxy, W>(TKey key, FuncRef<W, TValue> builder,
+            ActionRef<TValueProxy, W> recycler, ref W parameter) where TValueProxy : class, TValue
+        {
+            return ref _dictionary.RecycleOrCreate(key, builder, recycler, ref parameter);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetDirectValueByRef(uint index)
         {
             return ref _dictionary.GetDirectValueByRef(index);
@@ -122,9 +172,15 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ResizeTo(uint size)
+        public void EnsureCapacity(uint size)
         {
-            _dictionary.ResizeTo(size);
+            _dictionary.EnsureCapacity(size);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void IncreaseCapacityBy(uint size)
+        {
+            _dictionary.IncreaseCapacityBy(size);
         }
 
         public TValue this[TKey key]
@@ -196,15 +252,9 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetOrCreate<W>(TKey key, FuncRef<W, TValue> builder, ref W parameter)
-        {
-            return ref _dictionary.GetOrCreate(key, builder, ref parameter);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public MB<TValue> GetValues(out uint count)
         {
-            count = (uint) this.count;
+            count = (uint)this.count;
             return _dictionary._values.ToRealBuffer();
         }
 
@@ -227,9 +277,11 @@ namespace Svelto.DataStructures
         }
 
 #if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST
-        [NativeDisableUnsafePtrRestriction]
+        [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         SveltoDictionary<TKey, TValue, ManagedStrategy<SveltoDictionaryNode<TKey>>, ManagedStrategy<TValue>,
             ManagedStrategy<int>> _dictionary;
+
+        static readonly string name;
     }
 }
