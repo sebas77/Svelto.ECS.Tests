@@ -312,7 +312,7 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        public void SwapEntitiesBetweenDictionaries(FasterList<(uint, string)> infosToProcess,
+        public void SwapEntitiesBetweenDictionaries(FasterList<(uint, uint, string)> infosToProcess,
             ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup, ITypeSafeDictionary toComponentsDictionary)
         {
             void SharedSwapEntityInDictionary<Strategy1, Strategy2, Strategy3>(
@@ -326,12 +326,12 @@ namespace Svelto.ECS.Internal
 
                 for (var i = 0; i < iterations; i++)
                 {
-                    var (id, trace) = infosToProcess[i];
+                    var (fromID, toID, trace) = infosToProcess[i];
 
                     try
                     {
-                        var fromEntityGid = new EGID(id, fromGroup);
-                        var toEntityEgid  = new EGID(id, toGroup);
+                        var fromEntityGid = new EGID(fromID, fromGroup);
+                        var toEntityEgid  = new EGID(toID, toGroup);
 
                         Check.Require(toGroup != null,
                             "Invalid To Group"); //todo check this, if it's right merge GetIndex
@@ -412,7 +412,7 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        public void ExecuteEnginesSwapCallbacks(FasterList<(uint, string)> infosToProcess,
+        public void ExecuteEnginesSwapCallbacks(FasterList<(uint, uint, string)> infosToProcess,
             FasterList<ReactEngineContainer<IReactOnSwap>> reactiveEnginesSwap, ExclusiveGroupStruct fromGroup,
             ExclusiveGroupStruct toGroup, in PlatformProfiler profiler)
         {
@@ -421,12 +421,12 @@ namespace Svelto.ECS.Internal
             if (isUnmanaged)
                 for (var i = 0; i < iterations; i++)
                 {
-                    var (entityID, trace) = infosToProcess[i];
+                    var (fromEntityID, toEntityID, trace) = infosToProcess[i];
 
                     try
                     {
-                        ExecuteEnginesSwapEntityCallbacks(reactiveEnginesSwap, ref implUnmgd.GetValueByRef(entityID),
-                            fromGroup, new EGID(entityID, toGroup), in profiler);
+                        ExecuteEnginesSwapEntityCallbacks(reactiveEnginesSwap, ref implUnmgd.GetValueByRef(fromEntityID),
+                            fromGroup, new EGID(toEntityID, toGroup), in profiler);
                     }
                     catch
                     {
@@ -441,12 +441,12 @@ namespace Svelto.ECS.Internal
             else
                 for (var i = 0; i < iterations; i++)
                 {
-                    var (entityID, trace) = infosToProcess[i];
+                    var (fromEntityID, toEntityID, trace) = infosToProcess[i];
 
                     try
                     {
-                        ExecuteEnginesSwapEntityCallbacks(reactiveEnginesSwap, ref implMgd.GetValueByRef(entityID),
-                            fromGroup, new EGID(entityID, toGroup), in profiler);
+                        ExecuteEnginesSwapEntityCallbacks(reactiveEnginesSwap, ref implMgd.GetValueByRef(fromEntityID),
+                            fromGroup, new EGID(toEntityID, toGroup), in profiler);
                     }
                     catch
                     {

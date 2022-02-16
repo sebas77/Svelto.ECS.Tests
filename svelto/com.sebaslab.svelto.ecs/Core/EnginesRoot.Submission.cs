@@ -96,7 +96,7 @@ namespace Svelto.ECS
 
         static void SwapEntities(
             FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType,
-                FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, string)>>>> swapEntitiesOperations,
+                FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, uint, string)>>>> swapEntitiesOperations,
             FasterList<(EGID, EGID)> entitiesIDSwaps, EnginesRoot enginesRoot)
         {
             using (var sampler = new PlatformProfiler("Swap entities between groups"))
@@ -127,9 +127,8 @@ namespace Svelto.ECS
                         ExclusiveGroupStruct fromGroup           = entitiesToSwap.key;
                         var                  fromGroupDictionary = enginesRoot.GetDBGroup(fromGroup);
 
-                        var groupedEntitiesToSwapsPerFromGroup = entitiesToSwap.value;
                         //iterate all the from groups
-                        foreach (var groupedEntitiesToSwap in groupedEntitiesToSwapsPerFromGroup)
+                        foreach (var groupedEntitiesToSwap in entitiesToSwap.value)
                         {
                             var                 componentType            = groupedEntitiesToSwap.key;
                             ITypeSafeDictionary fromComponentsDictionary = fromGroupDictionary[componentType];
@@ -148,7 +147,7 @@ namespace Svelto.ECS
 
                                 //this list represent the set of entities that come from fromGroup and need
                                 //to be swapped to toGroup. Most of the times will be 1 of few units.
-                                FasterList<(uint, string)> infosToProcess = entitiesInfoToSwap.value;
+                                var infosToProcess = entitiesInfoToSwap.value;
 
                                 int lastIndex = -1;
 
@@ -159,9 +158,9 @@ namespace Svelto.ECS
 
                                     lastIndex = fromComponentsDictionary.count - 1;
 
-                                    foreach (var (entityID, _) in infosToProcess)
-                                        enginesRoot._cachedIndicesForFilters.Add(entityID,
-                                            fromComponentsDictionary.GetIndex(entityID));
+                                    foreach (var (fromEntityID, _, _) in infosToProcess)
+                                        enginesRoot._cachedIndicesForFilters.Add(fromEntityID,
+                                            fromComponentsDictionary.GetIndex(fromEntityID));
                                 }
 
                                 //ensure that to dictionary has enough room to store the new entities`
@@ -207,7 +206,7 @@ namespace Svelto.ECS
                                 ITypeSafeDictionary toComponentsDictionary = GetTypeSafeDictionary(toGroup,
                                     enginesRoot.GetDBGroup(toGroup), componentType);
 
-                                FasterList<(uint, string)> infosToProcess = entitiesInfoToSwap.value;
+                                var infosToProcess = entitiesInfoToSwap.value;
 
                                 toComponentsDictionary.ExecuteEnginesSwapCallbacks(infosToProcess,
                                     entityComponentsEngines, fromGroup, toGroup, in sampler);
@@ -468,10 +467,7 @@ namespace Svelto.ECS
         readonly FasterList<(uint, uint)>     _cachedSubmissionIndices;
         readonly FasterDictionary<uint, uint> _cachedIndicesForFilters;
 
-        static readonly Action<
-            FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType,
-                FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, string)>>>>, FasterList<(EGID, EGID)>,
-            EnginesRoot> _swapEntities;
+        static readonly Action<FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, uint, string)>>>>, FasterList<(EGID, EGID)>, EnginesRoot> _swapEntities;
 
         static readonly Action<
             FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, FasterList<(uint, string)>>>,

@@ -33,11 +33,10 @@ namespace Svelto.ECS.Internal
          FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnAddEx>>> reactiveEnginesAdd,
          ExclusiveGroupStruct groupID, (uint, uint) enumeratorCurrent, in PlatformProfiler profiler);
 
-        void SwapEntitiesBetweenDictionaries
-        (FasterList<(uint, string)> infosToProcess, ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup
-       , ITypeSafeDictionary toComponentsDictionary);
+        void SwapEntitiesBetweenDictionaries(FasterList<(uint, uint, string)> infosToProcess,
+         ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup, ITypeSafeDictionary toComponentsDictionary);
 
-        void ExecuteEnginesSwapCallbacks(FasterList<(uint, string)> infosToProcess,
+        void ExecuteEnginesSwapCallbacks(FasterList<(uint, uint, string)> infosToProcess,
          FasterList<ReactEngineContainer<IReactOnSwap>> reactiveEnginesSwap, ExclusiveGroupStruct fromGroup,
          ExclusiveGroupStruct toGroup, in PlatformProfiler sampler);
         void ExecuteEnginesSwapCallbacksFast(FasterList<ReactEngineContainer<IReactOnSwapEx>> infosToProcess,

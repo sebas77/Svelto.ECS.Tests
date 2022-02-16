@@ -112,8 +112,18 @@ namespace Svelto.ECS.Tests.ECS
             var fromEgid = new EGID(0, GroupA);
             var toEgid   = new EGID(1, GroupB);
             
-            Assert.That(_entitiesDB.entitiesForTesting.Exists<TestEntityComponent>(fromEgid), Is.True);            
-            Assert.That(_entitiesDB.entitiesForTesting.Exists<TestEntityViewComponent>(fromEgid), Is.True);
+            var (componentA, componentViewA, countA) =
+                _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent, TestEntityViewComponent>(GroupA);
+
+            Assert.AreEqual(1, countA, "An entity should exist in target Group");
+            Assert.AreEqual(fromEgid.entityID, componentA[0].ID.entityID,
+                "Swapped entity should have the target entityID");
+            
+            Assert.AreEqual(testEntityComponent.floatValue, componentA[0].floatValue, "Component values should be copied");
+            Assert.AreEqual(testEntityComponent.intValue, componentA[0].intValue, "Component values should be copied");
+            
+            Assert.AreEqual(testEntityViewComponent.TestFloatValue.Value, componentViewA[0].TestFloatValue.Value, "ViewComponent values should be copied");
+            Assert.AreEqual(testEntityViewComponent.TestIntValue.Value, componentViewA[0].TestIntValue.Value, "ViewComponent values should be copied");
             
             _functions.SwapEntityGroup<EntityDescriptorWithComponentAndViewComponent>(fromEgid, toEgid);
             _scheduler.SubmitEntities();

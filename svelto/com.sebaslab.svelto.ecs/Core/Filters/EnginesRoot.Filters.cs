@@ -82,17 +82,17 @@ namespace Svelto.ECS
             }
         }
 
-        void SwapEntityBetweenPersistentFilters(FasterList<(uint, string)> infosToProcess,
+        void SwapEntityBetweenPersistentFilters(FasterList<(uint, uint, string)> infosToProcess,
             FasterDictionary<uint, uint> fromIndices, ITypeSafeDictionary toComponentsDictionary,
             ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup, uint lastIndex, FasterList<int> listOfFilters)
         {
             var listCount = listOfFilters.count;
-            foreach (var (entityID, _) in infosToProcess)
+            foreach (var (fromEntityID, toEntityID, _) in infosToProcess)
             {
-                var fromIndex = fromIndices[entityID];
-                var toIndex   = toComponentsDictionary.GetIndex(entityID);
-                var @from     = new EGID(entityID, fromGroup);
-                var to        = new EGID(entityID, toGroup);
+                var fromIndex = fromIndices[fromEntityID];
+                var toIndex   = toComponentsDictionary.GetIndex(toEntityID);
+                var @from     = new EGID(fromEntityID, fromGroup);
+                var to        = new EGID(toEntityID, toGroup);
 
                 for (int i = 0; i < listCount; ++i)
                 {
@@ -100,7 +100,7 @@ namespace Svelto.ECS
                     var persistentFilter = _persistentFilters[i];
                     if (persistentFilter._filtersPerGroup.TryGetValue(@from.groupID, out var groupFilter))
                     {
-                        if (groupFilter.HasEntity(entityID) == true)
+                        if (groupFilter.HasEntity(fromEntityID) == true)
                         {
                             persistentFilter.AddEntity(to, toIndex);
                         }
