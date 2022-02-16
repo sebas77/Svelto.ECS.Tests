@@ -1,54 +1,68 @@
 ﻿using Svelto.DataStructures;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
-        public EntityFilterID CreateTransientFilter<T>() where T : IEntityComponent
+        /// <summary>
+        /// Creates a transient filter. Transient filters are deleted after each submission
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public void CreateTransientFilter<T>(int filterID) where T : IEntityComponent
         {
-            var typeRef = TypeRefWrapper<T>.wrapper;
-            var filter = new EntityFilterID(_nextEntityFilter++, typeRef);
+            var typeRef          = TypeRefWrapper<T>.wrapper;
             var filterCollection = new EntityFilterCollection(typeRef, this);
 
-            _entityFilters[filter] = filterCollection;
+            _transientEntityFilters.Add(filterID, filterCollection);
             _transientFilters.Add(filterCollection);
-
-            return filter;
         }
 
-        public EntityFilterID CreatePersistentFilter<T>() where T : IEntityComponent
+        /// <summary>
+        /// Create a persistent filter. Persistent filters are not deleted after each submission,
+        /// however they have a maintenance cost that must be taken into account and will affect
+        /// entities submission performance.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public void CreatePersistentFilter<T>(int filterID) where T : IEntityComponent
         {
-            var typeRef = TypeRefWrapper<T>.wrapper;
-            var filter = new EntityFilterID(_nextEntityFilter++, typeRef);
+            var typeRef          = TypeRefWrapper<T>.wrapper;
             var filterCollection = new EntityFilterCollection(typeRef, this);
 
-            _entityFilters[filter] = filterCollection;
+            _persistentEntityFilters.Add(filterID, filterCollection);
             _persistentFilters.Add(filterCollection);
-
-            return filter;
+            _persistentFiltersPerGroup.GetOrCreate(typeRef, () => new FasterList<int>())
+               .Add(_persistentFilters.count - 1);
         }
 
         void InitFilters()
         {
-            _entityFilters = new FasterDictionary<EntityFilterID, EntityFilterCollection>();
-            _transientFilters = new FasterList<EntityFilterCollection>();
-            _persistentFilters = new FasterList<EntityFilterCollection>();
+            _transientEntityFilters             = new FasterDictionary<int, EntityFilterCollection>();
+            _persistentEntityFilters             = new FasterDictionary<int, EntityFilterCollection>();
+            _transientFilters          = new FasterList<EntityFilterCollection>();
+            _persistentFilters         = new FasterList<EntityFilterCollection>();
+            _persistentFiltersPerGroup = new FasterDictionary<RefWrapperType, FasterList<int>>();
         }
 
         void DisposeFilters()
         {
-            foreach (var filter in _transientFilters)
+            foreach (var filter in _transientEntityFilters)
             {
-                filter.Dispose();
+                filter.value.Dispose();
             }
-
-            foreach (var filter in _persistentFilters)
+            
+            foreach (var filter in _persistentEntityFilters)
             {
-                filter.Dispose();
+                filter.value.Dispose();
             }
         }
 
-        internal void ClearTransientFilters()
+        /// <summary>
+        /// 
+        /// </summary>
+        void ClearTransientFilters()
         {
             foreach (var filter in _transientFilters)
             {
@@ -56,34 +70,55 @@ namespace Svelto.ECS
             }
         }
 
-        void RemovePersistentFilters(EGID egid)
+        void RemoveEntityFromPersistentFilters(EGID @from, RefWrapperType refWrapperType, ITypeSafeDictionary fromDic)
         {
-            for (var i = 0; i < _persistentFilters.count; i++)
+            if (_persistentFiltersPerGroup.TryGetValue(refWrapperType, out var list))
             {
-                var refType = _persistentFilters[i].refType;
-                if (_groupsPerEntity.ContainsKey(refType) && _groupsPerEntity[refType].ContainsKey(egid.groupID))
+                var listCount = list.count;
+                for (int i = 0; i < listCount; ++i)
                 {
-                    _persistentFilters[i].UpdateOnRemove(egid, _groupsPerEntity[refType][egid.groupID]);
+                    _persistentFilters[i].UpdateOnRemove(from, fromDic);
                 }
             }
         }
 
-        void SwapPersistentFilters(EGID from, EGID to)
+        void SwapEntityBetweenPersistentFilters(FasterList<(uint, string)> infosToProcess,
+            FasterDictionary<uint, uint> fromIndices, ITypeSafeDictionary toComponentsDictionary,
+            ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup, uint lastIndex, FasterList<int> listOfFilters)
         {
-            for (var i = 0; i < _persistentFilters.count; i++)
+            var listCount = listOfFilters.count;
+            foreach (var (entityID, _) in infosToProcess)
             {
-                var refType = _persistentFilters[i].refType;
-                if (_groupsPerEntity.ContainsKey(refType) && _groupsPerEntity[refType].ContainsKey(from.groupID))
+                var fromIndex = fromIndices[entityID];
+                var toIndex   = toComponentsDictionary.GetIndex(entityID);
+                var @from     = new EGID(entityID, fromGroup);
+                var to        = new EGID(entityID, toGroup);
+
+                for (int i = 0; i < listCount; ++i)
                 {
-                    _persistentFilters[i].UpdateOnSwap(from, to, _groupsPerEntity[refType][from.groupID], _groupsPerEntity[refType][to.groupID]);
+                    //if the group has a filter linked: 
+                    var persistentFilter = _persistentFilters[i];
+                    if (persistentFilter._filtersPerGroup.TryGetValue(@from.groupID, out var groupFilter))
+                    {
+                        if (groupFilter.HasEntity(entityID) == true)
+                        {
+                            persistentFilter.AddEntity(to, toIndex);
+                        }
+
+                        // Removing an entity from the diction`ary may affect the index of the last entity in the 
+                        // values dictionary array, so we need to to update the indices of the affected entities.
+                        //must be outside because from may not be present in the filter, but last index is 
+                        groupFilter.RemoveWithSwapBack(@from.entityID, fromIndex, lastIndex);
+                    }
                 }
             }
         }
 
-        internal FasterDictionary<EntityFilterID, EntityFilterCollection> _entityFilters;
+        internal FasterDictionary<int, EntityFilterCollection> _transientEntityFilters;
+        internal FasterDictionary<int, EntityFilterCollection> _persistentEntityFilters;
 
-        FasterList<EntityFilterCollection> _transientFilters;
-        FasterList<EntityFilterCollection> _persistentFilters;
-        uint                               _nextEntityFilter;
+        FasterList<EntityFilterCollection>                _transientFilters;
+        FasterList<EntityFilterCollection>                _persistentFilters;
+        FasterDictionary<RefWrapperType, FasterList<int>> _persistentFiltersPerGroup;
     }
 }

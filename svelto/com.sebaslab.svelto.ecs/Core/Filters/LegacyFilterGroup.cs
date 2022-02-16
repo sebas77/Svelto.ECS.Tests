@@ -15,9 +15,9 @@ namespace Svelto.ECS
     ///     sparse[0] = position in the dense list of the entity 0
     ///     dense[index] = entity ID but also index in the sparse list of the same entity ID
     /// </summary>
-    public struct FilterGroup
+    public struct LegacyFilterGroup
     {
-        internal FilterGroup(ExclusiveGroupStruct exclusiveGroupStruct, int ID)
+        internal LegacyFilterGroup(ExclusiveGroupStruct exclusiveGroupStruct, int ID)
         {
             _denseListOfIndicesToEntityComponentArray =
                 new NativeDynamicArrayCast<uint>(NativeDynamicArray.Alloc<uint>(Allocator.Persistent));
@@ -32,7 +32,7 @@ namespace Svelto.ECS
         /// <summary>
         /// Todo: how to detect if the indices are still pointing to valid entities?
         /// </summary>
-        public FilteredIndices filteredIndices => new FilteredIndices(_denseListOfIndicesToEntityComponentArray);
+        public LegacyFilteredIndices filteredIndices => new LegacyFilteredIndices(_denseListOfIndicesToEntityComponentArray);
 
         public bool Add<N>(uint entityID, N mapper)  where N:IEGIDMapper
         {

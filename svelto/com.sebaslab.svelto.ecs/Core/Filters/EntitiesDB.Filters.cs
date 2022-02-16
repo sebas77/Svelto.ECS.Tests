@@ -4,16 +4,14 @@ namespace Svelto.ECS
 {
     public partial class EntitiesDB
     {
-        public EntityFilterCollection GetFilter(EntityFilterID filterId)
+        public EntityFilterCollection GetPersistentFilter(int filterId)
         {
-            return entityFilters[filterId];
+            return _enginesRoot._persistentEntityFilters[filterId];
         }
 
-        public EntityFilterIterator FilterEntities(EntityFilterID filterId)
+        public EntityFilterCollection GetTransientFilter(int filterId)
         {
-            return entityFilters[filterId].iterator;
+            return _enginesRoot._transientEntityFilters[filterId];
         }
-
-        FasterDictionary<EntityFilterID, EntityFilterCollection> entityFilters => _enginesRoot._entityFilters;
     }
 }

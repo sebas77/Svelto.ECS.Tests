@@ -19,10 +19,9 @@ namespace Svelto.ECS
             //recycle or create dictionaries of components per group
             var swappedComponentsPerType = _thisSubmissionInfo._currentSwapEntitiesOperations.RecycleOrCreate(
                 fromID.groupID,
-                () => new FasterDictionary<RefWrapperType, 
+                () => new FasterDictionary<RefWrapperType,
                     FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, string)>>>(),
-                (ref FasterDictionary<RefWrapperType, 
-                        FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, string)>>> recycled) =>
+                (ref FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, string)>>> recycled) =>
                     recycled.FastClear());
 
             foreach (IComponentBuilder operation in componentBuilders)
@@ -47,8 +46,7 @@ namespace Svelto.ECS
             //todo: limit the number of dictionaries that can be cached 
             //recycle or create dictionaries of components per group
             var removedComponentsPerType = _thisSubmissionInfo._currentRemoveEntitiesOperations.RecycleOrCreate(
-                entityEgid.groupID, 
-                () => new FasterDictionary<RefWrapperType, FasterList<(uint, string)>>(),
+                entityEgid.groupID, () => new FasterDictionary<RefWrapperType, FasterList<(uint, string)>>(),
                 (ref FasterDictionary<RefWrapperType, FasterList<(uint, string)>> recycled) => recycled.FastClear());
 
             foreach (IComponentBuilder operation in componentBuilders)
@@ -135,9 +133,9 @@ namespace Svelto.ECS
 
         struct Info
         {
-            //from group                          //actual component type      
+                                        //from group                          //actual component type      
             internal FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType,
-                // to group ID        //entityIDs = debugIngo
+                                   // to group ID        //entityIDs , debugInfo
                 FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, string)>>>> _currentSwapEntitiesOperations;
 
             internal FasterDictionary<ExclusiveGroupStruct,

@@ -29,8 +29,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
     // public class ZeroTest : EntitiesDB.QueryPredicate<TestEntityComponent>
     // {
     //     public override bool Predicate(in EntityCollection<TestEntityComponent> components)
-    //     {
-    //         var (buffer, count) = components;
+    //     {//         var (buffer, count) = components;
     //
     //         return true;
     //     }

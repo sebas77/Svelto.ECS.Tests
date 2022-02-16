@@ -336,7 +336,8 @@ namespace Svelto.ECS.Internal
                         Check.Require(toGroup != null,
                             "Invalid To Group"); //todo check this, if it's right merge GetIndex
 
-                        fromDictionary.Remove(fromEntityGid.entityID, out var entity);
+                        var isFound = fromDictionary.Remove(fromEntityGid.entityID, out var entity);
+                        DBC.ECS.Check.Assert(isFound == true, "Swapping an entity that doesn't exist");
 
                         if (_hasEgid)
                             SetEGIDWithoutBoxing<TValue>.SetIDWithoutBoxing(ref entity, toEntityEgid);

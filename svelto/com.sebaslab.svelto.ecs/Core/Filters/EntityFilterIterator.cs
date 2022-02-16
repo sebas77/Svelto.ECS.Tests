@@ -39,14 +39,14 @@
 
             public RefCurrent Current => new RefCurrent(_current);
 
-            int                    _indexGroup;
-            EntityFilterCollection _filter;
-            EntityFilterCollection.GroupFilters  _current;
+            int                                 _indexGroup;
+            readonly EntityFilterCollection     _filter;
+            EntityFilterCollection.LegacyGroupFilters _current;
         }
 
         public readonly ref struct RefCurrent
         {
-            internal RefCurrent(EntityFilterCollection.GroupFilters filter)
+            internal RefCurrent(EntityFilterCollection.LegacyGroupFilters filter)
             {
                 _filter = filter;
             }
@@ -57,7 +57,7 @@
                 group = _filter.group;
             }
 
-            readonly EntityFilterCollection.GroupFilters _filter;
+            readonly EntityFilterCollection.LegacyGroupFilters _filter;
         }
     }
 }

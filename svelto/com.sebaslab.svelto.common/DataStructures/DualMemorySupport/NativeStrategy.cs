@@ -54,6 +54,16 @@ namespace Svelto.DataStructures.Native
             }
         }
 
+        public IntPtr AsBytesPointer()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void   SerialiseFrom(IntPtr bytesPointer)
+        {
+            throw new NotImplementedException();
+        }
+
         public void ShiftLeft(uint index, uint count)
         {
             DBC.Common.Check.Require(index < capacity, "out of bounds index");

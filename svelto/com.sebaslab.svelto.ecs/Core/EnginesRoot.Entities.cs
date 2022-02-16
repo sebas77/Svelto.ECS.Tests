@@ -112,7 +112,7 @@ namespace Svelto.ECS
              && ((ITypeSafeDictionary<EntityInfoComponent>)entityInfoDic).TryGetValue(fromEntityGID.entityID,
                     out var entityInfo)) //there could be multiple entity descriptors registered in the same group, so it's necessary to check if the entity registered in the group has entityInfoComponent   
             {
-#if PARANOID_CHECK                
+#if PARANOID_CHECK
                 var hash = new HashSet<IComponentBuilder>(entityInfo.componentsToBuild,
                     default(ComponentBuilderComparer));
 
@@ -179,7 +179,7 @@ namespace Svelto.ECS
             _groupsPerEntity;
 
         //The filters stored for each component and group
-        internal readonly FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, GroupFilters>>
+        internal readonly FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, LegacyGroupFilters>>
             _groupFilters;
 
         readonly EntitiesDB _entitiesDB;

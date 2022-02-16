@@ -5,22 +5,22 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public struct EntityFilterCollection
+    public readonly struct EntityFilterCollection
     {
         internal EntityFilterCollection(RefWrapperType refType, EnginesRoot enginesRoot)
         {
-            _enginesRoot = enginesRoot;
-            _refType = refType;
-            _filtersPerGroup = new FasterDictionary<ExclusiveGroupStruct, GroupFilters>();
+            _enginesRoot     = enginesRoot;
+            _refType         = refType;
+            _filtersPerGroup = new FasterDictionary<ExclusiveGroupStruct, LegacyGroupFilters>();
         }
 
         public EntityFilterIterator iterator => new EntityFilterIterator(this);
 
         public void AddEntity(EGID egid)
         {
-            // Get dictionary to find the index of the target entity.
-            var dictionary = _enginesRoot._groupsPerEntity[_refType][egid.groupID];
-            AddEntity(egid, dictionary);
+            ITypeSafeDictionary dictionary = _enginesRoot._groupsPerEntity[_refType][egid.groupID];
+            
+            AddEntity(egid, dictionary.GetIndex(egid.entityID));
         }
 
         public void RemoveEntity(EGID egid)
@@ -37,59 +37,36 @@ namespace Svelto.ECS
             }
         }
 
-        internal RefWrapperType refType => _refType;
-
         internal void UpdateOnRemove(EGID egid, ITypeSafeDictionary dictionary)
         {
             // If the way the submission code calls this function changes we want to be aware of it as it would break the code.
-            DBC.ECS.Check.Require(dictionary.ContainsKey(egid.entityID)
-                , "We expected the entity to still be part of the original dictionary, update the last index from next call from dictionary.count - 1 to dictionary.count");
+            DBC.ECS.Check.Require(dictionary.ContainsKey(egid.entityID),
+                "We expected the entity to still be part of the original dictionary, update the last index from next call from dictionary.count - 1 to dictionary.count");
 
             if (_filtersPerGroup.TryGetValue(egid.groupID, out var groupFilter))
             {
                 // We must perform the swap back regardless of having the entity in the group filter or not.
                 // Since this might affect the last entity as well.
-                groupFilter.RemoveWithSwapBack(egid.entityID, dictionary.GetIndex(egid.entityID), (uint)dictionary.count - 1);
-            }
-        }
-
-        internal void UpdateOnSwap(EGID from, EGID to, ITypeSafeDictionary fromDictionary, ITypeSafeDictionary toDictionary)
-        {
-            // If the way the submission code calls this function changes we want to be aware of it in order to fix the
-            // index passed to the swap back and the index passed to the addition.
-            DBC.ECS.Check.Require(fromDictionary.ContainsKey(from.entityID)
-                , "We expected the entity to still be part of the original dictionary, update the last index from next call from dictionary.count - 1 to dictionary.count");
-            DBC.ECS.Check.Require(toDictionary.ContainsKey(to.entityID)
-                , "Entity must be added to the target dictionary before calling this method.");
-
-            if (_filtersPerGroup.TryGetValue(from.groupID, out var groupFilter))
-            {
-                if (groupFilter.HasEntity(from.entityID))
-                {
-                    AddEntity(to, toDictionary);
-                }
-
-                // We must perform the swap back regardless of having the entity in the group filter or not.
-                // Since this might affect the last entity as well.
-                groupFilter.RemoveWithSwapBack(from.entityID, fromDictionary.GetIndex(from.entityID), (uint)fromDictionary.count - 1);
+                groupFilter.RemoveWithSwapBack(egid.entityID, dictionary.GetIndex(egid.entityID),
+                    (uint)dictionary.count - 1);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void AddEntity(EGID egid, ITypeSafeDictionary dictionary)
+        internal void AddEntity(EGID egid, uint toIndex)
         {
             if (_filtersPerGroup.TryGetValue(egid.groupID, out var groupFilter) == false)
             {
-                groupFilter = new GroupFilters(32, egid.groupID);
+                groupFilter                    = new LegacyGroupFilters(32, egid.groupID);
                 _filtersPerGroup[egid.groupID] = groupFilter;
             }
 
-            groupFilter.Add(egid.entityID, dictionary.GetIndex(egid.entityID));
+            groupFilter.Add(egid.entityID, toIndex);
         }
 
         internal int groupCount => _filtersPerGroup.count;
 
-        internal GroupFilters GetGroup(int indexGroup)
+        internal LegacyGroupFilters GetGroup(int indexGroup)
         {
             DBC.ECS.Check.Require(indexGroup < _filtersPerGroup.count);
             return _filtersPerGroup.GetValues(out _)[indexGroup];
@@ -104,17 +81,17 @@ namespace Svelto.ECS
             }
         }
 
-        readonly EnginesRoot _enginesRoot;
-        readonly RefWrapperType _refType;
-        readonly FasterDictionary<ExclusiveGroupStruct, GroupFilters> _filtersPerGroup;
+        readonly          EnginesRoot                                          _enginesRoot;
+        readonly          RefWrapperType                                       _refType;
+        internal readonly FasterDictionary<ExclusiveGroupStruct, LegacyGroupFilters> _filtersPerGroup;
 
-        internal struct GroupFilters
+        internal struct LegacyGroupFilters
         {
-            internal GroupFilters(uint size, ExclusiveGroupStruct group)
+            internal LegacyGroupFilters(uint size, ExclusiveGroupStruct group)
             {
                 _entityIDToDenseIndex = new SharedSveltoDictionaryNative<uint, uint>(size);
-                _indexToEntityId = new SharedSveltoDictionaryNative<uint, uint>(size);
-                _group = group;
+                _indexToEntityId      = new SharedSveltoDictionaryNative<uint, uint>(size);
+                _group                = group;
             }
 
             internal void Add(uint entityId, uint entityIndex)
@@ -129,33 +106,27 @@ namespace Svelto.ECS
                 _entityIDToDenseIndex.Remove(entityId);
             }
 
-            public void RemoveWithSwapBack(uint entityId, uint entityIndex, uint lastIndex)
+            internal void RemoveWithSwapBack(uint entityId, uint entityIndex, uint lastIndex)
             {
-                // Check if we need to do the swap back.
+                // Check if the last index is part of the filter as an entity, in that case
+                //we need to update the filter
                 if (entityIndex != lastIndex && _indexToEntityId.ContainsKey(lastIndex))
                 {
-                    var lastEntityID = _indexToEntityId[lastIndex];
+                    uint lastEntityID = _indexToEntityId[lastIndex];
 
                     _entityIDToDenseIndex[lastEntityID] = entityIndex;
-                    _indexToEntityId[entityIndex] = lastEntityID;
+                    _indexToEntityId[entityIndex]       = lastEntityID;
+                }
 
-                    _indexToEntityId.Remove(lastIndex);
-                    // We don't need to check if the entityID and the entityIndex are part of the dictionary.
-                    // The Remove function will check for us.
-                    _entityIDToDenseIndex.Remove(entityId);
-                }
-                else
-                {
-                    // We don't need to check if the entityID and the entityIndex are part of the dictionary.
-                    // The Remove function will check for us.
-                    _entityIDToDenseIndex.Remove(entityId);
-                    _indexToEntityId.Remove(entityIndex);
-                }
+                // We don't need to check if the entityID and the entityIndex are part of the dictionary.
+                // The Remove function will check for us.
+                _entityIDToDenseIndex.Remove(entityId);
+                _indexToEntityId.Remove(entityIndex);
             }
 
             internal void Clear()
             {
-                _indexToEntityId.Clear();
+                _indexToEntityId.FastClear();
                 _entityIDToDenseIndex.FastClear();
             }
 
@@ -182,7 +153,7 @@ namespace Svelto.ECS
 
             SharedSveltoDictionaryNative<uint, uint> _indexToEntityId;
             SharedSveltoDictionaryNative<uint, uint> _entityIDToDenseIndex;
-            ExclusiveGroupStruct                     _group;
+            readonly ExclusiveGroupStruct            _group;
         }
     }
 }

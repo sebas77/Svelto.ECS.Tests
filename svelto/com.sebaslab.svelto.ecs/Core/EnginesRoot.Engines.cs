@@ -8,7 +8,6 @@ using System.Linq;
 using DBC.ECS;
 using Svelto.Common;
 using Svelto.DataStructures;
-using Svelto.ECS.DataStructures;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
 
@@ -38,12 +37,13 @@ namespace Svelto.ECS
         {
             _entitiesOperations                 = new EntitiesOperations();
             _idChecker                          = new FasterDictionary<ExclusiveGroupStruct, HashSet<uint>>();
+            _cachedIndicesForFilters            = new FasterDictionary<uint, uint>();
             _cachedSubmissionIndices            = new FasterList<(uint, uint)>();
             _multipleOperationOnSameEGIDChecker = new FasterDictionary<EGID, uint>();
 #if UNITY_NATIVE //because of the thread count, ATM this is only for unity
-            _nativeSwapOperationQueue   = new AtomicNativeBags(Allocator.Persistent);
-            _nativeRemoveOperationQueue = new AtomicNativeBags(Allocator.Persistent);
-            _nativeAddOperationQueue    = new AtomicNativeBags(Allocator.Persistent);
+            _nativeSwapOperationQueue   = new Svelto.ECS.DataStructures.AtomicNativeBags(Allocator.Persistent);
+            _nativeRemoveOperationQueue = new Svelto.ECS.DataStructures.AtomicNativeBags(Allocator.Persistent);
+            _nativeAddOperationQueue    = new Svelto.ECS.DataStructures.AtomicNativeBags(Allocator.Persistent);
 #endif
             _serializationDescriptorMap = new SerializationDescriptorMap();
             _reactiveEnginesAdd = new FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnAdd>>>();
@@ -73,7 +73,7 @@ namespace Svelto.ECS
             _groupedEntityToAdd = new DoubleBufferedEntitiesToAdd();
             _entityStreams      = EntitiesStreams.Create();
             _groupFilters =
-                new FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, GroupFilters>>();
+                new FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, LegacyGroupFilters>>();
             _entityLocator.InitEntityReferenceMap();
             _entitiesDB = new EntitiesDB(this, _entityLocator);
 

@@ -3,9 +3,9 @@ using Svelto.ECS.DataStructures;
 
 namespace Svelto.ECS
 {
-    public readonly struct FilteredIndices
+    public readonly struct LegacyFilteredIndices
     {
-        public FilteredIndices(NativeDynamicArrayCast<uint> denseListOfIndicesToEntityComponentArray)
+        public LegacyFilteredIndices(NativeDynamicArrayCast<uint> denseListOfIndicesToEntityComponentArray)
         {
             _denseListOfIndicesToEntityComponentArray = denseListOfIndicesToEntityComponentArray;
             _count                                    = _denseListOfIndicesToEntityComponentArray.count;

@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
-using Svelto.Common.DataStructures;
 using Svelto.Utilities;
 
 namespace Svelto.DataStructures
@@ -152,7 +151,7 @@ namespace Svelto.DataStructures
         static bool IsUnmanaged()
         {
 #if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST            
-            return UnsafeUtility.IsUnmanaged<TValue>();
+            return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.IsUnmanaged<TValue>();
 #else
             return typeof(TValue).IsUnmanagedEx();
 #endif
@@ -665,6 +664,20 @@ namespace Svelto.DataStructures
                 this[other.key] = other.value;
             }
         }
+        
+        public void CopyFrom<OTKeyStrategy, OTValueStrategy, OTBucketStrategy>
+            (SveltoDictionary<TKey, TValue, OTKeyStrategy, OTValueStrategy, OTBucketStrategy> otherDicKeys)
+            where OTKeyStrategy : struct, IBufferStrategy<SveltoDictionaryNode<TKey>>
+            where OTValueStrategy : struct, IBufferStrategy<TValue>
+            where OTBucketStrategy : struct, IBufferStrategy<int>
+        {
+            _valuesInfo.SerialiseFrom(otherDicKeys._valuesInfo.AsBytesPointer());
+            _values.SerialiseFrom(otherDicKeys._values.AsBytesPointer());
+            _buckets.SerialiseFrom(otherDicKeys._buckets.AsBytesPointer());
+
+            this._collisions = otherDicKeys._collisions;
+            this._freeValueCellIndex = otherDicKeys._freeValueCellIndex;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static uint Reduce(uint x, uint N)
@@ -745,10 +758,8 @@ namespace Svelto.DataStructures
         internal TValueStrategy _values;
         TBucketStrategy         _buckets;
         
-        readonly Sentinel _threadSentinel;
-
-        uint _freeValueCellIndex;
-        uint _collisions;
+        uint        _freeValueCellIndex;
+        uint        _collisions;
     }
 
     public class SveltoDictionaryException : Exception

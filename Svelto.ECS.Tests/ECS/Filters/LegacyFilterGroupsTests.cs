@@ -4,7 +4,7 @@ using Svelto.ECS.Schedulers;
 namespace Svelto.ECS.Tests.ECS.Filters
 {
     [TestFixture]
-    public class FilterGroupsTests: GenericTestsBaseClass
+    public class LegacyFilterGroupsTests : GenericTestsBaseClass
     {
         [Test]
         public void Test_Removing_Last_Added_Entity_And_Adding_It_Back()
@@ -16,7 +16,8 @@ namespace Svelto.ECS.Tests.ECS.Filters
 
             _scheduler.SubmitEntities();
 
-            var filter = _entitiesDB.entitiesForTesting.GetFilters().CreateOrGetFilterForGroup<TestEntityComponent>(FilterIdA, GroupA);
+            var filter = _entitiesDB.entitiesForTesting.GetLegacyFilters()
+               .CreateOrGetFilterForGroup<TestEntityComponent>(FilterIdA, GroupA);
             var mapper = _entitiesDB.entitiesForTesting.QueryMappedEntities<TestEntityComponent>(GroupA);
 
             filter.Add(egid0.entityID, mapper);
@@ -35,7 +36,9 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(3, filter.filteredIndices.Get(3));
         }
 
-        class TestEntityDescriptor : GenericEntityDescriptor<TestEntityComponent> {}
+        class TestEntityDescriptor : GenericEntityDescriptor<TestEntityComponent>
+        {
+        }
 
         const int FilterIdA = 0;
     }

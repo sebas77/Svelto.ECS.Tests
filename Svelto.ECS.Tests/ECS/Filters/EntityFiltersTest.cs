@@ -28,10 +28,10 @@ namespace Svelto.ECS.Tests.ECS.Filters
             _factory.BuildEntity<EntityDescriptorWithComponents>(EgidB3);
             _factory.BuildEntity<EntityDescriptorWithComponents>(EgidB4);
 
-            _transientFilter1 = _enginesRoot.CreateTransientFilter<TestEntityComponent>();
-            _transientFilter2 = _enginesRoot.CreateTransientFilter<TestEntityComponent>();
-            _persistentFilter1 = _enginesRoot.CreatePersistentFilter<TestEntityComponent>();
-            _persistentFilter2 = _enginesRoot.CreatePersistentFilter<TestEntityComponent>();
+            _enginesRoot.CreateTransientFilter<TestEntityComponent>(_transientFilter1);
+            _enginesRoot.CreateTransientFilter<TestEntityComponent>(_transientFilter2);
+             _enginesRoot.CreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+             _enginesRoot.CreatePersistentFilter<TestEntityComponent>(_persistentFilter2);
 
             _scheduler.SubmitEntities();
         }
@@ -43,10 +43,15 @@ namespace Svelto.ECS.Tests.ECS.Filters
             _scheduler.Dispose();
         }
 
+        void Test_TransientFilter_Is_Not_Found_After_Submission()
+        {
+            
+        }
+
         [Test]
         public void Test_AddingFilter_SingleEntity()
         {
-            var filter = _entitiesDB.GetFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
             filter.AddEntity(EgidA1);
 
             var iterator = filter.iterator.GetEnumerator();
@@ -66,7 +71,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_AddingFilter_ManyEntities()
         {
-            var filter = _entitiesDB.GetFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
             filter.AddEntity(EgidB4);
             filter.AddEntity(EgidB0);
             filter.AddEntity(EgidB2);
@@ -101,7 +106,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_RemovingFilter_SingleEntity()
         {
-            var filter = _entitiesDB.GetFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
             filter.AddEntity(EgidA1);
             filter.AddEntity(EgidA3);
             filter.AddEntity(EgidA4);
@@ -126,7 +131,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_RemovingFilter_ManyEntities()
         {
-            var filter = _entitiesDB.GetFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
             filter.AddEntity(EgidA1);
             filter.AddEntity(EgidA3);
             filter.AddEntity(EgidA4);
@@ -163,7 +168,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_ClearingFilter()
         {
-            var filter = _entitiesDB.GetFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
             filter.AddEntity(EgidA1);
             filter.AddEntity(EgidA3);
             filter.AddEntity(EgidA4);
@@ -180,8 +185,8 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(false, iterator.MoveNext());
         }
 
-        static ExclusiveGroup GroupA = new ExclusiveGroup();
-        static ExclusiveGroup GroupB = new ExclusiveGroup();
+        static readonly ExclusiveGroup GroupA = new ExclusiveGroup();
+        static readonly ExclusiveGroup GroupB = new ExclusiveGroup();
 
         SimpleEntitiesSubmissionScheduler _scheduler;
         EnginesRoot                       _enginesRoot;
@@ -189,21 +194,21 @@ namespace Svelto.ECS.Tests.ECS.Filters
         IEntityFunctions                  _functions;
         EntitiesDB                        _entitiesDB;
 
-        EntityFilterID _persistentFilter1;
-        EntityFilterID _persistentFilter2;
-        EntityFilterID _transientFilter1;
-        EntityFilterID _transientFilter2;
+        int _persistentFilter1 = 0;
+        int _persistentFilter2 = 1;
+        int _transientFilter1 = 0;
+        int _transientFilter2 = 1;
 
-        static EGID EgidA0 = new EGID(45872, GroupA);
-        static EGID EgidA1 = new EGID(28577, GroupA);
-        static EGID EgidA2 = new EGID(95323, GroupA);
-        static EGID EgidA3 = new EGID(68465, GroupA);
-        static EGID EgidA4 = new EGID(12335, GroupA);
+        static readonly EGID EgidA0 = new EGID(45872, GroupA);
+        static readonly EGID EgidA1 = new EGID(28577, GroupA);
+        static readonly EGID EgidA2 = new EGID(95323, GroupA);
+        static readonly EGID EgidA3 = new EGID(68465, GroupA);
+        static readonly EGID EgidA4 = new EGID(12335, GroupA);
 
-        static EGID EgidB0 = new EGID(45873, GroupB);
-        static EGID EgidB1 = new EGID(28578, GroupB);
-        static EGID EgidB2 = new EGID(95324, GroupB);
-        static EGID EgidB3 = new EGID(68466, GroupB);
-        static EGID EgidB4 = new EGID(12336, GroupB);
+        static readonly EGID EgidB0 = new EGID(45873, GroupB);
+        static readonly EGID EgidB1 = new EGID(28578, GroupB);
+        static readonly EGID EgidB2 = new EGID(95324, GroupB);
+        static readonly EGID EgidB3 = new EGID(68466, GroupB);
+        static readonly EGID EgidB4 = new EGID(12336, GroupB);
     }
 }

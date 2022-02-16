@@ -282,6 +282,9 @@ namespace Svelto.DataStructures
         SveltoDictionary<TKey, TValue, ManagedStrategy<SveltoDictionaryNode<TKey>>, ManagedStrategy<TValue>,
             ManagedStrategy<int>> _dictionary;
 
-        static readonly string name;
+        public void CopyFrom(FasterDictionary<TKey, TValue> fromComponentsDictionary)
+        {
+            _dictionary.CopyFrom(fromComponentsDictionary._dictionary);
+        }
     }
 }
