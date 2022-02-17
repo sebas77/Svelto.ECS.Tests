@@ -296,5 +296,39 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(EgidB1, components[indices[1]].ID, "Group B filters must not change.");
             Assert.AreEqual(EgidB4, components[indices[2]].ID, "Group B filters must not change.");
         }
+
+        [Test]
+        public void Test_PersistentFilter_UpdatesAfterRemove_WithSwapBack_EnsureReverseMapIsKeptValid()
+        {
+            // Create filters.
+            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            filter.AddEntity(EgidA2);
+            filter.AddEntity(EgidA3);
+            filter.AddEntity(EgidA4);
+            // Add filters to other group just to make sure there is no interference.
+            filter.AddEntity(EgidB0);
+            filter.AddEntity(EgidB3);
+
+            // Remove an entity that is not filtered and this should also cause a swap back.
+            _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA0);
+            _scheduler.SubmitEntities();
+
+            // Add a new entity to take the place of the swapped back index.
+            _factory.BuildEntity<EntityDescriptorWithComponents>(EgidA0);
+            _scheduler.SubmitEntities();
+
+            // Add new entity to filter.
+            filter.AddEntity(EgidA0);
+
+            var iterator = filter.iterator.GetEnumerator();
+            iterator.MoveNext();
+
+            var (indices, _) = iterator.Current;
+            Assert.AreEqual(4, indices.Count(), "Filter count must have changed by one");
+
+            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupA);
+            Assert.AreEqual(4, indices[3], "Last index must point to the last entity added.");
+            Assert.AreEqual(EgidA0, components[indices[3]].ID, "Last entity index must point to the last entity added.");
+        }
     }
 }
