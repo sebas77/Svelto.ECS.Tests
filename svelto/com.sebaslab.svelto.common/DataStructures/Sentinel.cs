@@ -1,6 +1,5 @@
 ﻿using System;
 
-#if DEBUG && !PROFILE_SVELTO
 // #define ENABLE_THREAD_SAFE_CHECKS
 // using System.Threading;
 // using Volatile = System.Threading.Volatile;
@@ -451,7 +450,7 @@ namespace Svelto.Common.DataStructures
     // #endif
     //         }
     //     }
-
+    
     public struct Sentinel
     {
         public Sentinel(IntPtr ptr, uint readFlag)
@@ -474,4 +473,5 @@ namespace Svelto.Common.DataStructures
         }
     }
 }
-#endif
+
+

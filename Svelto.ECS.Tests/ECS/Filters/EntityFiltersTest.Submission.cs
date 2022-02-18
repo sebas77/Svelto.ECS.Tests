@@ -7,7 +7,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_TransientFilter_UpdateAfterSubmission()
         {
-            var filter = _entitiesDB.GetTransientFilter(_transientFilter1);
+            var filter = _entitiesDB.GetTransientFilter<TestEntityComponent>(_transientFilter1);
             filter.AddEntity(EgidA0);
             filter.AddEntity(EgidA3);
             filter.AddEntity(EgidB1);
@@ -40,7 +40,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         public void Test_PersistentFilter_UpdateAfterRemoving_FilteredEntity_WithSwapBack()
         {
             // Create filters.
-            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
             filter.AddEntity(EgidA2);
             filter.AddEntity(EgidA3);
             filter.AddEntity(EgidA4);
@@ -78,7 +78,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         public void Test_PersistentFilter_UpdateAfterRemoving_NonFilteredEntity_WithSwapBack()
         {
             // Create filters.
-            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
             filter.AddEntity(EgidA2);
             filter.AddEntity(EgidA3);
             filter.AddEntity(EgidA4);
@@ -105,7 +105,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         public void Test_PersistentFilter_UpdateAfterRemoving_FilteredEntity_WithoutSwapBack()
         {
             // Create filters.
-            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
             filter.AddEntity(EgidA1);
             filter.AddEntity(EgidA2);
             filter.AddEntity(EgidA4);
@@ -131,7 +131,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_PersistentFilter_UpdateAfterRemoving_NonFilteredEntity_WithoutSwapBack()
         {
-            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
             filter.AddEntity(EgidA1);
             filter.AddEntity(EgidA2);
 
@@ -154,7 +154,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_PersistentFilter_UpdateAfterSwapping_FilteredEntity_WithSwapBack()
         {
-            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
             filter.AddEntity(EgidA0);
             filter.AddEntity(EgidA3);
             filter.AddEntity(EgidB1);
@@ -190,7 +190,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_PersistentFilter_UpdateAfterSwapping_NonFilteredEntity_WithSwapBack()
         {
-            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
             filter.AddEntity(EgidA0);
             filter.AddEntity(EgidA3);
             filter.AddEntity(EgidB1);
@@ -226,7 +226,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_PersistentFilter_UpdateAfterSwapping_FilteredEntity_WithoutSwapBack()
         {
-            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
             filter.AddEntity(EgidA0);
             filter.AddEntity(EgidA3);
             filter.AddEntity(EgidB2);
@@ -263,7 +263,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_PersistentFilter_UpdateAfterSwapping_NonFilteredEntity_WithoutSwapBack()
         {
-            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
             filter.AddEntity(EgidA0);
             filter.AddEntity(EgidA3);
             filter.AddEntity(EgidB2);
@@ -301,7 +301,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         public void Test_PersistentFilter_UpdatesAfterRemove_WithSwapBack_EnsureReverseMapIsKeptValid()
         {
             // Create filters.
-            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
             filter.AddEntity(EgidA2);
             filter.AddEntity(EgidA3);
             filter.AddEntity(EgidA4);

@@ -151,7 +151,7 @@ namespace Svelto.ECS
 
                                 int lastIndex = -1;
 
-                                if (enginesRoot._persistentFiltersPerGroup.TryGetValue(componentType,
+                                if (enginesRoot._persistentFiltersIndicesPerComponent.TryGetValue(componentType,
                                         out FasterList<int> listOfFilters))
                                 {
                                     enginesRoot._cachedIndicesForFilters.FastClear();

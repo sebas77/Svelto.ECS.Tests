@@ -51,7 +51,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_AddingFilter_SingleEntity()
         {
-            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
             filter.AddEntity(EgidA1);
 
             var iterator = filter.iterator.GetEnumerator();
@@ -71,7 +71,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_AddingFilter_ManyEntities()
         {
-            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
             filter.AddEntity(EgidB4);
             filter.AddEntity(EgidB0);
             filter.AddEntity(EgidB2);
@@ -106,7 +106,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_RemovingFilter_SingleEntity()
         {
-            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
             filter.AddEntity(EgidA1);
             filter.AddEntity(EgidA3);
             filter.AddEntity(EgidA4);
@@ -131,7 +131,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_RemovingFilter_ManyEntities()
         {
-            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
             filter.AddEntity(EgidA1);
             filter.AddEntity(EgidA3);
             filter.AddEntity(EgidA4);
@@ -168,7 +168,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_ClearingFilter()
         {
-            var filter = _entitiesDB.GetPersistentFilter(_persistentFilter1);
+            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
             filter.AddEntity(EgidA1);
             filter.AddEntity(EgidA3);
             filter.AddEntity(EgidA4);

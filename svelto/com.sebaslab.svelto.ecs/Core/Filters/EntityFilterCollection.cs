@@ -37,21 +37,6 @@ namespace Svelto.ECS
             }
         }
 
-        internal void UpdateOnRemove(EGID egid, ITypeSafeDictionary dictionary)
-        {
-            // If the way the submission code calls this function changes we want to be aware of it as it would break the code.
-            DBC.ECS.Check.Require(dictionary.ContainsKey(egid.entityID),
-                "We expected the entity to still be part of the original dictionary, update the last index from next call from dictionary.count - 1 to dictionary.count");
-
-            if (_filtersPerGroup.TryGetValue(egid.groupID, out var groupFilter))
-            {
-                // We must perform the swap back regardless of having the entity in the group filter or not.
-                // Since this might affect the last entity as well.
-                groupFilter.RemoveWithSwapBack(egid.entityID, dictionary.GetIndex(egid.entityID),
-                    (uint)dictionary.count - 1);
-            }
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void AddEntity(EGID egid, uint toIndex)
         {

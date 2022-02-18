@@ -1,10 +1,12 @@
-﻿using Svelto.DataStructures;
+﻿using Svelto.Common;
+using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
+        internal static long CombineFilterIDs<T>(int filterID) => (long)filterID << 32 | TypeHash<T>.hash;
         /// <summary>
         /// Creates a transient filter. Transient filters are deleted after each submission
         /// </summary>
@@ -15,7 +17,7 @@ namespace Svelto.ECS
             var typeRef          = TypeRefWrapper<T>.wrapper;
             var filterCollection = new EntityFilterCollection(typeRef, this);
 
-            _transientEntityFilters.Add(filterID, filterCollection);
+            _transientEntityFilters.Add(CombineFilterIDs<T>(filterID), filterCollection);
             _transientFilters.Add(filterCollection);
         }
 
@@ -31,19 +33,20 @@ namespace Svelto.ECS
             var typeRef          = TypeRefWrapper<T>.wrapper;
             var filterCollection = new EntityFilterCollection(typeRef, this);
 
-            _persistentEntityFilters.Add(filterID, filterCollection);
+            _persistentEntityFilters.Add(CombineFilterIDs<T>(filterID), filterCollection);
             _persistentFilters.Add(filterCollection);
-            _persistentFiltersPerGroup.GetOrCreate(typeRef, () => new FasterList<int>())
+
+            _persistentFiltersIndicesPerComponent.GetOrCreate(typeRef, () => new FasterList<int>())
                .Add(_persistentFilters.count - 1);
         }
 
         void InitFilters()
         {
-            _transientEntityFilters             = new FasterDictionary<int, EntityFilterCollection>();
-            _persistentEntityFilters             = new FasterDictionary<int, EntityFilterCollection>();
-            _transientFilters          = new FasterList<EntityFilterCollection>();
-            _persistentFilters         = new FasterList<EntityFilterCollection>();
-            _persistentFiltersPerGroup = new FasterDictionary<RefWrapperType, FasterList<int>>();
+            _transientEntityFilters               = new FasterDictionary<long, EntityFilterCollection>();
+            _persistentEntityFilters              = new FasterDictionary<long, EntityFilterCollection>();
+            _transientFilters                     = new FasterList<EntityFilterCollection>();
+            _persistentFilters                    = new FasterList<EntityFilterCollection>();
+            _persistentFiltersIndicesPerComponent = new FasterDictionary<RefWrapperType, FasterList<int>>();
         }
 
         void DisposeFilters()
@@ -52,7 +55,7 @@ namespace Svelto.ECS
             {
                 filter.value.Dispose();
             }
-            
+
             foreach (var filter in _persistentEntityFilters)
             {
                 filter.value.Dispose();
@@ -60,7 +63,7 @@ namespace Svelto.ECS
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         void ClearTransientFilters()
         {
@@ -72,12 +75,18 @@ namespace Svelto.ECS
 
         void RemoveEntityFromPersistentFilters(EGID @from, RefWrapperType refWrapperType, ITypeSafeDictionary fromDic)
         {
-            if (_persistentFiltersPerGroup.TryGetValue(refWrapperType, out var list))
+            if (_persistentFiltersIndicesPerComponent.TryGetValue(refWrapperType, out var list))
             {
+                var fromIndex = fromDic.GetIndex(from.entityID);
+                var lastIndex = (uint)fromDic.count - 1;
+
                 var listCount = list.count;
                 for (int i = 0; i < listCount; ++i)
                 {
-                    _persistentFilters[i].UpdateOnRemove(from, fromDic);
+                    if (_persistentFilters[i]._filtersPerGroup.TryGetValue(from.groupID, out var groupFilter))
+                    {
+                        groupFilter.RemoveWithSwapBack(from.entityID, fromIndex, lastIndex);
+                    }
                 }
             }
         }
@@ -96,7 +105,7 @@ namespace Svelto.ECS
 
                 for (int i = 0; i < listCount; ++i)
                 {
-                    //if the group has a filter linked: 
+                    //if the group has a filter linked:
                     var persistentFilter = _persistentFilters[i];
                     if (persistentFilter._filtersPerGroup.TryGetValue(@from.groupID, out var groupFilter))
                     {
@@ -105,20 +114,20 @@ namespace Svelto.ECS
                             persistentFilter.AddEntity(to, toIndex);
                         }
 
-                        // Removing an entity from the diction`ary may affect the index of the last entity in the 
+                        // Removing an entity from the diction`ary may affect the index of the last entity in the
                         // values dictionary array, so we need to to update the indices of the affected entities.
-                        //must be outside because from may not be present in the filter, but last index is 
+                        //must be outside because from may not be present in the filter, but last index is
                         groupFilter.RemoveWithSwapBack(@from.entityID, fromIndex, lastIndex);
                     }
                 }
             }
         }
 
-        internal FasterDictionary<int, EntityFilterCollection> _transientEntityFilters;
-        internal FasterDictionary<int, EntityFilterCollection> _persistentEntityFilters;
+        internal FasterDictionary<long, EntityFilterCollection> _transientEntityFilters;
+        internal FasterDictionary<long, EntityFilterCollection> _persistentEntityFilters;
 
         FasterList<EntityFilterCollection>                _transientFilters;
         FasterList<EntityFilterCollection>                _persistentFilters;
-        FasterDictionary<RefWrapperType, FasterList<int>> _persistentFiltersPerGroup;
+        FasterDictionary<RefWrapperType, FasterList<int>> _persistentFiltersIndicesPerComponent;
     }
 }
