@@ -1,9 +1,15 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Svelto.DataStructures
 {
     public static class HashHelpers
     {
+        public static ulong GetFastModMultiplier(uint divisor) => ulong.MaxValue / (ulong) divisor + 1UL;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint FastMod(uint value, uint divisor, ulong multiplier) => (uint) (((multiplier * (ulong) value >> 32) + 1UL) * (ulong) divisor >> 32);
+        
         //why prime numbers: https://stackoverflow.com/questions/4638520/why-net-dictionaries-resize-to-prime-numbers
         static readonly int[] primes = {
             1, 3, 7, 11, 17, 23, 29, 37, 47, 59, 71, 89, 107, 131, 163, 197, 239, 293, 353, 431, 521, 631, 761, 919,

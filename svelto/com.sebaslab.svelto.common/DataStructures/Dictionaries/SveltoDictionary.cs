@@ -67,6 +67,9 @@ namespace Svelto.DataStructures
             _values.Alloc(size, allocator);
             _buckets = default;
             _buckets.Alloc((uint)HashHelpers.GetPrime((int)size), allocator);
+            
+            if (size > 0)
+                _fastModBucketsMultiplier = HashHelpers.GetFastModMultiplier((uint)size);
         }
 
         public TKeyStrategy unsafeKeys
@@ -343,11 +346,10 @@ namespace Svelto.DataStructures
             }
         }
 
-        //todo: do I really need to return indexSet? I know that the new index is always count 
         bool AddValue(TKey key, out uint indexSet)
         {
-            int  hash        = key.GetHashCode();
-            uint bucketIndex = Reduce((uint)hash, (uint)_buckets.capacity);
+            int  hash        = key.GetHashCode(); //IEquatable doesn't enforce the override of GetHashCode
+            uint bucketIndex = Reduce((uint)hash, (uint)_buckets.capacity, _fastModBucketsMultiplier);
 
             //buckets value -1 means it's empty
             var valueIndex = _buckets[bucketIndex] - 1;
@@ -405,6 +407,7 @@ namespace Svelto.DataStructures
                 //we need more space and less collisions
                 _buckets.Resize((uint)HashHelpers.Expand((int)_collisions), false);
                 _collisions = 0;
+                _fastModBucketsMultiplier = HashHelpers.GetFastModMultiplier((uint) _buckets.capacity);
 
                 //we need to get all the hash code of all the values stored so far and spread them over the new bucket
                 //length
@@ -412,7 +415,7 @@ namespace Svelto.DataStructures
                 {
                     //get the original hash code and find the new bucketIndex due to the new length
                     ref var fasterDictionaryNode = ref _valuesInfo[newValueIndex];
-                    bucketIndex = Reduce((uint)fasterDictionaryNode.hashcode, (uint)_buckets.capacity);
+                    bucketIndex = Reduce((uint)fasterDictionaryNode.hashcode, (uint)_buckets.capacity, _fastModBucketsMultiplier);
                     //bucketsIndex can be -1 or a next value. If it's -1 means no collisions. If there is collision,
                     //we create a new node which prev points to the old one. Old one next points to the new one.
                     //the bucket will now points to the new one
@@ -466,7 +469,7 @@ namespace Svelto.DataStructures
         public bool Remove(TKey key, out TValue value)
         {
             int  hash        = key.GetHashCode();
-            uint bucketIndex = Reduce((uint)hash, (uint)_buckets.capacity);
+            uint bucketIndex = Reduce((uint)hash, (uint)_buckets.capacity, _fastModBucketsMultiplier);
 
             //find the bucket
             int indexToValueToRemove = _buckets[bucketIndex] - 1;
@@ -537,7 +540,7 @@ namespace Svelto.DataStructures
                 //first we find the index in the bucket list of the pointer that points to the cell
                 //to move
                 ref var fasterDictionaryNode = ref _valuesInfo[_freeValueCellIndex];
-                var     movingBucketIndex    = Reduce((uint)fasterDictionaryNode.hashcode, (uint)_buckets.capacity);
+                var     movingBucketIndex    = Reduce((uint)fasterDictionaryNode.hashcode, (uint)_buckets.capacity, _fastModBucketsMultiplier);
 
                 //if the key is found and the bucket points directly to the node to remove
                 //it must now point to the cell where it's going to be moved
@@ -581,7 +584,7 @@ namespace Svelto.DataStructures
 
             int hash = key.GetHashCode();
 
-            uint bucketIndex = Reduce((uint)hash, (uint)_buckets.capacity);
+            uint bucketIndex = Reduce((uint)hash, (uint)_buckets.capacity, _fastModBucketsMultiplier);
 
             int valueIndex = _buckets[bucketIndex] - 1;
 
@@ -680,12 +683,12 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static uint Reduce(uint x, uint N)
+        static uint Reduce(uint hashcode, uint N, ulong fastModBucketsMultiplier)
         {
-            if (x >= N) //is the condition return actually an optimization?
-                return x % N;
+            if (hashcode >= N) //is the condition return actually an optimization?
+                return Environment.Is64BitProcess ? HashHelpers.FastMod((uint)hashcode, N, fastModBucketsMultiplier) : hashcode % N;
 
-            return x;
+            return hashcode;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -758,8 +761,9 @@ namespace Svelto.DataStructures
         internal TValueStrategy _values;
         TBucketStrategy         _buckets;
         
-        uint        _freeValueCellIndex;
-        uint        _collisions;
+        uint  _freeValueCellIndex;
+        uint  _collisions;
+        ulong _fastModBucketsMultiplier;
     }
 
     public class SveltoDictionaryException : Exception
