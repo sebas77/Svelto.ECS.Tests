@@ -22,7 +22,7 @@ namespace Svelto.ECS
             return new LegacyFilters(_filters);
         }
 
-        public readonly struct LegacyFilters
+        public readonly ref struct LegacyFilters
         {
             public LegacyFilters(
                 FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, LegacyGroupFilters>>
@@ -62,10 +62,10 @@ namespace Svelto.ECS
             public ref LegacyGroupFilters CreateOrGetFiltersForGroup<T>(ExclusiveGroupStruct groupID)
                 where T : struct, IEntityComponent
             {
-                var fasterDictionary = _filtersLegacy.GetOrCreate(TypeRefWrapper<T>.wrapper,
+                var fasterDictionary = _filtersLegacy.GetOrAdd(TypeRefWrapper<T>.wrapper,
                     () => new FasterDictionary<ExclusiveGroupStruct, LegacyGroupFilters>());
 
-                return ref fasterDictionary.GetOrCreate(groupID,
+                return ref fasterDictionary.GetOrAdd(groupID,
                     () => new LegacyGroupFilters(new SharedSveltoDictionaryNative<int, LegacyFilterGroup>(0), groupID));
             }
 
@@ -166,7 +166,7 @@ namespace Svelto.ECS
                     fasterDictionary[@group].DisposeFilter(resetFilterID);
             }
 
-            public bool TryRemoveEntityFromFilter<T>(int filtersID, EGID egid) where T : struct, IEntityComponent
+            public bool TryRemoveFromFilter<T>(int filtersID, EGID egid) where T : struct, IEntityComponent
             {
                 if (TryGetFilterForGroup<T>(filtersID, egid.groupID, out var filter))
                     return filter.TryRemove(egid.entityID);
@@ -174,14 +174,14 @@ namespace Svelto.ECS
                 return false;
             }
 
-            public void RemoveEntityFromFilter<T>(int filtersID, EGID egid) where T : struct, IEntityComponent
+            public void RemoveFromFilter<T>(int filtersID, EGID egid) where T : struct, IEntityComponent
             {
                 ref var filter = ref GetFilterForGroup<T>(filtersID, egid.groupID);
 
                 filter.Remove(egid.entityID);
             }
 
-            public bool AddEntityToFilter<N>(int filtersID, EGID egid, N mapper) where N : IEGIDMapper
+            public bool AddToFilter<N>(int filtersID, EGID egid, N mapper) where N : IEGIDMapper
             {
                 ref var filter =
                     ref CreateOrGetFilterForGroup(filtersID, egid.groupID, new RefWrapperType(mapper.entityType));
@@ -192,10 +192,10 @@ namespace Svelto.ECS
             internal ref LegacyFilterGroup CreateOrGetFilterForGroup(int filterID, ExclusiveGroupStruct groupID,
                 RefWrapperType refWrapper)
             {
-                var fasterDictionary = _filtersLegacy.GetOrCreate(refWrapper,
+                var fasterDictionary = _filtersLegacy.GetOrAdd(refWrapper,
                     () => new FasterDictionary<ExclusiveGroupStruct, LegacyGroupFilters>());
 
-                var filters = fasterDictionary.GetOrCreate(groupID,
+                var filters = fasterDictionary.GetOrAdd(groupID,
                     (ref ExclusiveGroupStruct gid) =>
                         new LegacyGroupFilters(new SharedSveltoDictionaryNative<int, LegacyFilterGroup>(0), gid),
                     ref groupID);

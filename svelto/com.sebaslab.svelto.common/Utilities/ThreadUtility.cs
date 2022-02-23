@@ -20,7 +20,7 @@ namespace Svelto.Utilities
 #if NETFX_CORE && !NET_STANDARD_2_0 && !NETSTANDARD2_0
             #error Svelto doesn't support UWP without NET_STANDARD_2_0 support
 #endif
-            Thread.Yield(); 
+            Thread.Yield();
         }
 
         public static void TakeItEasy()
@@ -28,15 +28,15 @@ namespace Svelto.Utilities
 #if NETFX_CORE && !NET_STANDARD_2_0 && !NETSTANDARD2_0
             #error Svelto doesn't support UWP without NET_STANDARD_2_0 support
 #endif
-            Thread.Sleep(1); 
+            Thread.Sleep(1);
         }
-        
+
         public static void Relax()
         {
 #if NETFX_CORE && !NET_STANDARD_2_0 && !NETSTANDARD2_0
             #error Svelto doesn't support UWP without NET_STANDARD_2_0 support
 #endif
-            Thread.Sleep(0); 
+            Thread.Sleep(0);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Svelto.Utilities
             if ((quickIterations++ & (frequency - 1)) == 0)
                 Yield();
         }
-        
+
         /// DO NOT TOUCH THE NUMBERS, THEY ARE THE BEST BALANCE BETWEEN CPU OCCUPATION AND RESUME SPEED
         /// DO NOT ADD THREAD.SLEEP(1) it KILLS THE RESUME
         public static void LongWait(ref int quickIterations, Stopwatch watch, int frequency = 256)
@@ -62,11 +62,11 @@ namespace Svelto.Utilities
                 if ((quickIterations++ & (frequency - 1)) == 0)
                     Yield();
             }
-            else 
+            else
             {
                 if ((quickIterations++ & ((frequency << 3) - 1)) == 0)
                     Relax();
-                else 
+                else
                     Yield();
             }
         }

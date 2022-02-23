@@ -1,4 +1,6 @@
 ﻿using NUnit.Framework;
+using Svelto.Common;
+using Svelto.ECS.Native;
 using Svelto.ECS.Schedulers;
 
 namespace Svelto.ECS.Tests.ECS.Filters
@@ -9,11 +11,11 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [SetUp]
         public void SetUp()
         {
-            _scheduler = new SimpleEntitiesSubmissionScheduler();
+            _scheduler   = new SimpleEntitiesSubmissionScheduler();
             _enginesRoot = new EnginesRoot(_scheduler);
-            _factory = _enginesRoot.GenerateEntityFactory();
-            _functions = _enginesRoot.GenerateEntityFunctions();
-            _entitiesDB = ((IUnitTestingInterface)_enginesRoot).entitiesForTesting;
+            _factory     = _enginesRoot.GenerateEntityFactory();
+            _functions   = _enginesRoot.GenerateEntityFunctions();
+            _entitiesDB  = ((IUnitTestingInterface)_enginesRoot).entitiesForTesting;
 
             // Create entities.
             _factory.BuildEntity<EntityDescriptorWithComponents>(EgidA0);
@@ -28,11 +30,6 @@ namespace Svelto.ECS.Tests.ECS.Filters
             _factory.BuildEntity<EntityDescriptorWithComponents>(EgidB3);
             _factory.BuildEntity<EntityDescriptorWithComponents>(EgidB4);
 
-            _enginesRoot.CreateTransientFilter<TestEntityComponent>(_transientFilter1);
-            _enginesRoot.CreateTransientFilter<TestEntityComponent>(_transientFilter2);
-             _enginesRoot.CreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
-             _enginesRoot.CreatePersistentFilter<TestEntityComponent>(_persistentFilter2);
-
             _scheduler.SubmitEntities();
         }
 
@@ -45,22 +42,21 @@ namespace Svelto.ECS.Tests.ECS.Filters
 
         void Test_TransientFilter_Is_Not_Found_After_Submission()
         {
-            
         }
 
         [Test]
         public void Test_AddingFilter_SingleEntity()
         {
-            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
-            filter.AddEntity(EgidA1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            filter.Add(EgidA1, _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(GroupA));
 
-            var iterator = filter.iterator.GetEnumerator();
+            var iterator = filter.GetEnumerator();
 
             // Iterate a single group and check filter values.
             Assert.AreEqual(true, iterator.MoveNext());
 
             var (indices, group) = iterator.Current;
-            Assert.AreEqual(1, indices.Count());
+            Assert.AreEqual(1, indices.count);
             Assert.AreEqual(1, indices[0]);
             Assert.AreEqual(GroupA.id, group.id);
 
@@ -71,20 +67,25 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_AddingFilter_ManyEntities()
         {
-            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
-            filter.AddEntity(EgidB4);
-            filter.AddEntity(EgidB0);
-            filter.AddEntity(EgidB2);
-            filter.AddEntity(EgidA1);
-            filter.AddEntity(EgidA3);
-
-            var iterator = filter.iterator.GetEnumerator();
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
+                _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
+            
+            filter.Add(EgidB4, mmap);
+            filter.Add(EgidB0, mmap);
+            filter.Add(EgidB2, mmap);
+            filter.Add(EgidA1, mmap);
+            filter.Add(EgidA3, mmap);
+            
+            mmap.Dispose();
+            
+            var iterator = filter.GetEnumerator();
 
             // Check group B filters.
             Assert.AreEqual(true, iterator.MoveNext());
 
             var (indices, group) = iterator.Current;
-            Assert.AreEqual(3, indices.Count());
+            Assert.AreEqual(3, indices.count);
             Assert.AreEqual(4, indices[0]);
             Assert.AreEqual(0, indices[1]);
             Assert.AreEqual(2, indices[2]);
@@ -94,7 +95,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(true, iterator.MoveNext());
 
             (indices, group) = iterator.Current;
-            Assert.AreEqual(2, indices.Count());
+            Assert.AreEqual(2, indices.count);
             Assert.AreEqual(1, indices[0]);
             Assert.AreEqual(3, indices[1]);
             Assert.AreEqual(GroupA.id, group.id);
@@ -106,21 +107,22 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_RemovingFilter_SingleEntity()
         {
-            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
-            filter.AddEntity(EgidA1);
-            filter.AddEntity(EgidA3);
-            filter.AddEntity(EgidA4);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var mmapA  = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(GroupA);
+            filter.Add(EgidA1, mmapA);
+            filter.Add(EgidA3, mmapA);
+            filter.Add(EgidA4, mmapA);
 
             // Remove entity.
-            filter.RemoveEntity(EgidA1);
+            filter.Remove(EgidA1);
 
-            var iterator = filter.iterator.GetEnumerator();
+            var iterator = filter.GetEnumerator();
 
             // Check group A filters
             Assert.AreEqual(true, iterator.MoveNext());
 
             var (indices, _) = iterator.Current;
-            Assert.AreEqual(2, indices.Count());
+            Assert.AreEqual(2, indices.count);
             Assert.AreEqual(4, indices[0]); // There was a swap back.
             Assert.AreEqual(3, indices[1]);
 
@@ -131,26 +133,31 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_RemovingFilter_ManyEntities()
         {
-            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
-            filter.AddEntity(EgidA1);
-            filter.AddEntity(EgidA3);
-            filter.AddEntity(EgidA4);
-            filter.AddEntity(EgidB4);
-            filter.AddEntity(EgidB3);
-            filter.AddEntity(EgidB2);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
+                _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
+            
+            filter.Add(EgidA1, mmap);
+            filter.Add(EgidA3, mmap);
+            filter.Add(EgidA4, mmap);
+            filter.Add(EgidB4, mmap);
+            filter.Add(EgidB3, mmap);
+            filter.Add(EgidB2, mmap);
+            
+            mmap.Dispose();
 
             // Remove entity.
-            filter.RemoveEntity(EgidB3);
-            filter.RemoveEntity(EgidB2);
-            filter.RemoveEntity(EgidA3);
+            filter.Remove(EgidB3);
+            filter.Remove(EgidB2);
+            filter.Remove(EgidA3);
 
-            var iterator = filter.iterator.GetEnumerator();
+            var iterator = filter.GetEnumerator();
 
             // Check group A filters
             Assert.AreEqual(true, iterator.MoveNext());
 
             var (indices, _) = iterator.Current;
-            Assert.AreEqual(2, indices.Count());
+            Assert.AreEqual(2, indices.count);
             Assert.AreEqual(1, indices[0]);
             Assert.AreEqual(4, indices[1]);
 
@@ -158,7 +165,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(true, iterator.MoveNext());
 
             (indices, _) = iterator.Current;
-            Assert.AreEqual(1, indices.Count());
+            Assert.AreEqual(1, indices.count);
             Assert.AreEqual(4, indices[0]);
 
             // No more groups to iterate
@@ -168,18 +175,23 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_ClearingFilter()
         {
-            var filter = _entitiesDB.GetPersistentFilter<TestEntityComponent>(_persistentFilter1);
-            filter.AddEntity(EgidA1);
-            filter.AddEntity(EgidA3);
-            filter.AddEntity(EgidA4);
-            filter.AddEntity(EgidB4);
-            filter.AddEntity(EgidB3);
-            filter.AddEntity(EgidB2);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
+                _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
+            
+            filter.Add(EgidA1, mmap);
+            filter.Add(EgidA3, mmap);
+            filter.Add(EgidA4, mmap);
+            filter.Add(EgidB4, mmap);
+            filter.Add(EgidB3, mmap);
+            filter.Add(EgidB2, mmap);
+            
+            mmap.Dispose();
 
             // Remove entity.
             filter.Clear();
 
-            var iterator = filter.iterator.GetEnumerator();
+            var iterator = filter.GetEnumerator();
 
             // Nothing to iterate.
             Assert.AreEqual(false, iterator.MoveNext());
@@ -196,8 +208,8 @@ namespace Svelto.ECS.Tests.ECS.Filters
 
         int _persistentFilter1 = 0;
         int _persistentFilter2 = 1;
-        int _transientFilter1 = 0;
-        int _transientFilter2 = 1;
+        int _transientFilter1  = 0;
+        int _transientFilter2  = 1;
 
         static readonly EGID EgidA0 = new EGID(45872, GroupA);
         static readonly EGID EgidA1 = new EGID(28577, GroupA);

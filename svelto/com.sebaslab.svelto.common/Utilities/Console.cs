@@ -116,7 +116,7 @@ namespace Svelto
             {
                 var builder = _stringBuilder;
                 builder.Length = 0;
-                builder.Append(toPrint).Append(message);
+                builder.Append(toPrint).Append(exception.Message).Append(" -- ").Append(message);
 
                 toPrint = builder.ToString();
             }

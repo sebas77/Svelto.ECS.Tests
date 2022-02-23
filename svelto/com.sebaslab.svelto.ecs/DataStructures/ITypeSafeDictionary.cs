@@ -29,7 +29,7 @@ namespace Svelto.ECS.Internal
         void ExecuteEnginesAddCallbacks
         (FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnAdd>>> entityComponentEnginesDb
        , ITypeSafeDictionary destinationDatabase, ExclusiveGroupStruct toGroup, in PlatformProfiler profiler);
-        void ExecuteEnginesAddEntityCallbacksFast(
+        void ExecuteEnginesAddCallbacksFast(
          FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnAddEx>>> reactiveEnginesAdd,
          ExclusiveGroupStruct groupID, (uint, uint) enumeratorCurrent, in PlatformProfiler profiler);
 

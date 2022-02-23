@@ -7,13 +7,13 @@ namespace Svelto.ECS.Tests.ECS
     public class EnginesRoot_GenericEntityFunctionsTests : GenericTestsBaseClass
     {
         [Test]
-        public void TestRemoveEntityWithEntityIdAndGroup()
+        public void TestRemoveWithEntityIdAndGroup()
         {
             CreateTestEntity(0, GroupA);
             CreateTestEntity(1, GroupA);
             _scheduler.SubmitEntities();
 
-            _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(0, GroupA);
+            _functions.Remove<EntityDescriptorWithComponentAndViewComponent>(0, GroupA);
             _scheduler.SubmitEntities();
 
             var exists = _entitiesDB.entitiesForTesting.Exists<TestEntityComponent>(0, GroupA);
@@ -22,25 +22,25 @@ namespace Svelto.ECS.Tests.ECS
             var count = _entitiesDB.entitiesForTesting.Count<TestEntityComponent>(GroupA);
             Assert.AreEqual(1, count, "Other entities should not be removed");
 
-            void RemoveEntityNotFound()
+            void RemoveNotFound()
             {
-                _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(0, GroupA);
+                _functions.Remove<EntityDescriptorWithComponentAndViewComponent>(0, GroupA);
                 _scheduler.SubmitEntities();
             }
 
-            Assert.Throws<ECSException>(RemoveEntityNotFound,
+            Assert.Throws<ECSException>(RemoveNotFound,
                 "When removing non created entities an exception should be thrown");
         }
 
         [Test]
-        public void TestRemoveEntityWithEgid()
+        public void TestRemoveWithEgid()
         {
             CreateTestEntity(0, GroupA);
             CreateTestEntity(1, GroupA);
             _scheduler.SubmitEntities();
 
             var egid = new EGID(0, GroupA);
-            _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(egid);
+            _functions.Remove<EntityDescriptorWithComponentAndViewComponent>(egid);
             _scheduler.SubmitEntities();
 
             var exists = _entitiesDB.entitiesForTesting.Exists<TestEntityComponent>(0, GroupA);
@@ -49,13 +49,13 @@ namespace Svelto.ECS.Tests.ECS
             var count = _entitiesDB.entitiesForTesting.Count<TestEntityComponent>(GroupA);
             Assert.AreEqual(1, count, "Other entities should not be removed");
 
-            void RemoveEntityNotFound()
+            void RemoveNotFound()
             {
-                _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(new EGID(0, GroupA));
+                _functions.Remove<EntityDescriptorWithComponentAndViewComponent>(new EGID(0, GroupA));
                 _scheduler.SubmitEntities();
             }
 
-            Assert.Throws<ECSException>(RemoveEntityNotFound,
+            Assert.Throws<ECSException>(RemoveNotFound,
                 "When removing non created entities an exception should be thrown");
         }
 

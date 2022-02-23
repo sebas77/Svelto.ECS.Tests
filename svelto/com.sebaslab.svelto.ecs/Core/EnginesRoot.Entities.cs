@@ -32,7 +32,7 @@ namespace Svelto.ECS
         EntityInitializer BuildEntity(EGID entityID, IComponentBuilder[] componentsToBuild, Type descriptorType,
             IEnumerable<object> implementors, string caller)
         {
-            CheckAddEntityID(entityID, descriptorType, caller);
+            CheckAddID(entityID, descriptorType, caller);
 
             DBC.ECS.Check.Require(entityID.groupID.isInvalid == false,
                 "invalid group detected, are you using new ExclusiveGroupStruct() instead of new ExclusiveGroup()?");
@@ -70,7 +70,7 @@ namespace Svelto.ECS
                     var entityComponentType    = entityComponentBuilder.GetEntityComponentType();
 
                     var refWrapper = new RefWrapperType(entityComponentType);
-                    var dbList     = group.GetOrCreate(refWrapper, () => entityComponentBuilder.CreateDictionary(size));
+                    var dbList     = group.GetOrAdd(refWrapper, () => entityComponentBuilder.CreateDictionary(size));
                     entityComponentBuilder.Preallocate(dbList, size);
 
                     if (_groupsPerEntity.TryGetValue(refWrapper, out var groupedGroup) == false)
@@ -99,7 +99,7 @@ namespace Svelto.ECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         FasterDictionary<RefWrapperType, ITypeSafeDictionary> GetOrCreateDBGroup(ExclusiveGroupStruct toGroupId)
         {
-            return _groupEntityComponentsDB.GetOrCreate(toGroupId,
+            return _groupEntityComponentsDB.GetOrAdd(toGroupId,
                 () => new FasterDictionary<RefWrapperType, ITypeSafeDictionary>());
         }
 

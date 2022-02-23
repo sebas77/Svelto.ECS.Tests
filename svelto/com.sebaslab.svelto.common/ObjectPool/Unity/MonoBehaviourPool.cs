@@ -1,4 +1,5 @@
 #if UNITY_5_3_OR_NEWER || UNITY_5
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Svelto.ObjectPool
@@ -15,9 +16,19 @@ namespace Svelto.ObjectPool
 #endif
         protected override void OnDispose()
         {
-            for (var enumerator = _recycledPools.GetEnumerator(); enumerator.MoveNext();)
-                foreach (var obj in enumerator.Current.Value)
-                    GameObject.Destroy(obj);
+            using (var recycledPoolsGetValues = _recycledPools.GetValues)
+            {
+                var values = recycledPoolsGetValues.GetValues(out var count);
+                for (int i = 0; i < count; i++)                     
+                {
+                    using (var stacks = values[i].GetValues)
+                    {
+                        var stackValues = stacks.GetValues();
+                        foreach (var obj in stackValues)
+                            GameObject.Destroy(obj);
+                    }
+                }
+            }
         }
     }
 }

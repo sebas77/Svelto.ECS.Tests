@@ -15,21 +15,21 @@ namespace Svelto.ECS
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void RemoveEntity<T>
+            public void Remove<T>
                 (uint entityID, ExclusiveBuildGroup groupID, [CallerMemberName] string caller = null)
                 where T : IEntityDescriptor, new()
             {
-                RemoveEntity<T>(new EGID(entityID, groupID), caller);
+                Remove<T>(new EGID(entityID, groupID), caller);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void RemoveEntity<T>(EGID entityEGID, [CallerMemberName] string caller = null) 
+            public void Remove<T>(EGID entityEGID, [CallerMemberName] string caller = null) 
                 where T : IEntityDescriptor, new()
             {
                 DBC.ECS.Check.Require(entityEGID.groupID.isInvalid == false, "invalid group detected");
-                _enginesRoot.Target.CheckRemoveEntityID(entityEGID, TypeCache<T>.type, caller);
+                _enginesRoot.Target.CheckRemoveID(entityEGID, TypeCache<T>.type, caller);
 
-                _enginesRoot.Target.QueueRemoveEntityOperation(
+                _enginesRoot.Target.QueueRemoveOperation(
                     entityEGID, _enginesRoot.Target.FindRealComponents<T>(entityEGID), caller);
             }
 
@@ -58,8 +58,8 @@ namespace Svelto.ECS
 
                     dictionary.KeysEvaluator((key) =>
                     {
-                        _enginesRoot.Target.CheckRemoveEntityID(new EGID(key, fromGroupID), TypeCache<T>.type, caller);
-                        _enginesRoot.Target.CheckAddEntityID(new EGID(key, toGroupID), TypeCache<T>.type, caller);
+                        _enginesRoot.Target.CheckRemoveID(new EGID(key, fromGroupID), TypeCache<T>.type, caller);
+                        _enginesRoot.Target.CheckAddID(new EGID(key, toGroupID), TypeCache<T>.type, caller);
                     });
 #endif
                     _enginesRoot.Target.QueueSwapGroupOperation(fromGroupID, toGroupID, caller);
@@ -103,8 +103,8 @@ namespace Svelto.ECS
 
                 var enginesRootTarget = _enginesRoot.Target;
 
-                enginesRootTarget.CheckRemoveEntityID(fromEGID, TypeCache<T>.type, caller);
-                enginesRootTarget.CheckAddEntityID(toEGID, TypeCache<T>.type, caller);
+                enginesRootTarget.CheckRemoveID(fromEGID, TypeCache<T>.type, caller);
+                enginesRootTarget.CheckAddID(toEGID, TypeCache<T>.type, caller);
 
                 enginesRootTarget.QueueSwapEntityOperation(fromEGID, toEGID
                                                          , this._enginesRoot.Target.FindRealComponents<T>(fromEGID)
@@ -147,7 +147,7 @@ namespace Svelto.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void QueueRemoveEntityOperation(EGID entityEGID, IComponentBuilder[] componentBuilders, string caller)
+        void QueueRemoveOperation(EGID entityEGID, IComponentBuilder[] componentBuilders, string caller)
         {
             _entitiesOperations.AddRemoveOperation(entityEGID, componentBuilders, caller);
         }

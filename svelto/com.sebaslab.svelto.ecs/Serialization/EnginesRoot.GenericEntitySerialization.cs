@@ -119,8 +119,8 @@ namespace Svelto.ECS
                 uint descriptorHash = serializableEntityComponent.descriptorHash;
                 var entityDescriptor = serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
 
-                _enginesRoot.CheckRemoveEntityID(fromEGID, entityDescriptor.realType, caller);
-                _enginesRoot.CheckAddEntityID(toEGID, entityDescriptor.realType, caller);
+                _enginesRoot.CheckRemoveID(fromEGID, entityDescriptor.realType, caller);
+                _enginesRoot.CheckAddID(toEGID, entityDescriptor.realType, caller);
 
                 /// Serializable Entity Descriptors can be extended so we need to use FindRealComponents
                 _enginesRoot.QueueSwapEntityOperation(fromEGID, toEGID
@@ -136,12 +136,12 @@ namespace Svelto.ECS
                 SerializationDescriptorMap serializationDescriptorMap = _enginesRoot._serializationDescriptorMap;
                 var entityDescriptor = serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
 
-                _enginesRoot.CheckRemoveEntityID(egid, entityDescriptor.realType, caller);
+                _enginesRoot.CheckRemoveID(egid, entityDescriptor.realType, caller);
 
                 try
                 {
                     /// Serializable Entity Descriptors can be extended so we need to use FindRealComponents
-                    _enginesRoot.QueueRemoveEntityOperation(egid
+                    _enginesRoot.QueueRemoveOperation(egid
                         , _enginesRoot.FindRealComponents(egid, entityDescriptor.componentsToBuild), caller);
                 }
                 catch

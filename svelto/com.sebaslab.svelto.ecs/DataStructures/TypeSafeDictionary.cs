@@ -385,7 +385,7 @@ namespace Svelto.ECS.Internal
                     {
                         var     key    = dictionaryKeyEnumerator[i].key;
                         ref var entity = ref toDictionary.GetValueByRef(key);
-                        ExecuteEnginesAddEntityCallbacks(entityComponentEnginesDB, ref entity, new EGID(key, toGroup),
+                        ExecuteEnginesAddCallbacks(entityComponentEnginesDB, ref entity, new EGID(key, toGroup),
                             in profiler);
                     }
                 }
@@ -398,7 +398,7 @@ namespace Svelto.ECS.Internal
                     {
                         var     key    = dictionaryKeyEnumerator[i].key;
                         ref var entity = ref toDictionary.GetValueByRef(key);
-                        ExecuteEnginesAddEntityCallbacks(entityComponentEnginesDB, ref entity, new EGID(key, toGroup),
+                        ExecuteEnginesAddCallbacks(entityComponentEnginesDB, ref entity, new EGID(key, toGroup),
                             in profiler);
                     }
                 }
@@ -474,7 +474,7 @@ namespace Svelto.ECS.Internal
 
                     try
                     {
-                        ExecuteEnginesRemoveEntityCallback(reactiveEnginesRemove, ref implUnmgd.GetValueByRef(entityID),
+                        ExecuteEnginesRemoveCallback(reactiveEnginesRemove, ref implUnmgd.GetValueByRef(entityID),
                             new EGID(entityID, fromGroup), sampler);
                     }
                     catch
@@ -496,7 +496,7 @@ namespace Svelto.ECS.Internal
 
                     try
                     {
-                        ExecuteEnginesRemoveEntityCallback(reactiveEnginesRemove, ref implMgd.GetValueByRef(entityID),
+                        ExecuteEnginesRemoveCallback(reactiveEnginesRemove, ref implMgd.GetValueByRef(entityID),
                             new EGID(entityID, fromGroup), sampler);
                     }
                     catch
@@ -512,7 +512,7 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        public void ExecuteEnginesAddEntityCallbacksFast(
+        public void ExecuteEnginesAddCallbacksFast(
             FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnAddEx>>> reactiveEnginesAdd,
             ExclusiveGroupStruct groupID, (uint, uint) enumeratorCurrent, in PlatformProfiler profiler)
         {
@@ -605,11 +605,11 @@ namespace Svelto.ECS.Internal
             {
                 if (isUnmanaged)
                     foreach (var value in implUnmgd)
-                        ExecuteEnginesRemoveEntityCallback(engines, ref value.value, new EGID(value.key, group),
+                        ExecuteEnginesRemoveCallback(engines, ref value.value, new EGID(value.key, group),
                             in profiler);
                 else
                     foreach (var value in implMgd)
-                        ExecuteEnginesRemoveEntityCallback(engines, ref value.value, new EGID(value.key, group),
+                        ExecuteEnginesRemoveCallback(engines, ref value.value, new EGID(value.key, group),
                             in profiler);
             }
             catch
@@ -669,7 +669,7 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        static void ExecuteEnginesAddEntityCallbacks(
+        static void ExecuteEnginesAddCallbacks(
             FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnAdd>>> engines,
             ref TValue entityComponent, EGID egid, in PlatformProfiler profiler)
         {
@@ -694,7 +694,7 @@ namespace Svelto.ECS.Internal
                 }
         }
 
-        static void ExecuteEnginesRemoveEntityCallback(
+        static void ExecuteEnginesRemoveCallback(
             FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnRemove>>> engines,
             ref TValue entity, EGID egid, in PlatformProfiler profiler)
         {

@@ -1,4 +1,3 @@
-#if UNITY_NATIVE
 using System;
 using Svelto.DataStructures;
 using Svelto.DataStructures.Native;
@@ -39,6 +38,16 @@ namespace Svelto.ECS.Native
             ref var sveltoDictionary = ref _dic.GetValueByRef(entity.groupID);
             return ref sveltoDictionary.GetValueByRef(entity.entityID);
         }
+        
+        internal uint GetIndex(EGID entity)
+        {
+#if DEBUG && !PROFILE_SVELTO
+            if (Exists(entity) == false)
+                throw new Exception($"NativeEGIDMultiMapper: Entity not found {entity}");
+#endif
+            ref var sveltoDictionary = ref _dic.GetValueByRef(entity.groupID);
+            return sveltoDictionary.GetIndex(entity.entityID);
+        }
 
         public bool Exists(EGID entity)
         {
@@ -60,4 +69,3 @@ namespace Svelto.ECS.Native
                 NativeStrategy<int>>>, NativeStrategy<int>> _dic;
     }
 }
-#endif

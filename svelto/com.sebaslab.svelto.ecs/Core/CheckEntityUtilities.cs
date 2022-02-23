@@ -17,7 +17,7 @@ namespace Svelto.ECS
 #if DONT_USE        
         [Conditional("MEANINGLESS")]
 #endif
-        void CheckRemoveEntityID(EGID egid, Type entityDescriptorType, string caller)
+        void CheckRemoveID(EGID egid, Type entityDescriptorType, string caller)
         {
             if (_multipleOperationOnSameEGIDChecker.ContainsKey(egid) == true)
                 throw new ECSException(
@@ -51,7 +51,7 @@ namespace Svelto.ECS
 #if DONT_USE
         [Conditional("MEANINGLESS")]
 #endif
-        void CheckAddEntityID(EGID egid, Type entityDescriptorType, string caller)
+        void CheckAddID(EGID egid, Type entityDescriptorType, string caller)
         {
             if (_multipleOperationOnSameEGIDChecker.ContainsKey(egid) == true)
                 throw new ECSException(
@@ -62,7 +62,7 @@ namespace Svelto.ECS
                        .FastConcat(" previous operation was: ")
                        .FastConcat(_multipleOperationOnSameEGIDChecker[egid] == 1 ? "add" : "remove"));
 
-            var hash = _idChecker.GetOrCreate(egid.groupID, () => new HashSet<uint>());
+            var hash = _idChecker.GetOrAdd(egid.groupID, () => new HashSet<uint>());
             if (hash.Contains(egid.entityID) == true)
                 throw new ECSException("Trying to add an Entity already present in the database "
                                       .FastConcat(" caller: ", caller, " entityID ").FastConcat(egid.entityID)

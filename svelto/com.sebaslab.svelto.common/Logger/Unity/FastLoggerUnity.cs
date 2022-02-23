@@ -119,9 +119,9 @@ namespace Svelto.Utilities
 
         static bool _quitThread;
 
-        static readonly ConcurrentDictionary<uint, ErrorLogObject> _batchedErrorLogs;
-        static readonly IComparer<ErrorLogObject>                  _comparison;
-        static readonly ConcurrentQueue<ErrorLogObject>            _notBatchedQueue;
+        static readonly ThreadSafeDictionary<uint, ErrorLogObject> _batchedErrorLogs;
+        static readonly IComparer<ErrorLogObject>                      _comparison;
+        static readonly ConcurrentQueue<ErrorLogObject>                _notBatchedQueue;
 
         static readonly Thread _lowPrioThread;
 
@@ -134,14 +134,14 @@ namespace Svelto.Utilities
             gameObject.AddComponent<FastMonoLogger>();
 
             _comparison       = new ErrorComparer();
-            _batchedErrorLogs = new ConcurrentDictionary<uint, ErrorLogObject>();
+            _batchedErrorLogs = new ThreadSafeDictionary<uint, ErrorLogObject>();
 
             _lowPrioThread          = new Thread(StartQueue) { IsBackground = true };
             _notBatchedQueue        = new ConcurrentQueue<ErrorLogObject>();
             _lowPrioThread.Priority = ThreadPriority.BelowNormal;
             _lowPrioThread.Start();
             
-            _logs = new FasterList<ErrorLogObject>(_batchedErrorLogs.Count + _notBatchedQueue.Count);
+            _logs = new FasterList<ErrorLogObject>(_batchedErrorLogs.count + _notBatchedQueue.Count);
         }
 
         public void OnLoggerAdded()
@@ -214,13 +214,20 @@ namespace Svelto.Utilities
 
         static void OtherThreadFlushLogger()
         {
-            if (_batchedErrorLogs.Count + _notBatchedQueue.Count == 0)
+            if (_batchedErrorLogs.count + _notBatchedQueue.Count == 0)
                 return;
             
             _logs.FastClear();
+            
+            using (var recycledPoolsGetValues = _batchedErrorLogs.GetValues)
+            {
+                var values = recycledPoolsGetValues.GetValues(out var logsCount);
+                for (int i = 0; i < logsCount; i++)                     
+                {
+                    _logs.Add(values[i]);
+                }
+            }
 
-            foreach (var log in _batchedErrorLogs)
-                _logs.Add(log.Value);
             _batchedErrorLogs.Clear();
 
             while (_notBatchedQueue.TryDequeue(out var value)) _logs.Add(value);

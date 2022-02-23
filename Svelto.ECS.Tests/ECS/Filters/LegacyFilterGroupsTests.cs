@@ -24,14 +24,14 @@ namespace Svelto.ECS.Tests.ECS.Filters
             filter.Add(egid1.entityID, mapper);
             filter.Add(egid2.entityID, mapper);
             filter.Add(egid3.entityID, mapper);
-            Assert.AreEqual(4, filter.filteredIndices.Count());
+            Assert.AreEqual(4, filter.filteredIndices.count);
 
             filter.Remove(egid3.entityID);
-            Assert.AreEqual(3, filter.filteredIndices.Count());
+            Assert.AreEqual(3, filter.filteredIndices.count);
 
             filter.Add(egid3.entityID, mapper);
             //Asert count.
-            Assert.AreEqual(4, filter.filteredIndices.Count());
+            Assert.AreEqual(4, filter.filteredIndices.count);
             // Assert EGID.entityID
             Assert.AreEqual(3, filter.filteredIndices.Get(3));
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using Svelto.Common.DataStructures;
 using Svelto.DataStructures;
 #if DEBUG && !PROFILE_SVELTO
 using System.Collections.Generic;
@@ -36,13 +37,17 @@ namespace Svelto.ObjectPool
             OnDispose();
 
             if (typeof(IDisposable).IsAssignableFrom(typeof(T)))
-                foreach (var keyvalue in _recycledPools)
+                using (var recycledPoolsGetValues = _recycledPools.GetValues)
                 {
-                    ConcurrentStack<T> fasterList = keyvalue.Value;
-
-                    foreach (var obj in fasterList)
+                    var values = recycledPoolsGetValues.GetValues(out var count);
+                    for (int i = 0; i < count; i++)                     
                     {
-                        ((IDisposable)obj).Dispose();
+                        using (var stacks = values[i].GetValues)
+                        {
+                            var stackValues = stacks.GetValues();
+                            foreach (var obj in stackValues)
+                                ((IDisposable)obj).Dispose();
+                        }
                     }
                 }
 
@@ -144,11 +149,12 @@ namespace Svelto.ObjectPool
         {
             debugInfo.Clear();
 
-            for (var enumerator = _recycledPools.GetEnumerator(); enumerator.MoveNext();)
-            {
-                var currentValue = enumerator.Current.Value;
-                debugInfo.Add(new ObjectPoolDebugStructure(enumerator.Current.Key, currentValue.Count));
-            }
+            //todo put it back
+            // for (var enumerator = _recycledPools.GetEnumerator(); enumerator.MoveNext();)
+            // {
+            //     var currentValue = enumerator.Current.Value;
+            //     debugInfo.Add(new ObjectPoolDebugStructure(enumerator.Current.Key, currentValue.Count));
+            // }
 
             return debugInfo;
         }
@@ -180,10 +186,10 @@ namespace Svelto.ObjectPool
             _objectsRecyled++;
         }
 
-        ConcurrentStack<T> ReturnValidPool(ConcurrentDictionary<int, ConcurrentStack<T>> pools, int pool)
+        ThreadSafeStack<T> ReturnValidPool(ThreadSafeDictionary<int, ThreadSafeStack<T>> pools, int pool)
         {
             if (pools.TryGetValue(pool, out var localPool) == false)
-                pools[pool] = localPool = new ConcurrentStack<T>();
+                pools[pool] = localPool = new ThreadSafeStack<T>();
 
             return localPool;
         }
@@ -192,9 +198,9 @@ namespace Svelto.ObjectPool
         {
             T obj = null;
 
-            ConcurrentStack<T> localPool = ReturnValidPool(_recycledPools, pool);
+            ThreadSafeStack<T> localPool = ReturnValidPool(_recycledPools, pool);
 
-            while (IsNull(obj) == true && localPool.Count > 0)
+            while (IsNull(obj) == true && localPool.count > 0)
                 localPool.TryPop(out obj);
 
             if (IsNull(obj) == true)
@@ -222,8 +228,8 @@ namespace Svelto.ObjectPool
             return aObj == null || aObj.Equals(null);
         }
 
-        protected readonly ConcurrentDictionary<int, ConcurrentStack<T>> _recycledPools =
-            new ConcurrentDictionary<int, ConcurrentStack<T>>();
+        protected readonly ThreadSafeDictionary<int, ThreadSafeStack<T>> _recycledPools =
+            new ThreadSafeDictionary<int, ThreadSafeStack<T>>();
 
         // readonly ConcurrentDictionary<int, ConcurrentStack<T>> _usedPools =
         //     new ConcurrentDictionary<int, ConcurrentStack<T>>();

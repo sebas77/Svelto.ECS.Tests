@@ -93,7 +93,7 @@ namespace Svelto.ECS
                 groupMap[to.entityID] = reference;
             }
 
-            internal void RemoveEntityReference(EGID egid)
+            internal void RemoveReference(EGID egid)
             {
                 var reference = FetchAndRemoveReference(@egid);
 
@@ -123,7 +123,7 @@ namespace Svelto.ECS
                 // We need to traverse all entities in the group and remove the locator using the egid.
                 // RemoveLocator would modify the enumerator so this is why we traverse the dictionary from last to first.
                 foreach (var item in groupMap)
-                    RemoveEntityReference(new EGID(item.key, groupId));
+                    RemoveReference(new EGID(item.key, groupId));
 
                 _egidToReferenceMap.Remove(groupId);
             }
