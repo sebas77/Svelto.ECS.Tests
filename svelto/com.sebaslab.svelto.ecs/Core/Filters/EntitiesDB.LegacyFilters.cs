@@ -22,7 +22,7 @@ namespace Svelto.ECS
             return new LegacyFilters(_filters);
         }
 
-        public readonly ref struct LegacyFilters
+        public readonly struct LegacyFilters
         {
             public LegacyFilters(
                 FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, LegacyGroupFilters>>
@@ -166,7 +166,7 @@ namespace Svelto.ECS
                     fasterDictionary[@group].DisposeFilter(resetFilterID);
             }
 
-            public bool TryRemoveFromFilter<T>(int filtersID, EGID egid) where T : struct, IEntityComponent
+            public bool TryRemoveEntityFromFilter<T>(int filtersID, EGID egid) where T : struct, IEntityComponent
             {
                 if (TryGetFilterForGroup<T>(filtersID, egid.groupID, out var filter))
                     return filter.TryRemove(egid.entityID);
@@ -174,14 +174,14 @@ namespace Svelto.ECS
                 return false;
             }
 
-            public void RemoveFromFilter<T>(int filtersID, EGID egid) where T : struct, IEntityComponent
+            public void RemoveEntityFromFilter<T>(int filtersID, EGID egid) where T : struct, IEntityComponent
             {
                 ref var filter = ref GetFilterForGroup<T>(filtersID, egid.groupID);
 
                 filter.Remove(egid.entityID);
             }
 
-            public bool AddToFilter<N>(int filtersID, EGID egid, N mapper) where N : IEGIDMapper
+            public bool AddEntityToFilter<N>(int filtersID, EGID egid, N mapper) where N : IEGIDMapper
             {
                 ref var filter =
                     ref CreateOrGetFilterForGroup(filtersID, egid.groupID, new RefWrapperType(mapper.entityType));

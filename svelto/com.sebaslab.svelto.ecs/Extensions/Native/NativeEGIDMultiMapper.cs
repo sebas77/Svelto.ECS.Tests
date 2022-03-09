@@ -9,6 +9,9 @@ namespace Svelto.ECS.Native
     /// invalid. Unfortunately it can be a ref struct, because Jobs needs to hold if by paramater. So the deal is
     /// that a job can use it as long as nothing else is modifying the entities database and the NativeEGIDMultiMapper
     /// is disposed right after the use.
+    ///
+    ///WARNING: REMEMBER THIS MUST BE DISPOSED OF, AS IT USES NATIVE MEMORY. IT WILL LEAK MEMORY OTHERWISE
+    /// 
     /// </summary>
     public struct NativeEGIDMultiMapper<T> : IDisposable where T : unmanaged, IEntityComponent
     {
@@ -39,7 +42,7 @@ namespace Svelto.ECS.Native
             return ref sveltoDictionary.GetValueByRef(entity.entityID);
         }
         
-        internal uint GetIndex(EGID entity)
+        public uint GetIndex(EGID entity)
         {
 #if DEBUG && !PROFILE_SVELTO
             if (Exists(entity) == false)

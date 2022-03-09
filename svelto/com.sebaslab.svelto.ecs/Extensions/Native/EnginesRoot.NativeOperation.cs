@@ -63,10 +63,10 @@ namespace Svelto.ECS
 
                         ref NativeOperationRemove nativeRemoveOperation = ref _nativeRemoveOperations[componentsIndex];
 
-                        CheckRemoveID(entityEGID, nativeRemoveOperation.entityDescriptorType
+                        CheckRemoveEntityID(entityEGID, nativeRemoveOperation.entityDescriptorType
                                           , nativeRemoveOperation.caller);
 
-                        QueueRemoveOperation(
+                        QueueRemoveEntityOperation(
                             entityEGID, FindRealComponents(entityEGID, nativeRemoveOperation.components)
                           , nativeRemoveOperation.caller);
                     }
@@ -87,9 +87,9 @@ namespace Svelto.ECS
 
                         ref var nativeSwapOperation = ref _nativeSwapOperations[componentsIndex];
 
-                        CheckRemoveID(entityEGID.@from, nativeSwapOperation.entityDescriptorType
+                        CheckRemoveEntityID(entityEGID.@from, nativeSwapOperation.entityDescriptorType
                                           , nativeSwapOperation.caller);
-                        CheckAddID(entityEGID.to, nativeSwapOperation.entityDescriptorType
+                        CheckAddEntityID(entityEGID.to, nativeSwapOperation.entityDescriptorType
                                        , nativeSwapOperation.caller);
 
                         QueueSwapEntityOperation(entityEGID.@from, entityEGID.to
@@ -120,7 +120,7 @@ namespace Svelto.ECS
                         ref var nativeOperation = ref _nativeAddOperations[componentsIndex];
 #if DEBUG && !PROFILE_SVELTO
                         var entityDescriptorType = nativeOperation.entityDescriptorType;
-                        CheckAddID(egid, entityDescriptorType, nativeOperation.caller);
+                        CheckAddEntityID(egid, entityDescriptorType, nativeOperation.caller);
 #endif
 
                         _entityLocator.SetReference(reference, egid);

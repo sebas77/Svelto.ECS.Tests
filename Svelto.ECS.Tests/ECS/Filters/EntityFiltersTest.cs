@@ -44,10 +44,12 @@ namespace Svelto.ECS.Tests.ECS.Filters
         {
         }
 
+        readonly EntitiesDB.SveltoFilters.ContextID testFilterContext = EntitiesDB.SveltoFilters.GetNewContextID();
+
         [Test]
         public void Test_AddingFilter_SingleEntity()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
             filter.Add(EgidA1, _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(GroupA));
 
             var iterator = filter.GetEnumerator();
@@ -67,7 +69,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_AddingFilter_ManyEntities()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             
@@ -107,7 +109,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_RemovingFilter_SingleEntity()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
             var mmapA  = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(GroupA);
             filter.Add(EgidA1, mmapA);
             filter.Add(EgidA3, mmapA);
@@ -133,7 +135,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_RemovingFilter_ManyEntities()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             
@@ -175,7 +177,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_ClearingFilter()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             
@@ -207,10 +209,8 @@ namespace Svelto.ECS.Tests.ECS.Filters
         EntitiesDB                        _entitiesDB;
 
         int _persistentFilter1 = 0;
-        int _persistentFilter2 = 1;
         int _transientFilter1  = 0;
-        int _transientFilter2  = 1;
-
+        
         static readonly EGID EgidA0 = new EGID(45872, GroupA);
         static readonly EGID EgidA1 = new EGID(28577, GroupA);
         static readonly EGID EgidA2 = new EGID(95323, GroupA);

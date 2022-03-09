@@ -31,7 +31,7 @@ namespace Svelto.ECS.Tests.ECS
             _scheduler.SubmitEntities();
 
             var entityReference = _entitiesDB.entitiesForTesting.GetEntityReference(egid);
-            _functions.Remove<TestDescriptor>(egid);
+            _functions.RemoveEntity<TestDescriptor>(egid);
 
             var found = _entitiesDB.entitiesForTesting.TryGetEGID(entityReference, out var foundEgid);
             Assert.IsTrue(found, "Entity reference should still be valid before submit.");
@@ -49,7 +49,7 @@ namespace Svelto.ECS.Tests.ECS
             _factory.BuildEntity<TestDescriptor>(egidA.entityID, egidA.groupID);
             _scheduler.SubmitEntities();
 
-            _functions.Remove<TestDescriptor>(egidA);
+            _functions.RemoveEntity<TestDescriptor>(egidA);
             _scheduler.SubmitEntities();
 
             var egidB = new EGID(0, TestGroupB);
@@ -118,16 +118,16 @@ namespace Svelto.ECS.Tests.ECS
             _scheduler.SubmitEntities();
 
             // Second submission
-            _functions.Remove<TestDescriptor>(1, TestGroupA);
-            _functions.Remove<TestDescriptor>(0, TestGroupB);
+            _functions.RemoveEntity<TestDescriptor>(1, TestGroupA);
+            _functions.RemoveEntity<TestDescriptor>(0, TestGroupB);
             _factory.BuildEntity<TestDescriptor>(3, TestGroupA);
             _factory.BuildEntity<TestDescriptor>(4, TestGroupA);
             _factory.BuildEntity<TestDescriptor>(1, TestGroupB);
             _scheduler.SubmitEntities();
 
             // Third submission
-            _functions.Remove<TestDescriptor>(3, TestGroupA);
-            _functions.Remove<TestDescriptor>(1, TestGroupB);
+            _functions.RemoveEntity<TestDescriptor>(3, TestGroupA);
+            _functions.RemoveEntity<TestDescriptor>(1, TestGroupB);
             _factory.BuildEntity<TestDescriptor>(5, TestGroupA);
             _factory.BuildEntity<TestDescriptor>(2, TestGroupB);
             _scheduler.SubmitEntities();

@@ -8,7 +8,7 @@ namespace Svelto.DataStructures
     {
         public static RefWrapperType wrapper = new RefWrapperType(typeof(T));        
     }
-
+    
     [DebuggerDisplay("{_type}")]
     public readonly struct RefWrapperType: IEquatable<RefWrapperType> 
     {
@@ -30,7 +30,32 @@ namespace Svelto.DataStructures
         
         public static implicit operator Type(RefWrapperType t) => t._type;
 
-        readonly Type _type;
+        readonly          Type _type;
+        internal readonly int  _hashCode;
+    }
+    
+    public readonly struct NativeRefWrapperType: IEquatable<NativeRefWrapperType>
+    {
+        internal static FasterDictionary<RefWrapperType, System.Guid> GUIDCache =
+            new FasterDictionary<RefWrapperType, Guid>();
+        
+        public NativeRefWrapperType(RefWrapperType type)
+        {
+            _type     = GUIDCache.GetOrAdd(type, (ref RefWrapperType type) => ((Type)type).GUID, ref type);
+            _hashCode = type._hashCode;
+        }
+
+        public bool Equals(NativeRefWrapperType other)
+        {
+            return _type == other._type;
+        }
+        
+        public override int GetHashCode()
+        {
+            return _hashCode;
+        }
+        
+        readonly Guid _type;
         readonly int  _hashCode;
     }
     

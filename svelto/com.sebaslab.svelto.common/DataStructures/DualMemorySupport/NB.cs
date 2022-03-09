@@ -118,8 +118,7 @@ namespace Svelto.DataStructures
 #endif
                     using (_threadSentinel.TestThreadSafety())
                     {
-                        var     size  = MemoryUtilities.SizeOf<T>();
-                        ref var asRef = ref Unsafe.AsRef<T>((void*)(_ptr + (int)(index * size)));
+                        ref var asRef = ref Unsafe.AsRef<T>((void*)(_ptr + (int)index * SIZE));
                         return ref asRef;
                     }
                 }
@@ -139,8 +138,7 @@ namespace Svelto.DataStructures
 #endif
                     using (_threadSentinel.TestThreadSafety())
                     {
-                        var     size  = MemoryUtilities.SizeOf<T>();
-                        ref var asRef = ref Unsafe.AsRef<T>((void*)(_ptr + (int)(index * size)));
+                        ref var asRef = ref Unsafe.AsRef<T>((void*)(_ptr + (int)(index * SIZE)));
                         return ref asRef;
                     }
                 }
@@ -148,6 +146,7 @@ namespace Svelto.DataStructures
         }
         
         readonly uint _capacity;
+        static readonly int SIZE = MemoryUtilities.SizeOf<T>();
 
 #if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST    
 #if UNITY_BURST
@@ -162,12 +161,12 @@ namespace Svelto.DataStructures
         //Todo: this logic is not completed yet, WIP
         public NBParallelReader AsReader()
         {
-            return new NBParallelReader(this, new Sentinel(this._ptr, Sentinel.ReadFlag));
+            return new NBParallelReader(this, new Sentinel(this._ptr, Sentinel.readFlag));
         }
 
         public NBParallelWriter AsWriter()
         {
-            return new NBParallelWriter(this, new Sentinel(this._ptr, Sentinel.WriteFlag));
+            return new NBParallelWriter(this, new Sentinel(this._ptr, Sentinel.writeFlag));
         }
 
         public struct NBParallelReader

@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using DBC.ECS;
 using Svelto.Common;
+using Svelto.Common.DataStructures;
 using Svelto.DataStructures;
+using Svelto.ECS.DataStructures;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
 
@@ -18,6 +20,7 @@ namespace Svelto.ECS
         static EnginesRoot()
         {
             GroupHashMap.Init();
+            SharedDictonary.Init();
             SerializationDescriptorMap.Init();
             _swapEntities   = SwapEntities;
             _removeEntities = RemoveEntities;
@@ -38,8 +41,9 @@ namespace Svelto.ECS
             _entitiesOperations                  = new EntitiesOperations();
             _idChecker                           = new FasterDictionary<ExclusiveGroupStruct, HashSet<uint>>();
 
-            _cachedRangeOfSubmittedIndices                       = new FasterList<(uint, uint)>();
+            _cachedRangeOfSubmittedIndices                 = new FasterList<(uint, uint)>();
             _cachedIndicesToSwapBeforeSubmissionForFilters = new FasterDictionary<uint, uint>();
+            
             _multipleOperationOnSameEGIDChecker            = new FasterDictionary<EGID, uint>();
 #if UNITY_NATIVE //because of the thread count, ATM this is only for unity
             _nativeSwapOperationQueue   = new Svelto.ECS.DataStructures.AtomicNativeBags(Allocator.Persistent);
@@ -241,7 +245,9 @@ namespace Svelto.ECS
                 foreach (var entityList in groups.value)
                     try
                     {
-                        entityList.value.ExecuteEnginesDisposeCallbacks_Group(_reactiveEnginesDispose, groups.key,
+                        ITypeSafeDictionary typeSafeDictionary = entityList.value;
+                        
+                        typeSafeDictionary.ExecuteEnginesDisposeCallbacks_Group(_reactiveEnginesDispose, groups.key,
                             profiler);
                     }
                     catch (Exception e)

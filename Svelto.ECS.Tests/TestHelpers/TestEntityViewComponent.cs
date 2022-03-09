@@ -2,12 +2,12 @@
 
 namespace Svelto.ECS.Tests
 {
-    interface ITestFloatValue
+    public interface ITestFloatValue
     {
         float Value { get; set; }
     }
 
-    interface ITestIntValue
+    public interface ITestIntValue
     {
         int Value { get; set; }
     }
@@ -48,7 +48,7 @@ namespace Svelto.ECS.Tests
         }
     }
 
-    struct TestEntityViewComponent : IEntityViewComponent
+    public struct TestEntityViewComponent : IEntityViewComponent
     {
 #pragma warning disable 649
         public ITestFloatValue TestFloatValue;

@@ -19,9 +19,7 @@ namespace Svelto.ECS.Tests.ECS
         [TearDown]
         public void Cleanup()
         {
-            _functions.RemoveEntitiesFromGroup(GroupA);
-            _functions.RemoveEntitiesFromGroup(GroupB);
-            _scheduler.SubmitEntities();
+            
         }
 
         protected EntityInitializer CreateTestEntity(uint entityId, ExclusiveGroupStruct group, int value = 1)
@@ -33,13 +31,13 @@ namespace Svelto.ECS.Tests.ECS
         }
 
         protected SimpleEntitiesSubmissionScheduler _scheduler;
-        EnginesRoot                                 _enginesRoot;
+        protected EnginesRoot                                 _enginesRoot;
         protected IEntityFactory                    _factory;
         protected IEntityFunctions                  _functions;
         protected IUnitTestingInterface             _entitiesDB;
 
-        protected static ExclusiveGroup                   GroupA  = new ExclusiveGroup();
-        protected static ExclusiveGroup                   GroupB  = new ExclusiveGroup();
-        protected static FasterList<ExclusiveGroupStruct> GroupAB = new FasterList<ExclusiveGroupStruct>().Add(GroupA).Add(GroupB);
+        protected static readonly ExclusiveGroup                   GroupA  = new ExclusiveGroup();
+        protected static readonly ExclusiveGroup                   GroupB  = new ExclusiveGroup();
+        protected static readonly FasterList<ExclusiveGroupStruct> GroupAB = new FasterList<ExclusiveGroupStruct>().Add(GroupA).Add(GroupB);
     }
 }

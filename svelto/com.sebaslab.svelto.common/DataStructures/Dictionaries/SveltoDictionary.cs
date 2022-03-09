@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.Utilities;
@@ -17,6 +18,8 @@ namespace Svelto.DataStructures
         {
             _dic = dic;
         }
+        
+        public uint count => (uint)_dic.count;
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public KeyValuePairFast<TKey, TValue, TValueStrategy>[] keyValues
@@ -57,6 +60,18 @@ namespace Svelto.DataStructures
         where TValueStrategy : struct, IBufferStrategy<TValue>
         where TBucketStrategy : struct, IBufferStrategy<int>
     {
+        static SveltoDictionary()
+        {
+            try
+            {
+                if (typeof(TKey).GetMethod("GetHashCode", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly) == null)
+                    Svelto.Console.LogWarning(typeof(TKey).Name + " does not implement GetHashCode -> This will cause unwated allocations (boxing)");
+            }
+            catch(AmbiguousMatchException)
+            {
+            }
+        }
+
         public SveltoDictionary(uint size, Allocator allocator) : this()
         {
             //AllocationStrategy must be passed external for TValue because SveltoDictionary doesn't have struct
@@ -118,6 +133,17 @@ namespace Svelto.DataStructures
 
             _values[index] = value;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryAdd(TKey key, in TValue value, out uint index)
+        {
+            var ret = AddValue(key, out index);
+
+            if (ret == true)
+                _values[index] = value;
+
+            return ret;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set(TKey key, in TValue value)
@@ -143,7 +169,6 @@ namespace Svelto.DataStructures
             //Buckets cannot be FastCleared because it's important that the values are reset to 0
             _buckets.Clear();
 
-            //todo: replace this, but burst doesn't like any other solution
             if (IsUnmanaged() == false)
             {
                 _values.Clear();
@@ -196,7 +221,7 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetOrCreate(TKey key)
+        public ref TValue GetOrAdd(TKey key)
         {
             if (TryFindIndex(key, out var findIndex) == true)
             {
@@ -211,7 +236,7 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetOrCreate(TKey key, Func<TValue> builder)
+        public ref TValue GetOrAdd(TKey key, Func<TValue> builder)
         {
             if (TryFindIndex(key, out var findIndex) == true)
             {
@@ -226,7 +251,7 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetOrCreate<W>(TKey key, FuncRef<W, TValue> builder, ref W parameter)
+        public ref TValue GetOrAdd<W>(TKey key, FuncRef<W, TValue> builder, ref W parameter)
         {
             if (TryFindIndex(key, out var findIndex) == true)
             {

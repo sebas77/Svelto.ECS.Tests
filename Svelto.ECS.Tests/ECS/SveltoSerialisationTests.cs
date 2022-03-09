@@ -1,4 +1,5 @@
-﻿﻿using NUnit.Framework;
+﻿﻿using System.Runtime.InteropServices;
+ using NUnit.Framework;
 using Svelto.DataStructures;
  using Svelto.ECS.Hybrid;
 using Svelto.ECS.Schedulers;
@@ -397,12 +398,13 @@ namespace Svelto.ECS.Tests.Serialization
             public int value;
         }
 
+        [StructLayout(LayoutKind.Explicit)]
         struct EntityStructPartiallySerialized : IEntityComponent
         {
 #pragma warning disable 169
-            int value;
+            [FieldOffset(0)]int value;
 #pragma warning restore 169
-            [PartialSerializerField] public int value1;
+            [FieldOffset(4)][PartialSerializerField] public int value1;
         }
 
         struct EntityViewStructNotSerialized : IEntityViewComponent

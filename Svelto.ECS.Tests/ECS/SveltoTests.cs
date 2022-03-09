@@ -149,7 +149,7 @@ namespace Svelto.ECS.Tests.Messy
                 Assert.IsTrue(hasit);
             }
 
-            _entityFunctions.Remove<TestDescriptorEntityView>(new EGID(id, group3));
+            _entityFunctions.RemoveEntity<TestDescriptorEntityView>(new EGID(id, group3));
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
@@ -237,7 +237,7 @@ namespace Svelto.ECS.Tests.Messy
             _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.Remove<TestDescriptorEntityView>(new EGID(id, group1));
+            _entityFunctions.RemoveEntity<TestDescriptorEntityView>(new EGID(id, group1));
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
@@ -388,7 +388,7 @@ namespace Svelto.ECS.Tests.Messy
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group1)));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
 
-            _entityFunctions.Remove<TestDescriptorEntityView>(id, group1);
+            _entityFunctions.RemoveEntity<TestDescriptorEntityView>(id, group1);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group1)));
@@ -420,7 +420,7 @@ namespace Svelto.ECS.Tests.Messy
             _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.Remove<TestDescriptorEntityView>(id, group1);
+            _entityFunctions.RemoveEntity<TestDescriptorEntityView>(id, group1);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
             _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] {new TestIt(2)});
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
@@ -518,10 +518,10 @@ namespace Svelto.ECS.Tests.Messy
                 }
             }
 
-            _entityFunctions.Remove<TestEntityWithComponentViewAndComponent>(new EGID(id, groupR4));
-            _entityFunctions.Remove<TestEntityWithComponentViewAndComponent>(new EGID(id2, groupR4 + 1));
-            _entityFunctions.Remove<TestEntityWithComponentViewAndComponent>(new EGID(id3, groupR4 + 2));
-            _entityFunctions.Remove<TestEntityWithComponentViewAndComponent>(new EGID(id4, groupR4 + 3));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id, groupR4));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id2, groupR4 + 1));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id3, groupR4 + 2));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id4, groupR4 + 3));
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             foreach (var (_, _) in _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewComponent>())

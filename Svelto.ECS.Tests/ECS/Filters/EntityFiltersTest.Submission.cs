@@ -9,7 +9,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_TransientFilter_UpdateAfterSubmission()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreateTransientFilter<TestEntityComponent>(_transientFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreateTransientFilter<TestEntityComponent>((_transientFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA0, mmap);
@@ -46,7 +46,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         public void Test_PersistentFilter_UpdateAfterRemoving_FilteredEntity_WithSwapBack()
         {
             // Create filters.
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA2, mmap);
@@ -57,7 +57,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             filter.Add(EgidB3, mmap);
             mmap.Dispose();
             // Remove first entity to make sure the swap is being handled after the submit.
-            _functions.Remove<EntityDescriptorWithComponents>(EgidA2);
+            _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA2);
 
             var iterator = filter.GetEnumerator();
             iterator.MoveNext();
@@ -86,7 +86,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         public void Test_PersistentFilter_UpdateAfterRemoving_NonFilteredEntity_WithSwapBack()
         {
             // Create filters.
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA2, mmap);
@@ -97,7 +97,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             filter.Add(EgidB3, mmap);
             mmap.Dispose();
             // Remove an entity that is not filtered and this should also cause a swap back.
-            _functions.Remove<EntityDescriptorWithComponents>(EgidA0);
+            _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA0);
             _scheduler.SubmitEntities();
 
             var iterator = filter.GetEnumerator();
@@ -115,7 +115,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         public void Test_PersistentFilter_UpdateAfterRemoving_FilteredEntity_WithoutSwapBack()
         {
             // Create filters.
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA1, mmap);
@@ -126,7 +126,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             filter.Add(EgidB3, mmap);
             mmap.Dispose();
             // Remove last entity which won't cause a swap.
-            _functions.Remove<EntityDescriptorWithComponents>(EgidA4);
+            _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA4);
             _scheduler.SubmitEntities();
 
             var iterator = filter.GetEnumerator();
@@ -143,13 +143,13 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_PersistentFilter_UpdateAfterRemoving_NonFilteredEntity_WithoutSwapBack()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
             var mmapA  = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(GroupA);
             filter.Add(EgidA1, mmapA);
             filter.Add(EgidA2, mmapA);
 
             // Remove last entity in group that is not filtered.
-            _functions.Remove<EntityDescriptorWithComponents>(EgidA4);
+            _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA4);
             _scheduler.SubmitEntities();
 
             // Check that filters haven't changed.
@@ -167,7 +167,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_PersistentFilter_UpdateAfterSwapping_FilteredEntity_WithSwapBack()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA0, mmap);
@@ -205,7 +205,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_PersistentFilter_UpdateAfterSwapping_NonFilteredEntity_WithSwapBack()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA0, mmap);
@@ -243,7 +243,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_PersistentFilter_UpdateAfterSwapping_FilteredEntity_WithoutSwapBack()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA0, mmap);
@@ -282,7 +282,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_PersistentFilter_UpdateAfterSwapping_NonFilteredEntity_WithoutSwapBack()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA0, mmap);
@@ -324,7 +324,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             // Create filters.
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(_persistentFilter1);
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
             filter.Add(EgidA2, mmap);
             filter.Add(EgidA3, mmap);
             filter.Add(EgidA4, mmap);
@@ -333,7 +333,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             filter.Add(EgidB3, mmap);
             
             // Remove an entity that is not filtered and this should also cause a swap back.
-            _functions.Remove<EntityDescriptorWithComponents>(EgidA0);
+            _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA0);
             _scheduler.SubmitEntities();
 
             // Add a new entity to take the place of the swapped back index.

@@ -13,7 +13,7 @@ namespace Svelto.ECS.Tests.ECS
             CreateTestEntity(1, GroupA);
             _scheduler.SubmitEntities();
 
-            _functions.Remove<EntityDescriptorWithComponentAndViewComponent>(0, GroupA);
+            _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(0, GroupA);
             _scheduler.SubmitEntities();
 
             var exists = _entitiesDB.entitiesForTesting.Exists<TestEntityComponent>(0, GroupA);
@@ -24,7 +24,7 @@ namespace Svelto.ECS.Tests.ECS
 
             void RemoveNotFound()
             {
-                _functions.Remove<EntityDescriptorWithComponentAndViewComponent>(0, GroupA);
+                _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(0, GroupA);
                 _scheduler.SubmitEntities();
             }
 
@@ -40,7 +40,7 @@ namespace Svelto.ECS.Tests.ECS
             _scheduler.SubmitEntities();
 
             var egid = new EGID(0, GroupA);
-            _functions.Remove<EntityDescriptorWithComponentAndViewComponent>(egid);
+            _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(egid);
             _scheduler.SubmitEntities();
 
             var exists = _entitiesDB.entitiesForTesting.Exists<TestEntityComponent>(0, GroupA);
@@ -51,7 +51,7 @@ namespace Svelto.ECS.Tests.ECS
 
             void RemoveNotFound()
             {
-                _functions.Remove<EntityDescriptorWithComponentAndViewComponent>(new EGID(0, GroupA));
+                _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(new EGID(0, GroupA));
                 _scheduler.SubmitEntities();
             }
 

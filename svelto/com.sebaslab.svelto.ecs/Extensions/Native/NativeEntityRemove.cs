@@ -14,7 +14,7 @@ namespace Svelto.ECS.Native
             _indexRemove = indexRemove;
         }
 
-        public void Remove(EGID egid, int threadIndex)
+        public void RemoveEntity(EGID egid, int threadIndex)
         {
             var simpleNativeBag = _removeQueue.GetBuffer(threadIndex);
             
