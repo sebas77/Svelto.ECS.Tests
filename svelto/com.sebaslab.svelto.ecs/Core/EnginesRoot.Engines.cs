@@ -123,25 +123,25 @@ namespace Svelto.ECS
             try
             {
                 if (engine is IReactOnAdd viewEngineAdd)
-                    CheckReactEngineComponents(viewEngineAdd, _reactiveEnginesAdd, type.Name);
+                    CheckReactEngineComponents(typeof(IReactOnAdd<>), viewEngineAdd, _reactiveEnginesAdd, type.Name);
 
                 if (engine is IReactOnAddEx viewEngineAddEx)
-                    CheckReactEngineComponents(viewEngineAddEx, _reactiveEnginesAddEx, type.Name);
+                    CheckReactEngineComponents(typeof(IReactOnAddEx<>), viewEngineAddEx, _reactiveEnginesAddEx, type.Name);
 
                 if (engine is IReactOnRemove viewEngineRemove)
-                    CheckReactEngineComponents(viewEngineRemove, _reactiveEnginesRemove, type.Name);
+                    CheckReactEngineComponents(typeof(IReactOnRemove<>), viewEngineRemove, _reactiveEnginesRemove, type.Name);
 
                 if (engine is IReactOnRemoveEx viewEngineRemoveEx)
-                    CheckReactEngineComponents(viewEngineRemoveEx, _reactiveEnginesRemoveEx, type.Name);
+                    CheckReactEngineComponents(typeof(IReactOnRemoveEx<>), viewEngineRemoveEx, _reactiveEnginesRemoveEx, type.Name);
 
                 if (engine is IReactOnDispose viewEngineDispose)
-                    CheckReactEngineComponents(viewEngineDispose, _reactiveEnginesDispose, type.Name);
+                    CheckReactEngineComponents(typeof(IReactOnDispose<>), viewEngineDispose, _reactiveEnginesDispose, type.Name);
 
                 if (engine is IReactOnSwap viewEngineSwap)
-                    CheckReactEngineComponents(viewEngineSwap, _reactiveEnginesSwap, type.Name);
+                    CheckReactEngineComponents(typeof(IReactOnSwap<>), viewEngineSwap, _reactiveEnginesSwap, type.Name);
 
                 if (engine is IReactOnSwapEx viewEngineSwapEx)
-                    CheckReactEngineComponents(viewEngineSwapEx, _reactiveEnginesSwapEx, type.Name);
+                    CheckReactEngineComponents(typeof(IReactOnSwapEx<>), viewEngineSwapEx, _reactiveEnginesSwapEx, type.Name);
 
                 if (engine is IReactOnSubmission submissionEngine)
                     _reactiveEnginesSubmission.Add(submissionEngine);
@@ -194,20 +194,15 @@ namespace Svelto.ECS
             }
         }
 
-        void CheckReactEngineComponents<T>(T engine,
+        void CheckReactEngineComponents<T>(Type genericDefinition, T engine,
             FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<T>>> engines, string typeName)
             where T : class, IReactEngine
         {
             var interfaces = engine.GetType().GetInterfaces();
 
-            //copied from: https://stackoverflow.com/a/5318781
-            var minimalInterfaces = interfaces.Except(interfaces.SelectMany(t => t.GetInterfaces()));
-
-            var type = typeof(T);
-
-            foreach (var interf in minimalInterfaces)
+            foreach (var interf in interfaces)
             {
-                if (interf.IsGenericTypeEx() && type.IsAssignableFrom(interf))
+                if (interf.IsGenericTypeEx() && interf.GetGenericTypeDefinition() == genericDefinition)
                 {
                     var genericArguments = interf.GetGenericArgumentsEx();
 
