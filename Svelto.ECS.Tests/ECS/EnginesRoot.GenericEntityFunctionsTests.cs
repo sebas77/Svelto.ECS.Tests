@@ -86,7 +86,7 @@ namespace Svelto.ECS.Tests.ECS
             CreateTestEntity(2, GroupA, 2);
             _scheduler.SubmitEntities();
 
-            _functions.SwapEntitiesInGroup<EntityDescriptorWithComponentAndViewComponent>(GroupA, GroupB);
+            _functions.SwapEntitiesInGroup(GroupA, GroupB);
             _scheduler.SubmitEntities();
 
             var countA = _entitiesDB.entitiesForTesting.Count<TestEntityComponent>(GroupA);

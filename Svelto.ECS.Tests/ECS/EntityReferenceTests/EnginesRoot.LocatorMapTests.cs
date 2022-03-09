@@ -97,7 +97,7 @@ namespace Svelto.ECS.Tests.ECS
 
             _scheduler.SubmitEntities();
 
-            _functions.SwapEntitiesInGroup<TestDescriptor>(TestGroupA, TestGroupB);
+            _functions.SwapEntitiesInGroup(TestGroupA, TestGroupB);
             _scheduler.SubmitEntities();
 
             for (var i = 0; i < 10; i++)

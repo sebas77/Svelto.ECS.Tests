@@ -215,7 +215,6 @@ namespace Svelto.ECS.Tests.ECS
                 total += i;
                 CreateTestEntity(i, GroupA, (int)i);
             }
-
             _scheduler.SubmitEntities();
 
             var megaReactEngine = new MegaReactEngineView();
@@ -230,11 +229,11 @@ namespace Svelto.ECS.Tests.ECS
             for (uint i = 0; i < 100; i++)
                 _functions.SwapEntityGroup<EntityDescriptorWithComponentAndViewComponent>(new EGID(i, GroupA), GroupB);
             _scheduler.SubmitEntities();
-
+            
             for (uint i = 0; i < 100; i++)
                 _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(i, GroupB);
             _scheduler.SubmitEntities();
-
+            
             Assert.That(megaReactEngine.legacyAddCounter, Is.EqualTo(100));
             Assert.That(megaReactEngine.legacyRemoveCounter, Is.EqualTo(total));
             Assert.That(megaReactEngine.legacySwapCounter, Is.EqualTo(total));
@@ -242,6 +241,27 @@ namespace Svelto.ECS.Tests.ECS
             Assert.That(megaReactEngine.addCounter, Is.EqualTo(100));
             Assert.That(megaReactEngine.removeCounter, Is.EqualTo(total));
             Assert.That(megaReactEngine.swapCounter, Is.EqualTo(total));
+            
+            for (uint i = 0; i < 100; i++) 
+                CreateTestEntity(i, GroupB, (int)i);
+            _scheduler.SubmitEntities();
+            
+            _functions.SwapEntitiesInGroup(GroupB, GroupA);
+            _scheduler.SubmitEntities();
+            
+            Assert.That(megaReactEngine.legacySwapCounter, Is.EqualTo(total * 2));
+            Assert.That(megaReactEngine.swapCounter, Is.EqualTo(total * 2));
+            
+            for (uint i = 0; i < 100; i++)
+                _functions.SwapEntityGroup<EntityDescriptorWithComponentAndViewComponent>
+                    (new EGID(i, GroupA), GroupB);
+            _scheduler.SubmitEntities();
+            
+            _functions.RemoveEntitiesFromGroup(GroupB);
+            _scheduler.SubmitEntities();
+            
+            Assert.That(megaReactEngine.legacyRemoveCounter, Is.EqualTo(total * 2));
+            Assert.That(megaReactEngine.removeCounter, Is.EqualTo(total * 2));
             
             _enginesRoot.Dispose();
 
