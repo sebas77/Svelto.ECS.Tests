@@ -4,12 +4,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using DBC.ECS;
 using Svelto.Common;
 using Svelto.Common.DataStructures;
 using Svelto.DataStructures;
-using Svelto.ECS.DataStructures;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
 
@@ -328,7 +326,8 @@ namespace Svelto.ECS
                         enginesRootTarget.FlushNativeOperations(profiler);
 #endif
                         //todo: proper unit test structural changes made as result of add/remove callbacks
-                        while (enginesRootTarget.HasMadeNewStructuralChangesInThisIteration() && iterations++ < 5)
+                        while (enginesRootTarget.HasMadeNewStructuralChangesInThisIteration() 
+                               && iterations++ < MAX_SUBMISSION_ITERATIONS)
                         {
                             hasEverSubmitted = true;
 
@@ -340,7 +339,7 @@ namespace Svelto.ECS
                         }
 
 #if DEBUG && !PROFILE_SVELTO
-                        if (iterations == 5)
+                        if (iterations == MAX_SUBMISSION_ITERATIONS)
                             throw new ECSException("possible circular submission detected");
 #endif
                         if (hasEverSubmitted)
@@ -361,6 +360,8 @@ namespace Svelto.ECS
 
             Dispose(false);
         }
+
+        const int MAX_SUBMISSION_ITERATIONS = 10;
 
         internal bool                    _isDisposing;
         readonly FasterList<IDisposable> _disposableEngines;
