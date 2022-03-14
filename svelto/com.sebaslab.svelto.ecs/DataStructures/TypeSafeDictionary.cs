@@ -55,9 +55,10 @@ namespace Svelto.ECS.Internal
     public sealed class TypeSafeDictionary<TValue> : ITypeSafeDictionary<TValue> where TValue : struct, IEntityComponent
     {
         static readonly Type _type         = typeof(TValue);
+#if SLOW_SVELTO_SUBMISSION        
         static readonly bool _hasEgid      = typeof(INeedEGID).IsAssignableFrom(_type);
         static readonly bool _hasReference = typeof(INeedEntityReference).IsAssignableFrom(_type);
-
+#endif
         internal static readonly bool isUnmanaged =
             _type.IsUnmanagedEx() && typeof(IEntityViewComponent).IsAssignableFrom(_type) == false;
 
@@ -229,14 +230,15 @@ namespace Svelto.ECS.Internal
                 foreach (var tuple in fromDictionary)
                 {
                     var egid = new EGID(tuple.key, toGroupID);
-
+#if SLOW_SVELTO_SUBMISSION            
                     if (_hasEgid)
                         SetEGIDWithoutBoxing<TValue>.SetIDWithoutBoxing(ref tuple.value, egid);
 
-                    //todo: temporary code that will eventually be removed
+                    //todo: temporary code that will eventually be removed 
                     if (_hasReference)
                         SetEGIDWithoutBoxing<TValue>.SetRefWithoutBoxing(ref tuple.value,
                             entityLocator.GetEntityReference(egid));
+#endif
                     try
                     {
                         toDictionary.Add(tuple.key, tuple.value);
@@ -332,9 +334,10 @@ namespace Svelto.ECS.Internal
 
                         var isFound = fromDictionary.Remove(fromEntityGid.entityID, out var entity);
                         Check.Assert(isFound, "Swapping an entity that doesn't exist");
-
+#if SLOW_SVELTO_SUBMISSION            
                         if (_hasEgid)
                             SetEGIDWithoutBoxing<TValue>.SetIDWithoutBoxing(ref entity, toEntityEgid);
+#endif
 
                         toDictionary.Add(toEntityEgid.entityID, entity);
 

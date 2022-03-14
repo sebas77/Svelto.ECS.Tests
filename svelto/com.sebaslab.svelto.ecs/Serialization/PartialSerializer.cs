@@ -40,9 +40,10 @@ namespace Svelto.ECS.Serialization
 
             if (myType.IsExplicitLayout == false)
                 throw new ECSException($"PartialSerializer requires explicit layout {myType}");
-
+#if SLOW_SVELTO_SUBMISSION            
             if (myType.GetProperties().Length > (ComponentBuilder<T>.HAS_EGID ? 1 : 0))
                 throw new ECSException("serializable entity struct must be property less ".FastConcat(myType.FullName));
+#endif                
         }
 
         public bool Serialize(in T value, ISerializationData serializationData)

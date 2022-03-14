@@ -745,7 +745,6 @@ namespace Svelto.ECS.Tests.Messy
         public uint value;
 
         public TestEntityComponent(uint value) : this() { this.value = value; }
-
         public EGID ID { get; set; }
     }
 
@@ -756,7 +755,7 @@ namespace Svelto.ECS.Tests.Messy
         public TestEntityComponent2(uint value) : this() { this.value = value; }
     }
 
-    struct TestEntityViewComponent : IEntityViewComponent
+    struct TestEntityViewComponent : IEntityViewComponent, INeedEGID
     {
 #pragma warning disable 649
         public ITestIt TestIt;

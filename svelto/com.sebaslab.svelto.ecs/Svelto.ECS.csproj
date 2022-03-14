@@ -17,11 +17,13 @@
         <PlatformTarget>AnyCPU</PlatformTarget>
         <UseSharedCompilation>false</UseSharedCompilation>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <DefineConstants>TRACE; SLOW_SVELTO_SUBMISSION</DefineConstants>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
         <UseSharedCompilation>false</UseSharedCompilation>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <DefineConstants>TRACE; SLOW_SVELTO_SUBMISSION</DefineConstants>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'NugetPack' "> <!-- Do not delete. Used for nuget packing -->
         <NuspecFile>Svelto.ECS.nuspec</NuspecFile>

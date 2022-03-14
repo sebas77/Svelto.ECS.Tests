@@ -128,7 +128,7 @@ namespace Svelto.ECS
 
                 // We need to traverse all entities in the group and remove the locator using the egid.
                 // RemoveLocator would modify the enumerator so this is why we traverse the dictionary from last to first.
-                foreach (KeyValuePairFast<uint, EntityReference, NativeStrategy<EntityReference>> item in groupMap)
+                foreach (var item in groupMap)
                     RemoveEntityReference(new EGID(item.key, groupId));
 
                 _egidToReferenceMap.Remove(groupId);

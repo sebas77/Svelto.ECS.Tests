@@ -26,28 +26,32 @@ namespace Svelto.ECS
     public class ComponentBuilder<T> : IComponentBuilder where T : struct, IEntityComponent
     {
         internal static readonly Type ENTITY_COMPONENT_TYPE;
-        public static readonly   bool HAS_EGID;
         internal static readonly bool IS_ENTITY_VIEW_COMPONENT;
 
         static readonly T      DEFAULT_IT;
         static readonly string ENTITY_COMPONENT_NAME;
         static readonly bool   IS_UNMANAGED;
-        public static   bool   HAS_REFERENCE;
+#if SLOW_SVELTO_SUBMISSION            
+        public static readonly bool HAS_EGID;
+        public static readonly bool HAS_REFERENCE;
+#endif
 
         static ComponentBuilder()
         {
             ENTITY_COMPONENT_TYPE = typeof(T);
             DEFAULT_IT = default;
             IS_ENTITY_VIEW_COMPONENT = typeof(IEntityViewComponent).IsAssignableFrom(ENTITY_COMPONENT_TYPE);
+#if SLOW_SVELTO_SUBMISSION            
             HAS_EGID = typeof(INeedEGID).IsAssignableFrom(ENTITY_COMPONENT_TYPE);
             HAS_REFERENCE = typeof(INeedEntityReference).IsAssignableFrom(ENTITY_COMPONENT_TYPE);
+            
+            SetEGIDWithoutBoxing<T>.Warmup();
+#endif
             ENTITY_COMPONENT_NAME = ENTITY_COMPONENT_TYPE.ToString();
             IS_UNMANAGED = TypeType.isUnmanaged<T>(); //attention this is important as it serves as warm up for Type<T>
 
             if (IS_UNMANAGED)
                 EntityComponentIDMap.Register<T>(new Filler<T>());
-
-            SetEGIDWithoutBoxing<T>.Warmup();
 
             ComponentBuilderUtilities.CheckFields(ENTITY_COMPONENT_TYPE, IS_ENTITY_VIEW_COMPONENT);
 
