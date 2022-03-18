@@ -10,6 +10,6 @@ namespace Svelto.Common.DataStructures
             test.Data.test = SharedDictionaryStruct.Create();
         }
 
-        static readonly SharedStatic<SharedDictionaryStruct, SharedDictonary> test;
+        static readonly SharedStaticWrapper<SharedDictionaryStruct, SharedDictonary> test;
     }
 }

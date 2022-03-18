@@ -46,7 +46,7 @@ namespace Svelto.ECS.Serialization
 #endif                
         }
 
-        public bool Serialize(in T value, ISerializationData serializationData)
+        public bool Serialize(in T value, ISerializationData serializationData) 
         {
             unsafe
             {
@@ -67,7 +67,7 @@ namespace Svelto.ECS.Serialization
             return true;
         }
 
-        public bool Deserialize(ref T value, ISerializationData serializationData)
+        public bool Deserialize(ref T value, ISerializationData serializationData) 
         {
             unsafe
             {

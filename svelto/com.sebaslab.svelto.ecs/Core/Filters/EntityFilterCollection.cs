@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using Svelto.Common;
-using Svelto.Common.DataStructures;
 using Svelto.DataStructures.Native;
 using Svelto.ECS.Native;
 
@@ -8,7 +7,7 @@ namespace Svelto.ECS
 {
     public struct EntityFilterCollection
     {
-        internal static EntityFilterCollection Create(Allocator allocatorStrategy = Allocator.Persistent)
+        public static EntityFilterCollection Create(Allocator allocatorStrategy = Allocator.Persistent)
         {
             var collection = new EntityFilterCollection
             {
@@ -81,7 +80,7 @@ namespace Svelto.ECS
             return _filtersPerGroup.GetValues(out _)[indexGroup];
         }
 
-        internal void Dispose()
+        public void Dispose()
         {
             var filterSets = _filtersPerGroup.GetValues(out var count);
             for (var i = 0; i < count; i++)

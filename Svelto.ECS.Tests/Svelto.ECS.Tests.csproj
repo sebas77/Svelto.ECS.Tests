@@ -8,6 +8,10 @@
         <LangVersion>8</LangVersion>
 
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <Configurations>Debug;Release;SlowSubmissionRelease;SlowSubmissionDebug</Configurations>
+
+        <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -16,6 +20,16 @@
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <DefineConstants>TRACE; SLOW_SVELTO_SUBMISSION</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'SlowSubmissionRelease' ">
+      <DefineConstants>TRACE;SLOW_SVELTO_SUBMISSION;RELEASE</DefineConstants>
+      <Optimize>true</Optimize>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'SlowSubmissionDebug' ">
+      <DefineConstants>TRACE;SLOW_SVELTO_SUBMISSION;DEBUG</DefineConstants>
+      <DebugSymbols>true</DebugSymbols>
     </PropertyGroup>
 
     <ItemGroup>

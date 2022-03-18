@@ -26,11 +26,17 @@ namespace Svelto.ECS.Internal
         readonly NB<SveltoDictionaryNode<uint>> _native;
     }
 
-    public struct ManagedEntityIDs
+    public readonly struct ManagedEntityIDs
     {
         public ManagedEntityIDs(MB<SveltoDictionaryNode<uint>> managed)
         {
+            _managed = managed;
         }
+
+        public uint this[uint index] => _managed[index].key;
+        public uint this[int index] => _managed[index].key;
+
+        readonly MB<SveltoDictionaryNode<uint>> _managed;
     }
 
     public readonly struct EntityIDs
@@ -54,8 +60,8 @@ namespace Svelto.ECS.Internal
 
     public sealed class TypeSafeDictionary<TValue> : ITypeSafeDictionary<TValue> where TValue : struct, IEntityComponent
     {
-        static readonly Type _type         = typeof(TValue);
-#if SLOW_SVELTO_SUBMISSION        
+        static readonly Type _type = typeof(TValue);
+#if SLOW_SVELTO_SUBMISSION
         static readonly bool _hasEgid      = typeof(INeedEGID).IsAssignableFrom(_type);
         static readonly bool _hasReference = typeof(INeedEntityReference).IsAssignableFrom(_type);
 #endif
@@ -66,8 +72,10 @@ namespace Svelto.ECS.Internal
         {
             if (isUnmanaged)
                 implUnmgd =
-                    new SveltoDictionary<uint, TValue, NativeStrategy<SveltoDictionaryNode<uint>>,
-                        NativeStrategy<TValue>, NativeStrategy<int>>(size, Allocator.Persistent);
+                    new SharedNative<SveltoDictionary<uint, TValue, NativeStrategy<SveltoDictionaryNode<uint>>,
+                        NativeStrategy<TValue>, NativeStrategy<int>>>(
+                        new SveltoDictionary<uint, TValue, NativeStrategy<SveltoDictionaryNode<uint>>,
+                            NativeStrategy<TValue>, NativeStrategy<int>>(size, Allocator.Persistent));
             else
                 implMgd =
                     new SveltoDictionary<uint, TValue, ManagedStrategy<SveltoDictionaryNode<uint>>,
@@ -79,7 +87,7 @@ namespace Svelto.ECS.Internal
             get
             {
                 if (isUnmanaged)
-                    return new EntityIDs(implUnmgd.unsafeKeys);
+                    return new EntityIDs(implUnmgd.value.unsafeKeys);
 
                 return new EntityIDs(implMgd.unsafeKeys);
             }
@@ -88,62 +96,66 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ContainsKey(uint egidEntityId)
         {
-            return isUnmanaged ? implUnmgd.ContainsKey(egidEntityId) : implMgd.ContainsKey(egidEntityId);
+            return isUnmanaged ? implUnmgd.value.ContainsKey(egidEntityId) : implMgd.ContainsKey(egidEntityId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint GetIndex(uint valueEntityId)
         {
-            return isUnmanaged ? implUnmgd.GetIndex(valueEntityId) : implMgd.GetIndex(valueEntityId);
+            return isUnmanaged ? implUnmgd.value.GetIndex(valueEntityId) : implMgd.GetIndex(valueEntityId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetOrAdd(uint idEntityId)
         {
-            return ref isUnmanaged ? ref implUnmgd.GetOrAdd(idEntityId) : ref implMgd.GetOrAdd(idEntityId);
+            return ref isUnmanaged ? ref implUnmgd.value.GetOrAdd(idEntityId) : ref implMgd.GetOrAdd(idEntityId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IBuffer<TValue> GetValues(out uint count)
         {
-            return isUnmanaged ? implUnmgd.UnsafeGetValues(out count) : implMgd.UnsafeGetValues(out count);
+            return isUnmanaged ? implUnmgd.value.UnsafeGetValues(out count) : implMgd.UnsafeGetValues(out count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetDirectValueByRef(uint key)
         {
-            return ref isUnmanaged ? ref implUnmgd.GetDirectValueByRef(key) : ref implMgd.GetDirectValueByRef(key);
+            return ref isUnmanaged
+                ? ref implUnmgd.value.GetDirectValueByRef(key)
+                : ref implMgd.GetDirectValueByRef(key);
         }
 
         public ref TValue GetValueByRef(uint key)
         {
-            return ref isUnmanaged ? ref implUnmgd.GetValueByRef(key) : ref implMgd.GetValueByRef(key);
+            return ref isUnmanaged ? ref implUnmgd.value.GetValueByRef(key) : ref implMgd.GetValueByRef(key);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(uint key)
         {
-            return isUnmanaged ? implUnmgd.ContainsKey(key) : implMgd.ContainsKey(key);
+            return isUnmanaged ? implUnmgd.value.ContainsKey(key) : implMgd.ContainsKey(key);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryFindIndex(uint entityId, out uint index)
         {
             return isUnmanaged
-                ? implUnmgd.TryFindIndex(entityId, out index)
+                ? implUnmgd.value.TryFindIndex(entityId, out index)
                 : implMgd.TryFindIndex(entityId, out index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetValue(uint entityId, out TValue item)
         {
-            return isUnmanaged ? implUnmgd.TryGetValue(entityId, out item) : implMgd.TryGetValue(entityId, out item);
+            return isUnmanaged
+                ? implUnmgd.value.TryGetValue(entityId, out item)
+                : implMgd.TryGetValue(entityId, out item);
         }
 
         public int count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => isUnmanaged ? implUnmgd.count : implMgd.count;
+            get => isUnmanaged ? implUnmgd.value.count : implMgd.count;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -156,7 +168,7 @@ namespace Svelto.ECS.Internal
         public void Clear()
         {
             if (isUnmanaged)
-                implUnmgd.FastClear();
+                implUnmgd.value.FastClear();
             else
                 implMgd.Clear();
         }
@@ -165,7 +177,7 @@ namespace Svelto.ECS.Internal
         public void EnsureCapacity(uint size)
         {
             if (isUnmanaged)
-                implUnmgd.EnsureCapacity(size);
+                implUnmgd.value.EnsureCapacity(size);
             else
                 implMgd.EnsureCapacity(size);
         }
@@ -174,7 +186,7 @@ namespace Svelto.ECS.Internal
         public void IncreaseCapacityBy(uint size)
         {
             if (isUnmanaged)
-                implUnmgd.IncreaseCapacityBy(size);
+                implUnmgd.value.IncreaseCapacityBy(size);
             else
                 implMgd.IncreaseCapacityBy(size);
         }
@@ -183,7 +195,7 @@ namespace Svelto.ECS.Internal
         public void Trim()
         {
             if (isUnmanaged)
-                implUnmgd.Trim();
+                implUnmgd.value.Trim();
             else
                 implMgd.Trim();
         }
@@ -191,7 +203,7 @@ namespace Svelto.ECS.Internal
         public void KeysEvaluator(Action<uint> action)
         {
             if (isUnmanaged)
-                foreach (var key in implUnmgd.keys)
+                foreach (var key in implUnmgd.value.keys)
                     action(key);
             else
                 foreach (var key in implMgd.keys)
@@ -202,7 +214,7 @@ namespace Svelto.ECS.Internal
         public void Add(uint egidEntityId, in TValue entityComponent)
         {
             if (isUnmanaged)
-                implUnmgd.Add(egidEntityId, entityComponent);
+                implUnmgd.value.Add(egidEntityId, entityComponent);
             else
                 implMgd.Add(egidEntityId, entityComponent);
         }
@@ -220,28 +232,29 @@ namespace Svelto.ECS.Internal
         public void AddEntitiesToDictionary(ITypeSafeDictionary toDictionary, ExclusiveGroupStruct groupId,
             in EnginesRoot.LocatorMap entityLocator)
         {
-            static void SharedAddEntitiesFromDictionary<Strategy1, Strategy2, Strategy3>(
+            void SharedAddEntitiesFromDictionary<Strategy1, Strategy2, Strategy3>(
                 in SveltoDictionary<uint, TValue, Strategy1, Strategy2, Strategy3> fromDictionary,
-                ITypeSafeDictionary<TValue> toDictionary, in EnginesRoot.LocatorMap entityLocator,
+                ITypeSafeDictionary<TValue> toDic, in EnginesRoot.LocatorMap locator,
                 ExclusiveGroupStruct toGroupID) where Strategy1 : struct, IBufferStrategy<SveltoDictionaryNode<uint>>
                 where Strategy2 : struct, IBufferStrategy<TValue>
                 where Strategy3 : struct, IBufferStrategy<int>
             {
                 foreach (var tuple in fromDictionary)
                 {
+#if SLOW_SVELTO_SUBMISSION
                     var egid = new EGID(tuple.key, toGroupID);
-#if SLOW_SVELTO_SUBMISSION            
+
                     if (_hasEgid)
                         SetEGIDWithoutBoxing<TValue>.SetIDWithoutBoxing(ref tuple.value, egid);
 
                     //todo: temporary code that will eventually be removed 
                     if (_hasReference)
                         SetEGIDWithoutBoxing<TValue>.SetRefWithoutBoxing(ref tuple.value,
-                            entityLocator.GetEntityReference(egid));
+                            locator.GetEntityReference(egid));
 #endif
                     try
                     {
-                        toDictionary.Add(tuple.key, tuple.value);
+                        toDic.Add(tuple.key, tuple.value);
                     }
                     catch (Exception e)
                     {
@@ -252,7 +265,7 @@ namespace Svelto.ECS.Internal
 
                         throw;
                     }
-#if PARANOID_CHECK
+#if PARANOID_CHECK && SLOW_SVELTO_SUBMISSION
                         DBC.ECS.Check.Ensure(_hasEgid == false || ((INeedEGID)fromDictionary[egid.entityID]).ID == egid, "impossible situation happened during swap");
 #endif
                 }
@@ -261,7 +274,7 @@ namespace Svelto.ECS.Internal
             var destinationDictionary = toDictionary as ITypeSafeDictionary<TValue>;
 
             if (isUnmanaged)
-                SharedAddEntitiesFromDictionary(implUnmgd, destinationDictionary, entityLocator, groupId);
+                SharedAddEntitiesFromDictionary(implUnmgd.value, destinationDictionary, entityLocator, groupId);
             else
                 SharedAddEntitiesFromDictionary(implMgd, destinationDictionary, entityLocator, groupId);
         }
@@ -303,7 +316,7 @@ namespace Svelto.ECS.Internal
             }
 
             if (isUnmanaged)
-                AgnosticMethod(ref implUnmgd);
+                AgnosticMethod(ref implUnmgd.value);
             else
                 AgnosticMethod(ref implMgd);
         }
@@ -334,7 +347,7 @@ namespace Svelto.ECS.Internal
 
                         var isFound = fromDictionary.Remove(fromEntityGid.entityID, out var entity);
                         Check.Assert(isFound, "Swapping an entity that doesn't exist");
-#if SLOW_SVELTO_SUBMISSION            
+#if SLOW_SVELTO_SUBMISSION
                         if (_hasEgid)
                             SetEGIDWithoutBoxing<TValue>.SetIDWithoutBoxing(ref entity, toEntityEgid);
 #endif
@@ -360,7 +373,7 @@ namespace Svelto.ECS.Internal
             var toGroupCasted = toComponentsDictionary as ITypeSafeDictionary<TValue>;
 
             if (isUnmanaged)
-                SharedSwapEntityInDictionary(ref implUnmgd, toGroupCasted);
+                SharedSwapEntityInDictionary(ref implUnmgd.value, toGroupCasted);
             else
                 SharedSwapEntityInDictionary(ref implMgd, toGroupCasted);
         }
@@ -371,7 +384,7 @@ namespace Svelto.ECS.Internal
         {
             void AgnosticMethod<Strategy1, Strategy2, Strategy3>(
                 ref SveltoDictionary<uint, TValue, Strategy1, Strategy2, Strategy3> fromDictionary,
-                ITypeSafeDictionary<TValue> toDictionary, in PlatformProfiler sampler)
+                ITypeSafeDictionary<TValue> todic, in PlatformProfiler sampler)
                 where Strategy1 : struct, IBufferStrategy<SveltoDictionaryNode<uint>>
                 where Strategy2 : struct, IBufferStrategy<TValue>
                 where Strategy3 : struct, IBufferStrategy<int>
@@ -387,7 +400,7 @@ namespace Svelto.ECS.Internal
                         try
                         {
                             var     key    = dictionaryKeyEnumerator[i].key;
-                            ref var entity = ref toDictionary.GetValueByRef(key);
+                            ref var entity = ref todic.GetValueByRef(key);
                             var     egid   = new EGID(key, toGroup);
                             //get all the engines linked to TValue
                             for (var j = 0; j < entityComponentsEngines.count; j++)
@@ -409,7 +422,7 @@ namespace Svelto.ECS.Internal
             var toDictionary = (ITypeSafeDictionary<TValue>)toDic;
 
             if (isUnmanaged)
-                AgnosticMethod(ref implUnmgd, toDictionary, in profiler);
+                AgnosticMethod(ref implUnmgd.value, toDictionary, in profiler);
             else
                 AgnosticMethod(ref implMgd, toDictionary, in profiler);
         }
@@ -456,7 +469,7 @@ namespace Svelto.ECS.Internal
             }
 
             if (isUnmanaged)
-                AgnosticMethod(ref implUnmgd, in profiler);
+                AgnosticMethod(ref implUnmgd.value, in profiler);
             else
                 AgnosticMethod(ref implMgd, in profiler);
         }
@@ -506,7 +519,7 @@ namespace Svelto.ECS.Internal
             }
 
             if (isUnmanaged)
-                AgnosticMethod(ref implUnmgd, in sampler);
+                AgnosticMethod(ref implUnmgd.value, in sampler);
             else
                 AgnosticMethod(ref implMgd, in sampler);
         }
@@ -592,7 +605,7 @@ namespace Svelto.ECS.Internal
         {
             void AgnosticMethod<Strategy1, Strategy2, Strategy3>(
                 ref SveltoDictionary<uint, TValue, Strategy1, Strategy2, Strategy3> fromDictionary,
-                ITypeSafeDictionary<TValue> toDictionary, in PlatformProfiler profiler)
+                ITypeSafeDictionary<TValue> toDic, in PlatformProfiler sampler)
                 where Strategy1 : struct, IBufferStrategy<SveltoDictionaryNode<uint>>
                 where Strategy2 : struct, IBufferStrategy<TValue>
                 where Strategy3 : struct, IBufferStrategy<int>
@@ -608,11 +621,11 @@ namespace Svelto.ECS.Internal
                     {
                         foreach (var value in fromDictionary)
                         {
-                            ref var entityComponent = ref toDictionary.GetValueByRef(value.key);
+                            ref var entityComponent = ref toDic.GetValueByRef(value.key);
                             var     newEgid         = new EGID(value.key, toGroup);
 
 
-                            using (profiler.Sample(reactiveEnginesSwapPerType[i].name))
+                            using (sampler.Sample(reactiveEnginesSwapPerType[i].name))
                             {
                                 ((IReactOnSwap<TValue>)reactiveEnginesSwapPerType[i].engine).MovedTo(
                                     ref entityComponent, fromGroup, newEgid);
@@ -635,7 +648,7 @@ namespace Svelto.ECS.Internal
                     for (var i = 0; i < enginesCount; i++)
                         try
                         {
-                            using (profiler.Sample(reactiveEnginesRemoveExPerType[i].name))
+                            using (sampler.Sample(reactiveEnginesRemoveExPerType[i].name))
                             {
                                 ((IReactOnSwapEx<TValue>)reactiveEnginesRemoveExPerType[i].engine).MovedTo(
                                     (0, (uint)count),
@@ -657,7 +670,7 @@ namespace Svelto.ECS.Internal
             var toEntitiesDictionary = (ITypeSafeDictionary<TValue>)toDictionary;
 
             if (isUnmanaged)
-                AgnosticMethod(ref implUnmgd, toEntitiesDictionary, in profiler);
+                AgnosticMethod(ref implUnmgd.value, toEntitiesDictionary, in profiler);
             else
                 AgnosticMethod(ref implMgd, toEntitiesDictionary, in profiler);
         }
@@ -669,7 +682,7 @@ namespace Svelto.ECS.Internal
         {
             void AgnosticMethod<Strategy1, Strategy2, Strategy3>(
                 ref SveltoDictionary<uint, TValue, Strategy1, Strategy2, Strategy3> fromDictionary,
-                in PlatformProfiler profiler) where Strategy1 : struct, IBufferStrategy<SveltoDictionaryNode<uint>>
+                in PlatformProfiler sampler) where Strategy1 : struct, IBufferStrategy<SveltoDictionaryNode<uint>>
                 where Strategy2 : struct, IBufferStrategy<TValue>
                 where Strategy3 : struct, IBufferStrategy<int>
             {
@@ -686,7 +699,7 @@ namespace Svelto.ECS.Internal
                                 var     egid   = new EGID(value.key, group);
 
 
-                                using (profiler.Sample(reactiveEnginesRemovePerType[i].name))
+                                using (sampler.Sample(reactiveEnginesRemovePerType[i].name))
                                 {
                                     ((IReactOnRemove<TValue>)reactiveEnginesRemovePerType[i].engine).Remove(ref entity,
                                         egid);
@@ -711,7 +724,7 @@ namespace Svelto.ECS.Internal
                     for (var i = 0; i < enginesCount; i++)
                         try
                         {
-                            using (profiler.Sample(reactiveEnginesRemoveExPerType[i].name))
+                            using (sampler.Sample(reactiveEnginesRemoveExPerType[i].name))
                             {
                                 ((IReactOnRemoveEx<TValue>)reactiveEnginesRemoveExPerType[i].engine).Remove(
                                     (0, (uint)count),
@@ -730,7 +743,7 @@ namespace Svelto.ECS.Internal
             }
 
             if (isUnmanaged)
-                AgnosticMethod(ref implUnmgd, in profiler);
+                AgnosticMethod(ref implUnmgd.value, in profiler);
             else
                 AgnosticMethod(ref implMgd, in profiler);
         }
@@ -739,26 +752,26 @@ namespace Svelto.ECS.Internal
             FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnDispose>>> engines,
             ExclusiveGroupStruct group, in PlatformProfiler profiler)
         {
-            static void ExecuteEnginesDisposeEntityCallback<Strategy1, Strategy2, Strategy3>(
+            void ExecuteEnginesDisposeEntityCallback<Strategy1, Strategy2, Strategy3>(
                 ref SveltoDictionary<uint, TValue, Strategy1, Strategy2, Strategy3> fromDictionary,
-                FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnDispose>>> engines,
-                in PlatformProfiler profiler, ExclusiveGroupStruct @group)
+                FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnDispose>>> allEngines,
+                in PlatformProfiler sampler, ExclusiveGroupStruct inGroup)
                 where Strategy1 : struct, IBufferStrategy<SveltoDictionaryNode<uint>>
                 where Strategy2 : struct, IBufferStrategy<TValue>
                 where Strategy3 : struct, IBufferStrategy<int>
             {
-                if (engines.TryGetValue(new RefWrapperType(_type), out var entityComponentsEngines) == false)
+                if (allEngines.TryGetValue(new RefWrapperType(_type), out var entityComponentsEngines) == false)
                     return;
 
                 for (var i = 0; i < entityComponentsEngines.count; i++)
                     try
                     {
-                        using (profiler.Sample(entityComponentsEngines[i].name))
+                        using (sampler.Sample(entityComponentsEngines[i].name))
                         {
                             foreach (var value in fromDictionary)
                             {
                                 ref var entity        = ref value.value;
-                                var     egid          = new EGID(value.key, @group);
+                                var     egid          = new EGID(value.key, inGroup);
                                 var     reactOnRemove = ((IReactOnDispose<TValue>)entityComponentsEngines[i].engine);
                                 reactOnRemove.Remove(ref entity, egid);
                             }
@@ -774,16 +787,15 @@ namespace Svelto.ECS.Internal
             }
 
             if (isUnmanaged)
-                ExecuteEnginesDisposeEntityCallback(ref implUnmgd, engines, in profiler, @group);
+                ExecuteEnginesDisposeEntityCallback(ref implUnmgd.value, engines, in profiler, @group);
             else
                 ExecuteEnginesDisposeEntityCallback(ref implMgd, engines, in profiler, @group);
         }
 
-
         SveltoDictionary<uint, TValue, ManagedStrategy<SveltoDictionaryNode<uint>>, ManagedStrategy<TValue>,
             ManagedStrategy<int>> implMgd;
 
-        internal SveltoDictionary<uint, TValue, NativeStrategy<SveltoDictionaryNode<uint>>, NativeStrategy<TValue>,
-            NativeStrategy<int>> implUnmgd;
+        internal SharedNative<SveltoDictionary<uint, TValue, NativeStrategy<SveltoDictionaryNode<uint>>,
+            NativeStrategy<TValue>, NativeStrategy<int>>> implUnmgd;
     }
 }

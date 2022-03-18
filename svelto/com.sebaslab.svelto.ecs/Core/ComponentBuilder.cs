@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using DBC.ECS;
 using Svelto.Common;
 using Svelto.DataStructures;
@@ -21,6 +22,28 @@ namespace Svelto.ECS
         {
             return obj.GetEntityComponentType().GetHashCode();
         }
+    }
+    
+    public class TypeCounterData
+    {
+        public static readonly SharedStaticWrapper<int, TypeCounterData>
+            idCounter = new SharedStaticWrapper<int, TypeCounterData>(0);
+    }
+    
+    public class ComponentID<T> where T : struct, IEntityComponent
+    {
+        public static readonly SharedStaticWrapper<int, ComponentID<T>>
+            id = new SharedStaticWrapper<int, ComponentID<T>>(0);
+
+        static ComponentID()
+        {
+            id.Data = Interlocked.Increment(ref TypeCounterData.idCounter.Data);
+
+            DBC.ECS.Check.Ensure(id.Data < ushort.MaxValue, "too many types registered, HOW :)");
+        }
+         
+        public static void Init()
+        { }
     }
 
     public class ComponentBuilder<T> : IComponentBuilder where T : struct, IEntityComponent
@@ -47,6 +70,7 @@ namespace Svelto.ECS
             
             SetEGIDWithoutBoxing<T>.Warmup();
 #endif
+            ComponentID<T>.Init();
             ENTITY_COMPONENT_NAME = ENTITY_COMPONENT_TYPE.ToString();
             IS_UNMANAGED = TypeType.isUnmanaged<T>(); //attention this is important as it serves as warm up for Type<T>
 

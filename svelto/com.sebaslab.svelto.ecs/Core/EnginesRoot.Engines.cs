@@ -20,6 +20,8 @@ namespace Svelto.ECS
             GroupHashMap.Init();
             SharedDictonary.Init();
             SerializationDescriptorMap.Init();
+
+
             _swapEntities   = SwapEntities;
             _removeEntities = RemoveEntities;
             _removeGroup    = RemoveGroup;

@@ -44,7 +44,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         {
         }
 
-        readonly EntitiesDB.SveltoFilters.ContextID testFilterContext = EntitiesDB.SveltoFilters.GetNewContextID();
+        readonly FilterContextID testFilterContext = EntitiesDB.SveltoFilters.GetNewContextID();
 
         [Test]
         public void Test_AddingFilter_SingleEntity()
