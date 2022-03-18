@@ -32,9 +32,6 @@ namespace Svelto.Common.Tests.Datastructures
 
             test1.Intersect(test2);
 
-            for (int i = 0; i < test1.count; ++i)
-                Console.LogDebug(test1.unsafeKeys[i].key.ToString());
-
             Assert.AreEqual(50, test1.count);
 
             for (int i = 0; i < 100; i += 2)
@@ -53,10 +50,7 @@ namespace Svelto.Common.Tests.Datastructures
             for (int i = 0; i < 200; i += 2)
                 test2.Add(i, i);
 
-            test1.Intersect(test2);
-
-            for (int i = 0; i < test1.count; ++i)
-                Console.LogDebug(test1.unsafeKeys[i].key.ToString());
+            test1.Exclude(test2);
 
             Assert.AreEqual(50, test1.count);
 
@@ -77,9 +71,6 @@ namespace Svelto.Common.Tests.Datastructures
                 test2.Add(i, i);
 
             test1.Union(test2);
-
-            for (int i = 0; i < test1.count; ++i)
-                Console.LogDebug(test1.unsafeKeys[i].key.ToString());
 
             Assert.AreEqual(150, test1.count);
 
