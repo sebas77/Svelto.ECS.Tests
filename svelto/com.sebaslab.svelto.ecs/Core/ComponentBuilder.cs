@@ -31,8 +31,7 @@ namespace Svelto.ECS
     
     public class ComponentID<T> where T : struct, IEntityComponent
     {
-        public static readonly SharedStaticWrapper<int, ComponentID<T>>
-            id = new SharedStaticWrapper<int, ComponentID<T>>(0);
+        public static readonly SharedStaticWrapper<int, ComponentID<T>> id;
 
 #if UNITY_BURST 
         [Unity.Burst.BurstDiscard] 

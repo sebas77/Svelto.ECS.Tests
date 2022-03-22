@@ -64,9 +64,12 @@ namespace Svelto.ECS
         /// </summary>
         public readonly struct SveltoFilters
         {
-            static readonly SharedStaticWrapper<int, Internal_FilterHelper> uniqueContextID =
-                new SharedStaticWrapper<int, Internal_FilterHelper>(1);
+            static readonly SharedStaticWrapper<int, Internal_FilterHelper> uniqueContextID = new();
             
+#if UNITY_BURST 
+            [Unity.Burst.BurstDiscard] 
+            //SharedStatic values must be initialized from not burstified code
+#endif            
             public static FilterContextID GetNewContextID()
             {
                 return new FilterContextID((uint)Interlocked.Increment(ref uniqueContextID.Data));
