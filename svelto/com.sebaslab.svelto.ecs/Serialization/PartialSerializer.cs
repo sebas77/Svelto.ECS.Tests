@@ -30,8 +30,13 @@ namespace Svelto.ECS.Serialization
                             myMembers[i].IsPrivate == false)
                                 throw new ECSException($"field cannot be serialised {fieldType} in {myType.FullName}");
 
-                        var offset = Marshal.OffsetOf<T>(myMembers[i].Name);
-                        var sizeOf = (uint)Marshal.SizeOf(fieldType);
+                        var  offset = Marshal.OffsetOf<T>(myMembers[i].Name);
+                        uint sizeOf;
+                        if (fieldType == typeof(bool))
+                            sizeOf = 1;
+                        else
+                            sizeOf = (uint)Marshal.SizeOf(fieldType);
+                        
                         offsets.Add(((uint) offset.ToInt32(), sizeOf));
                         totalSize += sizeOf;
                     }
