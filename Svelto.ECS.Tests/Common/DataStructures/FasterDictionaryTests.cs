@@ -80,5 +80,19 @@ namespace Svelto.Common.Tests.Datastructures
             for (int i = 100; i < 200; i += 2)
                 Assert.IsTrue(test1.ContainsKey(i));
         }
+
+        [TestCase]
+        public void TestFastClear()
+        {
+            FasterDictionary<int, int> test = new FasterDictionary<int, int>();
+
+            test.Add(0, 0);
+
+            Assert.IsTrue(test.ContainsKey(0));
+
+            test.FastClear();
+
+            Assert.IsFalse(test.ContainsKey(0));
+        }
     }
 }
