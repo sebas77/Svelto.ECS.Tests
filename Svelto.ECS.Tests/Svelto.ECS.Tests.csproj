@@ -9,7 +9,7 @@
 
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-        <Configurations>Debug;Release;SlowSubmissionRelease;SlowSubmissionDebug</Configurations>
+        <Configurations>SlowSubmissionRelease;SlowSubmissionDebug</Configurations>
 
         <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
