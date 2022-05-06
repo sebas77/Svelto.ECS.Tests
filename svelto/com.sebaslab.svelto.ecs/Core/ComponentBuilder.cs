@@ -104,7 +104,7 @@ namespace Svelto.ECS
 
         public bool isUnmanaged => IS_UNMANAGED;
 
-        [ThreadStatic] static EntityViewComponentCache _localCache = new EntityViewComponentCache();
+        static ThreadLocal<EntityViewComponentCache> _localCache = new ThreadLocal<EntityViewComponentCache>(() => new EntityViewComponentCache());
 
         public void BuildEntityAndAddToList(ITypeSafeDictionary dictionary, EGID egid, IEnumerable<object> implementors)
         {
@@ -117,7 +117,7 @@ namespace Svelto.ECS
                 Check.Require(castedDic.ContainsKey(egid.entityID) == false,
                     $"building an entity with already used entity id! id: '{(ulong)egid}', {ENTITY_COMPONENT_NAME}");
 
-                this.SetEntityViewComponentImplementors(ref entityComponent, implementors, _localCache);
+                this.SetEntityViewComponentImplementors(ref entityComponent, implementors, _localCache.Value);
 
                 castedDic.Add(egid.entityID, entityComponent);
             }
