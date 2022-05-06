@@ -1,6 +1,9 @@
 ﻿using NUnit.Framework;
 using Svelto.ECS.Hybrid;
 using Svelto.ECS.Schedulers;
+using System;
+using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 
 namespace Svelto.ECS.Tests.ECS
@@ -10,52 +13,66 @@ namespace Svelto.ECS.Tests.ECS
         [SetUp]
         public void Init()
         {
-            ctx1 = new Context();
-            ctx2 = new Context();   
-            ctx3 = new Context();
+            ctxs = new List<Context>();
+            for (int i = 0; i < 10; i++)
+                ctxs.Add(new Context());
         }
 
         private void Make(int n, Context ctx)
         {
             for (uint i = 0; i < n; i++)
             {
-                ctx.EntityFactory.BuildEntity<ImplementorTestDescriptor>(new EGID(i, group0), new[] { new TestItA(i) });
-                ctx.Scheduler.SubmitEntities();
+                try
+                {
+                    ctx.EntityFactory.BuildEntity<ImplementorTestDescriptor>(new EGID(i, group0), new[] { new TestItA(i) });
+                    ctx.Scheduler.SubmitEntities();
+                } catch (Exception e)
+                {
+                    // In the event of an exception we want to save it instead of throwing
+                    // because NUnit doesn't recognize exceptions or asserts on different threads as "failed"
+                    ctx.Exception = ExceptionDispatchInfo.Capture(e);
+                    break;
+                }
             }
         }
 
         [TestCase]
         public void ImplementorsInterferenceSinglethreaded()
         {
-            Make(100000, ctx1);
-            Make(100000, ctx2);
-            Make(100000, ctx3);
+            foreach(var ctx in ctxs)
+                Make(10, ctx);
+
+            // Use the same logic for re-throwing exception as for multithreaded
+            // to keep the Make function more generic
+            foreach (var ctx in ctxs)
+                ctx.Exception?.Throw();
         }
         [TestCase]
         public void ImplementorsInterferenceMultithreaded()
         {
-            var t1 = new Thread(() => Make(100000, ctx1));
-            var t2 = new Thread(() => Make(100000, ctx2));
-            var t3 = new Thread(() => Make(100000, ctx3));
-            t1.Start();
-            t2.Start();
-            t3.Start();
+            var threads = new List<Thread>();
+            foreach (var ctx in ctxs) {
+                var _ctx = ctx;
+                threads.Add(new Thread(() => Make(100000, _ctx)));
+            }
+            foreach (var t in threads)
+                t.Start();
 
-            t1.Join();
-            t2.Join();
-            t3.Join();
+            foreach (var t in threads)
+                t.Join();
+
+            // We need to rethrow any exceptions that might have occurred during the test
+            foreach (var ctx in ctxs)
+                ctx.Exception?.Throw();
         }
         [TearDown]
         public void Dispose()
         {
-            ctx1.EnginesRoot.Dispose();
-            ctx2.EnginesRoot.Dispose();
-            ctx3.EnginesRoot.Dispose();
+            foreach (var ctx in ctxs)
+                ctx.EnginesRoot.Dispose();
         }
 
-        Context ctx1;
-        Context ctx2;
-        Context ctx3;
+        List<Context> ctxs;
         ExclusiveGroup group0 = new ExclusiveGroup();
         class Context
         {
@@ -69,6 +86,7 @@ namespace Svelto.ECS.Tests.ECS
             public EnginesRoot EnginesRoot { get; }
             public SimpleEntitiesSubmissionScheduler Scheduler { get; }
             public IEntityFactory EntityFactory { get; }
+            public ExceptionDispatchInfo Exception { get; set; }
         }
 
         class ImplementorTestDescriptor : GenericEntityDescriptor<ViewComponentForImplementorTest> { }
