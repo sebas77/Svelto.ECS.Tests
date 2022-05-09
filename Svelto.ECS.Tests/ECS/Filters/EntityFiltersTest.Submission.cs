@@ -385,10 +385,47 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
 
             var bufferIndex = mmap.GetIndex(EgidA2);
+            mmap.Dispose();
             var filterIndex = aGroupFilter.indices[0];
             Assert.AreEqual(bufferIndex, filterIndex, "Filter index does not match expected buffer index");
         }
 
+        [Test]
+        public void Test_EntitySwapsWithFilterRemoval_InvertedOrder()
+        {
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
+            var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
+                _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
+
+            // Adding 4 entities to filter
+            filter.Add(EgidA0, mmap);
+            filter.Add(EgidA1, mmap); 
+            filter.Add(EgidA2, mmap); // Will not be swapped
+            filter.Add(EgidA3, mmap);
+            filter.Add(EgidA4, mmap);
+
+            // Swapping all but one entity to other group and removing from filter at the same time
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA4, GroupB);
+            filter.Remove(EgidA4);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA3, GroupB);
+            filter.Remove(EgidA3);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA1, GroupB);
+            filter.Remove(EgidA1);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA0, GroupB);
+            filter.Remove(EgidA0);
+
+            _scheduler.SubmitEntities();
+
+            var aGroupFilter = filter.GetGroupFilter(GroupA);
+            
+            Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
+
+            var bufferIndex = mmap.GetIndex(EgidA2);
+            mmap.Dispose();
+            var filterIndex = aGroupFilter.indices[0];
+            Assert.AreEqual(bufferIndex, filterIndex, "Filter index does not match expected buffer index");
+        }
+        
         [Test]
         public void Test_EntityRemovalWithFilterRemoval()
         {
@@ -420,9 +457,46 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
 
             var bufferIndex = mmap.GetIndex(EgidA2);
+            mmap.Dispose();
             var filterIndex = aGroupFilter.indices[0];
             Assert.AreEqual(bufferIndex, filterIndex, "Filter index does not match expected buffer index");
         }
         
+        [Test]
+        public void Test_EntityRemovalWithFilterRemoval_InvertedOrder()
+        {
+            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
+            var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
+                _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
+
+            // Adding 4 entities to filter
+            filter.Add(EgidA0, mmap);
+            filter.Add(EgidA1, mmap); 
+            filter.Add(EgidA2, mmap); // Will not be swapped
+            filter.Add(EgidA3, mmap);
+            filter.Add(EgidA4, mmap);
+
+            // Swapping all but one entity to other group and removing from filter at the same time - in reverse order of buffer
+            _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA4);
+            filter.Remove(EgidA4);
+            _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA3);
+            filter.Remove(EgidA3);
+            _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA1);
+            filter.Remove(EgidA1);
+            _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA0);
+            filter.Remove(EgidA0);
+
+            
+            _scheduler.SubmitEntities();
+
+            var aGroupFilter = filter.GetGroupFilter(GroupA);
+            
+            Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
+
+            var bufferIndex = mmap.GetIndex(EgidA2);
+            mmap.Dispose();
+            var filterIndex = aGroupFilter.indices[0];
+            Assert.AreEqual(bufferIndex, filterIndex, "Filter index does not match expected buffer index");
+        }
     }
 }
