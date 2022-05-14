@@ -104,8 +104,6 @@ namespace Svelto.ECS
 
         public bool isUnmanaged => IS_UNMANAGED;
 
-        static ThreadLocal<EntityViewComponentCache> _localCache = new ThreadLocal<EntityViewComponentCache>(() => new EntityViewComponentCache());
-
         public void BuildEntityAndAddToList(ITypeSafeDictionary dictionary, EGID egid, IEnumerable<object> implementors)
         {
             var castedDic = dictionary as ITypeSafeDictionary<T>;
@@ -117,7 +115,8 @@ namespace Svelto.ECS
                 Check.Require(castedDic.ContainsKey(egid.entityID) == false,
                     $"building an entity with already used entity id! id: '{(ulong)egid}', {ENTITY_COMPONENT_NAME}");
 
-                this.SetEntityViewComponentImplementors(ref entityComponent, implementors, _localCache.Value);
+                this.SetEntityViewComponentImplementors(ref entityComponent, EntityViewComponentCache.cachedFields,
+                    implementors, EntityViewComponentCache.implementorsByType, EntityViewComponentCache.cachedTypes);
 
                 castedDic.Add(egid.entityID, entityComponent);
             }
@@ -157,18 +156,22 @@ namespace Svelto.ECS
 
         readonly T _initializer;
 
-        internal class EntityViewComponentCache
+        /// <summary>
+        ///     Note: this static class will hold forever the references of the entities implementors. These references
+        ///     are not even cleared when the engines root is destroyed, as they are static references.
+        ///     It must be seen as an application-wide cache system. Honestly, I am not sure if this may cause leaking
+        ///     issues in some kind of applications. To remember.
+        /// </summary>
+        static class EntityViewComponentCache
         {
-            internal readonly FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>> cachedFields;
-            internal readonly Dictionary<Type, Type[]>                                cachedTypes;
-            
-            //this is just a local static cache that is cleared after every use
+            internal static readonly FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>> cachedFields;
+            internal static readonly Dictionary<Type, Type[]>                                cachedTypes;
 #if DEBUG && !PROFILE_SVELTO
-            internal readonly Dictionary<Type, ECSTuple<object, int>> implementorsByType;
+            internal static readonly Dictionary<Type, ECSTuple<object, int>> implementorsByType;
 #else
-            internal readonly Dictionary<Type, object> implementorsByType;
+            internal static readonly Dictionary<Type, object> implementorsByType;
 #endif
-            internal EntityViewComponentCache()
+            static EntityViewComponentCache()
             {
                 cachedFields = new FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>>();
 

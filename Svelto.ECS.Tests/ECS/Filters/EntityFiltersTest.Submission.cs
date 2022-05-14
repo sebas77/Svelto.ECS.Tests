@@ -20,7 +20,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
 
             var iterator = filter.GetEnumerator();
             mmap.Dispose();
-            
+
 
             // Group A
             Assert.AreEqual(true, iterator.MoveNext());
@@ -331,7 +331,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             // Add filters to other group just to make sure there is no interference.
             filter.Add(EgidB0, mmap);
             filter.Add(EgidB3, mmap);
-            
+
             // Remove an entity that is not filtered and this should also cause a swap back.
             _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA0);
             _scheduler.SubmitEntities();
