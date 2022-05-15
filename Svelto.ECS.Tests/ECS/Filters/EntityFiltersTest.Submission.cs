@@ -9,7 +9,9 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_TransientFilter_UpdateAfterSubmission()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreateTransientFilter<TestEntityComponent>((_transientFilter1, testFilterContext));
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreateTransientFilter<TestEntityComponent>(
+                                         (_transientFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA0, mmap);
@@ -20,7 +22,6 @@ namespace Svelto.ECS.Tests.ECS.Filters
 
             var iterator = filter.GetEnumerator();
             mmap.Dispose();
-            
 
             // Group A
             Assert.AreEqual(true, iterator.MoveNext());
@@ -46,7 +47,9 @@ namespace Svelto.ECS.Tests.ECS.Filters
         public void Test_PersistentFilter_UpdateAfterRemoving_FilteredEntity_WithSwapBack()
         {
             // Create filters.
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA2, mmap);
@@ -66,7 +69,8 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(3, indices.count, "Filter must not be removed before submission");
 
             var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupA);
-            Assert.AreEqual(EgidA4, components[indices[2]].ID, "Unexpected entity will get swapped, test is invalidated");
+            Assert.AreEqual(EgidA4, components[indices[2]].ID
+                          , "Unexpected entity will get swapped, test is invalidated");
 
             // Perform entity removal.
             _scheduler.SubmitEntities();
@@ -86,7 +90,9 @@ namespace Svelto.ECS.Tests.ECS.Filters
         public void Test_PersistentFilter_UpdateAfterRemoving_NonFilteredEntity_WithSwapBack()
         {
             // Create filters.
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA2, mmap);
@@ -115,7 +121,9 @@ namespace Svelto.ECS.Tests.ECS.Filters
         public void Test_PersistentFilter_UpdateAfterRemoving_FilteredEntity_WithoutSwapBack()
         {
             // Create filters.
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA1, mmap);
@@ -143,8 +151,10 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_PersistentFilter_UpdateAfterRemoving_NonFilteredEntity_WithoutSwapBack()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
-            var mmapA  = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(GroupA);
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
+            var mmapA = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(GroupA);
             filter.Add(EgidA1, mmapA);
             filter.Add(EgidA2, mmapA);
 
@@ -167,7 +177,9 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_PersistentFilter_UpdateAfterSwapping_FilteredEntity_WithSwapBack()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA0, mmap);
@@ -189,7 +201,8 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(3, indices.count, "Group A count must increase after swap.");
             Assert.AreEqual(EgidA0, components[indices[0]].ID, "Previous filtered entities must not have changed.");
             Assert.AreEqual(EgidA3, components[indices[1]].ID, "Previous filtered entities must not have changed.");
-            Assert.AreEqual(new EGID(EgidB1.entityID, GroupA), components[indices[2]].ID, "Swapped entity must be added to the last index.");
+            Assert.AreEqual(new EGID(EgidB1.entityID, GroupA), components[indices[2]].ID
+                          , "Swapped entity must be added to the last index.");
 
             // Check groups B.
             iterator.MoveNext();
@@ -199,13 +212,16 @@ namespace Svelto.ECS.Tests.ECS.Filters
             (indices, _) = iterator.Current;
             Assert.AreEqual(1, indices.count, "Group B count must decrease after swap.");
             Assert.AreEqual(1, indices[0], "Index of last entity must have updated.");
-            Assert.AreEqual(EgidB4, components[indices[0]].ID, "Entity pointed by index must be the previuos last index.");
+            Assert.AreEqual(EgidB4, components[indices[0]].ID
+                          , "Entity pointed by index must be the previuos last index.");
         }
 
         [Test]
         public void Test_PersistentFilter_UpdateAfterSwapping_NonFilteredEntity_WithSwapBack()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA0, mmap);
@@ -237,13 +253,16 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(2, indices.count, "Group B count must not have changed after swap.");
             Assert.AreEqual(1, indices[0], "Index of first entity must not have updated.");
             Assert.AreEqual(0, indices[1], "Index of last entity must have changed to the swapped index.");
-            Assert.AreEqual(EgidB4, components[indices[1]].ID, "Changed index must be still pointing to the correct entity");
+            Assert.AreEqual(EgidB4, components[indices[1]].ID
+                          , "Changed index must be still pointing to the correct entity");
         }
 
         [Test]
         public void Test_PersistentFilter_UpdateAfterSwapping_FilteredEntity_WithoutSwapBack()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA0, mmap);
@@ -266,7 +285,8 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(3, indices.count, "Group A count must increase after swap.");
             Assert.AreEqual(EgidA0, components[indices[0]].ID, "Previous filtered entities must not have changed.");
             Assert.AreEqual(EgidA3, components[indices[1]].ID, "Previous filtered entities must not have changed.");
-            Assert.AreEqual(new EGID(EgidB4.entityID, GroupA), components[indices[2]].ID, "Swapped entity must be added to the last index.");
+            Assert.AreEqual(new EGID(EgidB4.entityID, GroupA), components[indices[2]].ID
+                          , "Swapped entity must be added to the last index.");
 
             // Check groups B.
             iterator.MoveNext();
@@ -282,7 +302,9 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_PersistentFilter_UpdateAfterSwapping_NonFilteredEntity_WithoutSwapBack()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
             filter.Add(EgidA0, mmap);
@@ -324,14 +346,16 @@ namespace Svelto.ECS.Tests.ECS.Filters
             // Create filters.
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
             filter.Add(EgidA2, mmap);
             filter.Add(EgidA3, mmap);
             filter.Add(EgidA4, mmap);
             // Add filters to other group just to make sure there is no interference.
             filter.Add(EgidB0, mmap);
             filter.Add(EgidB3, mmap);
-            
+
             // Remove an entity that is not filtered and this should also cause a swap back.
             _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA0);
             _scheduler.SubmitEntities();
@@ -351,19 +375,22 @@ namespace Svelto.ECS.Tests.ECS.Filters
 
             var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupA);
             Assert.AreEqual(4, indices[3], "Last index must point to the last entity added.");
-            Assert.AreEqual(EgidA0, components[indices[3]].ID, "Last entity index must point to the last entity added.");
+            Assert.AreEqual(EgidA0, components[indices[3]].ID
+                          , "Last entity index must point to the last entity added.");
         }
-        
+
         [Test]
         public void Test_EntitySwapsWithFilterRemoval()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
 
             // Adding 4 entities to filter
             filter.Add(EgidA0, mmap);
-            filter.Add(EgidA1, mmap); 
+            filter.Add(EgidA1, mmap);
             filter.Add(EgidA2, mmap); // Will not be swapped
             filter.Add(EgidA3, mmap);
             filter.Add(EgidA4, mmap);
@@ -377,29 +404,31 @@ namespace Svelto.ECS.Tests.ECS.Filters
             filter.Remove(EgidA3);
             _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA4, GroupB);
             filter.Remove(EgidA4);
-            
+
             _scheduler.SubmitEntities();
 
             var aGroupFilter = filter.GetGroupFilter(GroupA);
-            
+
             Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
 
             var bufferIndex = mmap.GetIndex(EgidA2);
             mmap.Dispose();
-            var filterIndex = aGroupFilter.indices[0];
+            var filterIndex =  aGroupFilter[EgidA2.entityID];
             Assert.AreEqual(bufferIndex, filterIndex, "Filter index does not match expected buffer index");
         }
 
         [Test]
         public void Test_EntitySwapsWithFilterRemoval_InvertedOrder()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
 
             // Adding 4 entities to filter
             filter.Add(EgidA0, mmap);
-            filter.Add(EgidA1, mmap); 
+            filter.Add(EgidA1, mmap);
             filter.Add(EgidA2, mmap); // Will not be swapped
             filter.Add(EgidA3, mmap);
             filter.Add(EgidA4, mmap);
@@ -417,7 +446,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             _scheduler.SubmitEntities();
 
             var aGroupFilter = filter.GetGroupFilter(GroupA);
-            
+
             Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
 
             var bufferIndex = mmap.GetIndex(EgidA2);
@@ -425,53 +454,169 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var filterIndex = aGroupFilter.indices[0];
             Assert.AreEqual(bufferIndex, filterIndex, "Filter index does not match expected buffer index");
         }
-        
+
         [Test]
         public void Test_EntityRemovalWithFilterRemoval()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
-            var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
-                _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
-
-            // Adding 4 entities to filter
-            filter.Add(EgidA0, mmap);
-            filter.Add(EgidA1, mmap); 
-            filter.Add(EgidA2, mmap); // Will not be swapped
-            filter.Add(EgidA3, mmap);
-            filter.Add(EgidA4, mmap);
-
-            // Swapping all but one entity to other group and removing from filter at the same time
-            _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA0);
-            filter.Remove(EgidA0);
-            _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA1);
-            filter.Remove(EgidA1);
-            _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA3);
-            filter.Remove(EgidA3);
-            _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA4);
-            filter.Remove(EgidA4);
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
             
-            _scheduler.SubmitEntities();
+            using (var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
+                       _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent))
+            {
 
-            var aGroupFilter = filter.GetGroupFilter(GroupA);
+                // Adding 4 entities to filter
+                filter.Add(EgidA0, mmap);
+                filter.Add(EgidA1, mmap);
+                filter.Add(EgidA2, mmap); // Will not be removed
+                filter.Add(EgidA3, mmap);
+                filter.Add(EgidA4, mmap);
+
+                // Swapping all but one entity to other group and removing from filter at the same time
+                _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA0);
+                _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA1);
+                _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA3);
+                _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA4);
+                
+                //the entities are removed from the filter before the submission, this means
+                //that during the submission these entities will not be found in the filter
+                //we need still to be sure that the index of EgidA2 will be updated!
+                filter.Remove(EgidA0);
+                filter.Remove(EgidA1);
+                filter.Remove(EgidA3);
+                filter.Remove(EgidA4);
+                
+                _scheduler.SubmitEntities();
+
+                var aGroupFilter = filter.GetGroupFilter(GroupA);
+
+                Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
+
+                //multi map are still valid even after a submission, this should be a separate unit test actually
+                var entityIndex = mmap.GetIndex(EgidA2);
+                var filterIndex = aGroupFilter[EgidA2.entityID];
+                
+                Assert.AreEqual(entityIndex, filterIndex, "Filter index does not match expected buffer index");
+            }
+        }
+        
+         [Test]
+        public void Test_RemoveEntityThatIsNotInTheFilterButWillAffectOtherEntitiesInTheFilter()
+        {
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
             
-            Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
+            using (var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
+                       _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent))
+            {
+                filter.Add(EgidA0, mmap);
+                filter.Add(EgidA2, mmap);
+                filter.Add(EgidA3, mmap);
+                filter.Add(EgidA4, mmap);
 
-            var bufferIndex = mmap.GetIndex(EgidA2);
-            mmap.Dispose();
-            var filterIndex = aGroupFilter.indices[0];
-            Assert.AreEqual(bufferIndex, filterIndex, "Filter index does not match expected buffer index");
+                // EgidA1 is not in the filter, but will affect the index of EgidA4 that is in the filter instead
+                _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA1);
+                
+                _scheduler.SubmitEntities();
+
+                var aGroupFilter = filter.GetGroupFilter(GroupA);
+
+                //multi map are still valid even after a submission, this should be a separate unit test actually
+                var entityIndex = mmap.GetIndex(EgidA2);
+                var filterIndex = aGroupFilter[EgidA2.entityID];
+                
+                Assert.AreEqual(entityIndex, filterIndex, "Filter index does not match expected buffer index");
+            }
         }
         
         [Test]
+        public void Test_RemoveEntityThatIsNotInTheFilterButWillAffectOtherEntitiesInTheFilterCase2()
+        {
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
+            
+            using (var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
+                       _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent))
+            {
+                filter.Add(EgidA0, mmap);
+                filter.Add(EgidA2, mmap);
+                filter.Add(EgidA3, mmap);
+
+                // EgidA1 is not in the filter, but will affect the index of EgidA4
+                _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA1);
+                // EgidA4 is not in the filter but it will affect the index of EgidA3 that is in the filter!
+                _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA4);
+                
+                _scheduler.SubmitEntities();
+
+                var aGroupFilter = filter.GetGroupFilter(GroupA);
+
+                //multi map are still valid even after a submission, this should be a separate unit test actually
+                var entityIndex = mmap.GetIndex(EgidA2);
+                var filterIndex = aGroupFilter[EgidA2.entityID];
+                
+                Assert.AreEqual(entityIndex, filterIndex, "Filter index does not match expected buffer index");
+            }
+        }
+        
+        [Test]
+        public void Test_EntityRemovalWithFilterRemovalCase2()
+        {
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
+            
+            using (var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
+                       _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent))
+            {
+
+                // Adding 4 entities to filter
+                filter.Add(EgidA0, mmap); // Will not be removed
+                filter.Add(EgidA1, mmap);
+                filter.Add(EgidA2, mmap); // Will not be removed
+                filter.Add(EgidA3, mmap); 
+                filter.Add(EgidA4, mmap); // Will not be removed
+
+                // Swapping all but one entity to other group and removing from filter at the same time
+                _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA0);
+                _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA1);
+                _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA3);
+                _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA4);
+                
+                //the entities are removed from the filter before the submission, this means
+                //that during the submission these entities will not be found in the filter
+                //we need still to be sure that the index of EgidA2 will be updated!
+                filter.Remove(EgidA1);
+                filter.Remove(EgidA3);
+
+                _scheduler.SubmitEntities();
+
+                var aGroupFilter = filter.GetGroupFilter(GroupA);
+
+                Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
+
+                var bufferIndex = mmap.GetIndex(EgidA2);
+                var filterIndex = aGroupFilter[EgidA2.entityID];
+                
+                Assert.AreEqual(bufferIndex, filterIndex, "Filter index does not match expected buffer index");
+            }
+        }
+
+        [Test]
         public void Test_EntityRemovalWithFilterRemoval_InvertedOrder()
         {
-            var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
             var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
                 _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
 
             // Adding 4 entities to filter
             filter.Add(EgidA0, mmap);
-            filter.Add(EgidA1, mmap); 
+            filter.Add(EgidA1, mmap);
             filter.Add(EgidA2, mmap); // Will not be swapped
             filter.Add(EgidA3, mmap);
             filter.Add(EgidA4, mmap);
@@ -486,11 +631,10 @@ namespace Svelto.ECS.Tests.ECS.Filters
             _functions.RemoveEntity<EntityDescriptorWithComponents>(EgidA0);
             filter.Remove(EgidA0);
 
-            
             _scheduler.SubmitEntities();
 
             var aGroupFilter = filter.GetGroupFilter(GroupA);
-            
+
             Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
 
             var bufferIndex = mmap.GetIndex(EgidA2);
