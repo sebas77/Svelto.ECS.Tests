@@ -142,7 +142,6 @@ namespace Svelto.ECS
             internal GroupFilters(ExclusiveGroupStruct group) : this()
             {
                 _entityIDToDenseIndex = new SharedSveltoDictionaryNative<uint, uint>(1);
-               // _indexToEntityId      = new SharedSveltoDictionaryNative<uint, uint>(1);
                 _group                = group;
             }
 
@@ -150,13 +149,7 @@ namespace Svelto.ECS
             public bool Add(uint entityId, uint entityIndex)
             {
                 //TODO: when sentinels are finished, we need to add AsWriter here
-                if (_entityIDToDenseIndex.TryAdd(entityId, entityIndex, out _))
-                {
-                //    _indexToEntityId[entityIndex] = entityId;
-                    return true;
-                }
-
-                return false;
+                return _entityIDToDenseIndex.TryAdd(entityId, entityIndex, out _);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -165,7 +158,6 @@ namespace Svelto.ECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Remove(uint entityId)
             {
-             //   _indexToEntityId.Remove(_entityIDToDenseIndex[entityId]);
                 _entityIDToDenseIndex.Remove(entityId);
             }
 
@@ -191,7 +183,6 @@ namespace Svelto.ECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal void Clear()
             {
-             //   _indexToEntityId.FastClear();
                 _entityIDToDenseIndex.FastClear();
             }
 
@@ -199,13 +190,10 @@ namespace Svelto.ECS
             internal void Dispose()
             {
                 _entityIDToDenseIndex.Dispose();
-             //   _indexToEntityId.Dispose();
             }
 
             internal ExclusiveGroupStruct group => _group;
 
-            //dictionary of 
-          //  SharedSveltoDictionaryNative<uint, uint>          _indexToEntityId;
             internal SharedSveltoDictionaryNative<uint, uint> _entityIDToDenseIndex;
             readonly ExclusiveGroupStruct                     _group;
         }

@@ -45,7 +45,7 @@ namespace Svelto.ECS
             }
         }
 
-        void RemoveEntityFromPersistentFilters
+        void RemoveEntitiesFromPersistentFilters
         (FasterList<(uint, string)> entityIDsRemoved, ExclusiveGroupStruct fromGroup, RefWrapperType refWrapperType
        , ITypeSafeDictionary fromDic, FasterList<uint> entityIDsAffectedByRemoval)
         {

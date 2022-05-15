@@ -95,7 +95,7 @@ namespace Svelto.ECS
                             
                             //important: remove from the filter must happen after remove from the dictionary
                             //as we need to read the new indices linked to entities after the removal
-                            enginesRoot.RemoveEntityFromPersistentFilters(
+                            enginesRoot.RemoveEntitiesFromPersistentFilters(
                                 entityIDsToRemove, fromGroup, componentType, fromComponentsDictionary
                               , enginesRoot._entityIDsAffectedByRemoval);
 
@@ -212,7 +212,8 @@ namespace Svelto.ECS
                                     fromEntityToEntityIDs, fromGroup, toGroup, toComponentsDictionary
                                   , enginesRoot._entityIDsAffectedByRemoval);
 
-                                    enginesRoot.SwapEntityBetweenPersistentFilters(
+                                //important: this must happen after the entities are swapped in the database
+                                enginesRoot.SwapEntityBetweenPersistentFilters(
                                         fromEntityToEntityIDs, fromComponentsDictionary, toComponentsDictionary
                                       , fromGroup, toGroup, componentType, enginesRoot._entityIDsAffectedByRemoval);
                             }
