@@ -1,4 +1,5 @@
-﻿using Svelto.DataStructures;
+﻿using System.Collections.Generic;
+using Svelto.DataStructures;
 using Svelto.DataStructures.Native;
 using Svelto.ECS.DataStructures;
 using Svelto.ECS.Internal;
@@ -47,7 +48,7 @@ namespace Svelto.ECS
 
         void RemoveEntitiesFromPersistentFilters
         (FasterList<(uint, string)> entityIDsRemoved, ExclusiveGroupStruct fromGroup, RefWrapperType refWrapperType
-       , ITypeSafeDictionary fromDic, FasterList<uint> entityIDsAffectedByRemoval)
+       , ITypeSafeDictionary fromDic)
         {
             //is there any filter used by this component?
             if (_indicesOfPersistentFiltersUsedByThisComponent.TryGetValue(
@@ -55,6 +56,14 @@ namespace Svelto.ECS
             {
                 var numberOfFilters = listOfFilters.count;
                 var filters         = _persistentEntityFilters.unsafeValues;
+                
+                //remove duplicates
+                _entityIDsLeftWithoutDuplicates.FastClear();
+                var entityAffectedCount = _entityIDsLeftAndAffectedByRemoval.count;
+                for (int i = 0; i < entityAffectedCount; i++)
+                {
+                    _entityIDsLeftWithoutDuplicates[_entityIDsLeftAndAffectedByRemoval[i]] = -1;
+                }
 
                 for (int filterIndex = 0; filterIndex < numberOfFilters; ++filterIndex)
                 {
@@ -63,7 +72,7 @@ namespace Svelto.ECS
                     //we need to keep a copy to reset to the original count for each filter
                     var persistentFiltersPerGroup = filters[listOfFilters[filterIndex]]._filtersPerGroup;
 
-                    if (persistentFiltersPerGroup.TryGetValue(fromGroup, out var groupFilter))
+                    if (persistentFiltersPerGroup.TryGetValue(fromGroup, out var fromGroupFilter))
                     {
                         var entitiesCount = entityIDsRemoved.count;
 
@@ -73,19 +82,19 @@ namespace Svelto.ECS
                             //the current entity id to remove
                             uint fromEntityID = entityIDsRemoved[entityIndex].Item1;
 
-                            groupFilter.Remove(
+                            fromGroupFilter.Remove(
                                 fromEntityID); //Remove works even if the ID is not found (just returns false)
                         }
 
-                        entitiesCount = entityIDsAffectedByRemoval.count;
-                        //foreach entity affected by removal
-                        for (int entityIndex = 0; entityIndex < entitiesCount; ++entityIndex)
+                        foreach (var entity in _entityIDsLeftWithoutDuplicates)
                         {
-                            //the current entity id to remove
-                            uint fromEntityID = entityIDsAffectedByRemoval[entityIndex];
-
-                            if (groupFilter.Exists(fromEntityID))
-                                groupFilter._entityIDToDenseIndex[fromEntityID] = fromDic.GetIndex(fromEntityID);
+                            if (fromGroupFilter.Exists(entity.key))
+                            {
+                                if (entity.value == -1)
+                                    entity.value = (int)fromDic.GetIndex(entity.key);
+                                
+                                fromGroupFilter._entityIDToDenseIndex[entity.key] = (uint) entity.value;
+                            }
                         }
                     }
                 }
@@ -96,7 +105,7 @@ namespace Svelto.ECS
         void SwapEntityBetweenPersistentFilters
         (FasterList<(uint, uint, string)> fromEntityToEntityIDs, ITypeSafeDictionary fromDic
        , ITypeSafeDictionary toDic, ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup
-       , RefWrapperType refWrapperType, FasterList<uint> entityIDsAffectedByRemoval)
+       , RefWrapperType refWrapperType)
         {
             //is there any filter used by this component?
             if (_indicesOfPersistentFiltersUsedByThisComponent.TryGetValue(
@@ -104,6 +113,14 @@ namespace Svelto.ECS
             {
                 DBC.ECS.Check.Require(listOfFilters.count > 0, "why are you calling this with an empty list?");
                 var numberOfFilters = listOfFilters.count;
+                
+                //remove duplicates
+                _entityIDsLeftWithoutDuplicates.FastClear();
+                var entityAffectedCount = _entityIDsLeftAndAffectedByRemoval.count;
+                for (int i = 0; i < entityAffectedCount; i++)
+                {
+                    _entityIDsLeftWithoutDuplicates[_entityIDsLeftAndAffectedByRemoval[i]] = -1;
+                }
 
                 /// fromEntityToEntityIDs are the ID of the entities to swap from the from group to the to group.
                 /// for this component type. for each component type, there is only one set of fromEntityToEntityIDs
@@ -137,19 +154,18 @@ namespace Svelto.ECS
 
                         foreach (var (fromEntityID, _, _) in fromEntityToEntityIDs)
                         {
-                            fromGroupFilter
-                               .Remove(fromEntityID); //Remove works even if the ID is not found (just returns false)
+                            fromGroupFilter.Remove(fromEntityID); //Remove works even if the ID is not found (just returns false)
                         }
 
-                        var entitiesCount = entityIDsAffectedByRemoval.count;
-                        //foreach entity affected by removal
-                        for (int entityIndex = 0; entityIndex < entitiesCount; ++entityIndex)
+                        foreach (var entity in _entityIDsLeftWithoutDuplicates)
                         {
-                            //the current entity id to remove
-                            uint fromEntityID = entityIDsAffectedByRemoval[entityIndex];
-
-                            if (fromGroupFilter.Exists(fromEntityID))
-                                fromGroupFilter._entityIDToDenseIndex[fromEntityID] = fromDic.GetIndex(fromEntityID);
+                            if (fromGroupFilter.Exists(entity.key))
+                            {
+                                if (entity.value == -1)
+                                    entity.value = (int)fromDic.GetIndex(entity.key);
+                                
+                                fromGroupFilter._entityIDToDenseIndex[entity.key] = (uint) entity.value;
+                            }
                         }
                     }
                 }
