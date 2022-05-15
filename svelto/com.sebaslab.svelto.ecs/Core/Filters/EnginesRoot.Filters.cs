@@ -122,13 +122,9 @@ namespace Svelto.ECS
                     _entityIDsLeftWithoutDuplicates[_entityIDsLeftAndAffectedByRemoval[i]] = -1;
                 }
 
-                /// fromEntityToEntityIDs are the ID of the entities to swap from the from group to the to group.
+                /// fromEntityToEntityIDs are the IDs of the entities to swap from the from group to the to group.
                 /// for this component type. for each component type, there is only one set of fromEntityToEntityIDs
                 /// per from/to group.
-                /// The complexity of this function is that the ToDictionary is already updated, so the toIndex
-                /// is actually correct and guaranteed to be valid. However the beforeSubmissionFromIDs are the
-                /// indices of the entities in the FromDictionary BEFORE the submission happens, so before the
-                /// entities are actually removed from the dictionary.
                 for (int filterIndex = 0; filterIndex < numberOfFilters; ++filterIndex)
                 {
                     //if the group has a filter linked:
