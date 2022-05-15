@@ -694,17 +694,17 @@ namespace Svelto.ECS.Tests.Messy
             {
             }
 
-            public bool HasEntity<T>(EGID ID) where T : struct, IEntityComponent
+            public bool HasEntity<T>(EGID ID) where T : struct, IBaseEntityComponent
             {
                 return entitiesDB.Exists<T>(ID);
             }
 
-            public bool HasAnyEntityInGroup<T>(ExclusiveGroup groupID) where T : struct, IEntityComponent
+            public bool HasAnyEntityInGroup<T>(ExclusiveGroup groupID) where T : struct, IBaseEntityComponent
             {
                 return entitiesDB.QueryEntities<T>(groupID).count > 0;
             }
 
-            public bool HasAnyEntityInGroupArray<T>(ExclusiveGroup groupID) where T : struct, IEntityComponent
+            public bool HasAnyEntityInGroupArray<T>(ExclusiveGroup groupID) where T : struct, IBaseEntityComponent
             {
                 return entitiesDB.QueryEntities<T>(groupID).count > 0;
             }

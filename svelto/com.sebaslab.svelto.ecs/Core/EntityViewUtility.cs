@@ -34,7 +34,7 @@ namespace Svelto.ECS
 
         internal static void SetEntityViewComponentImplementors<T>(this IComponentBuilder componentBuilder,
             ref T entityComponent, IEnumerable<object> implementors,
-            ComponentBuilder<T>.EntityViewComponentCache localCache) where T : struct, IEntityComponent
+            ComponentBuilder<T>.EntityViewComponentCache localCache) where T : struct, IBaseEntityComponent
         {
             DBC.ECS.Check.Require(implementors != null,
                 NULL_IMPLEMENTOR_ERROR.FastConcat(" entityComponent ",
