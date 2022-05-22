@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using Svelto.DataStructures;
 using Svelto.ECS.Schedulers;
 using Assert = NUnit.Framework.Assert;
 
@@ -16,8 +17,8 @@ namespace Svelto.ECS.Tests.ECS
             this._entityCountPerGroup = entityCountPerGroup;
         }
 
-        readonly uint   _idStart;
-        readonly int    _entityCountPerGroup;
+        readonly uint _idStart;
+        readonly int  _entityCountPerGroup;
 
         EnginesRoot                       _enginesRoot;
         IEntityFactory                    _entityFactory;
@@ -28,7 +29,6 @@ namespace Svelto.ECS.Tests.ECS
         static   ExclusiveGroup _group         = new ExclusiveGroup(numberOfGroups);
         readonly ushort         _groupCount    = numberOfGroups;
 
-
         [SetUp]
         public void Init()
         {
@@ -36,7 +36,7 @@ namespace Svelto.ECS.Tests.ECS
             _enginesRoot                         = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
             _entitiesDB                          = _enginesRoot;
 
-            _entityFactory   = _enginesRoot.GenerateEntityFactory();
+            _entityFactory = _enginesRoot.GenerateEntityFactory();
             _enginesRoot.GenerateEntityFunctions();
 
             var id = _idStart;
@@ -45,21 +45,22 @@ namespace Svelto.ECS.Tests.ECS
                 for (int j = 0; j < _entityCountPerGroup; j++)
                 {
                     _entityFactory.BuildEntity<EntityDescriptorWithComponentAndViewComponent>(
-                        new EGID(id++, _group + i), new object[] {new TestFloatValue(1f), new TestIntValue(1)});
-                    
+                        new EGID(id++, _group + i), new object[] { new TestFloatValue(1f), new TestIntValue(1) });
+
                     _entityFactory.BuildEntity<EntityDescriptorViewComponentWithString>(
-                        new EGID(id++, _group + i), new object[] {new TestStringValue("test")});
+                        new EGID(id++, _group + i), new object[] { new TestStringValue("test") });
                 }
             }
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            foreach (var ((buffer, count), _) in _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponent>())
+            foreach (var ((buffer, count), _) in
+                     _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponent>())
             {
                 for (int i = 0; i < count; i++)
                 {
                     buffer[i].TestFloatValue.Value += buffer[i].ID.entityID;
-                    buffer[i].TestIntValue.Value   += (int) buffer[i].ID.entityID;
+                    buffer[i].TestIntValue.Value   += (int)buffer[i].ID.entityID;
                 }
             }
 
@@ -68,11 +69,12 @@ namespace Svelto.ECS.Tests.ECS
                 for (int i = 0; i < count; i++)
                 {
                     buffer[i].floatValue = 1 + buffer[i].ID.entityID;
-                    buffer[i].intValue   = 1 + (int) buffer[i].ID.entityID;
+                    buffer[i].intValue   = 1 + (int)buffer[i].ID.entityID;
                 }
             }
-            
-            foreach (var ((buffer, count), _) in _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponentString>())
+
+            foreach (var ((buffer, count), _) in _entitiesDB.entitiesForTesting
+                                                            .QueryEntities<TestEntityViewComponentString>())
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -87,7 +89,7 @@ namespace Svelto.ECS.Tests.ECS
             void TestNotAcceptedEntityComponent()
             {
                 _entityFactory.BuildEntity<EntityDescriptorViewComponentWithCustomStruct>(
-                    new EGID(0, _group), new object[] {new TestCustomStructWithString("test")});
+                    new EGID(0, _group), new object[] { new TestCustomStructWithString("test") });
             }
 
             Assert.Throws<TypeInitializationException>(TestNotAcceptedEntityComponent);
@@ -98,15 +100,15 @@ namespace Svelto.ECS.Tests.ECS
         {
             for (uint i = 0; i < _groupCount; i++)
             {
-                var (entityViewsManagedArray, count) = _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponent>(_group + i);
-
-                // can't get a native array from a managed buffer
-                Assert.Throws<NotImplementedException>(() => entityViewsManagedArray.ToNativeArray(out _));
+                (MB<TestEntityViewComponent> entityViewsManagedArray, int count) =
+                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponent>(_group + i);
 
                 for (int j = 0; j < count; j++)
                 {
-                    Assert.AreEqual(entityViewsManagedArray[j].ID.entityID + 1, entityViewsManagedArray[j].TestFloatValue.Value);
-                    Assert.AreEqual(entityViewsManagedArray[j].ID.entityID + 1, entityViewsManagedArray[j].TestIntValue.Value);
+                    Assert.AreEqual(entityViewsManagedArray[j].ID.entityID + 1
+                                  , entityViewsManagedArray[j].TestFloatValue.Value);
+                    Assert.AreEqual(entityViewsManagedArray[j].ID.entityID + 1
+                                  , entityViewsManagedArray[j].TestIntValue.Value);
                 }
             }
         }
@@ -116,10 +118,8 @@ namespace Svelto.ECS.Tests.ECS
         {
             for (uint i = 0; i < _groupCount; i++)
             {
-                var (entityComponents, count)       = _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(_group + i);
-                
-                // can't get a managed array from a native buffer
-                Assert.Throws<NotImplementedException>(() => entityComponents.ToManagedArray());                
+                var (entityComponents, count) =
+                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(_group + i);
 
                 for (int j = 0; j < count; j++)
                 {
@@ -135,7 +135,8 @@ namespace Svelto.ECS.Tests.ECS
         {
             for (uint i = 0; i < _groupCount; i++)
             {
-                var (entityViews, count) = _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponentString>(_group + i);
+                var (entityViews, count) =
+                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponentString>(_group + i);
 
                 for (int j = 0; j < count; j++)
                 {

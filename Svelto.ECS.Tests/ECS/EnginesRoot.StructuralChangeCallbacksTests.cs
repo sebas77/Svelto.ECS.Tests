@@ -3,10 +3,9 @@ using NUnit.Framework;
 
 namespace Svelto.ECS.Tests.ECS
 {
-    public class MegaReactEngine : IReactOnAdd<TestEntityComponent>, IReactOnRemove<TestEntityComponent>,
-        IReactOnAddAndRemove<TestEntityComponent>, IReactOnDispose<TestEntityComponent>, IReactOnSubmission,
-        IReactOnSwap<TestEntityComponent>, IReactOnAddEx<TestEntityComponent>, IReactOnRemoveEx<TestEntityComponent>,
-        IReactOnSwapEx<TestEntityComponent>
+    public class MegaReactEngine : IReactOnAddAndRemove<TestEntityComponent>, IReactOnDispose<TestEntityComponent>, IReactOnSubmission,
+                                   IReactOnSwap<TestEntityComponent>, IReactOnAddEx<TestEntityComponent>, IReactOnRemoveEx<TestEntityComponent>,
+                                   IReactOnSwapEx<TestEntityComponent>
     {
         public int  addCounter;
         public int  removeCounter;
@@ -29,7 +28,7 @@ namespace Svelto.ECS.Tests.ECS
         public void Add((uint start, uint end) rangeOfEntities, in EntityCollection<TestEntityComponent> collection,
             ExclusiveGroupStruct groupID)
         {
-            var (buffer, count) = collection;
+            var (buffer, _) = collection;
 
             for (var i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
             {
@@ -51,7 +50,7 @@ namespace Svelto.ECS.Tests.ECS
         public void Remove((uint start, uint end) rangeOfEntities, in EntityCollection<TestEntityComponent> collection,
             ExclusiveGroupStruct groupID)
         {
-            var (buffer, count) = collection;
+            var (buffer, _) = collection;
 
             for (var i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
             {
@@ -73,7 +72,7 @@ namespace Svelto.ECS.Tests.ECS
         public void MovedTo((uint start, uint end) rangeOfEntities, in EntityCollection<TestEntityComponent> collection,
             ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup)
         {
-            var (buffer, count) = collection;
+            var (buffer, _) = collection;
 
             for (var i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
             {
@@ -83,10 +82,9 @@ namespace Svelto.ECS.Tests.ECS
         }
     }
 
-    public class MegaReactEngineView : IReactOnAdd<TestEntityViewComponent>, IReactOnRemove<TestEntityViewComponent>,
-        IReactOnAddAndRemove<TestEntityViewComponent>, IReactOnDispose<TestEntityViewComponent>,
-        IReactOnSwap<TestEntityViewComponent>, IReactOnAddEx<TestEntityViewComponent>,
-        IReactOnRemoveEx<TestEntityViewComponent>, IReactOnSwapEx<TestEntityViewComponent>
+    public class MegaReactEngineView : IReactOnAddAndRemove<TestEntityViewComponent>, IReactOnDispose<TestEntityViewComponent>,
+                                       IReactOnSwap<TestEntityViewComponent>, IReactOnAddEx<TestEntityViewComponent>,
+                                       IReactOnRemoveEx<TestEntityViewComponent>, IReactOnSwapEx<TestEntityViewComponent>
     {
         public int  addCounter;
         public int  removeCounter;
@@ -99,7 +97,6 @@ namespace Svelto.ECS.Tests.ECS
         
         public int  removeCounterOnDispose;
        
-
         public void Add(ref TestEntityViewComponent entityComponent, EGID egid)
         {
             legacyAddCounter += entityComponent.TestIntValue.Value;
@@ -108,7 +105,7 @@ namespace Svelto.ECS.Tests.ECS
         public void Add((uint start, uint end) rangeOfEntities, in EntityCollection<TestEntityViewComponent> collection,
             ExclusiveGroupStruct groupID)
         {
-            var (buffer, count) = collection;
+            var (buffer, _) = collection;
 
             for (var i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
             {
@@ -130,7 +127,7 @@ namespace Svelto.ECS.Tests.ECS
         public void Remove((uint start, uint end) rangeOfEntities, in EntityCollection<TestEntityViewComponent> collection,
             ExclusiveGroupStruct groupID)
         {
-            var (buffer, count) = collection;
+            var (buffer, _) = collection;
 
             for (var i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
             {
@@ -147,7 +144,7 @@ namespace Svelto.ECS.Tests.ECS
         public void MovedTo((uint start, uint end) rangeOfEntities, in EntityCollection<TestEntityViewComponent> collection,
             ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup)
         {
-            var (buffer, count) = collection;
+            var (buffer, _) = collection;
 
             for (var i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
             {
