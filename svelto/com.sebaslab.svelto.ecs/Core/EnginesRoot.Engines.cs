@@ -63,7 +63,6 @@ namespace Svelto.ECS
                 new FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnSwap>>>();
             _reactiveEnginesSwapEx =
                 new FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnSwapEx>>>();
-
             _reactiveEnginesDispose =
                 new FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnDispose>>>();
 

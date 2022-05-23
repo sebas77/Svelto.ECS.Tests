@@ -222,8 +222,7 @@ namespace Svelto.ECS.Internal
                         {
                             ((IReactOnRemoveEx<TValue>)reactiveEnginesRemoveExPerType[i].engine).Remove(
                                 (0, (uint)count)
-                              , new EntityCollection<TValue>(typeSafeDictionary.GetValues(out _), (uint)count
-                                                           , entityids), group);
+                              , new EntityCollection<TValue>(typeSafeDictionary.GetValues(out _), entityids, (uint)count), group);
                         }
                     }
                     catch
@@ -332,8 +331,7 @@ namespace Svelto.ECS.Internal
                         {
                             ((IReactOnSwapEx<TValue>)reactiveEnginesRemoveExPerType[i].engine).MovedTo(
                                 (0, (uint)count)
-                              , new EntityCollection<TValue>(typeSafeDictionary.GetValues(out _), (uint)count
-                                                           , entityids), fromgroup, togroup);
+                              , new EntityCollection<TValue>(typeSafeDictionary.GetValues(out _), entityids, (uint)count), fromgroup, togroup);
                         }
                     }
                     catch
@@ -455,8 +453,7 @@ namespace Svelto.ECS.Internal
                     {
                         ((IReactOnAddEx<TValue>)entityComponentsEngines[i].engine).Add(
                             valueTuple
-                          , new EntityCollection<TValue>(typeSafeDictionary.GetValues(out var count), count
-                                                       , entityids), groupId);
+                          , new EntityCollection<TValue>(typeSafeDictionary.GetValues(out var count), entityids, count), groupId);
                     }
                 }
                 catch (Exception e)
@@ -483,8 +480,7 @@ namespace Svelto.ECS.Internal
                         ((IReactOnSwapEx<TValue>)fasterList[i].engine).MovedTo(rangeofsubmittedentitiesindicies
                                                                              , new EntityCollection<TValue>(
                                                                                    typeSafeDictionary
-                                                                                      .GetValues(out var count), count
-                                                                                 , entityids), fromGroup
+                                                                                      .GetValues(out var count), entityids, count), fromGroup
                                                                              , toGroup);
                     }
                 }
@@ -508,8 +504,7 @@ namespace Svelto.ECS.Internal
                     {
                         ((IReactOnRemoveEx<TValue>)fasterList[i].engine).Remove(
                             valueTuple
-                          , new EntityCollection<TValue>(typeSafeDictionary.GetValues(out var count), count
-                                                       , entityids), exclusiveGroupStruct);
+                          , new EntityCollection<TValue>(typeSafeDictionary.GetValues(out var count), entityids, count), exclusiveGroupStruct);
                     }
                 }
                 catch (Exception e)

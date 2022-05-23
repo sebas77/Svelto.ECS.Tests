@@ -124,10 +124,38 @@ namespace Svelto.ECS.Tests.ECS
                 for (int j = 0; j < count; j++)
                 {
                     ref var entity = ref entityComponents[j];
-                    Assert.AreEqual(entityComponents[j].ID.entityID + 1, entity.floatValue);
-                    Assert.AreEqual(entityComponents[j].ID.entityID + 1, entity.intValue);
+                    Assert.AreEqual(entity.ID.entityID + 1, entity.floatValue);
+                    Assert.AreEqual(entity.ID.entityID + 1, entity.intValue);
                 }
             }
+        }
+        
+        [TestCase(Description = "Test EntityCollection<T> ToBuffer ToNativeArray")]
+        public void TestEntityCollection1ToBufferToNativeArrayWithEntitiesID()
+        {
+            for (uint i = 0; i < _groupCount; i++)
+            {
+                var (entityComponents, entityIDs, count) =
+                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(_group + i);
+
+                for (int j = 0; j < count; j++)
+                {
+                    Assert.AreEqual(entityComponents[j].ID.entityID, entityIDs[j]);
+                }
+            }
+        }
+        
+        [Test]
+        public void TestEmptyEntityCollectionDeconstructs()
+        {
+            void QueryEmptyGroupAndDeconstruct()
+            {
+                var dummyGroup = new ExclusiveGroup();
+                var (components, nativeEntityIDs, count) =
+                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(dummyGroup);
+            }
+
+            Assert.DoesNotThrow(QueryEmptyGroupAndDeconstruct);
         }
 
         [TestCase(Description = "Test EntityCollection<T> String")]
