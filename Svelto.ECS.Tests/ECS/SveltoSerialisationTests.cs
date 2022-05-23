@@ -313,6 +313,24 @@ namespace Svelto.ECS.Tests.Serialization
             
             Assert.DoesNotThrow(Helper);
         }
+
+        static class GroupHashMapHelper
+        {
+            public static readonly ExclusiveGroup staticDisabledGroupToBeCaughtByGroupHashMap =
+                new ExclusiveGroup(ExclusiveGroupBitmask.DISABLED_BIT);
+        }
+        
+        [Test]
+        public void TestGroupHashMapWithBytemaskGroups()
+        {
+            var serializer = _enginesRoot.GenerateEntitySerializer();
+
+            var hash = serializer.GetHashFromGroup(GroupHashMapHelper.staticDisabledGroupToBeCaughtByGroupHashMap);
+            ExclusiveGroupStruct groupBack = ExclusiveGroupStruct.Invalid;
+
+            Assert.DoesNotThrow(() => groupBack = serializer.GetGroupFromHash(hash));
+            Assert.AreEqual(GroupHashMapHelper.staticDisabledGroupToBeCaughtByGroupHashMap.id, groupBack.id);
+        }
         
         EnginesRoot                       _enginesRoot;
         IEntityFactory                    _entityFactory;
