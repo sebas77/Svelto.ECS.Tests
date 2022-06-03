@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Svelto.DataStructures;
 using Svelto.ECS.Schedulers;
+using Svelto.ECS.Tests.ECS.Filters;
 
 namespace Svelto.ECS.Tests.ECS
 {
@@ -36,8 +37,6 @@ namespace Svelto.ECS.Tests.ECS
         protected IEntityFunctions                  _functions;
         protected IUnitTestingInterface             _entitiesDB;
 
-        protected static readonly ExclusiveGroup                   GroupA  = new ExclusiveGroup();
-        protected static readonly ExclusiveGroup                   GroupB  = new ExclusiveGroup();
-        protected static readonly FasterList<ExclusiveGroupStruct> GroupAB = new FasterList<ExclusiveGroupStruct>().Add(GroupA).Add(GroupB);
+        protected static readonly FasterList<ExclusiveGroupStruct> GroupAB = new FasterList<ExclusiveGroupStruct>().Add(Groups.GroupA).Add(Groups.GroupB);
     }
 }

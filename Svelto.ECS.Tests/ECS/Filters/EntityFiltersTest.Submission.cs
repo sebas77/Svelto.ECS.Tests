@@ -27,14 +27,14 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(true, iterator.MoveNext());
 
             var (indices, group) = iterator.Current;
-            Assert.AreEqual(GroupA.id, group.id);
+            Assert.AreEqual(Groups.GroupA.id, group.id);
             Assert.AreEqual(2, indices.count);
 
             // Group B
             Assert.AreEqual(true, iterator.MoveNext());
 
             (indices, group) = iterator.Current;
-            Assert.AreEqual(GroupB.id, group.id);
+            Assert.AreEqual(Groups.GroupB.id, group.id);
             Assert.AreEqual(3, indices.count);
 
             _scheduler.SubmitEntities();
@@ -68,7 +68,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var (indices, _) = iterator.Current;
             Assert.AreEqual(3, indices.count, "Filter must not be removed before submission");
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupA);
+            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
             Assert.AreEqual(EgidA4, components[indices[2]].ID
                           , "Unexpected entity will get swapped, test is invalidated");
 
@@ -81,7 +81,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             (indices, _) = iterator.Current;
             Assert.AreEqual(2, indices.count, "Filter count must decrease by one after remove");
 
-            (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupA);
+            (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
             Assert.AreEqual(2, indices[0], "Removed index must be reused for the last entity");
             Assert.AreEqual(EgidA4, components[indices[0]].ID, "Reused index must point to the previous last entity");
         }
@@ -112,7 +112,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var (indices, _) = iterator.Current;
             Assert.AreEqual(3, indices.count, "Filter count must not have changed");
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupA);
+            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
             Assert.AreEqual(0, indices[2], "Removed index must be reused for last entity.");
             Assert.AreEqual(EgidA4, components[indices[2]].ID, "Reused index must be pointing to last entity");
         }
@@ -143,7 +143,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var (indices, _) = iterator.Current;
             Assert.AreEqual(2, indices.count, "Filter count must decrease by one after remove");
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupA);
+            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
             Assert.AreEqual(EgidA1, components[indices[0]].ID, "Indices kept must not have changed");
             Assert.AreEqual(EgidA2, components[indices[1]].ID, "Indices kept must not have changed");
         }
@@ -154,7 +154,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var filter = _entitiesDB.GetFilters()
                                     .GetOrCreatePersistentFilter<TestEntityComponent>(
                                          (_persistentFilter1, testFilterContext));
-            var mmapA = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(GroupA);
+            var mmapA = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(Groups.GroupA);
             filter.Add(EgidA1, mmapA);
             filter.Add(EgidA2, mmapA);
 
@@ -169,7 +169,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var (indices, _) = iterator.Current;
             Assert.AreEqual(2, indices.count, "Filter count must decrease by one after remove");
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupA);
+            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
             Assert.AreEqual(EgidA1, components[indices[0]].ID, "Indices kept must not have changed");
             Assert.AreEqual(EgidA2, components[indices[1]].ID, "Indices kept must not have changed");
         }
@@ -188,32 +188,33 @@ namespace Svelto.ECS.Tests.ECS.Filters
             filter.Add(EgidB4, mmap);
             mmap.Dispose();
             // Swap an entity that was filtered and test changes.
-            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidB1, GroupA);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidB1, Groups.GroupA);
             _scheduler.SubmitEntities();
 
             // Check groups A.
             var iterator = filter.GetEnumerator();
             iterator.MoveNext();
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupA);
+            var (components, entityIDs, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
 
             var (indices, _) = iterator.Current;
             Assert.AreEqual(3, indices.count, "Group A count must increase after swap.");
             Assert.AreEqual(EgidA0, components[indices[0]].ID, "Previous filtered entities must not have changed.");
             Assert.AreEqual(EgidA3, components[indices[1]].ID, "Previous filtered entities must not have changed.");
-            Assert.AreEqual(new EGID(EgidB1.entityID, GroupA), components[indices[2]].ID
+            Assert.AreEqual(new EGID(EgidB1.entityID, Groups.GroupA), components[indices[2]].ID
                           , "Swapped entity must be added to the last index.");
 
             // Check groups B.
             iterator.MoveNext();
 
-            (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupB);
+            (components, entityIDs, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupB);
 
             (indices, _) = iterator.Current;
             Assert.AreEqual(1, indices.count, "Group B count must decrease after swap.");
             Assert.AreEqual(1, indices[0], "Index of last entity must have updated.");
-            Assert.AreEqual(EgidB4, components[indices[0]].ID
+            Assert.AreEqual(EgidB4, components[indices[0]].ID //
                           , "Entity pointed by index must be the previuos last index.");
+
         }
 
         [Test]
@@ -230,14 +231,14 @@ namespace Svelto.ECS.Tests.ECS.Filters
             filter.Add(EgidB4, mmap);
             mmap.Dispose();
             // Swap an entity that was not filtered and test changes.
-            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidB0, GroupA);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidB0, Groups.GroupA);
             _scheduler.SubmitEntities();
 
             // Check groups A.
             var iterator = filter.GetEnumerator();
             iterator.MoveNext();
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupA);
+            var (components, entitiesIDs, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
 
             var (indices, _) = iterator.Current;
             Assert.AreEqual(2, indices.count, "Group A count must not have changed after swap.");
@@ -247,12 +248,27 @@ namespace Svelto.ECS.Tests.ECS.Filters
             // Check groups B.
             iterator.MoveNext();
 
-            (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupB);
-
-            (indices, _) = iterator.Current;
+            (components, entitiesIDs, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupB);
+            (indices, _) = iterator.Current; //filters linked to the groupB
+            
+            
+            // entities are built in this order
+            // (EgidB0);
+            // (EgidB1); //value in filter[0] = 1
+            // (EgidB2);
+            // (EgidB3);
+            // (EgidB4); //value in filter[1] = 4
+            //so after removing B0 I expect the order to shuffle like:
+            // (EgidB4); //value in filter[1] = 0
+            // (EgidB1); //value in filter[0] = 1
+            // (EgidB2);
+            // (EgidB3);
+            
+            
             Assert.AreEqual(2, indices.count, "Group B count must not have changed after swap.");
             Assert.AreEqual(1, indices[0], "Index of first entity must not have updated.");
             Assert.AreEqual(0, indices[1], "Index of last entity must have changed to the swapped index.");
+
             Assert.AreEqual(EgidB4, components[indices[1]].ID
                           , "Changed index must be still pointing to the correct entity");
         }
@@ -272,26 +288,26 @@ namespace Svelto.ECS.Tests.ECS.Filters
             filter.Add(EgidB4, mmap);
             mmap.Dispose();
             // Swap an entity that was filtered and test changes.
-            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidB4, GroupA);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidB4, Groups.GroupA);
             _scheduler.SubmitEntities();
 
             // Check groups A.
             var iterator = filter.GetEnumerator();
             iterator.MoveNext();
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupA);
+            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
 
             var (indices, _) = iterator.Current;
             Assert.AreEqual(3, indices.count, "Group A count must increase after swap.");
             Assert.AreEqual(EgidA0, components[indices[0]].ID, "Previous filtered entities must not have changed.");
             Assert.AreEqual(EgidA3, components[indices[1]].ID, "Previous filtered entities must not have changed.");
-            Assert.AreEqual(new EGID(EgidB4.entityID, GroupA), components[indices[2]].ID
+            Assert.AreEqual(new EGID(EgidB4.entityID, Groups.GroupA), components[indices[2]].ID
                           , "Swapped entity must be added to the last index.");
 
             // Check groups B.
             iterator.MoveNext();
 
-            (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupB);
+            (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupB);
 
             (indices, _) = iterator.Current;
             Assert.AreEqual(2, indices.count, "Group B count must decrease after swap.");
@@ -314,14 +330,14 @@ namespace Svelto.ECS.Tests.ECS.Filters
             filter.Add(EgidB4, mmap);
             mmap.Dispose();
             // Swap an entity that was filtered and test changes.
-            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA4, GroupB);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA4, Groups.GroupB);
             _scheduler.SubmitEntities();
 
             // Check groups A.
             var iterator = filter.GetEnumerator();
             iterator.MoveNext();
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupA);
+            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
 
             var (indices, _) = iterator.Current;
             Assert.AreEqual(2, indices.count, "Group A count must not change.");
@@ -331,7 +347,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             // Check groups B.
             iterator.MoveNext();
 
-            (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupB);
+            (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupB);
 
             (indices, _) = iterator.Current;
             Assert.AreEqual(3, indices.count, "Group B count must not change.");
@@ -373,7 +389,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var (indices, _) = iterator.Current;
             Assert.AreEqual(4, indices.count, "Filter count must have changed by one");
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(GroupA);
+            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
             Assert.AreEqual(4, indices[3], "Last index must point to the last entity added.");
             Assert.AreEqual(EgidA0, components[indices[3]].ID
                           , "Last entity index must point to the last entity added.");
@@ -396,18 +412,18 @@ namespace Svelto.ECS.Tests.ECS.Filters
             filter.Add(EgidA4, mmap);
 
             // Swapping all but one entity to other group and removing from filter at the same time
-            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA0, GroupB);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA0, Groups.GroupB);
             filter.Remove(EgidA0);
-            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA1, GroupB);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA1, Groups.GroupB);
             filter.Remove(EgidA1);
-            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA3, GroupB);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA3, Groups.GroupB);
             filter.Remove(EgidA3);
-            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA4, GroupB);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA4, Groups.GroupB);
             filter.Remove(EgidA4);
 
             _scheduler.SubmitEntities();
 
-            var aGroupFilter = filter.GetGroupFilter(GroupA);
+            var aGroupFilter = filter.GetGroupFilter(Groups.GroupA);
 
             Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
 
@@ -434,18 +450,18 @@ namespace Svelto.ECS.Tests.ECS.Filters
             filter.Add(EgidA4, mmap);
 
             // Swapping all but one entity to other group and removing from filter at the same time
-            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA4, GroupB);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA4, Groups.GroupB);
             filter.Remove(EgidA4);
-            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA3, GroupB);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA3, Groups.GroupB);
             filter.Remove(EgidA3);
-            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA1, GroupB);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA1, Groups.GroupB);
             filter.Remove(EgidA1);
-            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA0, GroupB);
+            _functions.SwapEntityGroup<EntityDescriptorWithComponents>(EgidA0, Groups.GroupB);
             filter.Remove(EgidA0);
 
             _scheduler.SubmitEntities();
 
-            var aGroupFilter = filter.GetGroupFilter(GroupA);
+            var aGroupFilter = filter.GetGroupFilter(Groups.GroupA);
 
             Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
 
@@ -489,7 +505,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
                 
                 _scheduler.SubmitEntities();
 
-                var aGroupFilter = filter.GetGroupFilter(GroupA);
+                var aGroupFilter = filter.GetGroupFilter(Groups.GroupA);
 
                 Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
 
@@ -521,7 +537,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
                 
                 _scheduler.SubmitEntities();
 
-                var aGroupFilter = filter.GetGroupFilter(GroupA);
+                var aGroupFilter = filter.GetGroupFilter(Groups.GroupA);
 
                 //multi map are still valid even after a submission, this should be a separate unit test actually
                 var entityIndex = mmap.GetIndex(EgidA2);
@@ -552,7 +568,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
                 
                 _scheduler.SubmitEntities();
 
-                var aGroupFilter = filter.GetGroupFilter(GroupA);
+                var aGroupFilter = filter.GetGroupFilter(Groups.GroupA);
 
                 //multi map are still valid even after a submission, this should be a separate unit test actually
                 var entityIndex = mmap.GetIndex(EgidA2);
@@ -594,7 +610,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
 
                 _scheduler.SubmitEntities();
 
-                var aGroupFilter = filter.GetGroupFilter(GroupA);
+                var aGroupFilter = filter.GetGroupFilter(Groups.GroupA);
 
                 Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
 
@@ -633,7 +649,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
 
             _scheduler.SubmitEntities();
 
-            var aGroupFilter = filter.GetGroupFilter(GroupA);
+            var aGroupFilter = filter.GetGroupFilter(Groups.GroupA);
 
             Assert.AreEqual(aGroupFilter.indices.count, 1, "Filter should contain 1 entity");
 

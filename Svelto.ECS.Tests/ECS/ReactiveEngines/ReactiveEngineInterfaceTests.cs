@@ -14,12 +14,12 @@ namespace Svelto.ECS.Tests.ECS
             _enginesRoot.AddEngine(engine);
 
             for (uint i = 0; i < 10; i++)
-                _factory.BuildEntity<EntityDescriptorWithComponents>(i, GroupA);
+                _factory.BuildEntity<EntityDescriptorWithComponents>(i, Groups.GroupA);
 
             _scheduler.SubmitEntities();
 
             for (uint i = 0; i < 5; i++)
-                _functions.RemoveEntity<EntityDescriptorWithComponents>(i, GroupA);
+                _functions.RemoveEntity<EntityDescriptorWithComponents>(i, Groups.GroupA);
 
             _scheduler.SubmitEntities();
 
@@ -34,12 +34,12 @@ namespace Svelto.ECS.Tests.ECS
             _enginesRoot.AddEngine(engine);
 
             for (uint i = 0; i < 10; i++)
-                _factory.BuildEntity<EntityDescriptorWithComponents>(i, GroupA);
+                _factory.BuildEntity<EntityDescriptorWithComponents>(i, Groups.GroupA);
 
             _scheduler.SubmitEntities();
 
             for (uint i = 0; i < 5; i++)
-                _functions.RemoveEntity<EntityDescriptorWithComponents>(i, GroupA);
+                _functions.RemoveEntity<EntityDescriptorWithComponents>(i, Groups.GroupA);
 
             _scheduler.SubmitEntities();
 

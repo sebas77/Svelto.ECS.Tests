@@ -11,7 +11,7 @@ namespace Svelto.ECS
         public static void Deconstruct<T1>(in this EntityCollection<T1> ec, out NB<T1> buffer, out int count)
             where T1 : unmanaged, IEntityComponent
         {
-            if (ec.count == 0)
+            if (ec._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0 
             {
                 buffer = default;
                 count  = 0;
@@ -26,7 +26,7 @@ namespace Svelto.ECS
         public static void Deconstruct<T1>(in this EntityCollection<T1> ec, out NB<T1> buffer,
             out NativeEntityIDs entityIDs, out int count) where T1 : unmanaged, IEntityComponent
         {
-            if (ec.count == 0)
+            if (ec._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer    = default;
                 count     = 0;
@@ -44,7 +44,7 @@ namespace Svelto.ECS
             out NB<T2> buffer2, out NativeEntityIDs entityIDs, out int count) where T1 : unmanaged, IEntityComponent
             where T2 : unmanaged, IEntityComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1   = default;
                 buffer2   = default;
@@ -64,7 +64,7 @@ namespace Svelto.ECS
             out NB<T2> buffer2, out int count) where T1 : unmanaged, IEntityComponent
             where T2 : unmanaged, IEntityComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1   = default;
                 buffer2   = default;
@@ -83,7 +83,7 @@ namespace Svelto.ECS
             where T2 : unmanaged, IEntityComponent
             where T3 : unmanaged, IEntityComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1 = default;
                 buffer2 = default;
@@ -105,7 +105,7 @@ namespace Svelto.ECS
             where T2 : unmanaged, IEntityComponent
             where T3 : unmanaged, IEntityComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1   = default;
                 buffer2   = default;
@@ -130,7 +130,7 @@ namespace Svelto.ECS
             where T3 : unmanaged, IEntityComponent
             where T4 : unmanaged, IEntityComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1 = default;
                 buffer2 = default;
@@ -155,7 +155,7 @@ namespace Svelto.ECS
             where T3 : unmanaged, IEntityComponent
             where T4 : unmanaged, IEntityComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1   = default;
                 buffer2   = default;
@@ -181,7 +181,7 @@ namespace Svelto.ECS
         public static void Deconstruct<T1>(in this EntityCollection<T1> ec, out MB<T1> buffer, out int count)
             where T1 : struct, IEntityViewComponent
         {
-            if (ec.count == 0)
+            if (ec._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer = default;
                 count   = 0;
@@ -196,7 +196,7 @@ namespace Svelto.ECS
         public static void Deconstruct<T1>(in this EntityCollection<T1> ec, out MB<T1> buffer,
             out ManagedEntityIDs entityIDs, out int count) where T1 : struct, IEntityViewComponent
         {
-            if (ec.count == 0)
+            if (ec._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer    = default;
                 count     = 0;
@@ -213,7 +213,7 @@ namespace Svelto.ECS
             out MB<T2> buffer2, out int count) where T1 : struct, IEntityViewComponent
             where T2 : struct, IEntityViewComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1 = default;
                 buffer2 = default;
@@ -231,7 +231,7 @@ namespace Svelto.ECS
             out MB<T2> buffer2, out ManagedEntityIDs entityIDs, out int count) where T1 : struct, IEntityViewComponent
             where T2 : struct, IEntityViewComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1   = default;
                 buffer2   = default;
@@ -252,7 +252,7 @@ namespace Svelto.ECS
             where T2 : struct, IEntityViewComponent
             where T3 : struct, IEntityViewComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1 = default;
                 buffer2 = default;
@@ -274,7 +274,7 @@ namespace Svelto.ECS
             where T2 : struct, IEntityViewComponent
             where T3 : struct, IEntityViewComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1   = default;
                 buffer2   = default;
@@ -299,7 +299,7 @@ namespace Svelto.ECS
             out MB<T2> buffer2, out int count) where T1 : unmanaged, IEntityComponent
             where T2 : struct, IEntityViewComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1 = default;
                 buffer2 = default;
@@ -318,7 +318,7 @@ namespace Svelto.ECS
             where T2 : struct, IEntityViewComponent
             where T3 : struct, IEntityViewComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1 = default;
                 buffer2 = default;
@@ -341,7 +341,7 @@ namespace Svelto.ECS
             where T3 : unmanaged, IEntityComponent
             where T4 : struct, IEntityViewComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1 = default;
                 buffer2 = default;
@@ -367,7 +367,7 @@ namespace Svelto.ECS
             where T2 : unmanaged, IEntityComponent
             where T3 : struct, IEntityViewComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1 = default;
                 buffer2 = default;
@@ -390,7 +390,7 @@ namespace Svelto.ECS
             where T3 : struct, IEntityViewComponent
             where T4 : struct, IEntityViewComponent
         {
-            if (ec.count == 0)
+            if (ec.buffer1._buffer == null) //I cannot test 0, as buffer can be valid and processed by removeEx with count 0
             {
                 buffer1 = default;
                 buffer2 = default;

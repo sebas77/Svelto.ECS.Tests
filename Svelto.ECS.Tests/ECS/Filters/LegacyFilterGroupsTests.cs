@@ -9,16 +9,16 @@ namespace Svelto.ECS.Tests.ECS.Filters
         [Test]
         public void Test_Removing_Last_Added_Entity_And_Adding_It_Back()
         {
-            var egid0 = _factory.BuildEntity<TestEntityDescriptor>(0, GroupA).EGID;
-            var egid1 = _factory.BuildEntity<TestEntityDescriptor>(1, GroupA).EGID;
-            var egid2 = _factory.BuildEntity<TestEntityDescriptor>(2, GroupA).EGID;
-            var egid3 = _factory.BuildEntity<TestEntityDescriptor>(3, GroupA).EGID;
+            var egid0 = _factory.BuildEntity<TestEntityDescriptor>(0, Groups.GroupA).EGID;
+            var egid1 = _factory.BuildEntity<TestEntityDescriptor>(1, Groups.GroupA).EGID;
+            var egid2 = _factory.BuildEntity<TestEntityDescriptor>(2, Groups.GroupA).EGID;
+            var egid3 = _factory.BuildEntity<TestEntityDescriptor>(3, Groups.GroupA).EGID;
 
             _scheduler.SubmitEntities();
 
             var filter = _entitiesDB.entitiesForTesting.GetLegacyFilters()
-               .CreateOrGetFilterForGroup<TestEntityComponent>(FilterIdA, GroupA);
-            var mapper = _entitiesDB.entitiesForTesting.QueryMappedEntities<TestEntityComponent>(GroupA);
+               .CreateOrGetFilterForGroup<TestEntityComponent>(FilterIdA, Groups.GroupA);
+            var mapper = _entitiesDB.entitiesForTesting.QueryMappedEntities<TestEntityComponent>(Groups.GroupA);
 
             filter.Add(egid0.entityID, mapper);
             filter.Add(egid1.entityID, mapper);

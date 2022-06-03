@@ -24,7 +24,7 @@ namespace Svelto.ECS.Tests.ECS
         public void DoubleForEnumeratorWithOneComponentAndOneEmptyGroupTest()
         {
             for (uint i = 0; i < 10; i++)
-                CreateTestEntity(i, GroupA, (int) i);
+                CreateTestEntity(i, Groups.GroupA, (int) i);
 
             _scheduler.SubmitEntities();
 
@@ -51,7 +51,7 @@ namespace Svelto.ECS.Tests.ECS
                           , Is.EqualTo((bufferA[indexA].intValue << 16) | bufferB[indexB].intValue));
                 Assert.That(results[iteration++], Is.EqualTo((indexA << 16) | indexB));
 
-                Assert.That(groupA == GroupA);
+                Assert.That(groupA == Groups.GroupA);
             }
 
             Assert.That(results.Count == iteration);
@@ -61,10 +61,10 @@ namespace Svelto.ECS.Tests.ECS
         public void DoubleForEnumeratorWithOneComponentTest()
         {
             for (uint i = 0; i < 10; i++)
-                CreateTestEntity(i, GroupA, (int) i);
+                CreateTestEntity(i, Groups.GroupA, (int) i);
 
             for (uint i = 0; i < 5; i++)
-                CreateTestEntity(i, GroupB, (int) i);
+                CreateTestEntity(i, Groups.GroupB, (int) i);
 
             _scheduler.SubmitEntities();
 
@@ -117,10 +117,10 @@ namespace Svelto.ECS.Tests.ECS
         public void DoubleForEnumeratorWithTwoComponentTest()
         {
             for (uint i = 0; i < 10; i++)
-                CreateTestEntity(i, GroupA, (int) i);
+                CreateTestEntity(i, Groups.GroupA, (int) i);
 
             for (uint i = 0; i < 5; i++)
-                CreateTestEntity(i, GroupB, (int) i);
+                CreateTestEntity(i, Groups.GroupB, (int) i);
 
             _scheduler.SubmitEntities();
 
@@ -170,10 +170,10 @@ namespace Svelto.ECS.Tests.ECS
         public void DoubleForEnumeratorWith3ComponentTest()
         {
             for (uint i = 0; i < 10; i++)
-                CreateTestEntity(i, GroupA, (int) i);
+                CreateTestEntity(i, Groups.GroupA, (int) i);
 
             for (uint i = 0; i < 5; i++)
-                CreateTestEntity(i, GroupB, (int) i);
+                CreateTestEntity(i, Groups.GroupB, (int) i);
 
             _scheduler.SubmitEntities();
 

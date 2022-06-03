@@ -3,6 +3,9 @@ using Svelto.Common;
 using Svelto.ECS.Native;
 using Svelto.ECS.Schedulers;
 
+namespace Svelto.ECS.Tests
+{ }
+
 namespace Svelto.ECS.Tests.ECS.Filters
 {
     [TestFixture]
@@ -50,7 +53,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         public void Test_AddingFilter_SingleEntity()
         {
             var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
-            filter.Add(EgidA1, _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(GroupA));
+            filter.Add(EgidA1, _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(Groups.GroupA));
 
             var iterator = filter.GetEnumerator();
 
@@ -60,7 +63,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var (indices, group) = iterator.Current;
             Assert.AreEqual(1, indices.count);
             Assert.AreEqual(1, indices[0]);
-            Assert.AreEqual(GroupA.id, group.id);
+            Assert.AreEqual(Groups.GroupA.id, group.id);
 
             // No more groups to iterate.
             Assert.AreEqual(false, iterator.MoveNext());
@@ -91,7 +94,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(4, indices[0]);
             Assert.AreEqual(0, indices[1]);
             Assert.AreEqual(2, indices[2]);
-            Assert.AreEqual(GroupB.id, group.id);
+            Assert.AreEqual(Groups.GroupB.id, group.id);
 
             // Check group A filters
             Assert.AreEqual(true, iterator.MoveNext());
@@ -100,7 +103,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(2, indices.count);
             Assert.AreEqual(1, indices[0]);
             Assert.AreEqual(3, indices[1]);
-            Assert.AreEqual(GroupA.id, group.id);
+            Assert.AreEqual(Groups.GroupA.id, group.id);
 
             // No more groups to iterate
             Assert.AreEqual(false, iterator.MoveNext());
@@ -110,7 +113,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         public void Test_RemovingFilter_SingleEntity()
         {
             var filter = _entitiesDB.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>((_persistentFilter1, testFilterContext));
-            var mmapA  = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(GroupA);
+            var mmapA  = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(Groups.GroupA);
             filter.Add(EgidA1, mmapA);
             filter.Add(EgidA3, mmapA);
             filter.Add(EgidA4, mmapA);
@@ -199,9 +202,6 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(false, iterator.MoveNext());
         }
 
-        static readonly ExclusiveGroup GroupA = new ExclusiveGroup();
-        static readonly ExclusiveGroup GroupB = new ExclusiveGroup();
-
         SimpleEntitiesSubmissionScheduler _scheduler;
         EnginesRoot                       _enginesRoot;
         IEntityFactory                    _factory;
@@ -211,16 +211,16 @@ namespace Svelto.ECS.Tests.ECS.Filters
         int _persistentFilter1 = 0;
         int _transientFilter1  = 0;
         
-        static readonly EGID EgidA0 = new EGID(45872, GroupA);
-        static readonly EGID EgidA1 = new EGID(28577, GroupA);
-        static readonly EGID EgidA2 = new EGID(95323, GroupA);
-        static readonly EGID EgidA3 = new EGID(68465, GroupA);
-        static readonly EGID EgidA4 = new EGID(12335, GroupA);
+        static readonly EGID EgidA0 = new EGID(45872, Groups.GroupA);
+        static readonly EGID EgidA1 = new EGID(28577, Groups.GroupA);
+        static readonly EGID EgidA2 = new EGID(95323, Groups.GroupA);
+        static readonly EGID EgidA3 = new EGID(68465, Groups.GroupA);
+        static readonly EGID EgidA4 = new EGID(12335, Groups.GroupA);
 
-        static readonly EGID EgidB0 = new EGID(45873, GroupB);
-        static readonly EGID EgidB1 = new EGID(28578, GroupB);
-        static readonly EGID EgidB2 = new EGID(95324, GroupB);
-        static readonly EGID EgidB3 = new EGID(68466, GroupB);
-        static readonly EGID EgidB4 = new EGID(12336, GroupB);
+        static readonly EGID EgidB0 = new EGID(45873, Groups.GroupB);
+        static readonly EGID EgidB1 = new EGID(28578, Groups.GroupB);
+        static readonly EGID EgidB2 = new EGID(95324, Groups.GroupB);
+        static readonly EGID EgidB3 = new EGID(68466, Groups.GroupB);
+        static readonly EGID EgidB4 = new EGID(12336, Groups.GroupB);
     }
 }

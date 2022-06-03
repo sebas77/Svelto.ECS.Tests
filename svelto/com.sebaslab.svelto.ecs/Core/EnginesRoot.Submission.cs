@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
-using Svelto.ECS.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
@@ -90,15 +88,16 @@ namespace Svelto.ECS
 
                             FasterList<(uint, string)> entityIDsToRemove = groupedEntitiesToRemove.value;
 
-                            enginesRoot._entityIDsLeftAndAffectedByRemoval.FastClear();
-                            
+                            enginesRoot._transientEntityIDsLeftAndAffectedByRemoval.FastClear();
+
                             fromComponentsDictionary.RemoveEntitiesFromDictionary(
-                                entityIDsToRemove, enginesRoot._entityIDsLeftAndAffectedByRemoval);
+                                entityIDsToRemove, enginesRoot._transientEntityIDsLeftAndAffectedByRemoval);
 
                             //important: remove from the filter must happen after remove from the dictionary
                             //as we need to read the new indices linked to entities after the removal
                             enginesRoot.RemoveEntitiesFromPersistentFilters(
-                                entityIDsToRemove, fromGroup, componentType, fromComponentsDictionary);
+                                entityIDsToRemove, fromGroup, componentType, fromComponentsDictionary
+                              , enginesRoot._transientEntityIDsLeftAndAffectedByRemoval);
 
                             //store new database count after the entities are removed from the datatabase, plus the number of entities removed
                             enginesRoot._cachedRangeOfSubmittedIndices.Add(((uint, uint))(
@@ -210,16 +209,16 @@ namespace Svelto.ECS
                                                                                  , toComponentsDictionary.count
                                                                                  + fromEntityToEntityIDs.count));
 
-                                enginesRoot._entityIDsLeftAndAffectedByRemoval.FastClear();
+                                enginesRoot._transientEntityIDsLeftAndAffectedByRemoval.FastClear();
 
                                 fromComponentsDictionary.SwapEntitiesBetweenDictionaries(
                                     fromEntityToEntityIDs, fromGroup, toGroup, toComponentsDictionary
-                                  , enginesRoot._entityIDsLeftAndAffectedByRemoval);
+                                  , enginesRoot._transientEntityIDsLeftAndAffectedByRemoval);
 
                                 //important: this must happen after the entities are swapped in the database
                                 enginesRoot.SwapEntityBetweenPersistentFilters(
                                     fromEntityToEntityIDs, fromComponentsDictionary, toComponentsDictionary, fromGroup
-                                  , toGroup, componentType);
+                                  , toGroup, componentType, enginesRoot._transientEntityIDsLeftAndAffectedByRemoval);
                             }
                         }
                     }
@@ -327,7 +326,7 @@ namespace Svelto.ECS
                                     //Fill the DB with the entity components generated this frame.
                                     fromDictionary.AddEntitiesToDictionary(toDictionary, groupID
 #if SLOW_SVELTO_SUBMISSION
-                                                                         , entityLocator
+                                                                     , entityLocator
 #endif
                                     );
                                 }
@@ -402,6 +401,7 @@ namespace Svelto.ECS
             return _groupedEntityToAdd.AnyEntityCreated() || _entitiesOperations.AnyOperationQueued();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void RemoveEntitiesFromGroup(ExclusiveGroupStruct groupID, in PlatformProfiler profiler)
         {
             _entityLocator.RemoveAllGroupReferenceLocators(groupID);
@@ -424,6 +424,7 @@ namespace Svelto.ECS
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void SwapEntitiesBetweenGroups
             (ExclusiveGroupStruct fromGroupId, ExclusiveGroupStruct toGroupId, PlatformProfiler platformProfiler)
         {
@@ -443,7 +444,7 @@ namespace Svelto.ECS
 
                 fromDictionary.AddEntitiesToDictionary(toDictionary, toGroupId
 #if SLOW_SVELTO_SUBMISSION
-                                                     , this.entityLocator
+                                                 , this.entityLocator
 #endif
                 );
             }
@@ -513,8 +514,8 @@ namespace Svelto.ECS
 
         //transient caches>>>>>>>>>>>>>>>>>>>>>
         readonly FasterList<(uint, uint)>    _cachedRangeOfSubmittedIndices;
-        readonly FasterDictionary<uint, int> _entityIDsLeftWithoutDuplicates;
-        readonly FasterList<uint>            _entityIDsLeftAndAffectedByRemoval;
+        readonly FasterDictionary<uint, int> _transientEntityIDsLeftWithoutDuplicates;
+        readonly FasterList<uint>            _transientEntityIDsLeftAndAffectedByRemoval;
         //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         static readonly

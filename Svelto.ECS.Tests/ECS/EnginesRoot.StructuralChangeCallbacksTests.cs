@@ -114,11 +114,6 @@ namespace Svelto.ECS.Tests.ECS
             }
         }
 
-        void IReactOnDispose<TestEntityViewComponent>.Remove(ref TestEntityViewComponent entityComponent, EGID egid)
-        {
-            removeCounterOnDispose += entityComponent.TestIntValue.Value;
-        }
-
         void IReactOnRemove<TestEntityViewComponent>.Remove(ref TestEntityViewComponent entityComponent, EGID egid)
         {
             legacyRemoveCounter += entityComponent.TestIntValue.Value;
@@ -152,6 +147,12 @@ namespace Svelto.ECS.Tests.ECS
                 swapCounter += entityComponent.TestIntValue.Value;
             }
         }
+        
+        void IReactOnDispose<TestEntityViewComponent>.Remove(ref TestEntityViewComponent entityComponent, EGID egid)
+        {
+            removeCounterOnDispose += entityComponent.TestIntValue.Value;
+        }
+        
     }
 
     [TestFixture]
@@ -165,7 +166,7 @@ namespace Svelto.ECS.Tests.ECS
             for (uint i = 0; i < 100; i++)
             {
                 total += i;
-                CreateTestEntity(i, GroupA, (int)i);
+                CreateTestEntity(i, Groups.GroupA, (int)i);
             }
 
             _scheduler.SubmitEntities();
@@ -175,25 +176,25 @@ namespace Svelto.ECS.Tests.ECS
             _enginesRoot.AddEngine(megaReactEngine);
 
             for (uint i = 0; i < 100; i++)
-                CreateTestEntity(i + 100, GroupA);
-
+                CreateTestEntity(i + 100, Groups.GroupA);
             _scheduler.SubmitEntities();
             
-            for (uint i = 0; i < 100; i++)
-                _functions.SwapEntityGroup<EntityDescriptorWithComponentAndViewComponent>(new EGID(i, GroupA), GroupB);
-            _scheduler.SubmitEntities();
-
-            for (uint i = 0; i < 100; i++)
-                _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(i, GroupB);
-            _scheduler.SubmitEntities();
-
             Assert.That(megaReactEngine.legacyAddCounter, Is.EqualTo(100));
-            Assert.That(megaReactEngine.legacyRemoveCounter, Is.EqualTo(total));
-            Assert.That(megaReactEngine.legacySwapCounter, Is.EqualTo(total));
-            
             Assert.That(megaReactEngine.addCounter, Is.EqualTo(100));
-            Assert.That(megaReactEngine.removeCounter, Is.EqualTo(total));
+            
+            for (uint i = 0; i < 100; i++)
+                _functions.SwapEntityGroup<EntityDescriptorWithComponentAndViewComponent>(new EGID(i, Groups.GroupA), Groups.GroupB);
+            _scheduler.SubmitEntities();
+            
+            Assert.That(megaReactEngine.legacySwapCounter, Is.EqualTo(total));
             Assert.That(megaReactEngine.swapCounter, Is.EqualTo(total));
+
+            for (uint i = 0; i < 100; i++)
+                _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(i, Groups.GroupB);
+            _scheduler.SubmitEntities();
+            
+            Assert.That(megaReactEngine.legacyRemoveCounter, Is.EqualTo(total));
+            Assert.That(megaReactEngine.removeCounter, Is.EqualTo(total));
             
             Assert.That(megaReactEngine.entitySubmittedIsCalled, Is.EqualTo(true));
 
@@ -210,7 +211,7 @@ namespace Svelto.ECS.Tests.ECS
             for (uint i = 0; i < 100; i++)
             {
                 total += i;
-                CreateTestEntity(i, GroupA, (int)i);
+                CreateTestEntity(i, Groups.GroupA, (int)i);
             }
             _scheduler.SubmitEntities();
 
@@ -219,31 +220,34 @@ namespace Svelto.ECS.Tests.ECS
             _enginesRoot.AddEngine(megaReactEngine);
 
             for (uint i = 0; i < 100; i++)
-                CreateTestEntity(i + 100, GroupA);
+            {
+                CreateTestEntity(i + 100, Groups.GroupA, (int)i);
+            }
 
             _scheduler.SubmitEntities();
             
+            Assert.That(megaReactEngine.legacyAddCounter, Is.EqualTo(total));
+            Assert.That(megaReactEngine.addCounter, Is.EqualTo(total));
+
             for (uint i = 0; i < 100; i++)
-                _functions.SwapEntityGroup<EntityDescriptorWithComponentAndViewComponent>(new EGID(i, GroupA), GroupB);
+                _functions.SwapEntityGroup<EntityDescriptorWithComponentAndViewComponent>(new EGID(i, Groups.GroupA), Groups.GroupB);
             _scheduler.SubmitEntities();
             
-            for (uint i = 0; i < 100; i++)
-                _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(i, GroupB);
-            _scheduler.SubmitEntities();
-            
-            Assert.That(megaReactEngine.legacyAddCounter, Is.EqualTo(100));
-            Assert.That(megaReactEngine.legacyRemoveCounter, Is.EqualTo(total));
             Assert.That(megaReactEngine.legacySwapCounter, Is.EqualTo(total));
-            
-            Assert.That(megaReactEngine.addCounter, Is.EqualTo(100));
-            Assert.That(megaReactEngine.removeCounter, Is.EqualTo(total));
             Assert.That(megaReactEngine.swapCounter, Is.EqualTo(total));
+
+            for (uint i = 0; i < 100; i++)
+                _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(i, Groups.GroupB);
+            _scheduler.SubmitEntities();
+            
+            Assert.That(megaReactEngine.legacyRemoveCounter, Is.EqualTo(total));
+            Assert.That(megaReactEngine.removeCounter, Is.EqualTo(total));
             
             for (uint i = 0; i < 100; i++) 
-                CreateTestEntity(i, GroupB, (int)i);
+                CreateTestEntity(i, Groups.GroupB, (int)i);
             _scheduler.SubmitEntities();
             
-            _functions.SwapEntitiesInGroup(GroupB, GroupA);
+            _functions.SwapEntitiesInGroup(Groups.GroupB, Groups.GroupA);
             _scheduler.SubmitEntities();
             
             Assert.That(megaReactEngine.legacySwapCounter, Is.EqualTo(total * 2));
@@ -251,10 +255,10 @@ namespace Svelto.ECS.Tests.ECS
             
             for (uint i = 0; i < 100; i++)
                 _functions.SwapEntityGroup<EntityDescriptorWithComponentAndViewComponent>
-                    (new EGID(i, GroupA), GroupB);
+                    (new EGID(i, Groups.GroupA), Groups.GroupB);
             _scheduler.SubmitEntities();
             
-            _functions.RemoveEntitiesFromGroup(GroupB);
+            _functions.RemoveEntitiesFromGroup(Groups.GroupB);
             _scheduler.SubmitEntities();
             
             Assert.That(megaReactEngine.legacyRemoveCounter, Is.EqualTo(total * 2));
@@ -262,7 +266,7 @@ namespace Svelto.ECS.Tests.ECS
             
             _enginesRoot.Dispose();
 
-            Assert.That(megaReactEngine.removeCounterOnDispose, Is.EqualTo(100));
+            Assert.That(megaReactEngine.removeCounterOnDispose, Is.EqualTo(total));
         }
     }
 }

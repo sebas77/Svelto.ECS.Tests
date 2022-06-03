@@ -42,8 +42,8 @@ namespace Svelto.ECS
             _idChecker                           = new FasterDictionary<ExclusiveGroupStruct, HashSet<uint>>();
 
             _cachedRangeOfSubmittedIndices        = new FasterList<(uint, uint)>();
-            _entityIDsLeftAndAffectedByRemoval    = new FasterList<uint>();
-            _entityIDsLeftWithoutDuplicates = new FasterDictionary<uint, int>();
+            _transientEntityIDsLeftAndAffectedByRemoval    = new FasterList<uint>();
+            _transientEntityIDsLeftWithoutDuplicates = new FasterDictionary<uint, int>();
             
             _multipleOperationOnSameEGIDChecker            = new FasterDictionary<EGID, uint>();
 #if UNITY_NATIVE //because of the thread count, ATM this is only for unity
