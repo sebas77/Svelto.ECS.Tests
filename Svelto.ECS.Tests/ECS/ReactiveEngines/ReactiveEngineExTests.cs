@@ -97,33 +97,40 @@ namespace Svelto.ECS.Tests.ECS
 
             _enginesRoot.AddEngine(engine);
 
+            //create 10 entitites in groupA
             for (uint i = 0; i < 10; i++)
-                CreateTestEntity(i, GroupA, (int)i);
+                CreateTestEntity(i, Groups.GroupA);
 
+            //create 10 entities in groupB
             for (uint i = 10; i < 20; i++)
-                CreateTestEntity(i, GroupB, (int)i);
+                CreateTestEntity(i, Groups.GroupB);
 
             _scheduler.SubmitEntities();
 
+            //remove the first 5 entities from group A
             for (uint i = 0; i < 5; ++i)
             {
                 _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(
-                    i, GroupA);
+                    i, Groups.GroupA);
             }
 
+            //remove the first 2 entities from group B
             for (uint i = 10; i < 12; ++i)
             {
                 _functions.RemoveEntity<EntityDescriptorWithComponentAndViewComponent>(
-                    i, GroupB);
+                    i, Groups.GroupB);
             }
 
             _scheduler.SubmitEntities();
 
+            //the IDs removed from groupA
             Assert.Contains(0, engine.removedEntityIDs);
             Assert.Contains(1, engine.removedEntityIDs);
             Assert.Contains(2, engine.removedEntityIDs);
             Assert.Contains(3, engine.removedEntityIDs);
             Assert.Contains(4, engine.removedEntityIDs);
+            
+            //the IDs removed from groupB
             Assert.Contains(10, engine.removedEntityIDs);
             Assert.Contains(11, engine.removedEntityIDs);
         }
@@ -164,9 +171,7 @@ namespace Svelto.ECS.Tests.ECS
 
             public void Remove((uint start, uint end) rangeOfEntities, in EntityCollection<TestEntityComponent> collection, ExclusiveGroupStruct groupID)
             {
-                removedEntityIDs.Clear();
-
-                var (buffer, entityIDs, _) = collection;
+                var (_, entityIDs, _) = collection;
                 for (uint index = rangeOfEntities.start; index < rangeOfEntities.end; index++)
                 {
                     removedEntityIDs.Add(entityIDs[index]);

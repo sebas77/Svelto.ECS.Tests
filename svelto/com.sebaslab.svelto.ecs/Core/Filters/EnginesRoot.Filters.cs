@@ -97,7 +97,8 @@ namespace Svelto.ECS
                         //that not only we have to remove the index of the component of the entity deleted from the array
                         //but we need also to update the index of the component that has been swapped in the cell
                         //of the deleted component 
-                        //_entityIDsLeftWithoutDuplicates tracks all the indices of the components that need to be updated
+                        //entityIDsAffectedByRemoval tracks all the entitiesID of the components that need to be updated
+                        //in the filters because their indices in the array changed.
                         foreach (var entity in _transientEntityIDsLeftWithoutDuplicates)
                         {
                             var entityId = entity.key;
