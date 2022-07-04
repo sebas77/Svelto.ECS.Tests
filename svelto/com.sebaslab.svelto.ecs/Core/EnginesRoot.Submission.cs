@@ -521,8 +521,7 @@ namespace Svelto.ECS
         static readonly
             Action<FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType,
                     FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, uint, string)>>>>, FasterList<(EGID, EGID)>
-               ,
-                EnginesRoot> _swapEntities;
+               , EnginesRoot> _swapEntities;
 
         static readonly Action<
             FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, FasterList<(uint, string)>>>,
