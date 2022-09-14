@@ -657,11 +657,79 @@ namespace Svelto.ECS.Tests.Messy
             }
         }
 
+        [Test]
+        public void TestEntityBuildInSubmission()
+        {
+            var testBuildOnSwapEngine = new TestBuildOnSwapEngine(_entityFactory);
+            _enginesRoot.AddEngine(testBuildOnSwapEngine);
+
+            var testSwapAfterBuildEngine = new TestSwapAfterBuildEngine(_entityFunctions);
+            _enginesRoot.AddEngine(testSwapAfterBuildEngine);
+
+            _entityFactory.BuildEntity<TestDescriptorEntity>(0, group1);
+
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            _entityFunctions.SwapEntityGroup<TestDescriptorEntity>(0, TestSveltoECS.group1, TestSveltoECS.group2);
+
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            Assert.DoesNotThrow(() => testSwapAfterBuildEngine.Step());
+        }
+
         EnginesRoot                       _enginesRoot;
         IEntityFactory                    _entityFactory;
         IEntityFunctions                  _entityFunctions;
         SimpleEntitiesSubmissionScheduler _simpleSubmissionEntityViewScheduler;
         TestEngine                        _neverDoThisIsJustForTheTest;
+
+        class TestBuildOnSwapEngine : IReactOnSwapEx<TestEntityComponent>, IQueryingEntitiesEngine
+        {
+            private readonly IEntityFactory _entityFactory;
+
+            public TestBuildOnSwapEngine(IEntityFactory entityFactory)
+            {
+                _entityFactory = entityFactory;
+            }
+
+            public void MovedTo(
+                (uint start, uint end) rangeOfEntities,
+                in EntityCollection<TestEntityComponent> collection,
+                ExclusiveGroupStruct fromGroup,
+                ExclusiveGroupStruct toGroup)
+            {
+                _entityFactory.BuildEntity<TestDescriptorEntity>(1, TestSveltoECS.group1);
+            }
+
+            public void Ready() { }
+
+            public EntitiesDB entitiesDB { get; set; }
+        }
+
+        class TestSwapAfterBuildEngine : IStepEngine, IQueryingEntitiesEngine
+        {
+            private readonly IEntityFunctions _entityFunctions;
+            public           string           name => nameof(TestSwapAfterBuildEngine);
+
+            public TestSwapAfterBuildEngine(IEntityFunctions entityFunctions)
+            {
+                _entityFunctions = entityFunctions;
+            }
+
+            public void Step()
+            {
+                var (_, entityIDs, count) = entitiesDB.QueryEntities<TestEntityComponent>(TestSveltoECS.group1);
+
+                for (int i = 0; i < count; i++)
+                {
+                    _entityFunctions.SwapEntityGroup<TestDescriptorEntity>(entityIDs[i], TestSveltoECS.group1, TestSveltoECS.group2);
+                }
+            }
+
+            public EntitiesDB entitiesDB { get; set; }
+
+            public void Ready() { }
+        }
 
         class TestEngineAdd : IReactOnAddAndRemove<TestEntityViewComponent>
         {
