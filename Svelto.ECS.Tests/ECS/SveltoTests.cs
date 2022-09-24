@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Text;
 using DBC.ECS;
 using NUnit.Framework;
-using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.Hybrid;
 using Svelto.ECS.Schedulers;
@@ -11,24 +8,24 @@ using Assert = NUnit.Framework.Assert;
 
 namespace Svelto.ECS.Tests.Messy
 {
+    public static class Groups
+    {
+        public static readonly ExclusiveGroup group1 = new ExclusiveGroup();
+        public static readonly ExclusiveGroup group2 = new ExclusiveGroup();
+        public static readonly ExclusiveGroup group3 = new ExclusiveGroup();
+        public static readonly ExclusiveGroup group0 = new ExclusiveGroup();
+        public static readonly ExclusiveGroup groupR4 = new ExclusiveGroup(4);
+    }
+
     [TestFixture]
     public class TestSveltoECS
     {
-        static readonly ExclusiveGroup group1  = new ExclusiveGroup();
-        static readonly ExclusiveGroup group2  = new ExclusiveGroup();
-        static readonly ExclusiveGroup group3  = new ExclusiveGroup();
-        static readonly ExclusiveGroup group6  = new ExclusiveGroup();
-        static readonly ExclusiveGroup group7  = new ExclusiveGroup();
-        static readonly ExclusiveGroup group8  = new ExclusiveGroup();
-        static readonly ExclusiveGroup group0  = new ExclusiveGroup();
-        static readonly ExclusiveGroup groupR4 = new ExclusiveGroup(4);
-
         [SetUp]
         public void Init()
         {
             _simpleSubmissionEntityViewScheduler = new SimpleEntitiesSubmissionScheduler();
             _enginesRoot                         = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
-            _neverDoThisIsJustForTheTest         = new TestEngine();
+            _neverDoThisIsJustForTheTest         = new TestSveltoECS.TestEngine();
 
             _enginesRoot.AddEngine(_neverDoThisIsJustForTheTest);
 
@@ -47,7 +44,7 @@ namespace Svelto.ECS.Tests.Messy
         {
             void CheckFunction()
             {
-                _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(1, group1));
+                _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(1, Groups.group1));
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
             }
 
@@ -59,7 +56,7 @@ namespace Svelto.ECS.Tests.Messy
         {
             void CheckFunction()
             {
-                _entityFactory.BuildEntity<TestDescriptorWrongEntityViewInterface>(new EGID(1, group1),
+                _entityFactory.BuildEntity<TestDescriptorWrongEntityViewInterface>(new EGID(1, Groups.group1),
                     new[] { new TestIt(2) });
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
             }
@@ -82,7 +79,7 @@ namespace Svelto.ECS.Tests.Messy
         {
             void CheckFunction()
             {
-                _entityFactory.BuildEntity<TestDescriptorWrongEntityView>(new EGID(1, group1), new[] { new TestIt(2) });
+                _entityFactory.BuildEntity<TestDescriptorWrongEntityView>(new EGID(1, Groups.group1), new[] { new TestIt(2) });
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
             }
 
@@ -95,7 +92,7 @@ namespace Svelto.ECS.Tests.Messy
         {
             void CheckFunction()
             {
-                _entityFactory.BuildEntity<TestDescriptorWrongEntityView>(new EGID(1, group1), new[] { new TestIt(2) });
+                _entityFactory.BuildEntity<TestDescriptorWrongEntityView>(new EGID(1, Groups.group1), new[] { new TestIt(2) });
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
             }
 
@@ -110,10 +107,10 @@ namespace Svelto.ECS.Tests.Messy
         {
             void CheckFunction()
             {
-                _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] { new TestIt(2) });
+                _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group1), new[] { new TestIt(2) });
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-                _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] { new TestIt(2) });
+                _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group1), new[] { new TestIt(2) });
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
             }
 
@@ -133,31 +130,31 @@ namespace Svelto.ECS.Tests.Messy
             bool hasit;
             //Build Entity id, group0
             {
-                _entityFactory.BuildEntity(new EGID(id, group0), ded, new[] { new TestIt(2) });
+                _entityFactory.BuildEntity(new EGID(id, Groups.group0), ded, new[] { new TestIt(2) });
 
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-                hasit = _neverDoThisIsJustForTheTest.HasEntity<TestEntityComponent>(new EGID(id, group0));
+                hasit = _neverDoThisIsJustForTheTest.HasEntity<TestEntityComponent>(new EGID(id, Groups.group0));
 
                 Assert.IsTrue(hasit);
             }
 
             //Swap Entity id, group0 to group 3
             {
-                _entityFunctions.SwapEntityGroup<TestDescriptorEntityView>(new EGID(id, group0), group3);
+                _entityFunctions.SwapEntityGroup<TestDescriptorEntityView>(new EGID(id, Groups.group0), Groups.group3);
 
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-                hasit = _neverDoThisIsJustForTheTest.HasEntity<TestEntityComponent>(new EGID(id, group3));
+                hasit = _neverDoThisIsJustForTheTest.HasEntity<TestEntityComponent>(new EGID(id, Groups.group3));
 
                 Assert.IsTrue(hasit);
             }
 
-            _entityFunctions.RemoveEntity<TestDescriptorEntityView>(new EGID(id, group3));
+            _entityFunctions.RemoveEntity<TestDescriptorEntityView>(new EGID(id, Groups.group3));
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            hasit = _neverDoThisIsJustForTheTest.HasEntity<TestEntityComponent>(new EGID(id, group3));
+            hasit = _neverDoThisIsJustForTheTest.HasEntity<TestEntityComponent>(new EGID(id, Groups.group3));
 
             Assert.IsFalse(hasit);
         }
@@ -169,11 +166,11 @@ namespace Svelto.ECS.Tests.Messy
         {
             void CheckFunction()
             {
-                _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group0), new[] { new TestIt(2) });
+                _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group0), new[] { new TestIt(2) });
 
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-                _entityFactory.BuildEntity<TestDescriptorEntityView2>(new EGID(id, group0), new[] { new TestIt(2) });
+                _entityFactory.BuildEntity<TestDescriptorEntityView2>(new EGID(id, Groups.group0), new[] { new TestIt(2) });
 
                 _simpleSubmissionEntityViewScheduler.SubmitEntities();
             }
@@ -190,8 +187,8 @@ namespace Svelto.ECS.Tests.Messy
 
             try
             {
-                _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group0), new[] { new TestIt(2) });
-                _entityFactory.BuildEntity<TestDescriptorEntityView2>(new EGID(id, group0), new[] { new TestIt(2) });
+                _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group0), new[] { new TestIt(2) });
+                _entityFactory.BuildEntity<TestDescriptorEntityView2>(new EGID(id, Groups.group0), new[] { new TestIt(2) });
             }
             catch
             {
@@ -210,8 +207,8 @@ namespace Svelto.ECS.Tests.Messy
 
             try
             {
-                _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group0), new[] { new TestIt(2) });
-                _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group0), new[] { new TestIt(2) });
+                _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group0), new[] { new TestIt(2) });
+                _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group0), new[] { new TestIt(2) });
             }
             catch
             {
@@ -226,11 +223,11 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)2)]
         public void TestTwoEntitiesWithSameIDWorksOnDifferentGroups(uint id)
         {
-            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group0), new[] { new TestIt(2) });
-            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group0), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group1), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group0)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group1)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group0)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group1)));
         }
 
         [TestCase((uint)0)]
@@ -238,13 +235,13 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)2)]
         public void TestRemove(uint id)
         {
-            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group1), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.RemoveEntity<TestDescriptorEntityView>(new EGID(id, group1));
+            _entityFunctions.RemoveEntity<TestDescriptorEntityView>(new EGID(id, Groups.group1));
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group1));
         }
 
         [TestCase((uint)0)]
@@ -252,11 +249,11 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)2)]
         public void TestBuildEntity(uint id)
         {
-            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group1), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group1)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group1)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group1));
         }
 
         [TestCase((uint)0)]
@@ -264,21 +261,21 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)2)]
         public void TestBuildEntityWithImplementor(uint id)
         {
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(new EGID(id, group1),
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(new EGID(id, Groups.group1),
                 new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group1)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group1)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group1));
 
             var entityView =
-                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<TestEntityViewComponent>(new EGID(id, group1));
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<TestEntityViewComponent>(new EGID(id, Groups.group1));
             Assert.AreEqual(entityView.TestIt.value, 2);
 
             uint index;
             Assert.AreEqual(
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
-                    new EGID(id, group1), out index)[index].TestIt.value, 2);
+                    new EGID(id, Groups.group1), out index)[index].TestIt.value, 2);
         }
 
         [TestCase((uint)0)]
@@ -286,10 +283,10 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)2)]
         public void TestBuildEntityViewComponent(uint id)
         {
-            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group1), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group1));
         }
 
         [TestCase((uint)0)]
@@ -297,10 +294,10 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)2)]
         public void TestBuildEntitytruct(uint id)
         {
-            _entityFactory.BuildEntity<TestDescriptorEntity>(new EGID(id, group1));
+            _entityFactory.BuildEntity<TestDescriptorEntity>(new EGID(id, Groups.group1));
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityComponent>(group1));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityComponent>(Groups.group1));
         }
 
         [TestCase((uint)0)]
@@ -308,14 +305,14 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)2)]
         public void TestBuildEntityComponentWithInitializer(uint id)
         {
-            var init = _entityFactory.BuildEntity<TestDescriptorEntity>(new EGID(id, group1));
+            var init = _entityFactory.BuildEntity<TestDescriptorEntity>(new EGID(id, Groups.group1));
             init.Init(new TestEntityComponent(3));
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityComponent>(group1));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityComponent>(Groups.group1));
             uint index;
             Assert.IsTrue(
-                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityComponent>(new EGID(id, group1),
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityComponent>(new EGID(id, Groups.group1),
                     out index)[index].value == 3);
         }
 
@@ -325,14 +322,14 @@ namespace Svelto.ECS.Tests.Messy
         public void TestBuildEntityMixed(uint id)
         {
             TestIt testIt = new TestIt(2);
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(new EGID(id, group1), new[] { testIt });
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(new EGID(id, Groups.group1), new[] { testIt });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group1)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityComponent>(group1));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group1)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityComponent>(Groups.group1));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group1));
             var (entityCollection, count) =
-                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewComponent>(group1);
+                _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewComponent>(Groups.group1);
             Assert.AreSame(entityCollection[0].TestIt, testIt);
         }
 
@@ -342,15 +339,15 @@ namespace Svelto.ECS.Tests.Messy
         public void TestBuildEntityWithViewStructWithImplementorAndTestQueryEntitiesAndIndex(uint id)
         {
             var testIt = new TestIt(2);
-            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] { testIt });
+            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group1), new[] { testIt });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group1));
 
             uint index;
             var testEntityView2 =
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
-                    new EGID(id, group1), out index)[index];
+                    new EGID(id, Groups.group1), out index)[index];
 
             Assert.AreEqual(testEntityView2.TestIt, testIt);
         }
@@ -360,11 +357,11 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)2)]
         public void TestBuildEntityToGroupWithDescriptorInfo(uint id)
         {
-            _entityFactory.BuildEntity(new EGID(id, group1), new TestDescriptorEntityView(), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity(new EGID(id, Groups.group1), new TestDescriptorEntityView(), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group1)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group1)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group1));
         }
 
         [TestCase((uint)0)]
@@ -372,13 +369,13 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)2)]
         public void TestBuildEntityInAddFunction(uint id)
         {
-            _enginesRoot.AddEngine(new TestEngineAdd(_entityFactory));
-            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] { new TestIt(2) });
+            _enginesRoot.AddEngine(new TestSveltoECS.TestEngineAdd(_entityFactory));
+            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group1), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities(); //submit the entities
             _simpleSubmissionEntityViewScheduler.SubmitEntities(); //now submit the entities added by the engines
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group1)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityComponent>(new EGID(100, group0)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group1)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group1));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityComponent>(new EGID(100, Groups.group0)));
         }
 
         [TestCase((uint)0)]
@@ -386,16 +383,16 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)2)]
         public void TestRemoveFromGroup(uint id)
         {
-            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group1), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group1)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group1)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group1));
 
-            _entityFunctions.RemoveEntity<TestDescriptorEntityView>(id, group1);
+            _entityFunctions.RemoveEntity<TestDescriptorEntityView>(id, Groups.group1);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group1)));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group1)));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group1));
         }
 
         [TestCase((uint)0)]
@@ -403,16 +400,16 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)2)]
         public void TestRemoveGroup(uint id)
         {
-            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group1), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group1)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group1)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group1));
 
-            _entityFunctions.RemoveEntitiesFromGroup(group1);
+            _entityFunctions.RemoveEntitiesFromGroup(Groups.group1);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group1)));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group1)));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group1));
         }
 
         [TestCase((uint)0)]
@@ -420,16 +417,16 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)2)]
         public void TestRemoveAndAddAgainEntity(uint id)
         {
-            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group1), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.RemoveEntity<TestDescriptorEntityView>(id, group1);
+            _entityFunctions.RemoveEntity<TestDescriptorEntityView>(id, Groups.group1);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group1), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group1), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group1)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group1));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group1)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group1));
         }
 
         [TestCase((uint)0)]
@@ -437,38 +434,38 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)2)]
         public void TestSwapGroup(uint id)
         {
-            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, group0), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group0), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.SwapEntityGroup<TestDescriptorEntityView>(id, group0, group3);
+            _entityFunctions.SwapEntityGroup<TestDescriptorEntityView>(id, Groups.group0, Groups.group3);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group0)));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group0));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group3));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group3)));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group0)));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group0));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group3));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group3)));
 
             Assert.AreEqual(
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
-                    new EGID(id, group3), out var index)[index].ID.entityID, id);
+                    new EGID(id, Groups.group3), out var index)[index].ID.entityID, id);
             Assert.AreEqual(
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
-                    new EGID(id, group3), out index)[index].ID.groupID.id, (group3.id));
+                    new EGID(id, Groups.group3), out index)[index].ID.groupID.id, (Groups.group3.id));
 
-            _entityFunctions.SwapEntityGroup<TestDescriptorEntityView>(id, group3, group0);
+            _entityFunctions.SwapEntityGroup<TestDescriptorEntityView>(id, Groups.group3, Groups.group0);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group0)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group0));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group3));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, group3)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group0)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group0));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group3));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group3)));
 
             Assert.AreEqual(
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
-                    new EGID(id, group0), out index)[index].ID.entityID, id);
+                    new EGID(id, Groups.group0), out index)[index].ID.entityID, id);
             Assert.AreEqual(
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
-                    new EGID(id, group0), out index)[index].ID.groupID.id, group0.id);
+                    new EGID(id, Groups.group0), out index)[index].ID.groupID.id, Groups.group0.id);
         }
 
         [TestCase((uint)0, (uint)1, (uint)2, (uint)3)]
@@ -476,13 +473,13 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)8, (uint)9, (uint)10, (uint)11)]
         public void TestExecuteOnAllTheEntities(uint id, uint id2, uint id3, uint id4)
         {
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(new EGID(id, groupR4),
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(new EGID(id, Groups.groupR4),
                 new[] { new TestIt(2) });
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(new EGID(id2, groupR4 + 1),
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(new EGID(id2, Groups.groupR4 + 1),
                 new[] { new TestIt(2) });
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(new EGID(id3, groupR4 + 2),
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(new EGID(id3, Groups.groupR4 + 2),
                 new[] { new TestIt(2) });
-            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(new EGID(id4, groupR4 + 3),
+            _entityFactory.BuildEntity<TestEntityWithComponentViewAndComponent>(new EGID(id4, Groups.groupR4 + 3),
                 new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
@@ -507,9 +504,9 @@ namespace Svelto.ECS.Tests.Messy
             for (uint i = 0; i < 4; i++)
             {
                 var (buffer1, count) =
-                    _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityComponent>(groupR4 + i);
+                    _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityComponent>(Groups.groupR4 + i);
                 var (buffer2, count2) =
-                    _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewComponent>(groupR4 + i);
+                    _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewComponent>(Groups.groupR4 + i);
 
                 Assert.AreEqual(count, 1);
                 Assert.AreEqual(count2, 1);
@@ -521,10 +518,10 @@ namespace Svelto.ECS.Tests.Messy
                 }
             }
 
-            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id, groupR4));
-            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id2, groupR4 + 1));
-            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id3, groupR4 + 2));
-            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id4, groupR4 + 3));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id, Groups.groupR4));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id2, Groups.groupR4 + 1));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id3, Groups.groupR4 + 2));
+            _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id4, Groups.groupR4 + 3));
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             foreach (var (_, _) in _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewComponent>())
@@ -541,34 +538,34 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase]
         public void QueryingNotExistingViewsInAnExistingGroupMustNotCrash()
         {
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(group0));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroupArray<TestEntityViewComponent>(group0));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group0));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroupArray<TestEntityViewComponent>(Groups.group0));
         }
 
         [TestCase]
         public void TestExtendibleDescriptor()
         {
-            _entityFactory.BuildEntity<B>(new EGID(1, group0));
+            _entityFactory.BuildEntity<B>(new EGID(1, Groups.group0));
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            _entityFunctions.SwapEntityGroup<A>(new EGID(1, group0), group1);
+            _entityFunctions.SwapEntityGroup<A>(new EGID(1, Groups.group0), Groups.group1);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<EVS2>(new EGID(1, group0)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<EVS2>(new EGID(1, group1)));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<EVS1>(new EGID(1, group0)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<EVS1>(new EGID(1, group1)));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<EVS2>(new EGID(1, Groups.group0)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<EVS2>(new EGID(1, Groups.group1)));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<EVS1>(new EGID(1, Groups.group0)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<EVS1>(new EGID(1, Groups.group1)));
         }
 
         [TestCase]
         public void TestExtendibleDescriptor2()
         {
-            _entityFactory.BuildEntity<B2>(new EGID(1, group0), new[] { new TestIt(2) });
+            _entityFactory.BuildEntity<B2>(new EGID(1, Groups.group0), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            _entityFunctions.SwapEntityGroup<A2>(new EGID(1, group0), group1);
+            _entityFunctions.SwapEntityGroup<A2>(new EGID(1, Groups.group0), Groups.group1);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(1, group0)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(1, group1)));
-            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityComponent>(new EGID(1, group0)));
-            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityComponent>(new EGID(1, group1)));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(1, Groups.group0)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(1, Groups.group1)));
+            Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityComponent>(new EGID(1, Groups.group0)));
+            Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityComponent>(new EGID(1, Groups.group1)));
         }
 
         [TestCase]
@@ -576,14 +573,14 @@ namespace Svelto.ECS.Tests.Messy
         {
             for (int i = 0; i < 100; i++)
             {
-                var init = _entityFactory.BuildEntity<TestDescriptorWith2Components>(new EGID((uint)i, group0));
+                var init = _entityFactory.BuildEntity<TestDescriptorWith2Components>(new EGID((uint)i, Groups.group0));
                 init.Init(new TestEntityComponent((uint)(i)));
                 init.Init(new TestEntityComponent2((uint)(i + 100)));
             }
 
             for (int i = 0; i < 100; i++)
             {
-                var init = _entityFactory.BuildEntity<TestDescriptorWith2Components>(new EGID((uint)i, group1));
+                var init = _entityFactory.BuildEntity<TestDescriptorWith2Components>(new EGID((uint)i, Groups.group1));
                 init.Init(new TestEntityComponent((uint)(i + 200)));
                 init.Init(new TestEntityComponent2((uint)(i + 300)));
             }
@@ -593,7 +590,7 @@ namespace Svelto.ECS.Tests.Messy
             var iterators =
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityComponent, TestEntityComponent2>(
                     new LocalFasterReadOnlyList<ExclusiveGroupStruct>(
-                        new FasterList<ExclusiveGroupStruct>(new ExclusiveGroupStruct[] { group0, group1 })));
+                        new FasterList<ExclusiveGroupStruct>(new ExclusiveGroupStruct[] { Groups.group0, Groups.group1 })));
 
             uint index = 0;
 
@@ -602,7 +599,7 @@ namespace Svelto.ECS.Tests.Messy
             {
                 for (int i = 0; i < count; i++)
                 {
-                    if (exclusiveGroupStruct == group0)
+                    if (exclusiveGroupStruct == Groups.group0)
                     {
                         Assert.AreEqual(iteratorentityComponentA[i].value, index);
                         Assert.AreEqual(iteratorentityComponentB[i].value, index + 100);
@@ -623,14 +620,14 @@ namespace Svelto.ECS.Tests.Messy
         {
             for (int i = 0; i < 100; i++)
             {
-                var init = _entityFactory.BuildEntity<TestDescriptorWith2Components>(new EGID((uint)i, group0));
+                var init = _entityFactory.BuildEntity<TestDescriptorWith2Components>(new EGID((uint)i, Groups.group0));
                 init.Init(new TestEntityComponent((uint)(i)));
                 init.Init(new TestEntityComponent2((uint)(i + 100)));
             }
 
             for (int i = 0; i < 100; i++)
             {
-                var init = _entityFactory.BuildEntity<TestDescriptorWith2Components>(new EGID((uint)i, group1));
+                var init = _entityFactory.BuildEntity<TestDescriptorWith2Components>(new EGID((uint)i, Groups.group1));
                 init.Init(new TestEntityComponent((uint)(i + 200)));
                 init.Init(new TestEntityComponent2((uint)(i + 300)));
             }
@@ -638,7 +635,7 @@ namespace Svelto.ECS.Tests.Messy
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
             FasterList<ExclusiveGroupStruct> groupStructId =
-                new FasterList<ExclusiveGroupStruct>(new ExclusiveGroupStruct[] { group0, group1 });
+                new FasterList<ExclusiveGroupStruct>(new ExclusiveGroupStruct[] { Groups.group0, Groups.group1 });
             var iterators = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityComponent>(groupStructId);
 
             uint index = 0;
@@ -647,7 +644,7 @@ namespace Svelto.ECS.Tests.Messy
             {
                 for (int i = 0; i < count; i++)
                 {
-                    if (iterator[i].ID.groupID == group0)
+                    if (iterator[i].ID.groupID == Groups.group0)
                         Assert.IsTrue(iterator[i].value == index);
                     else
                         Assert.IsTrue(iterator[i].value == (index + 200));
@@ -660,17 +657,17 @@ namespace Svelto.ECS.Tests.Messy
         [Test]
         public void TestEntityBuildInSubmission()
         {
-            var testBuildOnSwapEngine = new TestBuildOnSwapEngine(_entityFactory);
+            var testBuildOnSwapEngine = new TestSveltoECS.TestBuildOnSwapEngine(_entityFactory);
             _enginesRoot.AddEngine(testBuildOnSwapEngine);
 
-            var testSwapAfterBuildEngine = new TestSwapAfterBuildEngine(_entityFunctions);
+            var testSwapAfterBuildEngine = new TestSveltoECS.TestSwapAfterBuildEngine(_entityFunctions);
             _enginesRoot.AddEngine(testSwapAfterBuildEngine);
 
-            _entityFactory.BuildEntity<TestDescriptorEntity>(0, group1);
+            _entityFactory.BuildEntity<TestDescriptorEntity>(0, Groups.group1);
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            _entityFunctions.SwapEntityGroup<TestDescriptorEntity>(0, TestSveltoECS.group1, TestSveltoECS.group2);
+            _entityFunctions.SwapEntityGroup<TestDescriptorEntity>(0, Groups.group1, Groups.group2);
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
@@ -681,7 +678,7 @@ namespace Svelto.ECS.Tests.Messy
         IEntityFactory                    _entityFactory;
         IEntityFunctions                  _entityFunctions;
         SimpleEntitiesSubmissionScheduler _simpleSubmissionEntityViewScheduler;
-        TestEngine                        _neverDoThisIsJustForTheTest;
+        TestSveltoECS.TestEngine                        _neverDoThisIsJustForTheTest;
 
         class TestBuildOnSwapEngine : IReactOnSwapEx<TestEntityComponent>, IQueryingEntitiesEngine
         {
@@ -698,7 +695,7 @@ namespace Svelto.ECS.Tests.Messy
                 ExclusiveGroupStruct fromGroup,
                 ExclusiveGroupStruct toGroup)
             {
-                _entityFactory.BuildEntity<TestDescriptorEntity>(1, TestSveltoECS.group1);
+                _entityFactory.BuildEntity<TestDescriptorEntity>(1, Groups.group1);
             }
 
             public void Ready() { }
@@ -709,7 +706,7 @@ namespace Svelto.ECS.Tests.Messy
         class TestSwapAfterBuildEngine : IStepEngine, IQueryingEntitiesEngine
         {
             private readonly IEntityFunctions _entityFunctions;
-            public           string           name => nameof(TestSwapAfterBuildEngine);
+            public           string           name => nameof(TestSveltoECS.TestSwapAfterBuildEngine);
 
             public TestSwapAfterBuildEngine(IEntityFunctions entityFunctions)
             {
@@ -718,11 +715,11 @@ namespace Svelto.ECS.Tests.Messy
 
             public void Step()
             {
-                var (_, entityIDs, count) = entitiesDB.QueryEntities<TestEntityComponent>(TestSveltoECS.group1);
+                var (_, entityIDs, count) = entitiesDB.QueryEntities<TestEntityComponent>(Groups.group1);
 
                 for (int i = 0; i < count; i++)
                 {
-                    _entityFunctions.SwapEntityGroup<TestDescriptorEntity>(entityIDs[i], TestSveltoECS.group1, TestSveltoECS.group2);
+                    _entityFunctions.SwapEntityGroup<TestDescriptorEntity>(entityIDs[i], Groups.group1, Groups.group2);
                 }
             }
 
@@ -740,7 +737,7 @@ namespace Svelto.ECS.Tests.Messy
 
             public void Add(ref TestEntityViewComponent entityView, EGID egid)
             {
-                _entityFactory.BuildEntity<TestDescriptorEntity>(new EGID(100, group0));
+                _entityFactory.BuildEntity<TestDescriptorEntity>(new EGID(100, Groups.group0));
             }
 
             public void Remove(ref TestEntityViewComponent entityView, EGID egid)

@@ -392,6 +392,9 @@ namespace Svelto.DataStructures
                 int currentValueIndex = valueIndex;
                 do
                 {
+                    //must check if the key already exists in the dictionary
+                    //Comparer<TKey>.default needs to create a new comparer, so it is much slower
+                    //than assuming that Equals is implemented through IEquatable (but what if the comparer is statically cached?)
                     ref var fasterDictionaryNode = ref _valuesInfo[currentValueIndex];
                     if (fasterDictionaryNode.hashcode == hash && fasterDictionaryNode.key.Equals(key) == true)
                     {
