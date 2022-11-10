@@ -287,6 +287,15 @@ namespace Svelto.ECS.Tests.Serialization
             newEnginesRoot.Dispose();
         }
 
+        [TestCase]
+        public void TestSerializingExclusiveGroupStruct()
+        {
+            ExclusiveGroupStruct egs = NamedGroup1.Group; 
+            Assert.That(
+                ExclusiveGroupStruct.Deserialize(egs.Serialize()) == egs
+            );
+        }
+
         EnginesRoot                       _enginesRoot;
         IEntityFactory                    _entityFactory;
         IEntityFunctions                  _entityFunctions;
