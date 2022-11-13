@@ -28,7 +28,7 @@ namespace Svelto.ECS.Tests.Serialization
         [TearDown]
         public void Dispose() { _enginesRoot.Dispose(); }
 
-        [TestCase]
+        [Test]
         public void TestSerializingToByteArrayRemoveGroup()
         {
             var init = _entityFactory.BuildEntity<SerializableEntityDescriptor>(0, NamedGroup1.Group);
@@ -103,7 +103,7 @@ namespace Svelto.ECS.Tests.Serialization
               , Is.EqualTo(2));
         }
 
-        [TestCase]
+        [Test]
         public void TestSerializingToByteArrayNewEnginesRoot()
         {
             var init = _entityFactory.BuildEntity<SerializableEntityDescriptor>(0, NamedGroup1.Group);
@@ -182,7 +182,7 @@ namespace Svelto.ECS.Tests.Serialization
             newEnginesRoot.Dispose();
         }
 
-        [TestCase]
+        [Test]
         public void TestSerializingWithEntityStructsWithVersioning()
         {
             var init = _entityFactory.BuildEntity<SerializableEntityDescriptorV0>(0, NamedGroup1.Group);
@@ -232,7 +232,7 @@ namespace Svelto.ECS.Tests.Serialization
             newEnginesRoot.Dispose();
         }
 
-        [TestCase]
+        [Test]
         public void TestSerializingWithEntityViewStructsAndFactories()
         {
             var init = _entityFactory.BuildEntity<SerializableEntityDescriptorWithViews>(
@@ -287,6 +287,51 @@ namespace Svelto.ECS.Tests.Serialization
             newEnginesRoot.Dispose();
         }
 
+        [Test]
+        public void TestSerializingAndDeserializingFromDisabledGroup()
+        {
+            void Helper()
+            {
+                var disabledGroupDummy = new ExclusiveGroup(ExclusiveGroupBitmask.DISABLED_BIT);
+                var disabledEGID       = new EGID(0, disabledGroupDummy);
+                var init     = _entityFactory.BuildEntity<SerializableEntityDescriptor>(disabledEGID);
+                
+                _simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+                FasterList<byte> bytes                    = new FasterList<byte>();
+                var              generateEntitySerializer = _enginesRoot.GenerateEntitySerializer();
+                var              simpleSerializationData  = new SimpleSerializationData(bytes);
+                generateEntitySerializer.SerializeEntity(disabledEGID, simpleSerializationData
+                    , (int) SerializationType.Storage);
+                
+                simpleSerializationData.Reset();
+                
+                DeserializationFactory factory = new DeserializationFactory();
+                generateEntitySerializer.RegisterSerializationFactory<SerializableEntityDescriptor>(factory);
+                generateEntitySerializer.DeserializeEntity(simpleSerializationData, (int) SerializationType.Storage);
+            }
+            
+            Assert.DoesNotThrow(Helper);
+        }
+
+        static class GroupHashMapHelper
+        {
+            public static readonly ExclusiveGroup staticDisabledGroupToBeCaughtByGroupHashMap =
+                new ExclusiveGroup(ExclusiveGroupBitmask.DISABLED_BIT);
+        }
+        
+        [Test]
+        public void TestGroupHashMapWithBytemaskGroups()
+        {
+            var serializer = _enginesRoot.GenerateEntitySerializer();
+
+            var hash = serializer.GetHashFromGroup(GroupHashMapHelper.staticDisabledGroupToBeCaughtByGroupHashMap);
+            ExclusiveGroupStruct groupBack = ExclusiveGroupStruct.Invalid;
+
+            Assert.DoesNotThrow(() => groupBack = serializer.GetGroupFromHash(hash));
+            Assert.AreEqual(GroupHashMapHelper.staticDisabledGroupToBeCaughtByGroupHashMap.id, groupBack.id);
+        }
+        
         EnginesRoot                       _enginesRoot;
         IEntityFactory                    _entityFactory;
         IEntityFunctions                  _entityFunctions;
