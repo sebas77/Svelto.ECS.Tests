@@ -80,19 +80,7 @@ namespace Svelto.ECS
         public bool isInvalid => this == Invalid;
         public uint id        => _idInternal & 0xFFFFFF;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ToIDAndBitmask() => _idInternal;
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public uint Serialize() => _idInternal;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ExclusiveGroupStruct Deserialize(uint serializedGroupId)
-        {
-            var egs = new ExclusiveGroupStruct(serializedGroupId);
-            DBC.ECS.Check.Ensure(egs.id < _globalId, "Invalid group ID deserialiased");
-            return egs;
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ExclusiveGroupStruct operator+(ExclusiveGroupStruct a, uint b)
