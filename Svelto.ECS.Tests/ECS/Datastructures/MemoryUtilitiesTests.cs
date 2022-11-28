@@ -18,19 +18,19 @@ namespace Svelto.ECS.Tests.NativeDataStructures
         {
             unsafe
             {
-                var ptr = MemoryUtilities.Alloc(10, Allocator.Persistent);
+                var ptr = MemoryUtilities.NativeAlloc(10, Allocator.Persistent);
                 Unsafe.Write((void*) ptr, new Test()
                 {
                     a = 3
                   , b = 1
                 });
                 Unsafe.Write((void*) (ptr + 8), (short) -10);
-                ptr = MemoryUtilities.Realloc(ptr, 10, Allocator.Persistent, 16);
+                ptr = MemoryUtilities.NativeRealloc(ptr, 10, Allocator.Persistent, 16);
                 var test = Unsafe.Read<Test>((void*) ptr);
                 Assert.That(test.a == 3);
                 Assert.That(test.b == 1);
                 Assert.That(Unsafe.Read<short>((void*) (ptr + 8)) == -10);
-                MemoryUtilities.Free(ptr, Allocator.Persistent);
+                MemoryUtilities.NativeFree(ptr, Allocator.Persistent);
             }
         }
     }

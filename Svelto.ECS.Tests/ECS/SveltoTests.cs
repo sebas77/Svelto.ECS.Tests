@@ -3,6 +3,7 @@ using DBC.ECS;
 using NUnit.Framework;
 using Svelto.DataStructures;
 using Svelto.ECS.Hybrid;
+using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
 using Assert = NUnit.Framework.Assert;
 
@@ -759,17 +760,17 @@ namespace Svelto.ECS.Tests.Messy
             {
             }
 
-            public bool HasEntity<T>(EGID ID) where T : struct, IBaseEntityComponent
+            public bool HasEntity<T>(EGID ID) where T : struct, _IInternalEntityComponent
             {
                 return entitiesDB.Exists<T>(ID);
             }
 
-            public bool HasAnyEntityInGroup<T>(ExclusiveGroup groupID) where T : struct, IBaseEntityComponent
+            public bool HasAnyEntityInGroup<T>(ExclusiveGroup groupID) where T : struct, _IInternalEntityComponent
             {
                 return entitiesDB.QueryEntities<T>(groupID).count > 0;
             }
 
-            public bool HasAnyEntityInGroupArray<T>(ExclusiveGroup groupID) where T : struct, IBaseEntityComponent
+            public bool HasAnyEntityInGroupArray<T>(ExclusiveGroup groupID) where T : struct, _IInternalEntityComponent
             {
                 return entitiesDB.QueryEntities<T>(groupID).count > 0;
             }

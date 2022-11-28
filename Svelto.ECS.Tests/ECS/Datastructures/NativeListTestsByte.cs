@@ -1,7 +1,6 @@
 ﻿using NUnit.Framework;
 using Svelto.Common;
-using Svelto.DataStructures;
-using Svelto.ECS.DataStructures;
+using Svelto.Common.DataStructures;
 using Assert = NUnit.Framework.Assert;
 
 namespace Svelto.ECS.Tests.NativeDataStructures

@@ -2,7 +2,6 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Svelto.Common;
-using UnityEngine;
 
 namespace Svelto.DataStructures.Experimental
 {

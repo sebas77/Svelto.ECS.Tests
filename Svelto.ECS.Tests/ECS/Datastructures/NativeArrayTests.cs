@@ -1,6 +1,6 @@
 using System;
 using NUnit.Framework;
-using Svelto.ECS.DataStructures;
+using Svelto.Common.DataStructures;
 
 namespace Svelto.ECS.Tests.NativeDataStructures
 {

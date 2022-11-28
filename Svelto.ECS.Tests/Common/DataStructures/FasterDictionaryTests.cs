@@ -90,7 +90,7 @@ namespace Svelto.Common.Tests.Datastructures
 
             Assert.IsTrue(test.ContainsKey(0));
 
-            test.FastClear();
+            test.Clear();
 
             Assert.IsFalse(test.ContainsKey(0));
         }
