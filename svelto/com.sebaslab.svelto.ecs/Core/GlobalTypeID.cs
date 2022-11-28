@@ -1,6 +1,7 @@
 using System.Threading;
 using Svelto.Common;
-using Svelto.ECS.DataStructures;
+using Svelto.Common.DataStructures;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
@@ -18,7 +19,7 @@ namespace Svelto.ECS
         void FillFromByteArray(EntityInitializer init, NativeBag buffer);
     }
 
-    class Filler<T> : IFiller where T : struct, IBaseEntityComponent
+    class Filler<T> : IFiller where T : struct, _IInternalEntityComponent
     {
         static Filler()
         {
