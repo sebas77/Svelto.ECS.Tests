@@ -2,7 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using NUnit.Framework;
 using Svelto.Common;
-using Svelto.Common.DataStructures;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS.Tests.NativeDataStructures
 {
