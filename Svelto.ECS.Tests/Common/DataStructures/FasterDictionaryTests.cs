@@ -37,6 +37,70 @@ namespace Svelto.Common.Tests.Datastructures
             for (int i = 0; i < 100; i += 2)
                 Assert.IsTrue(test1.ContainsKey(i));
         }
+        
+        [TestCase]
+        public void TestIntersect2()
+        {
+            FasterDictionary<int, int> test1 = new FasterDictionary<int, int>();
+            FasterDictionary<int, int> test2 = new FasterDictionary<int, int>();
+
+            test1.Add(1, 1);
+            test1.Add(2, 2);
+            test1.Add(3, 3);
+            test1.Add(4, 4);
+
+            test2.Add(1, 1);
+            test2.Add(2, 2);
+            test2.Add(5, 5);
+            test2.Add(4, 4);
+
+            test1.Intersect(test2);
+            
+            Assert.AreEqual(3, test1.count);
+
+            Assert.That(test1[1], Is.EqualTo(1));
+            Assert.That(test1[2], Is.EqualTo(2));
+            Assert.That(test1[4], Is.EqualTo(4));
+            
+            test2.Intersect(test1);
+            
+            Assert.AreEqual(3, test2.count);
+
+            Assert.That(test2[1], Is.EqualTo(1));
+            Assert.That(test2[2], Is.EqualTo(2));
+            Assert.That(test2[4], Is.EqualTo(4));
+        }
+        
+        [TestCase]
+        public void TestIntersect3()
+        {
+            FasterDictionary<int, int> test1 = new FasterDictionary<int, int>();
+            FasterDictionary<int, int> test2 = new FasterDictionary<int, int>();
+
+            test1.Add(1, 1);
+            test1.Add(2, 2);
+            test1.Add(3, 3);
+            test1.Add(4, 4);
+
+            test2.Add(1, 1);
+            test2.Add(6, 6);
+            test2.Add(5, 5);
+            test2.Add(4, 4);
+
+            test1.Intersect(test2);
+            
+            Assert.AreEqual(2, test1.count);
+
+            Assert.That(test1[1], Is.EqualTo(1));
+            Assert.That(test1[4], Is.EqualTo(4));
+            
+            test2.Intersect(test1);
+            
+            Assert.AreEqual(2, test2.count);
+
+            Assert.That(test2[1], Is.EqualTo(1));
+            Assert.That(test2[4], Is.EqualTo(4));
+        }
 
         [TestCase]
         public void TestExclude()
