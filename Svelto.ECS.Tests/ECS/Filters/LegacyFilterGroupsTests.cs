@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿#if SVELTO_LEGACY_FILTERS
+using NUnit.Framework;
 using Svelto.ECS.Schedulers;
 
 namespace Svelto.ECS.Tests.ECS.Filters
@@ -43,3 +44,4 @@ namespace Svelto.ECS.Tests.ECS.Filters
         const int FilterIdA = 0;
     }
 }
+#endif

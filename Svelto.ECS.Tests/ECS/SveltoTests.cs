@@ -484,14 +484,12 @@ namespace Svelto.ECS.Tests.Messy
                 new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            foreach (var ((entity, groupCount), _) in _neverDoThisIsJustForTheTest.entitiesDB
-                        .QueryEntities<TestEntityViewComponent>())
+            AllGroupsEnumerable<TestEntityViewComponent> allGroupsEnumerable = _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewComponent>();
+            foreach (var ((entity, count), group) in allGroupsEnumerable)
             {
-                for (int i = 0; i < groupCount; i++)
+                for (int i = 0; i < count; i++)
                     entity[i].TestIt.value = entity[i].ID.entityID;
             }
-
-            ;
 
             foreach (var ((entity, groupCount), _) in _neverDoThisIsJustForTheTest.entitiesDB
                         .QueryEntities<TestEntityComponent>())
@@ -499,8 +497,6 @@ namespace Svelto.ECS.Tests.Messy
                 for (int i = 0; i < groupCount; i++)
                     entity[i].value = entity[i].ID.entityID;
             }
-
-            ;
 
             for (uint i = 0; i < 4; i++)
             {
@@ -525,7 +521,7 @@ namespace Svelto.ECS.Tests.Messy
             _entityFunctions.RemoveEntity<TestEntityWithComponentViewAndComponent>(new EGID(id4, Groups.groupR4 + 3));
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
 
-            foreach (var (_, _) in _neverDoThisIsJustForTheTest.entitiesDB.QueryEntities<TestEntityViewComponent>())
+            foreach (var (_, _) in allGroupsEnumerable)
             {
                 Assert.Fail();
             }
@@ -653,6 +649,24 @@ namespace Svelto.ECS.Tests.Messy
                     index = ++index % 100;
                 }
             }
+        }
+        
+        [Test]
+        public void EntityCollectionBenchmark()
+        {
+            Assert.DoesNotThrow(
+                () =>
+                {
+                    var simpleEntitiesSubmissionScheduler = new SimpleEntitiesSubmissionScheduler();
+                    var _enginesroot = new EnginesRoot(simpleEntitiesSubmissionScheduler);
+                    var factory = _enginesroot.GenerateEntityFactory();
+
+                    for (uint i = 0 ; i < 1_000_000; i++)
+                        factory.BuildEntity<TestDescriptorEntity>(new EGID(i, Groups.group1));
+
+                    simpleEntitiesSubmissionScheduler.SubmitEntities();
+                    _enginesroot.Dispose();
+                });
         }
 
         [Test]
