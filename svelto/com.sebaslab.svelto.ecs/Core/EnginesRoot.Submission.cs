@@ -352,20 +352,14 @@ namespace Svelto.ECS
                                     var fromDictionary = entityComponentsToSubmit.value;
                                     var wrapper = new RefWrapperType(type);
 
-                                    var toDictionary = GetOrAddTypeSafeDictionary(
-                                        groupID
-                                      , groupDB
-                                      , wrapper
-                                      , fromDictionary);
+                                    var toDictionary = GetOrAddTypeSafeDictionary(groupID, groupDB, wrapper, fromDictionary);
 
                                     //all the new entities are added at the end of each dictionary list, so we can
                                     //just iterate the list using the indices ranges added in the _cachedIndices
                                     _cachedRangeOfSubmittedIndices.Add(
                                         ((uint, uint))(toDictionary.count, toDictionary.count + fromDictionary.count));
                                     //Fill the DB with the entity components generated this frame.
-                                    fromDictionary.AddEntitiesToDictionary(
-                                        toDictionary, 
-                                        groupID
+                                    fromDictionary.AddEntitiesToDictionary(toDictionary, groupID
 #if SLOW_SVELTO_SUBMISSION
                                        , entityLocator
 #endif
@@ -391,11 +385,7 @@ namespace Svelto.ECS
 
                                     var toDictionary = GetTypeSafeDictionary(groupID, groupDB, wrapper);
                                     enumerator.MoveNext();
-                                    toDictionary.ExecuteEnginesAddEntityCallbacksFast(
-                                        _reactiveEnginesAddEx,
-                                        groupID,
-                                        enumerator.Current,
-                                        in sampler);
+                                    toDictionary.ExecuteEnginesAddEntityCallbacksFast(_reactiveEnginesAddEx, groupID, enumerator.Current, in sampler);
                                 }
                             }
                         }
@@ -475,8 +465,7 @@ namespace Svelto.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void SwapEntitiesBetweenGroups(ExclusiveGroupStruct fromGroupId, ExclusiveGroupStruct toGroupId,
-            PlatformProfiler platformProfiler)
+        void SwapEntitiesBetweenGroups(ExclusiveGroupStruct fromGroupId, ExclusiveGroupStruct toGroupId, PlatformProfiler platformProfiler)
         {
             FasterDictionary<RefWrapperType, ITypeSafeDictionary> fromGroup = GetDBGroup(fromGroupId);
             FasterDictionary<RefWrapperType, ITypeSafeDictionary> toGroup = GetOrAddDBGroup(toGroupId);
@@ -489,15 +478,9 @@ namespace Svelto.ECS
                 RefWrapperType refWrapperType = dictionaryOfEntities.key;
 
                 ITypeSafeDictionary fromDictionary = dictionaryOfEntities.value;
-                ITypeSafeDictionary toDictionary = GetOrAddTypeSafeDictionary(
-                    toGroupId,
-                    toGroup,
-                    refWrapperType,
-                    fromDictionary);
+                ITypeSafeDictionary toDictionary = GetOrAddTypeSafeDictionary(toGroupId, toGroup, refWrapperType, fromDictionary);
 
-                fromDictionary.AddEntitiesToDictionary(
-                    toDictionary,
-                    toGroupId
+                fromDictionary.AddEntitiesToDictionary(toDictionary, toGroupId
 #if SLOW_SVELTO_SUBMISSION
                                          , this.entityLocator
 #endif
@@ -513,13 +496,8 @@ namespace Svelto.ECS
                 ITypeSafeDictionary toDictionary = GetTypeSafeDictionary(toGroupId, toGroup, refWrapperType);
 
                 //SwapEX happens inside
-                fromDictionary.ExecuteEnginesSwapCallbacks_Group(
-                    _reactiveEnginesSwap,
-                    _reactiveEnginesSwapEx,
-                    toDictionary,
-                    fromGroupId,
-                    toGroupId,
-                    platformProfiler);
+                fromDictionary.ExecuteEnginesSwapCallbacks_Group(_reactiveEnginesSwap, _reactiveEnginesSwapEx, toDictionary,
+                    fromGroupId, toGroupId, platformProfiler);
             }
 
             //remove entities from dictionaries
@@ -573,15 +551,13 @@ namespace Svelto.ECS
         //transient caches>>>>>>>>>>>>>>>>>>>>>
         readonly FasterList<(uint, uint)> _cachedRangeOfSubmittedIndices;
         readonly FasterDictionary<uint, int> _transientEntityIDsLeftWithoutDuplicates;
-
         readonly FasterList<uint> _transientEntityIDsLeftAndAffectedByRemoval;
         //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         static readonly
             Action<FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType,
                     FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, uint, string)>>>>, FasterList<(EGID, EGID)>
-               ,
-                EnginesRoot> _swapEntities;
+               , EnginesRoot> _swapEntities;
 
         static readonly Action<
             FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, FasterList<(uint, string)>>>,

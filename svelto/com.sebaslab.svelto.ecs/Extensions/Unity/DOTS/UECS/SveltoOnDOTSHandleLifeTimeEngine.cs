@@ -8,19 +8,26 @@ namespace Svelto.ECS.SveltoOnDOTS
     }
 
     public class SveltoOnDOTSHandleLifeTimeEngine<DOTSEntityComponent> : ISveltoOnDOTSHandleLifeTimeEngine,
-        IReactOnRemove<DOTSEntityComponent>,
+        IReactOnRemoveEx<DOTSEntityComponent>,
         IReactOnSwapEx<DOTSEntityComponent> where DOTSEntityComponent : unmanaged, IEntityComponentForDOTS
     {
-        public void Remove(ref DOTSEntityComponent entityComponent, EGID egid)
-        {
-            ECB.DestroyEntity(entityComponent.dotsEntity);
-        }
-
         EntityCommandBufferForSvelto ECB { get; set; }
 
         public EntityCommandBufferForSvelto entityCommandBuffer
         {
             set => ECB = value;
+        }
+        
+        public void Remove((uint start, uint end) rangeOfEntities, in EntityCollection<DOTSEntityComponent> collection, ExclusiveGroupStruct groupID)
+        {
+            var (entities, _) = collection;
+
+            for (uint i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
+            {
+                ref var entityComponent = ref entities[i];
+                
+                ECB.DestroyEntity(entityComponent.dotsEntity);
+            }
         }
 
         public void MovedTo((uint start, uint end) rangeOfEntities, in EntityCollection<DOTSEntityComponent> collection,

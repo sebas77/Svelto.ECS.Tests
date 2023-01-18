@@ -445,13 +445,14 @@ namespace Svelto.ECS.Tests.Messy
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group0));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group3));
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group3)));
-
+#if SLOW_SVELTO_SUBMISSION
             Assert.AreEqual(
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
                     new EGID(id, Groups.group3), out var index)[index].ID.entityID, id);
             Assert.AreEqual(
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
                     new EGID(id, Groups.group3), out index)[index].ID.groupID.id, (Groups.group3.id));
+#endif
 
             _entityFunctions.SwapEntityGroup<TestDescriptorEntityView>(id, Groups.group3, Groups.group0);
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
@@ -460,13 +461,14 @@ namespace Svelto.ECS.Tests.Messy
             Assert.IsTrue(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group0));
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasAnyEntityInGroup<TestEntityViewComponent>(Groups.group3));
             Assert.IsFalse(_neverDoThisIsJustForTheTest.HasEntity<TestEntityViewComponent>(new EGID(id, Groups.group3)));
-
+#if SLOW_SVELTO_SUBMISSION
             Assert.AreEqual(
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
                     new EGID(id, Groups.group0), out index)[index].ID.entityID, id);
             Assert.AreEqual(
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntitiesAndIndex<TestEntityViewComponent>(
                     new EGID(id, Groups.group0), out index)[index].ID.groupID.id, Groups.group0.id);
+#endif                    
         }
 
         [TestCase((uint)0, (uint)1, (uint)2, (uint)3)]
@@ -641,10 +643,10 @@ namespace Svelto.ECS.Tests.Messy
             {
                 for (int i = 0; i < count; i++)
                 {
-                    if (iterator[i].ID.groupID == Groups.group0)
+                    if (exclusiveGroupStruct == Groups.group0)
                         Assert.IsTrue(iterator[i].value == index);
                     else
-                        Assert.IsTrue(iterator[i].value == (index + 200));
+                        Assert.That(iterator[i].value, Is.EqualTo(index + 200));
 
                     index = ++index % 100;
                 }
@@ -869,7 +871,10 @@ namespace Svelto.ECS.Tests.Messy
         public EGID ID { get; set; }
     }
 
-    struct TestEntityComponent : IEntityComponent, INeedEGID
+    struct TestEntityComponent : IEntityComponent
+#if SLOW_SVELTO_SUBMISSION            
+          , INeedEGID
+#endif            
     {
         public uint value;
 
@@ -891,7 +896,11 @@ namespace Svelto.ECS.Tests.Messy
         }
     }
 
-    struct TestEntityViewComponent : IEntityViewComponent, INeedEGID
+    struct TestEntityViewComponent : IEntityViewComponent
+#if SLOW_SVELTO_SUBMISSION            
+          , INeedEGID
+#endif            
+            
     {
 #pragma warning disable 649
         public ITestIt TestIt;

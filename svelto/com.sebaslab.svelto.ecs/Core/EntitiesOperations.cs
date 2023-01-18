@@ -9,6 +9,7 @@ namespace Svelto.ECS
         {
             _thisSubmissionInfo.Init();
             _lastSubmittedInfo.Init();
+            _builder = Builder;
         }
 
         public void QueueRemoveGroupOperation(ExclusiveBuildGroup groupID, string caller)
@@ -47,8 +48,7 @@ namespace Svelto.ECS
             //todo: limit the number of dictionaries that can be cached 
             //recycle or create dictionaries of components per group
             var swappedComponentsPerType = _thisSubmissionInfo._currentSwapEntitiesOperations.RecycleOrAdd(
-                fromID.groupID
-              , () => new FasterDictionary<RefWrapperType, //add case
+                fromID.groupID, () => new FasterDictionary<RefWrapperType, //add case
                         FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, uint, string)>>>()
                , (ref FasterDictionary<RefWrapperType, //recycle case (called at first recycle)
                         FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, uint, string)>>> recycled) =>
@@ -58,9 +58,7 @@ namespace Svelto.ECS
                 swappedComponentsPerType
                     //recycle or create dictionaries per component type
                    .RecycleOrAdd(new RefWrapperType(operation.GetEntityComponentType())
-                               , () => new FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, uint, string)>>()
-                                ,
-                                 (ref FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, uint, string)>>
+                               , _builder, (ref FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, uint, string)>>
                                      target) => target.Clear())
                     //recycle or create list of entities to swap
                    .RecycleOrAdd(toID.groupID, () => new FasterList<(uint, uint, string)>()
@@ -69,16 +67,19 @@ namespace Svelto.ECS
                    .Add((fromID.entityID, toID.entityID, caller));
         }
 
+        FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, uint, string)>> Builder()
+        {
+            return new FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, uint, string)>>();
+        }
+
         public bool AnyOperationQueued()
         {
             return _thisSubmissionInfo.AnyOperationQueued();
         }
 
-        public void ExecuteRemoveAndSwappingOperations
-        (Action<FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType,
+        public void ExecuteRemoveAndSwappingOperations(Action<FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType,
                  FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, uint, string)>>>>, FasterList<(EGID, EGID)>,
-             EnginesRoot> swapEntities
-       , Action<FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, FasterList<(uint, string)>>>,
+             EnginesRoot> swapEntities, Action<FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, FasterList<(uint, string)>>>,
              FasterList<EGID>, EnginesRoot> removeEntities, Action<ExclusiveGroupStruct, EnginesRoot> removeGroup
        , Action<ExclusiveGroupStruct, ExclusiveGroupStruct, EnginesRoot> swapGroup, EnginesRoot enginesRoot)
         {
@@ -129,9 +130,9 @@ namespace Svelto.ECS
 
         struct Info
         {
-            //from group                          //actual component type      
+                                      //from group         //actual component type      
             internal FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType,
-                    // to group ID        //entityIDs , debugInfo
+                                     // to group ID        //entityIDs , debugInfo
                     FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, uint, string)>>>>
                 _currentSwapEntitiesOperations;
 
@@ -176,7 +177,8 @@ namespace Svelto.ECS
         }
 
         Info _lastSubmittedInfo;
-
         Info _thisSubmissionInfo;
+
+        readonly Func<FasterDictionary<ExclusiveGroupStruct, FasterList<(uint, uint, string)>>> _builder;
     }
 }

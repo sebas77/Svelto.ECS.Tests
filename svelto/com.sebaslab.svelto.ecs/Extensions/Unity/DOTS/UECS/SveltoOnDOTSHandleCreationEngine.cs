@@ -1,5 +1,4 @@
 #if UNITY_ECS
-using System;
 using System.Runtime.CompilerServices;
 using Unity.Entities;
 using Unity.Jobs;

@@ -6,7 +6,7 @@ namespace Svelto.ECS.SveltoOnDOTS
     /// <summary>
     /// DOTS component to keep track of the associated Svelto.ECS entity
     /// </summary>
-    public struct DOTSSveltoEGID : IComponentData
+    public struct DOTSSveltoEGID: IComponentData
     {
         public EGID egid;
 
@@ -16,7 +16,7 @@ namespace Svelto.ECS.SveltoOnDOTS
     /// <summary>
     /// DOTS component to be able to query all the DOTS entities found in a Svelto.ECS group
     /// </summary>
-    public readonly struct DOTSSveltoGroupID : ISharedComponentData
+    public readonly struct DOTSSveltoGroupID: ISharedComponentData
     {
         readonly ExclusiveGroupStruct group;
 
@@ -31,7 +31,7 @@ namespace Svelto.ECS.SveltoOnDOTS
         }
     }
 
-    struct DOTSEntityToSetup : ISharedComponentData
+    struct DOTSEntityToSetup: ISharedComponentData
     {
         internal readonly ExclusiveGroupStruct group;
 
@@ -41,13 +41,12 @@ namespace Svelto.ECS.SveltoOnDOTS
         }
     }
 
-  public interface IEntityComponentForDOTS: IEntityComponent
+    public interface IEntityComponentForDOTS: IEntityComponent
     {
         public Entity dotsEntity { get; set; }
     }
-    
-    
-    public struct DOTSEntityComponent:IEntityComponentForDOTS
+
+    public struct DOTSEntityComponent: IEntityComponentForDOTS
     {
         public Entity dotsEntity { get; set; }
     }

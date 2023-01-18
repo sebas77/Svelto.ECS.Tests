@@ -1,6 +1,9 @@
 ﻿namespace Svelto.ECS.Tests
 {
-    public struct TestEntityComponent : IEntityComponent, INeedEGID
+    public struct TestEntityComponent : IEntityComponent
+#if SLOW_SVELTO_SUBMISSION            
+          , INeedEGID
+#endif            
     {
         public float floatValue;
         public int   intValue;
@@ -10,8 +13,9 @@
             this.floatValue = floatValue;
             this.intValue   = intValue;
         }
-
+#if SLOW_SVELTO_SUBMISSION   
         public EGID ID { get; set; }
+#endif
     }
     
     public struct TestEntityComponentInt : IEntityComponent

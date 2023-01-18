@@ -63,13 +63,22 @@ namespace Svelto.ECS.Tests.ECS
                     buffer[i].TestIntValue.Value   += (int)buffer[i].ID.entityID;
                 }
             }
-
+#if SLOW_SVELTO_SUBMISSION
             foreach (var ((buffer, count), _) in _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>())
             {
                 for (int i = 0; i < count; i++)
                 {
                     buffer[i].floatValue = 1 + buffer[i].ID.entityID;
                     buffer[i].intValue   = 1 + (int)buffer[i].ID.entityID;
+                }
+            }
+#endif            
+            foreach (var ((buffer, ids, count), _) in _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>())
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    buffer[i].floatValue = 1 + ids[i];
+                    buffer[i].intValue = 1 + (int)ids[i];
                 }
             }
 
@@ -116,6 +125,7 @@ namespace Svelto.ECS.Tests.ECS
         [TestCase(Description = "Test EntityCollection<T> ToBuffer ToNativeArray")]
         public void TestEntityCollection1ToBufferToNativeArray()
         {
+#if SLOW_SVELTO_SUBMISSION            
             for (uint i = 0; i < _groupCount; i++)
             {
                 var (entityComponents, count) =
@@ -128,8 +138,22 @@ namespace Svelto.ECS.Tests.ECS
                     Assert.AreEqual(entity.ID.entityID + 1, entity.intValue);
                 }
             }
+#endif            
+            for (uint i = 0; i < _groupCount; i++)
+            {
+                var (entityComponents, ids, count) =
+                        _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(_group + i);
+
+                for (int j = 0; j < count; j++)
+                {
+                    ref var entity = ref entityComponents[j];
+                    Assert.AreEqual(ids[j] + 1, entity.floatValue);
+                    Assert.AreEqual(ids[j] + 1, entity.intValue);
+                }
+            }
         }
-        
+
+#if SLOW_SVELTO_SUBMISSION
         [TestCase(Description = "Test EntityCollection<T> ToBuffer ToNativeArray")]
         public void TestEntityCollection1ToBufferToNativeArrayWithEntitiesID()
         {
@@ -141,9 +165,11 @@ namespace Svelto.ECS.Tests.ECS
                 for (int j = 0; j < count; j++)
                 {
                     Assert.AreEqual(entityComponents[j].ID.entityID, entityIDs[j]);
+                   
                 }
             }
         }
+#endif
         
         [Test]
         public void TestEmptyEntityCollectionDeconstructs()

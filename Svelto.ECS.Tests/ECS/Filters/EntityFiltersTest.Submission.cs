@@ -68,9 +68,13 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var (indices, _) = iterator.Current;
             Assert.AreEqual(3, indices.count, "Filter must not be removed before submission");
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
+            var (components, ids, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
+#if SLOW_SVELTO_SUBMISSION            
             Assert.AreEqual(EgidA4, components[indices[2]].ID
                           , "Unexpected entity will get swapped, test is invalidated");
+#endif
+            Assert.AreEqual(EgidA4.entityID, ids[indices[2]]
+              , "Unexpected entity will get swapped, test is invalidated");
 
             // Perform entity removal.
             _scheduler.SubmitEntities();
@@ -83,7 +87,10 @@ namespace Svelto.ECS.Tests.ECS.Filters
 
             (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
             Assert.AreEqual(2, indices[0], "Removed index must be reused for the last entity");
+#if SLOW_SVELTO_SUBMISSION               
             Assert.AreEqual(EgidA4, components[indices[0]].ID, "Reused index must point to the previous last entity");
+#endif            
+            Assert.AreEqual(EgidA4.entityID, ids[indices[0]], "Reused index must point to the previous last entity");
         }
 
         [Test]
@@ -112,9 +119,12 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var (indices, _) = iterator.Current;
             Assert.AreEqual(3, indices.count, "Filter count must not have changed");
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
+            var (components, entities, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
             Assert.AreEqual(0, indices[2], "Removed index must be reused for last entity.");
+#if SLOW_SVELTO_SUBMISSION            
             Assert.AreEqual(EgidA4, components[indices[2]].ID, "Reused index must be pointing to last entity");
+#endif
+            Assert.AreEqual(EgidA4.entityID, entities[indices[2]], "Reused index must be pointing to last entity");
         }
 
         [Test]
@@ -143,9 +153,13 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var (indices, _) = iterator.Current;
             Assert.AreEqual(2, indices.count, "Filter count must decrease by one after remove");
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
+            var (components, entities, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
+#if SLOW_SVELTO_SUBMISSION            
             Assert.AreEqual(EgidA1, components[indices[0]].ID, "Indices kept must not have changed");
             Assert.AreEqual(EgidA2, components[indices[1]].ID, "Indices kept must not have changed");
+#endif
+            Assert.AreEqual(EgidA1.entityID, entities[indices[0]], "Indices kept must not have changed");
+            Assert.AreEqual(EgidA2.entityID, entities[indices[1]], "Indices kept must not have changed");
         }
 
         [Test]
@@ -169,9 +183,14 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var (indices, _) = iterator.Current;
             Assert.AreEqual(2, indices.count, "Filter count must decrease by one after remove");
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
+            var (components, entities, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
+#if SLOW_SVELTO_SUBMISSION            
             Assert.AreEqual(EgidA1, components[indices[0]].ID, "Indices kept must not have changed");
             Assert.AreEqual(EgidA2, components[indices[1]].ID, "Indices kept must not have changed");
+#endif            
+            Assert.AreEqual(EgidA1.entityID, entities[indices[0]], "Indices kept must not have changed");
+            Assert.AreEqual(EgidA2.entityID, entities[indices[1]], "Indices kept must not have changed");
+
         }
 
         [Test]
@@ -199,11 +218,16 @@ namespace Svelto.ECS.Tests.ECS.Filters
 
             var (indices, _) = iterator.Current;
             Assert.AreEqual(3, indices.count, "Group A count must increase after swap.");
+#if SLOW_SVELTO_SUBMISSION            
             Assert.AreEqual(EgidA0, components[indices[0]].ID, "Previous filtered entities must not have changed.");
             Assert.AreEqual(EgidA3, components[indices[1]].ID, "Previous filtered entities must not have changed.");
             Assert.AreEqual(new EGID(EgidB1.entityID, Groups.GroupA), components[indices[2]].ID
                           , "Swapped entity must be added to the last index.");
-
+#endif
+            Assert.AreEqual(EgidA0.entityID, entityIDs[indices[0]], "Previous filtered entities must not have changed.");
+            Assert.AreEqual(EgidA3.entityID, entityIDs[indices[1]], "Previous filtered entities must not have changed.");
+            Assert.AreEqual(EgidB1.entityID, entityIDs[indices[2]]
+              , "Swapped entity must be added to the last index.");
             // Check groups B.
             iterator.MoveNext();
 
@@ -212,8 +236,12 @@ namespace Svelto.ECS.Tests.ECS.Filters
             (indices, _) = iterator.Current;
             Assert.AreEqual(1, indices.count, "Group B count must decrease after swap.");
             Assert.AreEqual(1, indices[0], "Index of last entity must have updated.");
+#if SLOW_SVELTO_SUBMISSION            
             Assert.AreEqual(EgidB4, components[indices[0]].ID //
                           , "Entity pointed by index must be the previuos last index.");
+#endif
+            Assert.AreEqual(EgidB4.entityID, entityIDs[indices[0]] //
+              , "Entity pointed by index must be the previuos last index.");
 
         }
 
@@ -242,9 +270,12 @@ namespace Svelto.ECS.Tests.ECS.Filters
 
             var (indices, _) = iterator.Current;
             Assert.AreEqual(2, indices.count, "Group A count must not have changed after swap.");
+#if SLOW_SVELTO_SUBMISSION            
             Assert.AreEqual(EgidA0, components[indices[0]].ID, "Previous filtered entities must not have changed.");
             Assert.AreEqual(EgidA3, components[indices[1]].ID, "Previous filtered entities must not have changed.");
-
+#endif
+            Assert.AreEqual(EgidA0.entityID, entitiesIDs[indices[0]], "Previous filtered entities must not have changed.");
+            Assert.AreEqual(EgidA3.entityID, entitiesIDs[indices[1]], "Previous filtered entities must not have changed.");
             // Check groups B.
             iterator.MoveNext();
 
@@ -268,9 +299,12 @@ namespace Svelto.ECS.Tests.ECS.Filters
             Assert.AreEqual(2, indices.count, "Group B count must not have changed after swap.");
             Assert.AreEqual(1, indices[0], "Index of first entity must not have updated.");
             Assert.AreEqual(0, indices[1], "Index of last entity must have changed to the swapped index.");
-
+#if SLOW_SVELTO_SUBMISSION
             Assert.AreEqual(EgidB4, components[indices[1]].ID
                           , "Changed index must be still pointing to the correct entity");
+#endif                          
+            Assert.AreEqual(EgidB4.entityID, entitiesIDs[indices[1]]
+              , "Changed index must be still pointing to the correct entity");
         }
 
         [Test]
@@ -295,24 +329,33 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var iterator = filter.GetEnumerator();
             iterator.MoveNext();
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
+            var (components, entityIDs, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
 
             var (indices, _) = iterator.Current;
             Assert.AreEqual(3, indices.count, "Group A count must increase after swap.");
+#if SLOW_SVELTO_SUBMISSION            
             Assert.AreEqual(EgidA0, components[indices[0]].ID, "Previous filtered entities must not have changed.");
             Assert.AreEqual(EgidA3, components[indices[1]].ID, "Previous filtered entities must not have changed.");
             Assert.AreEqual(new EGID(EgidB4.entityID, Groups.GroupA), components[indices[2]].ID
                           , "Swapped entity must be added to the last index.");
+#endif                          
+            Assert.AreEqual(EgidA0.entityID, entityIDs[indices[0]], "Previous filtered entities must not have changed.");
+            Assert.AreEqual(EgidA3.entityID, entityIDs[indices[1]], "Previous filtered entities must not have changed.");
+            Assert.AreEqual(EgidB4.entityID, entityIDs[indices[2]], "Swapped entity must be added to the last index.");
 
             // Check groups B.
             iterator.MoveNext();
 
-            (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupB);
+            (components, entityIDs, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupB);
 
             (indices, _) = iterator.Current;
             Assert.AreEqual(2, indices.count, "Group B count must decrease after swap.");
+#if SLOW_SVELTO_SUBMISSION            
             Assert.AreEqual(EgidB2, components[indices[0]].ID, "Group B filters must not have changed.");
             Assert.AreEqual(EgidB1, components[indices[1]].ID, "Group B filters must not have changed.");
+#endif            
+            Assert.AreEqual(EgidB2.entityID, entityIDs[indices[0]], "Group B filters must not have changed.");
+            Assert.AreEqual(EgidB1.entityID, entityIDs[indices[1]], "Group B filters must not have changed.");
         }
 
         [Test]
@@ -337,23 +380,32 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var iterator = filter.GetEnumerator();
             iterator.MoveNext();
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
+            var (components, entities, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
 
             var (indices, _) = iterator.Current;
             Assert.AreEqual(2, indices.count, "Group A count must not change.");
+#if SLOW_SVELTO_SUBMISSION            
             Assert.AreEqual(EgidA0, components[indices[0]].ID, "Previous filtered entities must not change.");
             Assert.AreEqual(EgidA3, components[indices[1]].ID, "Previous filtered entities must not change.");
+#endif            
+            Assert.AreEqual(EgidA0.entityID, entities[indices[0]], "Previous filtered entities must not change.");
+            Assert.AreEqual(EgidA3.entityID, entities[indices[1]], "Previous filtered entities must not change.");
 
             // Check groups B.
             iterator.MoveNext();
 
-            (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupB);
+            (components, entities, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupB);
 
             (indices, _) = iterator.Current;
             Assert.AreEqual(3, indices.count, "Group B count must not change.");
+#if SLOW_SVELTO_SUBMISSION            
             Assert.AreEqual(EgidB2, components[indices[0]].ID, "Group B filters must not change.");
             Assert.AreEqual(EgidB1, components[indices[1]].ID, "Group B filters must not change.");
             Assert.AreEqual(EgidB4, components[indices[2]].ID, "Group B filters must not change.");
+#endif            
+            Assert.AreEqual(EgidB2.entityID, entities[indices[0]], "Group B filters must not change.");
+            Assert.AreEqual(EgidB1.entityID, entities[indices[1]], "Group B filters must not change.");
+            Assert.AreEqual(EgidB4.entityID, entities[indices[2]], "Group B filters must not change.");
         }
 
         [Test]
@@ -389,10 +441,14 @@ namespace Svelto.ECS.Tests.ECS.Filters
             var (indices, _) = iterator.Current;
             Assert.AreEqual(4, indices.count, "Filter count must have changed by one");
 
-            var (components, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
+            var (components, entities, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
             Assert.AreEqual(4, indices[3], "Last index must point to the last entity added.");
+#if SLOW_SVELTO_SUBMISSION            
             Assert.AreEqual(EgidA0, components[indices[3]].ID
                           , "Last entity index must point to the last entity added.");
+#endif                          
+            Assert.AreEqual(EgidA0.entityID, entities[indices[3]]
+              , "Last entity index must point to the last entity added.");
         }
 
         [Test]

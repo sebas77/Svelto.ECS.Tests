@@ -95,7 +95,7 @@ namespace Svelto
                 DefaultUnityLogger.Init(); //first set to the Default Logger to avoid stack overflow with SimpleLogger due to SveltoSystemOutInterceptor
                 
                 if (catchEmAll)
-                    Console.CatchEmAll(); //this must happen first otherwise it will override the set out console of FasterUnityLogger
+                    CatchEmAll(); //this must happen first otherwise it will override the set out console of FasterUnityLogger
 
                 try
                 {
@@ -127,7 +127,7 @@ namespace Svelto
 #if UNITY_EDITOR
         static readonly Action<PlayModeStateChange> EditorApplicationOnplayModeStateChanged = OnEditorChangedMode;
 #endif
-        private static readonly ILogHandler defaultLogHandler = Debug.unityLogger.logHandler;
+        static readonly ILogHandler defaultLogHandler;
 #if UNITY_EDITOR
         static (StackTraceLogType warning, StackTraceLogType assert, StackTraceLogType error, StackTraceLogType log, StackTraceLogType exception)
             _originals;

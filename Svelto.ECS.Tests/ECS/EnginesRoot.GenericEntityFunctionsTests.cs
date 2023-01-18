@@ -1,10 +1,12 @@
 ﻿using NUnit.Framework;
+using Svelto.DataStructures;
 using Svelto.ECS.Experimental;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS.Tests.ECS
 {
     [TestFixture]
-    public class EnginesRoot_GenericEntityFunctionsTests : GenericTestsBaseClass
+    public class EnginesRoot_GenericEntityFunctionsTests: GenericTestsBaseClass
     {
         [Test]
         public void TestRemoveWithEntityIdAndGroup()
@@ -28,7 +30,8 @@ namespace Svelto.ECS.Tests.ECS
                 _scheduler.SubmitEntities();
             }
 
-            Assert.Throws<ECSException>(RemoveNotFound,
+            Assert.Throws<ECSException>(
+                RemoveNotFound,
                 "When removing non created entities an exception should be thrown");
         }
 
@@ -55,7 +58,8 @@ namespace Svelto.ECS.Tests.ECS
                 _scheduler.SubmitEntities();
             }
 
-            Assert.Throws<ECSException>(RemoveNotFound,
+            Assert.Throws<ECSException>(
+                RemoveNotFound,
                 "When removing non created entities an exception should be thrown");
         }
 
@@ -103,43 +107,53 @@ namespace Svelto.ECS.Tests.ECS
         public void TestSwapEntityFromEgidToEgid()
         {
             var initializer = CreateTestEntity(0, Groups.GroupA);
-            
-            var testEntityComponent     = initializer.Get<TestEntityComponent>();
+
+            var testEntityComponent = initializer.Get<TestEntityComponent>();
             var testEntityViewComponent = initializer.Get<TestEntityViewComponent>();
 
             _scheduler.SubmitEntities();
-            
+
             var fromEgid = new EGID(0, Groups.GroupA);
-            var toEgid   = new EGID(1, Groups.GroupB);
-            
-            var (componentA, componentViewA, countA) =
-                _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent, TestEntityViewComponent>(Groups.GroupA);
+            var toEgid = new EGID(1, Groups.GroupB);
+
+            (NB<TestEntityComponent> componentA, MB<TestEntityViewComponent> componentViewA, ManagedEntityIDs ids, int countA) =
+                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent, TestEntityViewComponent>(Groups.GroupA);
 
             Assert.AreEqual(1, countA, "An entity should exist in target Group");
+#if SLOW_SVELTO_SUBMISSION
             Assert.AreEqual(fromEgid.entityID, componentA[0].ID.entityID,
                 "Swapped entity should have the target entityID");
-            
+#endif
+            Assert.AreEqual(fromEgid.entityID, ids[0], "Swapped entity should have the target entityID");
+
             Assert.AreEqual(testEntityComponent.floatValue, componentA[0].floatValue, "Component values should be copied");
             Assert.AreEqual(testEntityComponent.intValue, componentA[0].intValue, "Component values should be copied");
-            
-            Assert.AreEqual(testEntityViewComponent.TestFloatValue.Value, componentViewA[0].TestFloatValue.Value, "ViewComponent values should be copied");
-            Assert.AreEqual(testEntityViewComponent.TestIntValue.Value, componentViewA[0].TestIntValue.Value, "ViewComponent values should be copied");
-            
+
+            Assert.AreEqual(
+                testEntityViewComponent.TestFloatValue.Value, componentViewA[0].TestFloatValue.Value, "ViewComponent values should be copied");
+            Assert.AreEqual(
+                testEntityViewComponent.TestIntValue.Value, componentViewA[0].TestIntValue.Value, "ViewComponent values should be copied");
+
             _functions.SwapEntityGroup<EntityDescriptorWithComponentAndViewComponent>(fromEgid, toEgid);
             _scheduler.SubmitEntities();
-            
-            var (componentB, componentViewB, countB) =
-                _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent, TestEntityViewComponent>(Groups.GroupB);
+
+            var (componentB, componentViewB, newIDs, countB) =
+                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent, TestEntityViewComponent>(Groups.GroupB);
 
             Assert.AreEqual(1, countB, "An entity should exist in target Group");
+#if SLOW_SVELTO_SUBMISSION
             Assert.AreEqual(toEgid.entityID, componentB[0].ID.entityID,
                 "Swapped entity should have the target entityID");
-            
+#endif
+            Assert.AreEqual(toEgid.entityID, newIDs[0], "Swapped entity should have the target entityID");
+
             Assert.AreEqual(testEntityComponent.floatValue, componentB[0].floatValue, "Component values should be copied");
             Assert.AreEqual(testEntityComponent.intValue, componentB[0].intValue, "Component values should be copied");
-            
-            Assert.AreEqual(testEntityViewComponent.TestFloatValue.Value, componentViewB[0].TestFloatValue.Value, "ViewComponent values should be copied");
-            Assert.AreEqual(testEntityViewComponent.TestIntValue.Value, componentViewB[0].TestIntValue.Value, "ViewComponent values should be copied");
+
+            Assert.AreEqual(
+                testEntityViewComponent.TestFloatValue.Value, componentViewB[0].TestFloatValue.Value, "ViewComponent values should be copied");
+            Assert.AreEqual(
+                testEntityViewComponent.TestIntValue.Value, componentViewB[0].TestIntValue.Value, "ViewComponent values should be copied");
 
             var existsA = _entitiesDB.entitiesForTesting.Exists<TestEntityComponent>(0, Groups.GroupA);
             Assert.IsFalse(existsA, "Entity should not be present in source Group anymore");
@@ -149,23 +163,25 @@ namespace Svelto.ECS.Tests.ECS
                 CreateTestEntity(2, Groups.GroupA);
                 CreateTestEntity(2, Groups.GroupB);
                 fromEgid = new EGID(0, Groups.GroupA);
-                toEgid   = new EGID(0, Groups.GroupB);
+                toEgid = new EGID(0, Groups.GroupB);
                 _functions.SwapEntityGroup<EntityDescriptorWithComponentAndViewComponent>(fromEgid, toEgid);
                 _scheduler.SubmitEntities();
             }
 
-            Assert.Throws<ECSException>(SwapEntityAlreadyExists,
+            Assert.Throws<ECSException>(
+                SwapEntityAlreadyExists,
                 "When target EGID already exists it should throw an exception");
 
             void SwapEntityNotFound()
             {
                 fromEgid = new EGID(3, Groups.GroupA);
-                toEgid   = new EGID(3, Groups.GroupB);
+                toEgid = new EGID(3, Groups.GroupB);
                 _functions.SwapEntityGroup<EntityDescriptorWithComponentAndViewComponent>(fromEgid, toEgid);
                 _scheduler.SubmitEntities();
             }
 
-            Assert.Throws<ECSException>(SwapEntityNotFound,
+            Assert.Throws<ECSException>(
+                SwapEntityNotFound,
                 "When source EGID doesn't exists it should throw an exception");
         }
     }

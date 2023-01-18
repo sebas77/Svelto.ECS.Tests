@@ -4,7 +4,7 @@ using Svelto.ECS.Schedulers;
 
 namespace Svelto.ECS.Tests.ECS
 {
-    public class EnginesRoot_LocatorMapTests : GenericTestsBaseClass
+    public class EnginesRoot_LocatorMapTests: GenericTestsBaseClass
     {
         [Test]
         public void TestEntityReferenceSequenceCreation()
@@ -16,11 +16,10 @@ namespace Svelto.ECS.Tests.ECS
 
             _scheduler.SubmitEntities();
 
-            var (egids, count) = _entitiesDB.entitiesForTesting.QueryEntities<EGIDComponent>(TestGroupA);
+            var (_, ids, count) = _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(TestGroupA);
             for (uint i = 0; i < count; i++)
             {
-                Assert.AreEqual(new EntityReference(i + 1, 0),
-                    _entitiesDB.entitiesForTesting.GetEntityReference(egids[i].ID));
+                Assert.AreEqual(new EntityReference(i + 1, 0), _entitiesDB.entitiesForTesting.GetEntityReference(new EGID(ids[i], TestGroupA)));
             }
         }
 
@@ -87,7 +86,7 @@ namespace Svelto.ECS.Tests.ECS
         [Test]
         public void TestEntityReferenceGroupUpdate()
         {
-            var egids      = new EGID[10];
+            var egids = new EGID[10];
             var references = new EntityReference[10];
             for (uint i = 0; i < 10; i++)
             {
@@ -111,7 +110,7 @@ namespace Svelto.ECS.Tests.ECS
         [Test]
         public void TestRemoveGroupUpdatesReferences()
         {
-            var egids      = new EGID[10];
+            var egids = new EGID[10];
             var references = new EntityReference[10];
             for (uint i = 0; i < 10; i++)
             {
@@ -143,7 +142,7 @@ namespace Svelto.ECS.Tests.ECS
         {
             _enginesRoot.AddEngine(new RemoveEntityEngineLegacy());
 
-            var egids      = new EGID[10];
+            var egids = new EGID[10];
             var references = new EntityReference[10];
             for (uint i = 0; i < 10; i++)
             {
@@ -151,7 +150,11 @@ namespace Svelto.ECS.Tests.ECS
                 _factory.BuildEntity<TestDescriptor>(egids[i].entityID, TestGroupA);
                 var init = _factory.BuildEntity<TestDescriptorWithReference>(egids[i].entityID, TestGroupB);
                 references[i] = _entitiesDB.entitiesForTesting.GetEntityReference(egids[i]);
-                init.Init(new EntityReferenceComponent() { reference = references[i] });
+                init.Init(
+                    new EntityReferenceComponent()
+                    {
+                            reference = references[i]
+                    });
             }
 
             _scheduler.SubmitEntities();
@@ -172,16 +175,20 @@ namespace Svelto.ECS.Tests.ECS
         {
             _enginesRoot.AddEngine(new RemoveEntityEngine());
 
-            var egids      = new EGID[10];
+            var egids = new EGID[10];
             var references = new EntityReference[10];
             for (uint i = 0; i < 10; i++)
             {
                 egids[i] = new EGID(i, TestGroupA);
                 _factory.BuildEntity<TestDescriptor>(egids[i].entityID, TestGroupA);
-                
+
                 var init = _factory.BuildEntity<TestDescriptorWithReference>(egids[i].entityID, TestGroupB);
                 references[i] = _entitiesDB.entitiesForTesting.GetEntityReference(egids[i]);
-                init.Init(new EntityReferenceComponent() { reference = references[i] });
+                init.Init(
+                    new EntityReferenceComponent()
+                    {
+                            reference = references[i]
+                    });
             }
 
             _scheduler.SubmitEntities();
@@ -193,9 +200,9 @@ namespace Svelto.ECS.Tests.ECS
             }
 
             _functions.RemoveEntitiesFromGroup(TestGroupA);
-            
+
             _functions.RemoveEntitiesFromGroup(TestGroupB);
-            
+
             _scheduler.SubmitEntities();
         }
 
@@ -232,63 +239,75 @@ namespace Svelto.ECS.Tests.ECS
             _scheduler.SubmitEntities();
 
             // First submission entities.
-            Assert.AreEqual(new EntityReference(1, 0),
+            Assert.AreEqual(
+                new EntityReference(1, 0),
                 _entitiesDB.entitiesForTesting.GetEntityReference(new EGID(0, TestGroupA)));
-            Assert.AreEqual(new EntityReference(3, 0),
+            Assert.AreEqual(
+                new EntityReference(3, 0),
                 _entitiesDB.entitiesForTesting.GetEntityReference(new EGID(2, TestGroupA)));
 
             // Second submission entities.
-            Assert.AreEqual(new EntityReference(6, 0),
+            Assert.AreEqual(
+                new EntityReference(6, 0),
                 _entitiesDB.entitiesForTesting.GetEntityReference(new EGID(4, TestGroupA)));
 
             // Third submission entities.
-            Assert.AreEqual(new EntityReference(4, 1),
+            Assert.AreEqual(
+                new EntityReference(4, 1),
                 _entitiesDB.entitiesForTesting.GetEntityReference(new EGID(5, TestGroupA)));
-            Assert.AreEqual(new EntityReference(2, 1),
+            Assert.AreEqual(
+                new EntityReference(2, 1),
                 _entitiesDB.entitiesForTesting.GetEntityReference(new EGID(2, TestGroupB)));
 
             // Fourth submission entities.
-            Assert.AreEqual(new EntityReference(7, 1),
+            Assert.AreEqual(
+                new EntityReference(7, 1),
                 _entitiesDB.entitiesForTesting.GetEntityReference(new EGID(3, TestGroupB)));
-            Assert.AreEqual(new EntityReference(5, 1),
+            Assert.AreEqual(
+                new EntityReference(5, 1),
                 _entitiesDB.entitiesForTesting.GetEntityReference(new EGID(4, TestGroupB)));
-            Assert.AreEqual(new EntityReference(8, 0),
+            Assert.AreEqual(
+                new EntityReference(8, 0),
                 _entitiesDB.entitiesForTesting.GetEntityReference(new EGID(6, TestGroupA)));
-            Assert.AreEqual(new EntityReference(9, 0),
+            Assert.AreEqual(
+                new EntityReference(9, 0),
                 _entitiesDB.entitiesForTesting.GetEntityReference(new EGID(7, TestGroupA)));
         }
 
         public static readonly ExclusiveGroup TestGroupA = new ExclusiveGroup();
         public static readonly ExclusiveGroup TestGroupB = new ExclusiveGroup();
 
-        class TestDescriptor : IEntityDescriptor
+        class TestDescriptor: IEntityDescriptor
         {
             public IComponentBuilder[] componentsToBuild
             {
                 get => new IComponentBuilder[]
                 {
+#if SLOW_SVELTO_SUBMISSION
                     new ComponentBuilder<EGIDComponent>(),
+#endif
+                        new ComponentBuilder<TestEntityComponentInt>()
                 };
             }
         }
 
-        public struct EntityReferenceComponent : IEntityComponent
+        public struct EntityReferenceComponent: IEntityComponent
         {
             public EntityReference reference { get; set; }
         }
 
-        class TestDescriptorWithReference : IEntityDescriptor
+        class TestDescriptorWithReference: IEntityDescriptor
         {
             public IComponentBuilder[] componentsToBuild
             {
                 get => new IComponentBuilder[]
                 {
-                    new ComponentBuilder<EntityReferenceComponent>(),
+                        new ComponentBuilder<EntityReferenceComponent>(),
                 };
             }
         }
 
-        public class RemoveEntityEngine : IReactOnRemoveEx<EntityReferenceComponent>, IQueryingEntitiesEngine
+        public class RemoveEntityEngine: IReactOnRemoveEx<EntityReferenceComponent>, IQueryingEntitiesEngine
         {
             public void Remove((uint start, uint end) rangeOfEntities,
                 in EntityCollection<EntityReferenceComponent> collection, ExclusiveGroupStruct groupID)
@@ -304,18 +323,14 @@ namespace Svelto.ECS.Tests.ECS
                 }
             }
 
-            public void Ready()
-            {
-            }
+            public void Ready() { }
 
             public EntitiesDB entitiesDB { get; set; }
         }
 
-        public class RemoveEntityEngineLegacy : IReactOnRemove<EntityReferenceComponent>, IQueryingEntitiesEngine
+        public class RemoveEntityEngineLegacy: IReactOnRemove<EntityReferenceComponent>, IQueryingEntitiesEngine
         {
-            public void Ready()
-            {
-            }
+            public void Ready() { }
 
             public EntitiesDB entitiesDB { get; set; }
 

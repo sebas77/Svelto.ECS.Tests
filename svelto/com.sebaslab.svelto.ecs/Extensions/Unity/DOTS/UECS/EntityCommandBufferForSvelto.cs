@@ -1,7 +1,7 @@
 ﻿#if UNITY_ECS
-//#if !UNITY_ECS_050
-#define SLOW_SVELTO_ECB //Using EntityManager directly is much faster than using ECB because of the shared components
-//#endif
+#if !UNITY_ECS_100
+#define OLD_DOTS //Using EntityManager directly is much faster than using ECB because of the shared components
+#endif
 using System;
 using System.Runtime.CompilerServices;
 using Unity.Entities;
@@ -19,7 +19,7 @@ namespace Svelto.ECS.SveltoOnDOTS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Entity CreatePureDOTSEntity(EntityArchetype jointArchetype)
         {
-#if SLOW_SVELTO_ECB
+#if OLD_DOTS
             return _EManager.CreateEntity(jointArchetype);
 #else
             return _ECB.CreateEntity(jointArchetype);
@@ -27,9 +27,9 @@ namespace Svelto.ECS.SveltoOnDOTS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetComponent<T>(Entity e, in T component) where T : struct, IComponentData
+        public void SetComponent<T>(Entity e, in T component) where T : unmanaged, IComponentData
         {
-#if SLOW_SVELTO_ECB
+#if OLD_DOTS
             _EManager.SetComponentData<T>(e, component);
 #else
             _ECB.SetComponent(e, component);
@@ -37,9 +37,9 @@ namespace Svelto.ECS.SveltoOnDOTS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetSharedComponent<T>(Entity e, in T component) where T : struct, ISharedComponentData
+        public void SetSharedComponent<T>(Entity e, in T component) where T : unmanaged, ISharedComponentData
         {
-#if SLOW_SVELTO_ECB
+#if OLD_DOTS
             _EManager.SetSharedComponentData<T>(e, component);
 #else
             _ECB.SetSharedComponent(e, component);
@@ -47,11 +47,10 @@ namespace Svelto.ECS.SveltoOnDOTS
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        ///Not ready for prime time with BURST yet, maybe with DOTS 1.0
         public static Entity CreateDOTSEntityOnSvelto(int sortKey, EntityCommandBuffer.ParallelWriter writer,
             Entity entityComponentPrefabEntity, EGID egid, bool mustHandleDOTSComponent)
         {
-#if !SLOW_SVELTO_ECB
+#if !OLD_DOTS
             Entity dotsEntity = writer.Instantiate(sortKey, entityComponentPrefabEntity);
 
             //SharedComponentData can be used to group the DOTS ECS entities exactly like the Svelto ones
@@ -66,11 +65,10 @@ namespace Svelto.ECS.SveltoOnDOTS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Entity CreateDOTSEntityOnSvelto(Entity entityComponentPrefabEntity, EGID egid,
-            bool mustHandleDOTSComponent)
+        internal Entity CreateDOTSEntityOnSvelto(Entity prefabEntity, EGID egid, bool mustHandleDOTSComponent)
         {
-#if SLOW_SVELTO_ECB
-            Entity dotsEntity = _EManager.Instantiate(entityComponentPrefabEntity);
+#if OLD_DOTS
+            Entity dotsEntity = _EManager.Instantiate(prefabEntity);
             
             //SharedComponentData can be used to group the DOTS ECS entities exactly like the Svelto ones
             _EManager.AddSharedComponentData(dotsEntity, new DOTSSveltoGroupID(egid.groupID));
@@ -78,7 +76,7 @@ namespace Svelto.ECS.SveltoOnDOTS
             if (mustHandleDOTSComponent)
                 _EManager.AddSharedComponentData(dotsEntity, new DOTSEntityToSetup(egid.groupID));
 #else
-            Entity dotsEntity = _ECB.Instantiate(entityComponentPrefabEntity);
+            Entity dotsEntity = _ECB.Instantiate(prefabEntity);
 
             //SharedComponentData can be used to group the DOTS ECS entities exactly like the Svelto ones
             _ECB.AddSharedComponent(dotsEntity, new DOTSSveltoGroupID(egid.groupID));
@@ -100,7 +98,7 @@ namespace Svelto.ECS.SveltoOnDOTS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Entity CreateDOTSEntityOnSvelto(EntityArchetype archetype, EGID egid, bool mustHandleDOTSComponent)
         {
-#if SLOW_SVELTO_ECB
+#if OLD_DOTS
             Entity dotsEntity = _EManager.CreateEntity(archetype);
             
             //SharedComponentData can be used to group the DOTS ECS entities exactly like the Svelto ones
@@ -131,7 +129,7 @@ namespace Svelto.ECS.SveltoOnDOTS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Entity CreateDOTSEntityUnmanaged(EntityArchetype archetype)
         {
-#if SLOW_SVELTO_ECB
+#if OLD_DOTS
             return _EManager.CreateEntity(archetype);
 #else
             return _ECB.CreateEntity(archetype);
@@ -141,7 +139,7 @@ namespace Svelto.ECS.SveltoOnDOTS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void DestroyEntity(Entity e)
         {
-#if SLOW_SVELTO_ECB
+#if OLD_DOTS
             _EManager.DestroyEntity(e);
 #else
             _ECB.DestroyEntity(e);
@@ -151,7 +149,7 @@ namespace Svelto.ECS.SveltoOnDOTS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveComponent<T>(Entity dotsEntity)
         {
-#if SLOW_SVELTO_ECB
+#if OLD_DOTS
             _EManager.RemoveComponent<T>(dotsEntity);
 #else
             _ECB.RemoveComponent<T>(dotsEntity);
@@ -159,9 +157,9 @@ namespace Svelto.ECS.SveltoOnDOTS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddComponent<T>(Entity dotsEntity) where T : struct, IComponentData
+        public void AddComponent<T>(Entity dotsEntity) where T : unmanaged, IComponentData
         {
-#if SLOW_SVELTO_ECB
+#if OLD_DOTS
             _EManager.AddComponent<T>(dotsEntity);
 #else
             _ECB.AddComponent<T>(dotsEntity);
@@ -169,9 +167,9 @@ namespace Svelto.ECS.SveltoOnDOTS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddComponent<T>(Entity dotsEntity, in T component) where T : struct, IComponentData
+        public void AddComponent<T>(Entity dotsEntity, in T component) where T : unmanaged, IComponentData
         {
-#if SLOW_SVELTO_ECB
+#if OLD_DOTS
             _EManager.AddComponentData(dotsEntity, component);
 #else
             _ECB.AddComponent(dotsEntity, component);
@@ -179,9 +177,9 @@ namespace Svelto.ECS.SveltoOnDOTS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddSharedComponent<T>(Entity dotsEntity, in T component) where T : struct, ISharedComponentData
+        public void AddSharedComponent<T>(Entity dotsEntity, in T component) where T : unmanaged, ISharedComponentData
         {
-#if SLOW_SVELTO_ECB
+#if OLD_DOTS
             _EManager.AddSharedComponentData(dotsEntity, component);
 #else
             _ECB.AddSharedComponent(dotsEntity, component);
@@ -189,9 +187,9 @@ namespace Svelto.ECS.SveltoOnDOTS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddBuffer<T>(Entity dotsEntity) where T : struct, IBufferElementData
+        public void AddBuffer<T>(Entity dotsEntity) where T : unmanaged, IBufferElementData
         {
-#if SLOW_SVELTO_ECB
+#if OLD_DOTS
             _EManager.AddBuffer<T>(dotsEntity);
 #else
             _ECB.AddBuffer<T>(dotsEntity);
@@ -201,7 +199,7 @@ namespace Svelto.ECS.SveltoOnDOTS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EntityCommandBuffer.ParallelWriter AsParallelWriter()
         {
-#if SLOW_SVELTO_ECB
+#if OLD_DOTS
             throw new System.Exception();
 #else
             return _ECB.AsParallelWriter();
