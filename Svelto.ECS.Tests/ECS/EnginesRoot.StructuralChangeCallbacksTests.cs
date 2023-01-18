@@ -257,8 +257,14 @@ namespace Svelto.ECS.Tests.ECS
                 _functions.SwapEntityGroup<EntityDescriptorWithComponentAndViewComponent>
                     (new EGID(i, Groups.GroupA), Groups.GroupB);
             _scheduler.SubmitEntities();
+
+            // Swap specifically EGID to EGID with different Ids
+            for (uint i = 0; i < 100; i++)
+                _functions.SwapEntityGroup<EntityDescriptorWithComponentAndViewComponent>
+                    (new EGID(i, Groups.GroupB), new EGID(i + 200,Groups.GroupA));
+            _scheduler.SubmitEntities();
             
-            _functions.RemoveEntitiesFromGroup(Groups.GroupB);
+            _functions.RemoveEntitiesFromGroup(Groups.GroupA);
             _scheduler.SubmitEntities();
             
             Assert.That(megaReactEngine.legacyRemoveCounter, Is.EqualTo(total * 2));
