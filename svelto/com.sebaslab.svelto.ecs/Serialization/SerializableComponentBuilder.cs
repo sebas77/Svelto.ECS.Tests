@@ -80,8 +80,6 @@ namespace Svelto.ECS.Serialization
             where T : unmanaged, IEntityComponent
             where SerializationType : Enum
     {
-        public static uint SIZE => (uint)MemoryUtilities.SizeOf<T>();
-        
         static SerializableComponentBuilder() { }
 
         public SerializableComponentBuilder(params ValueTuple<int, IComponentSerializer<T>>[] serializers)

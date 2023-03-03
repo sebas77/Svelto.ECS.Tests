@@ -1,51 +1,49 @@
 ﻿#if UNITY_ECS
+using Unity.Collections;
+using Unity.Entities;
 
 namespace Svelto.ECS.SveltoOnDOTS
 {
-    public interface ISveltoOnDOTSHandleLifeTimeEngine
+    /// <summary>
+    /// Automatic Svelto Group -> DOTS archetype synchronization when necessary
+    /// </summary>
+    /// <typeparam name="DOTSEntityComponent"></typeparam>
+    class SveltoOnDOTSHandleLifeTimeEngine<DOTSEntityComponent>: ISveltoOnDOTSStructuralEngine, IReactOnRemoveEx<DOTSEntityComponent>,
+            IReactOnSwapEx<DOTSEntityComponent> where DOTSEntityComponent : unmanaged, IEntityComponentForDOTS
     {
-        EntityCommandBufferForSvelto entityCommandBuffer { set; }
-    }
-
-    public class SveltoOnDOTSHandleLifeTimeEngine<DOTSEntityComponent> : ISveltoOnDOTSHandleLifeTimeEngine,
-        IReactOnRemoveEx<DOTSEntityComponent>,
-        IReactOnSwapEx<DOTSEntityComponent> where DOTSEntityComponent : unmanaged, IEntityComponentForDOTS
-    {
-        EntityCommandBufferForSvelto ECB { get; set; }
-
-        public EntityCommandBufferForSvelto entityCommandBuffer
+        public void Remove((uint start, uint end) rangeOfEntities, in EntityCollection<DOTSEntityComponent> entities, ExclusiveGroupStruct groupID)
         {
-            set => ECB = value;
-        }
-        
-        public void Remove((uint start, uint end) rangeOfEntities, in EntityCollection<DOTSEntityComponent> collection, ExclusiveGroupStruct groupID)
-        {
-            var (entities, _) = collection;
+            var (buffer, _) = entities;
 
+            var nativeArray = new NativeArray<Entity>((int)(rangeOfEntities.end - rangeOfEntities.start), Allocator.Temp);
+
+            //todo this could be burstified or memcpied
+            int counter = 0;
             for (uint i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
-            {
-                ref var entityComponent = ref entities[i];
-                
-                ECB.DestroyEntity(entityComponent.dotsEntity);
-            }
+                nativeArray[counter++] = buffer[i].dotsEntity;
+
+            DOTSOperations.DestroyEntitiesBatched(nativeArray);
         }
 
-        public void MovedTo((uint start, uint end) rangeOfEntities, in EntityCollection<DOTSEntityComponent> collection,
+        public void MovedTo((uint start, uint end) rangeOfEntities, in EntityCollection<DOTSEntityComponent> entities,
             ExclusiveGroupStruct _, ExclusiveGroupStruct toGroup)
         {
-            var (entities, entityIDs, _) = collection;
+            var (buffer, _) = entities;
 
+            var nativeArray = new NativeArray<Entity>((int)(rangeOfEntities.end - rangeOfEntities.start), Allocator.Temp);
+
+            //todo this could be burstified or memcpied
+            int counter = 0;
             for (uint i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
-            {
-                ref var entityComponent = ref entities[i];
-                ECB.SetSharedComponent(entityComponent.dotsEntity, new DOTSSveltoGroupID(toGroup));
+                nativeArray[counter++] = buffer[i].dotsEntity;
 
-                ECB.SetComponent(entityComponent.dotsEntity, new DOTSSveltoEGID
-                {
-                    egid = new EGID(entityIDs[i], toGroup)
-                });
-            }
+            DOTSOperations.SetSharedComponentBatched(nativeArray, new DOTSSveltoGroupID(toGroup));
         }
+        
+        public void OnPostSubmission() { }
+
+        public DOTSOperationsForSvelto DOTSOperations { get; set; }
+        public string name => nameof(SveltoOnDOTSHandleLifeTimeEngine<DOTSEntityComponent>);
     }
 }
 #endif

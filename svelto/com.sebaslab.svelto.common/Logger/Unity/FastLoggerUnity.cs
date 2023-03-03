@@ -3,7 +3,7 @@
 #if UNITY_EDITOR
 #define ISEDITOR
 #endif
-#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || DEBUG_FASTER
+#if (!UNITY_EDITOR || DEBUG_FASTER) && (UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX)
 #define REDIRECT_CONSOLE
 #endif
 
@@ -149,7 +149,7 @@ namespace Svelto.Utilities
         {
             return _folder.FullName + Path.DirectorySeparatorChar + "PlayerLog" + i + ".txt";
         }
-
+#if UNITY_2021_3_OR_NEWER
         public static void CompressLogsToZipAndShow(string zipName)
         {
             _consoleOut.Flush();
@@ -174,7 +174,7 @@ namespace Svelto.Utilities
             
             Application.OpenURL($"file://{DEBUG_ZIP_FOLDER}");
         }
-
+#endif
         static StreamWriter _consoleOut;
         static TextWriter _originalConsoleOutput;
         static DirectoryInfo _folder;

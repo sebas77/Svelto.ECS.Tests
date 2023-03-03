@@ -41,7 +41,7 @@ namespace Svelto.DataStructures
             if (size > Unsafe.SizeOf<T>())
                 throw new Exception("size is bigger than struct");
 #endif
-            Unsafe.CopyBlock(
+            Unsafe.CopyBlockUnaligned(
                 ref Unsafe.As<T, byte>(ref item),
                 ref Unsafe.Add(ref MemoryMarshal.GetReference(source), _readCursor), 
                 (uint)size); //size is not the size of T
@@ -74,7 +74,7 @@ namespace Svelto.DataStructures
 #endif
             //T can contain managed elements, it's up to the user to be sure that the right data is written
             //I cannot use span for this reason
-            Unsafe.CopyBlock(
+            Unsafe.CopyBlockUnaligned(
                 ref Unsafe.Add(ref MemoryMarshal.GetReference(destinationSpan), _writeCursor),
                 ref Unsafe.As<T, byte>(ref Unsafe.AsRef(item)), (uint)size);
 
