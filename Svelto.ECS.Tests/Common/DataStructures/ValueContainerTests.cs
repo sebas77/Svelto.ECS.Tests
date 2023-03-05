@@ -8,9 +8,9 @@ namespace Svelto.Common.Tests.Datastructures
     [TestFixture]
     public class TestValueContainer
     {
-        private class Test
+        class Test
         {
-            private uint _id;
+            uint _id;
 
             public Test(uint id)
             {

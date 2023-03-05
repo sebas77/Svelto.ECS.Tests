@@ -26,7 +26,7 @@ namespace Svelto.ECS.Tests.Messy
         {
             _simpleSubmissionEntityViewScheduler = new SimpleEntitiesSubmissionScheduler();
             _enginesRoot                         = new EnginesRoot(_simpleSubmissionEntityViewScheduler);
-            _neverDoThisIsJustForTheTest         = new TestSveltoECS.TestEngine();
+            _neverDoThisIsJustForTheTest         = new TestEngine();
 
             _enginesRoot.AddEngine(_neverDoThisIsJustForTheTest);
 
@@ -370,7 +370,7 @@ namespace Svelto.ECS.Tests.Messy
         [TestCase((uint)2)]
         public void TestBuildEntityInAddFunction(uint id)
         {
-            _enginesRoot.AddEngine(new TestSveltoECS.TestEngineAdd(_entityFactory));
+            _enginesRoot.AddEngine(new TestEngineAdd(_entityFactory));
             _entityFactory.BuildEntity<TestDescriptorEntityView>(new EGID(id, Groups.group1), new[] { new TestIt(2) });
             _simpleSubmissionEntityViewScheduler.SubmitEntities(); //submit the entities
             _simpleSubmissionEntityViewScheduler.SubmitEntities(); //now submit the entities added by the engines
@@ -674,10 +674,10 @@ namespace Svelto.ECS.Tests.Messy
         [Test]
         public void TestEntityBuildInSubmission()
         {
-            var testBuildOnSwapEngine = new TestSveltoECS.TestBuildOnSwapEngine(_entityFactory);
+            var testBuildOnSwapEngine = new TestBuildOnSwapEngine(_entityFactory);
             _enginesRoot.AddEngine(testBuildOnSwapEngine);
 
-            var testSwapAfterBuildEngine = new TestSveltoECS.TestSwapAfterBuildEngine(_entityFunctions);
+            var testSwapAfterBuildEngine = new TestSwapAfterBuildEngine(_entityFunctions);
             _enginesRoot.AddEngine(testSwapAfterBuildEngine);
 
             _entityFactory.BuildEntity<TestDescriptorEntity>(0, Groups.group1);
@@ -695,11 +695,11 @@ namespace Svelto.ECS.Tests.Messy
         IEntityFactory                    _entityFactory;
         IEntityFunctions                  _entityFunctions;
         SimpleEntitiesSubmissionScheduler _simpleSubmissionEntityViewScheduler;
-        TestSveltoECS.TestEngine                        _neverDoThisIsJustForTheTest;
+        TestEngine                        _neverDoThisIsJustForTheTest;
 
         class TestBuildOnSwapEngine : IReactOnSwapEx<TestEntityComponent>, IQueryingEntitiesEngine
         {
-            private readonly IEntityFactory _entityFactory;
+            readonly IEntityFactory _entityFactory;
 
             public TestBuildOnSwapEngine(IEntityFactory entityFactory)
             {
@@ -722,8 +722,8 @@ namespace Svelto.ECS.Tests.Messy
 
         class TestSwapAfterBuildEngine : IStepEngine, IQueryingEntitiesEngine
         {
-            private readonly IEntityFunctions _entityFunctions;
-            public           string           name => nameof(TestSveltoECS.TestSwapAfterBuildEngine);
+            readonly IEntityFunctions _entityFunctions;
+            public           string           name => nameof(TestSwapAfterBuildEngine);
 
             public TestSwapAfterBuildEngine(IEntityFunctions entityFunctions)
             {

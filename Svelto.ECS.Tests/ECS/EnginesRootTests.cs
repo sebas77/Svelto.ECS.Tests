@@ -72,7 +72,7 @@ namespace Svelto.ECS.Tests.ECS
         {
             public bool disposed = false;
 
-            public void Dispose() { this.disposed = true; }
+            public void Dispose() { disposed = true; }
         }
 
         class DisposableEngine1 : DisposableEngineBase { }

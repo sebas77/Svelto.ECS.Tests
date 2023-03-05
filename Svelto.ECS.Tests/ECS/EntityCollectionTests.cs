@@ -13,8 +13,8 @@ namespace Svelto.ECS.Tests.ECS
     {
         public EntityCollectionTests(uint idStart, int entityCountPerGroup)
         {
-            this._idStart             = idStart;
-            this._entityCountPerGroup = entityCountPerGroup;
+            _idStart             = idStart;
+            _entityCountPerGroup = entityCountPerGroup;
         }
 
         readonly uint _idStart;

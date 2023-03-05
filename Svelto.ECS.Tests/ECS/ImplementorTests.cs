@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Svelto.ECS.Tests.ECS
 {
-    internal class ImplementorTests
+    class ImplementorTests
     {
         [SetUp]
         public void Init()
@@ -18,7 +18,7 @@ namespace Svelto.ECS.Tests.ECS
                 ctxs.Add(new Context());
         }
 
-        private void Make(int n, Context ctx)
+        void Make(int n, Context ctx)
         {
             for (uint i = 0; i < n; i++)
             {

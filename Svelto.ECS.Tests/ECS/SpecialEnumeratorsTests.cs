@@ -103,7 +103,7 @@ namespace Svelto.ECS.Tests.ECS
                 Assert.That(indexA < countA, "invalid outer index");
                 Assert.That(indexB < countB, "invalid inner index");
 
-                Svelto.Console.Log($"{indexA} {indexB} {countA} {countB}");
+                Console.Log($"{indexA} {indexB} {countA} {countB}");
 
                 Assert.That(results[iteration]
                           , Is.EqualTo((bufferA[indexA].intValue << 16) | bufferB[indexB].intValue));
