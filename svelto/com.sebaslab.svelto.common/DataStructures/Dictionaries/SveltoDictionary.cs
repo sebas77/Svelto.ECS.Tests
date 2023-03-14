@@ -356,13 +356,19 @@ namespace Svelto.DataStructures
         {
             if (_values.capacity < size)
             {
-                ResizeStorage(size);
+                var expandPrime = HashHelpers.Expand((int)size);
+
+                _values.Resize((uint)expandPrime, true, false);
+                _valuesInfo.Resize((uint)expandPrime, true, true);
             }
         }
 
         public void IncreaseCapacityBy(uint size)
         {
-            ResizeStorage((uint)(_values.capacity + (int)size));
+            var expandPrime = HashHelpers.Expand((int)_values.capacity + (int)size);
+
+            _values.Resize((uint)expandPrime, true, false);
+            _valuesInfo.Resize((uint)expandPrime, true, true);
         }
 
         public TValue this[TKey key]
@@ -434,17 +440,22 @@ namespace Svelto.DataStructures
             indexSet = _freeValueCellIndex;
             _freeValueCellIndex++;
 
-            //too many collisions?
+            //too many collisions
             if (_collisions > _buckets.capacity)
-                ResizeBucket(_collisions);
+            {
+                if (_buckets.capacity < 100)
+                    RecomputeBuckets((uint)((int)_collisions << 1));
+                else
+                    RecomputeBuckets((uint)HashHelpers.Expand((int)_collisions));
+            }
 
             return true;
         }
 
-        void ResizeBucket(uint newSize)
+        void RecomputeBuckets(uint newSize)
         {
             //we need more space and less collisions
-            _buckets.Resize((uint)HashHelpers.Expand((int)newSize), false, true);
+            _buckets.Resize(newSize, false, true);
             _collisions = 0;
             _fastModBucketsMultiplier = HashHelpers.GetFastModMultiplier((uint)_buckets.capacity);
             var bucketsCapacity = (uint)_buckets.capacity;
@@ -716,18 +727,8 @@ namespace Svelto.DataStructures
                 var expandPrime = HashHelpers.Expand((int)_freeValueCellIndex);
 
                 _values.Resize((uint)expandPrime, true, false);
-                _valuesInfo.Resize((uint)expandPrime, true, false);
+                _valuesInfo.Resize((uint)expandPrime, true, true);
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void ResizeStorage(uint size)
-        {
-            var expandPrime = HashHelpers.Expand((int)size);
-
-            _values.Resize((uint)expandPrime, true, false);
-            _valuesInfo.Resize((uint)expandPrime, true, false);
-            ResizeBucket(size);
         }
 
         static readonly bool Is64BitProcess = Environment.Is64BitProcess;
