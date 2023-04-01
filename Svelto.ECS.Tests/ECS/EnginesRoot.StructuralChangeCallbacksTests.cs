@@ -6,7 +6,7 @@ namespace Svelto.ECS.Tests.ECS
 {
     public class MegaReactEngine : IReactOnAddAndRemove<TestEntityComponent>, IReactOnDispose<TestEntityComponent>, IReactOnSubmission,
                                    IReactOnSwap<TestEntityComponent>, IReactOnAddEx<TestEntityComponent>, IReactOnRemoveEx<TestEntityComponent>,
-                                   IReactOnSwapEx<TestEntityComponent>
+                                   IReactOnSwapEx<TestEntityComponent>, IReactOnDisposeEx<TestEntityComponent>, IDisposingEngine
     {
         public int  addCounter;
         public int  removeCounter;
@@ -18,6 +18,7 @@ namespace Svelto.ECS.Tests.ECS
         public int swapCounter;
         
         public bool entitySubmittedIsCalled;
+        public int  legacyRemoveCounterOnDispose;
         public int  removeCounterOnDispose;
         
 
@@ -40,7 +41,7 @@ namespace Svelto.ECS.Tests.ECS
 
         void IReactOnDispose<TestEntityComponent>.Remove(ref TestEntityComponent entityComponent, EGID egid)
         {
-            removeCounterOnDispose += entityComponent.intValue;
+            legacyRemoveCounterOnDispose += entityComponent.intValue;
         }
 
         void IReactOnRemove<TestEntityComponent>.Remove(ref TestEntityComponent entityComponent, EGID egid)
@@ -56,7 +57,10 @@ namespace Svelto.ECS.Tests.ECS
             for (var i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
             {
                 var entityComponent = buffer[i];
-                removeCounter += entityComponent.intValue;
+                if (isDisposing)
+                    removeCounterOnDispose += entityComponent.intValue;
+                else
+                    removeCounter += entityComponent.intValue;
             }
         }
 
@@ -81,6 +85,13 @@ namespace Svelto.ECS.Tests.ECS
                 swapCounter += entityComponent.intValue;
             }
         }
+
+        public void Dispose()
+        {
+            
+        }
+
+        public bool isDisposing { get; set; }
     }
 
     public class MegaReactEngineView : IReactOnAddAndRemove<TestEntityViewComponent>, IReactOnDispose<TestEntityViewComponent>,
@@ -267,7 +278,40 @@ namespace Svelto.ECS.Tests.ECS
 
             _enginesRoot.Dispose();
 
+            Assert.That(megaReactEngine.legacyRemoveCounterOnDispose, Is.EqualTo(100));
             Assert.That(megaReactEngine.removeCounterOnDispose, Is.EqualTo(100));
+        }
+        
+        [Test]
+        public void TestCallbacksAreCorrectlyCalledGroup()
+        {
+            uint total = 0;
+
+            for (uint i = 0; i < 100; i++)
+            {
+                total += i;
+                CreateTestEntity(i, Groups.GroupA, (int)i);
+            }
+
+            _scheduler.SubmitEntities();
+
+            var megaReactEngine = new MegaReactEngine();
+
+            _enginesRoot.AddEngine(megaReactEngine);
+
+            _functions.SwapEntitiesInGroup(Groups.GroupA, Groups.GroupB);
+            _scheduler.SubmitEntities();
+            
+            Assert.That(megaReactEngine.legacySwapCounter, Is.EqualTo(total));
+            Assert.That(megaReactEngine.swapCounter, Is.EqualTo(total));
+
+            _functions.RemoveEntitiesFromGroup(Groups.GroupB);
+            _scheduler.SubmitEntities();
+            
+            Assert.That(megaReactEngine.legacyRemoveCounter, Is.EqualTo(total));
+            Assert.That(megaReactEngine.removeCounter, Is.EqualTo(total));
+            
+            Assert.That(megaReactEngine.entitySubmittedIsCalled, Is.EqualTo(true));
         }
         
         [Test]
