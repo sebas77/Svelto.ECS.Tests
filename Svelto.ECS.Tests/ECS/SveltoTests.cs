@@ -670,6 +670,20 @@ namespace Svelto.ECS.Tests.Messy
                     _enginesroot.Dispose();
                 });
         }
+        
+        [Test]
+        public void TestDynamicEntityDescriptor()
+        {
+            var testBuildOnSwapEngine = new TestDynamicDescriptorEngine(_entityFactory);
+            _enginesRoot.AddEngine(testBuildOnSwapEngine);
+
+            var descriptor = DynamicEntityDescriptor<ButtonWidgetDescriptor>.CreateDynamicEntityDescriptor();
+            descriptor.Add<GUIWidgetEventsComponent1>();
+            
+            _entityFactory.BuildEntity(0, Groups.group1, descriptor);
+
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+        }
 
         [Test]
         public void TestEntityBuildInSubmission()
@@ -713,6 +727,29 @@ namespace Svelto.ECS.Tests.Messy
                 ExclusiveGroupStruct toGroup)
             {
                 _entityFactory.BuildEntity<TestDescriptorEntity>(1, Groups.group1);
+            }
+
+            public void Ready() { }
+
+            public EntitiesDB entitiesDB { get; set; }
+        }
+
+        
+        class TestDynamicDescriptorEngine : IReactOnSwapEx<GUIWidgetEventsComponent1>, IQueryingEntitiesEngine
+        {
+            readonly IEntityFactory _entityFactory;
+
+            public TestDynamicDescriptorEngine(IEntityFactory entityFactory)
+            {
+                _entityFactory = entityFactory;
+            }
+
+            public void MovedTo(
+                (uint start, uint end) rangeOfEntities,
+                in EntityCollection<GUIWidgetEventsComponent1> collection,
+                ExclusiveGroupStruct fromGroup,
+                ExclusiveGroupStruct toGroup)
+            {
             }
 
             public void Ready() { }
@@ -950,4 +987,29 @@ namespace Svelto.ECS.Tests.Messy
         public float value     { get; set; }
         public int   testValue { get; }
     }
+    
+    //test building a dynamic entity descriptor inline doesn't fail
+    
+    //test the warmup of the following doesn't fail
+    public interface IGUIEntityDescriptor: IEntityDescriptor { }
+
+    public class GUIExtendibleEntityDescriptor: ExtendibleEntityDescriptor<GUIExtendibleEntityDescriptor.GuiEntityDescriptor>, IGUIEntityDescriptor
+    {
+        public GUIExtendibleEntityDescriptor(IComponentBuilder[] extraEntities): base(extraEntities) { }
+
+        public class
+                GuiEntityDescriptor: GenericEntityDescriptor<EGIDComponent> { }
+    }
+    
+    public class ButtonWidgetDescriptor : GUIExtendibleEntityDescriptor
+    {
+        public ButtonWidgetDescriptor() : base(new IComponentBuilder[]
+        {
+            new ComponentBuilder<GUIWidgetEventsComponent>()
+        }) { }
+    }
+
+    public struct GUIWidgetEventsComponent: _IInternalEntityComponent { }
+    public struct GUIWidgetEventsComponent1: _IInternalEntityComponent { }
+    public struct GUIWidgetEventsComponent2: _IInternalEntityComponent { }
 }

@@ -306,6 +306,7 @@ namespace Svelto.ECS
                 _reactiveEnginesAdd.Clear();
                 _reactiveEnginesRemove.Clear();
                 _reactiveEnginesDispose.Clear();
+                _reactiveEnginesDisposeEx.Clear();
                 _reactiveEnginesSubmission.Clear();
                 _reactiveEnginesSubmissionStarted.Clear();
 
