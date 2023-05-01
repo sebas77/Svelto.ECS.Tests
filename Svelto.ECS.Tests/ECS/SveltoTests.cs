@@ -683,6 +683,8 @@ namespace Svelto.ECS.Tests.Messy
             _entityFactory.BuildEntity(0, Groups.group1, descriptor);
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            
+         //todo: complete this test to check that dynamic components are swapped correctly
         }
 
         [Test]
