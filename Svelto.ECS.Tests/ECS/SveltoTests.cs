@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using DBC.ECS;
 using NUnit.Framework;
 using Svelto.DataStructures;
@@ -670,21 +671,38 @@ namespace Svelto.ECS.Tests.Messy
                     _enginesroot.Dispose();
                 });
         }
+
+        [Test]
+        public void TestConcreteGenericDescriptor()
+        {
+            Assert.DoesNotThrow(()
+            =>
+            {
+                _entityFactory.BuildEntity<ConcreteGenericDescriptor>(0, Groups.group1);
+                
+                _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            });
+        }
         
         [Test]
         public void TestDynamicEntityDescriptor()
         {
-            var testBuildOnSwapEngine = new TestDynamicDescriptorEngine(_entityFactory);
+            var testBuildOnSwapEngine = new TestDynamicDescriptorEngine(_entityFactory, _entityFunctions);
             _enginesRoot.AddEngine(testBuildOnSwapEngine);
 
-            var descriptor = DynamicEntityDescriptor<ButtonWidgetDescriptor>.CreateDynamicEntityDescriptor();
+            var descriptor = DynamicEntityDescriptor<BaseWidgetDescriptor>.CreateDynamicEntityDescriptor();
             descriptor.Add<GUIWidgetEventsComponent1>();
             
             _entityFactory.BuildEntity(0, Groups.group1, descriptor);
 
             _simpleSubmissionEntityViewScheduler.SubmitEntities();
             
-         //todo: complete this test to check that dynamic components are swapped correctly
+            _entityFunctions.SwapEntityGroup<BaseWidgetDescriptor>(0, Groups.group1, Groups.group2);
+            
+            _simpleSubmissionEntityViewScheduler.SubmitEntities();
+            
+            Assert.That(testBuildOnSwapEngine.workedA, Is.True);
+            Assert.That(testBuildOnSwapEngine.workedB, Is.True);
         }
 
         [Test]
@@ -737,13 +755,18 @@ namespace Svelto.ECS.Tests.Messy
         }
 
         
-        class TestDynamicDescriptorEngine : IReactOnSwapEx<GUIWidgetEventsComponent1>, IQueryingEntitiesEngine
+        class TestDynamicDescriptorEngine : IReactOnSwapEx<GUIWidgetEventsComponent1>, IQueryingEntitiesEngine, IReactOnRemoveEx<GUIWidgetEventsComponent1>, IReactOnSwap<GUIWidgetEventsComponent1>
         {
+            public bool workedA;
+            public bool workedB;
+            
             readonly IEntityFactory _entityFactory;
+            readonly IEntityFunctions _functions;
 
-            public TestDynamicDescriptorEngine(IEntityFactory entityFactory)
+            public TestDynamicDescriptorEngine(IEntityFactory entityFactory, IEntityFunctions functions)
             {
                 _entityFactory = entityFactory;
+                _functions = functions;
             }
 
             public void MovedTo(
@@ -752,11 +775,25 @@ namespace Svelto.ECS.Tests.Messy
                 ExclusiveGroupStruct fromGroup,
                 ExclusiveGroupStruct toGroup)
             {
+                for (uint i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
+                {
+                    _functions.RemoveEntity<BaseWidgetDescriptor>(i, toGroup);
+                }
             }
 
             public void Ready() { }
 
             public EntitiesDB entitiesDB { get; set; }
+            
+            public void Remove((uint start, uint end) rangeOfEntities, in EntityCollection<GUIWidgetEventsComponent1> entities, ExclusiveGroupStruct groupID)
+            {
+                workedB = true;
+            }
+
+            public void MovedTo(ref GUIWidgetEventsComponent1 entityComponent, ExclusiveGroupStruct previousGroup, EGID egid)
+            {
+                workedA = true;
+            }
         }
 
         class TestSwapAfterBuildEngine : IStepEngine, IQueryingEntitiesEngine
@@ -960,20 +997,6 @@ namespace Svelto.ECS.Tests.Messy
     {
     }
 
-    class Transform : IImplementor
-    {
-        public readonly int value;
-
-        public Transform(int i)
-        {
-            value = i;
-        }
-    }
-
-    class TestItWrong : ITestItWrong
-    {
-    }
-
     interface ITestIt
     {
         float value { get; set; }
@@ -1003,9 +1026,9 @@ namespace Svelto.ECS.Tests.Messy
                 GuiEntityDescriptor: GenericEntityDescriptor<EGIDComponent> { }
     }
     
-    public class ButtonWidgetDescriptor : GUIExtendibleEntityDescriptor
+    public class BaseWidgetDescriptor : GUIExtendibleEntityDescriptor
     {
-        public ButtonWidgetDescriptor() : base(new IComponentBuilder[]
+        public BaseWidgetDescriptor() : base(new IComponentBuilder[]
         {
             new ComponentBuilder<GUIWidgetEventsComponent>()
         }) { }
@@ -1013,5 +1036,28 @@ namespace Svelto.ECS.Tests.Messy
 
     public struct GUIWidgetEventsComponent: _IInternalEntityComponent { }
     public struct GUIWidgetEventsComponent1: _IInternalEntityComponent { }
-    public struct GUIWidgetEventsComponent2: _IInternalEntityComponent { }
+
+    public class GenericDescriptor<T> : IEntityDescriptor
+    {
+        private IComponentBuilder[] _components;
+
+        protected GenericDescriptor(IComponentBuilder[] components)
+        {
+            _components = components;
+        }
+
+#region Implementation of IEntityDescriptor
+
+        public IComponentBuilder[] componentsToBuild => _components;
+
+#endregion
+    }
+
+    public class ConcreteGenericDescriptor : GenericDescriptor<GUIWidgetEventsComponent>
+    {
+        public ConcreteGenericDescriptor() : base(new IComponentBuilder[]
+        {
+            new ComponentBuilder<GUIWidgetEventsComponent>()
+        }) { }
+    }
 }
