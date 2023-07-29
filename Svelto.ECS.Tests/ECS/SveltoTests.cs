@@ -101,6 +101,11 @@ namespace Svelto.ECS.Tests.Messy
             Assert.Throws<TypeInitializationException>(CheckFunction);
         }
 
+        [TestCase]
+        public void TestRemoveMultipleTimesOnTheSameEntity()
+        {
+            Assert.Fail();
+        }
 
         [TestCase((uint)0)]
         [TestCase((uint)1)]
