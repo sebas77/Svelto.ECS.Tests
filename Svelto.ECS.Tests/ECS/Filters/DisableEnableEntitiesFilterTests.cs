@@ -49,6 +49,43 @@ public partial class DisableEnableEntitiesFilterTests
 
         RunTestLogic(syncEngine, changeValueEngine);
     }
+    
+    [Test]
+    public void SwapFromAtoAndThenBtoA()
+    {
+        //engines
+        _enginesRoot.AddEngine(new SimplerEngine());
+
+        RunTestLogic2();
+    }
+    
+    void RunTestLogic2()
+    {
+        //We build two entities
+        var initializer0 = _factory.BuildEntity<TestEntityDescriptor>(0, TestGroups.TestGroupTag.BuildGroup);
+        var initializer1 = _factory.BuildEntity<TestEntityDescriptor>(1, TestGroups.Disabled);
+
+        //Both entities are enabled, first one has value 0, second one has value 2
+        initializer0.Init(
+            new TestEntityComponent
+            {
+                Enabled = true,
+                SomeValue = 0
+            });
+        initializer1.Init(
+            new TestEntityComponent
+            {
+                Enabled = true,
+                SomeValue = 2
+            });
+
+        _scheduler.SubmitEntities();
+        
+        _functions.SwapEntityGroup<TestEntityDescriptor>(new EGID(0, TestGroups.TestGroupTag.BuildGroup), TestGroups.Disabled);
+        _functions.SwapEntityGroup<TestEntityDescriptor>(new EGID(1, TestGroups.Disabled), TestGroups.TestGroupTag.BuildGroup);
+        
+        _scheduler.SubmitEntities();
+    }
 
     void RunTestLogic(SyncEntitiesStateEngine syncEngine, ChangeActiveEntityValueEngine changeValueEngine)
     {
@@ -175,64 +212,4 @@ public partial class DisableEnableEntitiesFilterTests
     }
 
     class TestEntityDescriptor: GenericEntityDescriptor<TestEntityComponent> { }
-
-    class SyncFiltersEngine: IQueryingEntitiesEngine,
-            IReactOnAddEx<TestEntityComponent>,
-            IReactOnSwapEx<TestEntityComponent>
-    {
-        public EntitiesDB entitiesDB { get; set; }
-
-        public void Add((uint start, uint end) rangeOfEntities,
-            in EntityCollection<TestEntityComponent> entities,
-            ExclusiveGroupStruct groupID)
-        {
-            //if we add entity from disabled group - do not add to filters
-            if (!groupID.IsEnabled())
-            {
-                return;
-            }
-
-            var (_, entityIDs, _) = entities;
-
-            for (var i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
-            {
-                uint entityId = entityIDs[i];
-                var filters = entitiesDB.GetFilters();
-                ref var filter = ref filters.GetOrCreatePersistentFilter<TestEntityComponent>(TestFilters.TestID);
-                filter.Add(new(entityId, groupID), i);
-            }
-        }
-
-        public void MovedTo((uint start, uint end) rangeOfEntities, in EntityCollection<TestEntityComponent> entities,
-            ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup)
-        {
-            var willBeDisabled = toGroup.Equals(TestGroups.Disabled);
-            var willBeEnabled = fromGroup.Equals(TestGroups.Disabled);
-
-            var (_, entityIDs, _) = entities;
-
-            var filters = entitiesDB.GetFilters();
-            ref var filter = ref filters.GetOrCreatePersistentFilter<TestEntityComponent>(TestFilters.TestID);
-
-            var map = entitiesDB.QueryMappedEntities<TestEntityComponent>(toGroup);
-
-            for (var i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
-            {
-                //if we enable entity - add to filter
-                var entityId = new EGID(entityIDs[i], toGroup);
-                if (willBeEnabled)
-                {
-                    filter.Add(entityId, map);
-                }
-
-                //if we disable entity - remove from filter
-                if (willBeDisabled)
-                {
-                    filter.Remove(entityId);
-                }
-            }
-        }
-
-        public void Ready() { }
-    }
 }

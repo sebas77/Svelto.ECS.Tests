@@ -177,11 +177,11 @@ namespace Svelto.ECS
                         enginesRoot._entityLocator.UpdateEntityReference(fromEntityGid, toEntityGid);
                     }
                 }
+                
+                enginesRoot._cachedRangeOfSubmittedIndices.Clear();
 
                 using (sampler.Sample("Swap Entities"))
                 {
-                    enginesRoot._cachedRangeOfSubmittedIndices.Clear();
-
                     //Entities to swap are organised in order to minimise the amount of dictionary lookups.
                     //swapEntitiesOperations iterations happen in the following order:
                     //for each fromGroup, get all the entities to swap for each component type.

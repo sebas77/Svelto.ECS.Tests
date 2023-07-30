@@ -553,8 +553,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ExecuteEnginesSwapCallbacksFast<TValue>(
             FasterList<ReactEngineContainer<_Internal_IReactOnSwapEx>> callbackEngines,
-            ExclusiveGroupStruct fromGroup
-          , ExclusiveGroupStruct toGroup, IEntityIDs entityids, ITypeSafeDictionary<TValue> typeSafeDictionary
+            ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup, IEntityIDs entityids, ITypeSafeDictionary<TValue> typeSafeDictionary
           , (uint, uint) rangeOfSubmittedEntitiesIndicies, PlatformProfiler sampler)
                 where TValue : struct, _IInternalEntityComponent
         {
@@ -566,9 +565,7 @@ namespace Svelto.ECS.Internal
                         var values = typeSafeDictionary.GetValues(out var count);
                         
                         ((IReactOnSwapEx<TValue>)callbackEngines[i].engine).MovedTo(
-                            rangeOfSubmittedEntitiesIndicies
-                          , new EntityCollection<TValue>(values, entityids, count)
-                          , fromGroup, toGroup);
+                            rangeOfSubmittedEntitiesIndicies, new EntityCollection<TValue>(values, entityids, count), fromGroup, toGroup);
                     }
                 }
                 catch (Exception e)
