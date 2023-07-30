@@ -80,6 +80,8 @@ public partial class DisableEnableEntitiesFilterTests
             var (buffer, entityIDs, count) = entities;
 
             var map = entitiesDB.QueryMappedEntities<TestEntityComponent>(toGroup);
+            
+            Assert.That(count, Is.GreaterThanOrEqualTo(rangeOfEntities.end));
 
             for (var i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
             {
