@@ -88,6 +88,26 @@ namespace Svelto.ECS.Tests.ECS
             Assert.AreEqual(7, engine.removedCount);
         }
 
+        [TestCase]
+        public void Test_ReactiveEngineEx_DisposeCallback()
+        {
+            var engine = new ReactOnDisposeExEngine();
+
+            _enginesRoot.AddEngine(engine);
+
+            for (uint i = 0; i < 10; i++)
+                CreateTestEntity(i, Groups.GroupA, (int) i);
+
+            for (uint i = 10; i < 20; i++)
+                CreateTestEntity(i, Groups.GroupB, (int) i);
+
+            _scheduler.SubmitEntities();
+
+            _enginesRoot.Dispose();
+
+            Assert.AreEqual(20, engine.removedCount);
+        }
+
 
         [TestCase]
         public void Test_ReactiveEngineEx_RemoveCallback_CheckEntityIDs()
@@ -155,6 +175,16 @@ namespace Svelto.ECS.Tests.ECS
         }
 
         public class ReactOnRemoveExEngine : IReactOnRemoveEx<TestEntityComponent>
+        {
+            public uint removedCount = 0;
+
+            public void Remove((uint start, uint end) rangeOfEntities, in EntityCollection<TestEntityComponent> collection, ExclusiveGroupStruct groupID)
+            {
+                removedCount += rangeOfEntities.end - rangeOfEntities.start;
+            }
+        }
+
+        public class ReactOnDisposeExEngine : IReactOnDisposeEx<TestEntityComponent>
         {
             public uint removedCount = 0;
 
