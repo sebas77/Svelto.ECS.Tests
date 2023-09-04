@@ -37,7 +37,7 @@ namespace Svelto.ECS.Internal
             {
                 ref var unboxed = ref Unsafe.Unbox<NativeEntityIDs>(cachedEntityIDN.Value);
 
-                unboxed.Update(implUnmgd.dictionary.unsafeKeys.ToRealBuffer());
+                unboxed.Set(implUnmgd.dictionary.unsafeKeys.ToRealBuffer());
 
                 return cachedEntityIDN.Value;
             }

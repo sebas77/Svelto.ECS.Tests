@@ -5,7 +5,8 @@ using Svelto.DataStructures;
 namespace Svelto.ECS
 {
     //these are not meant to be held or passed by parameter.
-    public ref struct EntityFilterIndices
+    //however cannot be ref struct because of DOTS lambda design for entity queries Entities.ForEach
+    public struct EntityFilterIndices
     {
         public EntityFilterIndices(NB<uint> indices, uint count)
         {

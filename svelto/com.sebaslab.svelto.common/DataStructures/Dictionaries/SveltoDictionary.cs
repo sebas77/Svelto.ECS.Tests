@@ -138,7 +138,7 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Add(TKey key, in TValue value)
+        public void Add(in TKey key, in TValue value)
         {
             var itemAdded = AddValue(key, out var index);
 
@@ -150,7 +150,7 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryAdd(TKey key, in TValue value, out uint index)
+        public bool TryAdd(in TKey key, in TValue value, out uint index)
         {
             var itemAdded = AddValue(key, out index);
 
@@ -161,7 +161,7 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set(TKey key, in TValue value)
+        public void Set(in TKey key, in TValue value)
         {
             var itemAdded = AddValue(key, out var index);
 
@@ -203,7 +203,7 @@ namespace Svelto.DataStructures
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         //WARNING this method must stay stateless (not relying on states that can change, it's ok to read 
         //constant states) because it will be used in multithreaded parallel code
-        public bool ContainsKey(TKey key)
+        public bool ContainsKey(in TKey key)
         {
             return TryFindIndex(key, out _);
         }
@@ -211,7 +211,7 @@ namespace Svelto.DataStructures
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         //WARNING this method must stay stateless (not relying on states that can change, it's ok to read 
         //constant states) because it will be used in multithreaded parallel code
-        public bool TryGetValue(TKey key, out TValue result)
+        public bool TryGetValue(in TKey key, out TValue result)
         {
             if (TryFindIndex(key, out var findIndex) == true)
             {
@@ -239,7 +239,7 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetOrAdd(TKey key, Func<TValue> builder)
+        public ref TValue GetOrAdd(in TKey key, Func<TValue> builder)
         {
             if (TryFindIndex(key, out var findIndex) == true)
             {
@@ -254,7 +254,7 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetOrAdd<W>(TKey key, FuncRef<W, TValue> builder, ref W parameter)
+        public ref TValue GetOrAdd<W>(in TKey key, FuncRef<W, TValue> builder, ref W parameter)
         {
             if (TryFindIndex(key, out var findIndex) == true)
             {
@@ -277,7 +277,7 @@ namespace Svelto.DataStructures
         /// <typeparam name="TValueProxy"></typeparam>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue RecycleOrAdd<TValueProxy>(TKey key, Func<TValueProxy> builder
+        public ref TValue RecycleOrAdd<TValueProxy>(in TKey key, Func<TValueProxy> builder
           , ActionRef<TValueProxy> recycler) where TValueProxy : class, TValue
         {
             if (TryFindIndex(key, out var findIndex) == true)
@@ -308,7 +308,7 @@ namespace Svelto.DataStructures
         /// <typeparam name="W"></typeparam>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue RecycleOrAdd<TValueProxy, W>(TKey key, FuncRef<W, TValue> builder
+        public ref TValue RecycleOrAdd<TValueProxy, W>(in TKey key, FuncRef<W, TValue> builder
           , ActionRef<TValueProxy, W> recycler, ref W parameter)
             where TValueProxy : class, TValue
         {
@@ -372,7 +372,7 @@ namespace Svelto.DataStructures
             _valuesInfo.Resize((uint)expandPrime, true, true);
         }
 
-        public TValue this[TKey key]
+        public TValue this[in TKey key]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _values[(int)GetIndex(key)];
@@ -386,13 +386,13 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Remove(TKey key)
+        public bool Remove(in TKey key)
         {
             return Remove(key, out _, out _);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Remove(TKey key, out uint index, out TValue value)
+        public bool Remove(in TKey key, out uint index, out TValue value)
         {
             int hash = key.GetHashCode();
             uint bucketIndex = Reduce((uint)hash, (uint)_buckets.capacity, _fastModBucketsMultiplier);
@@ -507,7 +507,7 @@ namespace Svelto.DataStructures
         //WARNING this method must stay stateless (not relying on states that can change, it's ok to read 
         //constant states) because it will be used in multithreaded parallel code
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryFindIndex(TKey key, out uint findIndex)
+        public bool TryFindIndex(in TKey key, out uint findIndex)
         {
             DBC.Common.Check.Require(_buckets.capacity > 0, "Dictionary arrays are not correctly initialized (0 size)");
 
@@ -538,7 +538,7 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public uint GetIndex(TKey key)
+        public uint GetIndex(in TKey key)
         {
 #if DEBUG && !PROFILE_SVELTO
             if (TryFindIndex(key, out var findIndex) == true)
@@ -610,7 +610,7 @@ namespace Svelto.DataStructures
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        bool AddValue(TKey key, out uint indexSet)
+        bool AddValue(in TKey key, out uint indexSet)
         {
             int hash = key.GetHashCode(); //IEquatable doesn't enforce the override of GetHashCode
             uint bucketIndex = Reduce((uint)hash, (uint)_buckets.capacity, _fastModBucketsMultiplier);
@@ -622,7 +622,7 @@ namespace Svelto.DataStructures
             {
                 ResizeIfNeeded();
                 //create the info node at the last position and fill it with the relevant information
-                _valuesInfo[_freeValueCellIndex] = new SveltoDictionaryNode<TKey>(ref key, hash);
+                _valuesInfo[_freeValueCellIndex] = new SveltoDictionaryNode<TKey>(key, hash);
             }
             else //collision or already exists
             {
@@ -649,7 +649,7 @@ namespace Svelto.DataStructures
                 _collisions++;
                 //create a new node which previous index points to node currently pointed in the bucket (valueIndex)
                 //_freeValueCellIndex = valueIndex + 1
-                _valuesInfo[_freeValueCellIndex] = new SveltoDictionaryNode<TKey>(ref key, hash, valueIndex);
+                _valuesInfo[_freeValueCellIndex] = new SveltoDictionaryNode<TKey>(key, hash, valueIndex);
                 //Important: the new node is always the one that will be pointed by the bucket cell
                 //so I can assume that the one pointed by the bucket is always the last value added
             }
@@ -876,11 +876,11 @@ namespace Svelto.DataStructures
         where TValueStrategy : struct,
         IBufferStrategy<TValue>
     {
-        public KeyValuePairFast(in TKey keys, in TValueStrategy dicValues, int index)
+        public KeyValuePairFast(in TKey key, in TValueStrategy dicValues, int index)
         {
             _dicValues = dicValues;
             _index = index;
-            _key = keys;
+            _key = key;
         }
 
         public TKey key => _key;

@@ -39,25 +39,25 @@ namespace Svelto.DataStructures.Native
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Add(TKey key, in TValue value) { _dictionary.Add(key, in value); }
+        public void Add(in TKey key, in TValue value) { _dictionary.Add(key, in value); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set(TKey key, in TValue value) { _dictionary.Set(key, in value); }
+        public void Set(in TKey key, in TValue value) { _dictionary.Set(key, in value); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear() { _dictionary.Clear(); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ContainsKey(TKey key) { return _dictionary.ContainsKey(key); }
+        public bool ContainsKey(in TKey key) { return _dictionary.ContainsKey(key); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetValue(TKey key, out TValue result) { return _dictionary.TryGetValue(key, out result); }
+        public bool TryGetValue(in TKey key, out TValue result) { return _dictionary.TryGetValue(key, out result); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetOrAdd(TKey key) { return ref _dictionary.GetOrAdd(key); }
+        public ref TValue GetOrAdd(in TKey key) { return ref _dictionary.GetOrAdd(key); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetOrAdd(TKey key, Func<TValue> builder)
+        public ref TValue GetOrAdd(in TKey key, Func<TValue> builder)
         {
             return ref _dictionary.GetOrAdd(key, builder);
         }
@@ -66,7 +66,7 @@ namespace Svelto.DataStructures.Native
         public ref TValue GetDirectValueByRef(uint index) { return ref _dictionary.GetDirectValueByRef(index); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetValueByRef(TKey key) { return ref _dictionary.GetValueByRef(key); }
+        public ref TValue GetValueByRef(in TKey key) { return ref _dictionary.GetValueByRef(key); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void EnsureCapacity(uint size)
@@ -80,7 +80,7 @@ namespace Svelto.DataStructures.Native
             _dictionary.IncreaseCapacityBy(size);
         }
 
-        public TValue this[TKey key]
+        public TValue this[in TKey key]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _dictionary[key];
@@ -89,16 +89,16 @@ namespace Svelto.DataStructures.Native
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Remove(TKey key) { return _dictionary.Remove(key); }
+        public bool Remove(in TKey key) { return _dictionary.Remove(key); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Trim() { _dictionary.Trim(); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryFindIndex(TKey key, out uint findIndex) { return _dictionary.TryFindIndex(key, out findIndex); }
+        public bool TryFindIndex(in TKey key, out uint findIndex) { return _dictionary.TryFindIndex(key, out findIndex); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public uint GetIndex(TKey key) { return _dictionary.GetIndex(key); }
+        public uint GetIndex(in TKey key) { return _dictionary.GetIndex(key); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose() { _dictionary.Dispose(); }

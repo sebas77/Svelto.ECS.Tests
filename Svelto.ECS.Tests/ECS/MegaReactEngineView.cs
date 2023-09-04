@@ -14,6 +14,7 @@ public class MegaReactEngineView : IReactOnAddAndRemove<TestEntityViewComponent>
     public int swapCounter;
         
     public int  removeCounterOnDispose;
+    public int  legacyRemoveCounterOnDispose;
        
     public void Add(ref TestEntityViewComponent entityComponent, EGID egid)
     {
@@ -68,7 +69,7 @@ public class MegaReactEngineView : IReactOnAddAndRemove<TestEntityViewComponent>
         
     void IReactOnDispose<TestEntityViewComponent>.Remove(ref TestEntityViewComponent entityComponent, EGID egid)
     {
-        removeCounterOnDispose += entityComponent.TestIntValue.Value;
+        legacyRemoveCounterOnDispose += entityComponent.TestIntValue.Value;
     }
         
     void IReactOnDisposeEx<TestEntityViewComponent>.Remove((uint start, uint end) rangeOfEntities, in EntityCollection<TestEntityViewComponent> collection,
@@ -82,5 +83,4 @@ public class MegaReactEngineView : IReactOnAddAndRemove<TestEntityViewComponent>
             removeCounterOnDispose += entityComponent.TestIntValue.Value;
         }
     }
-        
 }
