@@ -83,16 +83,15 @@ namespace Svelto.ECS.SveltoOnDOTS
         public void CreateDOTSToSveltoSyncEngine<T>() where T:SyncSveltoToDOTSEngine, new()
         {
             //it's a Svelto Engine/DOTS ECS SystemBase so it must be added in the DOTS ECS world AND svelto enginesRoot
-            //it's a Svelto Engine/DOTS ECS SystemBase so it must be added in the DOTS ECS world AND svelto enginesRoot
 #if UNITY_ECS_100
             T engine = world.GetOrCreateSystemManaged<T>();
-#else            
-            throw new NotImplementedException();
-#endif
             
             _enginesRoot.AddEngine(engine);
 
             _syncSveltoToDotsGroup.Add(engine);
+#else            
+            throw new NotImplementedException();
+#endif
         }
         
 

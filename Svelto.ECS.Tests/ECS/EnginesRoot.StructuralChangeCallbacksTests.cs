@@ -6,7 +6,7 @@ namespace Svelto.ECS.Tests.ECS
 {
     public class MegaReactEngine : IReactOnAddAndRemove<TestEntityComponent>, IReactOnDispose<TestEntityComponent>, IReactOnSubmission,
                                    IReactOnSwap<TestEntityComponent>, IReactOnAddEx<TestEntityComponent>, IReactOnRemoveEx<TestEntityComponent>,
-                                   IReactOnSwapEx<TestEntityComponent>, IReactOnDisposeEx<TestEntityComponent>, IDisposingEngine
+                                   IReactOnSwapEx<TestEntityComponent>, IReactOnDisposeEx<TestEntityComponent>, IDisposableEngine
     {
         public int  addCounter;
         public int  removeCounter;

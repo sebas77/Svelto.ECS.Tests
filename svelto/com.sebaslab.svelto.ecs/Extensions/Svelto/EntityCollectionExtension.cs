@@ -18,7 +18,7 @@ namespace Svelto.ECS
                 return;
             }
 
-            buffer = (NB<T1>)ec.buffer;
+            buffer = (NBInternal<T1>)ec.buffer;
             count = (int)ec.count;
         }
 
@@ -35,7 +35,7 @@ namespace Svelto.ECS
                 return;
             }
 
-            buffer = (NB<T1>)ec.buffer;
+            buffer = (NBInternal<T1>)ec.buffer;
             count = (int)ec.count;
             entityIDs = (NativeEntityIDs)ec.entityIDs;
         }
@@ -56,8 +56,8 @@ namespace Svelto.ECS
                 return;
             }
 
-            buffer1 = (NB<T1>)ec.buffer1.buffer;
-            buffer2 = (NB<T2>)ec.buffer2.buffer;
+            buffer1 = (NBInternal<T1>)ec.buffer1.buffer;
+            buffer2 = (NBInternal<T2>)ec.buffer2.buffer;
             count = ec.count;
             entityIDs = (NativeEntityIDs)ec.buffer1.entityIDs;
         }
@@ -77,8 +77,8 @@ namespace Svelto.ECS
                 return;
             }
 
-            buffer1 = (NB<T1>)ec.buffer1.buffer;
-            buffer2 = (NB<T2>)ec.buffer2.buffer;
+            buffer1 = (NBInternal<T1>)ec.buffer1.buffer;
+            buffer2 = (NBInternal<T2>)ec.buffer2.buffer;
             count = (int)ec.count;
         }
 
@@ -99,9 +99,9 @@ namespace Svelto.ECS
                 return;
             }
 
-            buffer1 = (NB<T1>)ec.buffer1.buffer;
-            buffer2 = (NB<T2>)ec.buffer2.buffer;
-            buffer3 = (NB<T3>)ec.buffer3.buffer;
+            buffer1 = (NBInternal<T1>)ec.buffer1.buffer;
+            buffer2 = (NBInternal<T2>)ec.buffer2.buffer;
+            buffer3 = (NBInternal<T3>)ec.buffer3.buffer;
             count = (int)ec.count;
         }
 
@@ -123,9 +123,9 @@ namespace Svelto.ECS
                 return;
             }
 
-            buffer1 = (NB<T1>)ec.buffer1.buffer;
-            buffer2 = (NB<T2>)ec.buffer2.buffer;
-            buffer3 = (NB<T3>)ec.buffer3.buffer;
+            buffer1 = (NBInternal<T1>)ec.buffer1.buffer;
+            buffer2 = (NBInternal<T2>)ec.buffer2.buffer;
+            buffer3 = (NBInternal<T3>)ec.buffer3.buffer;
             count = (int)ec.count;
             entityIDs = (NativeEntityIDs)ec.buffer1.entityIDs;
         }
@@ -149,10 +149,10 @@ namespace Svelto.ECS
                 return;
             }
 
-            buffer1 = (NB<T1>)ec.buffer1.buffer;
-            buffer2 = (NB<T2>)ec.buffer2.buffer;
-            buffer3 = (NB<T3>)ec.buffer3.buffer;
-            buffer4 = (NB<T4>)ec.buffer4.buffer;
+            buffer1 = (NBInternal<T1>)ec.buffer1.buffer;
+            buffer2 = (NBInternal<T2>)ec.buffer2.buffer;
+            buffer3 = (NBInternal<T3>)ec.buffer3.buffer;
+            buffer4 = (NBInternal<T4>)ec.buffer4.buffer;
             count = (int)ec.count;
         }
 
@@ -176,10 +176,10 @@ namespace Svelto.ECS
                 return;
             }
 
-            buffer1 = (NB<T1>)ec.buffer1.buffer;
-            buffer2 = (NB<T2>)ec.buffer2.buffer;
-            buffer3 = (NB<T3>)ec.buffer3.buffer;
-            buffer4 = (NB<T4>)ec.buffer4.buffer;
+            buffer1 = (NBInternal<T1>)ec.buffer1.buffer;
+            buffer2 = (NBInternal<T2>)ec.buffer2.buffer;
+            buffer3 = (NBInternal<T3>)ec.buffer3.buffer;
+            buffer4 = (NBInternal<T4>)ec.buffer4.buffer;
             entityIDs = (NativeEntityIDs)ec.buffer1.entityIDs;
             count = (int)ec.count;
         }
@@ -328,7 +328,7 @@ namespace Svelto.ECS
                 return;
             }
 
-            buffer1 = (NB<T1>)ec.buffer1.buffer;
+            buffer1 = (NBInternal<T1>)ec.buffer1.buffer;
             buffer2 = (MBInternal<T2>)ec.buffer2.buffer;
             count = (int)ec.count;
             entityIDs = (ManagedEntityIDs)ec.buffer2.entityIDs;
@@ -349,7 +349,7 @@ namespace Svelto.ECS
                 return;
             }
 
-            buffer1 = (NB<T1>)ec.buffer1.buffer;
+            buffer1 = (NBInternal<T1>)ec.buffer1.buffer;
             buffer2 = (MBInternal<T2>)ec.buffer2.buffer;
             count = (int)ec.count;
         }
@@ -371,7 +371,7 @@ namespace Svelto.ECS
                 return;
             }
 
-            buffer1 = (NB<T1>)ec.buffer1.buffer;
+            buffer1 = (NBInternal<T1>)ec.buffer1.buffer;
             buffer2 = (MBInternal<T2>)ec.buffer2.buffer;
             buffer3 = (MBInternal<T3>)ec.buffer3.buffer;
             count = (int)ec.count;
@@ -396,9 +396,9 @@ namespace Svelto.ECS
                 return;
             }
 
-            buffer1 = (NB<T1>)ec.buffer1.buffer;
-            buffer2 = (NB<T2>)ec.buffer2.buffer;
-            buffer3 = (NB<T3>)ec.buffer3.buffer;
+            buffer1 = (NBInternal<T1>)ec.buffer1.buffer;
+            buffer2 = (NBInternal<T2>)ec.buffer2.buffer;
+            buffer3 = (NBInternal<T3>)ec.buffer3.buffer;
             buffer4 = (MBInternal<T4>)ec.buffer4.buffer;
             count = (int)ec.count;
         }
@@ -423,8 +423,8 @@ namespace Svelto.ECS
                 return;
             }
 
-            buffer1 = (NB<T1>)ec.buffer1.buffer;
-            buffer2 = (NB<T2>)ec.buffer2.buffer;
+            buffer1 = (NBInternal<T1>)ec.buffer1.buffer;
+            buffer2 = (NBInternal<T2>)ec.buffer2.buffer;
             buffer3 = (MBInternal<T3>)ec.buffer3.buffer;
             count = (int)ec.count;
         }
@@ -448,8 +448,8 @@ namespace Svelto.ECS
                 return;
             }
 
-            buffer1 = (NB<T1>)ec.buffer1.buffer;
-            buffer2 = (NB<T2>)ec.buffer2.buffer;
+            buffer1 = (NBInternal<T1>)ec.buffer1.buffer;
+            buffer2 = (NBInternal<T2>)ec.buffer2.buffer;
             buffer3 = (MBInternal<T3>)ec.buffer3.buffer;
             buffer4 = (MBInternal<T4>)ec.buffer4.buffer;
             count = (int)ec.count;

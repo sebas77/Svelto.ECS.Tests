@@ -61,7 +61,7 @@ namespace Svelto.ECS.Internal
         public static void ExecuteEnginesAddCallbacks<Strategy1, Strategy2, Strategy3, TValue>(
             ref SveltoDictionary<uint, TValue, Strategy1, Strategy2, Strategy3> fromDictionary
           , ITypeSafeDictionary<TValue> todic, ExclusiveGroupStruct togroup
-          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<_Internal_IReactOnAdd>>> entitycomponentenginesdb
+          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnAdd>>> entitycomponentenginesdb
           , in PlatformProfiler sampler)
                 where Strategy1 : struct, IBufferStrategy<SveltoDictionaryNode<uint>>
                 where Strategy2 : struct, IBufferStrategy<TValue>
@@ -105,8 +105,8 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ExecuteEnginesDisposeCallbacks_Group<Strategy1, Strategy2, Strategy3, TValue>(
             ref SveltoDictionary<uint, TValue, Strategy1, Strategy2, Strategy3> fromDictionary
-          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<_Internal_IReactOnDispose>>> reactiveEnginesDispose
-          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<_Internal_IReactOnDisposeEx>>> reactiveEnginesDisposeEx
+          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDispose>>> reactiveEnginesDispose
+          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDisposeEx>>> reactiveEnginesDisposeEx
           , IEntityIDs entityids, ExclusiveGroupStruct group, in PlatformProfiler sampler)
                 where Strategy1 : struct, IBufferStrategy<SveltoDictionaryNode<uint>>
                 where Strategy2 : struct, IBufferStrategy<TValue>
@@ -172,7 +172,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ExecuteEnginesRemoveCallbacks<Strategy1, Strategy2, Strategy3, TValue>(FasterList<(uint, string)> infostoprocess
           , ref SveltoDictionary<uint, TValue, Strategy1, Strategy2, Strategy3> fromDictionary
-          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<_Internal_IReactOnRemove>>> reactiveenginesremove
+          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnRemove>>> reactiveenginesremove
           , ExclusiveGroupStruct fromgroup, in PlatformProfiler profiler)
                 where Strategy1 : struct, IBufferStrategy<SveltoDictionaryNode<uint>>
                 where Strategy2 : struct, IBufferStrategy<TValue>
@@ -220,8 +220,8 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ExecuteEnginesRemoveCallbacks_Group<Strategy1, Strategy2, Strategy3, TValue>(
             ref SveltoDictionary<uint, TValue, Strategy1, Strategy2, Strategy3> fromDictionary
-          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<_Internal_IReactOnRemove>>> reactiveenginesremove
-          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<_Internal_IReactOnRemoveEx>>> reactiveenginesremoveex
+          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnRemove>>> reactiveenginesremove
+          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnRemoveEx>>> reactiveenginesremoveex
           , IEntityIDs entityids, ExclusiveGroupStruct group, in PlatformProfiler sampler)
                 where Strategy1 : struct, IBufferStrategy<SveltoDictionaryNode<uint>>
                 where Strategy2 : struct, IBufferStrategy<TValue>
@@ -290,7 +290,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ExecuteEnginesSwapCallbacks<Strategy1, Strategy2, Strategy3, TValue>(FasterDictionary<uint, SwapInfo> infostoprocess
           , ref SveltoDictionary<uint, TValue, Strategy1, Strategy2, Strategy3> fromDictionary
-          , FasterList<ReactEngineContainer<_Internal_IReactOnSwap>> reactiveenginesswap, ExclusiveGroupStruct togroup
+          , FasterList<ReactEngineContainer<IReactOnSwap>> reactiveenginesswap, ExclusiveGroupStruct togroup
           , ExclusiveGroupStruct fromgroup, in PlatformProfiler sampler)
                 where Strategy1 : struct, IBufferStrategy<SveltoDictionaryNode<uint>>
                 where Strategy2 : struct, IBufferStrategy<TValue>
@@ -339,8 +339,8 @@ namespace Svelto.ECS.Internal
         public static void ExecuteEnginesSwapCallbacks_Group<Strategy1, Strategy2, Strategy3, TValue>(
             ref SveltoDictionary<uint, TValue, Strategy1, Strategy2, Strategy3> fromDictionary
           , ITypeSafeDictionary<TValue> toDic, ExclusiveGroupStruct togroup, ExclusiveGroupStruct fromgroup
-          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<_Internal_IReactOnSwap>>> reactiveenginesswap
-          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<_Internal_IReactOnSwapEx>>> reactiveenginesswapex
+          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnSwap>>> reactiveenginesswap
+          , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnSwapEx>>> reactiveenginesswapex
           , IEntityIDs entityids, in PlatformProfiler sampler)
                 where Strategy1 : struct, IBufferStrategy<SveltoDictionaryNode<uint>>
                 where Strategy2 : struct, IBufferStrategy<TValue>
@@ -521,7 +521,7 @@ namespace Svelto.ECS.Internal
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ExecuteEnginesAddEntityCallbacksFast<TValue>(
-            FasterDictionary<ComponentID, FasterList<ReactEngineContainer<_Internal_IReactOnAddEx>>> fasterDictionary
+            FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnAddEx>>> fasterDictionary
           , ExclusiveGroupStruct groupId, (uint, uint) rangeTuple, IEntityIDs entityids
           , ITypeSafeDictionary<TValue> typeSafeDictionary, PlatformProfiler profiler)
                 where TValue : struct, _IInternalEntityComponent
@@ -551,7 +551,7 @@ namespace Svelto.ECS.Internal
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ExecuteEnginesSwapCallbacksFast<TValue>(
-            FasterList<ReactEngineContainer<_Internal_IReactOnSwapEx>> callbackEngines,
+            FasterList<ReactEngineContainer<IReactOnSwapEx>> callbackEngines,
             ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup, IEntityIDs entityids, ITypeSafeDictionary<TValue> typeSafeDictionary
           , (uint, uint) rangeOfSubmittedEntitiesIndicies, PlatformProfiler sampler)
                 where TValue : struct, _IInternalEntityComponent
@@ -576,7 +576,7 @@ namespace Svelto.ECS.Internal
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ExecuteEnginesRemoveCallbacksFast<TValue>(FasterList<ReactEngineContainer<_Internal_IReactOnRemoveEx>> fasterList,
+        public static void ExecuteEnginesRemoveCallbacksFast<TValue>(FasterList<ReactEngineContainer<IReactOnRemoveEx>> fasterList,
             ExclusiveGroupStruct exclusiveGroupStruct
           , (uint, uint) valueTuple, IEntityIDs entityids, ITypeSafeDictionary<TValue> typeSafeDictionary
           , PlatformProfiler sampler)

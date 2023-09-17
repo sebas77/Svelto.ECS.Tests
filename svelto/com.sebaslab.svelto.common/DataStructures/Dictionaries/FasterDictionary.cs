@@ -94,13 +94,13 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Add(in TKey key, in TValue value)
+        public void Add(TKey key, in TValue value)
         {
             _dictionary.Add(key, in value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set(in TKey key, in TValue value)
+        public void Set(TKey key, in TValue value)
         {
             _dictionary.Set(key, in value);
         }
@@ -118,44 +118,44 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ContainsKey(in TKey key)
+        public bool ContainsKey(TKey key)
         {
             return _dictionary.ContainsKey(key);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetValue(in TKey key, out TValue result)
+        public bool TryGetValue(TKey key, out TValue result)
         {
             return _dictionary.TryGetValue(key, out result);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetOrAdd(in TKey key)
+        public ref TValue GetOrAdd(TKey key)
         {
             return ref _dictionary.GetOrAdd(key);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetOrAdd(in TKey key, Func<TValue> builder)
+        public ref TValue GetOrAdd(TKey key, Func<TValue> builder)
         {
             return ref _dictionary.GetOrAdd(key, builder);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetOrAdd<W>(in TKey key, FuncRef<W, TValue> builder, ref W parameter)
+        public ref TValue GetOrAdd<W>(TKey key, FuncRef<W, TValue> builder, ref W parameter)
         {
             return ref _dictionary.GetOrAdd(key, builder, ref parameter);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue RecycleOrAdd<TValueProxy>(in TKey key, Func<TValueProxy> builder,
+        public ref TValue RecycleOrAdd<TValueProxy>(TKey key, Func<TValueProxy> builder,
             ActionRef<TValueProxy> recycler) where TValueProxy : class, TValue
         {
             return ref _dictionary.RecycleOrAdd(key, builder, recycler);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue RecycleOrAdd<TValueProxy, W>(in TKey key, FuncRef<W, TValue> builder,
+        public ref TValue RecycleOrAdd<TValueProxy, W>(TKey key, FuncRef<W, TValue> builder,
             ActionRef<TValueProxy, W> recycler, ref W parameter) where TValueProxy : class, TValue
         {
             return ref _dictionary.RecycleOrAdd(key, builder, recycler, ref parameter);
@@ -168,7 +168,7 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetValueByRef(in TKey key)
+        public ref TValue GetValueByRef(TKey key)
         {
             return ref _dictionary.GetValueByRef(key);
         }
@@ -185,7 +185,7 @@ namespace Svelto.DataStructures
             _dictionary.IncreaseCapacityBy(size);
         }
 
-        public TValue this[in TKey key]
+        public TValue this[TKey key]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _dictionary[key];
@@ -194,13 +194,13 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Remove(in TKey key)
+        public bool Remove(TKey key)
         {
             return _dictionary.Remove(key);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Remove(in TKey key, out TValue val)
+        public bool Remove(TKey key, out TValue val)
         {
             return _dictionary.Remove(key, out _, out val);
         }
@@ -212,13 +212,13 @@ namespace Svelto.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryFindIndex(in TKey key, out uint findIndex)
+        public bool TryFindIndex(TKey key, out uint findIndex)
         {
             return _dictionary.TryFindIndex(key, out findIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public uint GetIndex(in TKey key)
+        public uint GetIndex(TKey key)
         {
             return _dictionary.GetIndex(key);
         }
