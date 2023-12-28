@@ -2,10 +2,16 @@
 using NUnit.Framework;
 using Svelto.DataStructures;
 using Svelto.ECS.Schedulers;
+using Svelto.ECS.Serialization;
 using Assert = NUnit.Framework.Assert;
 
 namespace Svelto.ECS.Tests.ECS
 {
+    public static class EntityCollectionGroups 
+    {
+        public static ushort numberOfGroups = 10;
+        public static readonly ExclusiveGroup _group = new ExclusiveGroup(numberOfGroups);
+    }
     [TestFixture(0u, 100)]
     [TestFixture(20u, 100)]
     [TestFixture(123u, 100)]
@@ -24,10 +30,10 @@ namespace Svelto.ECS.Tests.ECS
         IEntityFactory                    _entityFactory;
         SimpleEntitiesSubmissionScheduler _simpleSubmissionEntityViewScheduler;
         IUnitTestingInterface             _entitiesDB;
+        IEntitySerialization              _entitySerializer;
 
-        static   ushort         numberOfGroups = 10;
-        static   ExclusiveGroup _group         = new ExclusiveGroup(numberOfGroups);
-        readonly ushort         _groupCount    = numberOfGroups;
+        readonly ushort _groupCount = EntityCollectionGroups.numberOfGroups;
+        static ExclusiveGroup _group = EntityCollectionGroups._group;
 
         [SetUp]
         public void Init()
@@ -37,6 +43,7 @@ namespace Svelto.ECS.Tests.ECS
             _entitiesDB                          = _enginesRoot;
 
             _entityFactory = _enginesRoot.GenerateEntityFactory();
+            _entitySerializer = _enginesRoot.GenerateEntitySerializer();
             _enginesRoot.GenerateEntityFunctions();
 
             var id = _idStart;
@@ -196,6 +203,27 @@ namespace Svelto.ECS.Tests.ECS
                 {
                     Assert.AreEqual((entityViews[j].ID.entityID + 1).ToString(), entityViews[j].TestStringValue.Value);
                 }
+            }
+        }
+
+        [TestCase(Description = "Test GroupHashMap Registration for first group")]
+        public void TestGroupHashMap0Registration()
+        {
+            ExclusiveGroupStruct group = _group;
+            var hash = _entitySerializer.GetHashFromGroup(group);
+            var deserialized = _entitySerializer.GetGroupFromHash(hash);
+            Assert.AreEqual(group, deserialized);
+        }
+
+        [TestCase(Description = "Test GroupHashMap Registration for all groups")]
+        public void TestGroupHashMapRegistration()
+        {
+            for (uint i = 0; i < _groupCount; i++)
+            {
+                ExclusiveGroupStruct group = _group + i;
+                var hash = _entitySerializer.GetHashFromGroup(group);
+                var deserialized = _entitySerializer.GetGroupFromHash(hash);
+                Assert.AreEqual(group, deserialized);
             }
         }
     }
