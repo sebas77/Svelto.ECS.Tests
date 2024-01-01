@@ -43,10 +43,6 @@ namespace Svelto.ECS.Tests.ECS.Filters
             _scheduler.Dispose();
         }
 
-        void Test_TransientFilter_Is_Not_Found_After_Submission()
-        {
-        }
-
         readonly FilterContextID testFilterContext = EntitiesDB.SveltoFilters.GetNewContextID();
 
         [Test]

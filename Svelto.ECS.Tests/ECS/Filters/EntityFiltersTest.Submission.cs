@@ -412,8 +412,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         public void Test_PersistentFilter_UpdatesAfterRemove_WithSwapBack_EnsureReverseMapIsKeptValid()
         {
             // Create filters.
-            var mmap = _entitiesDB.QueryNativeMappedEntities<TestEntityComponent>(
-                _entitiesDB.FindGroups<TestEntityComponent>(), Allocator.Persistent);
+            var mmap = _entitiesDB.QueryMappedEntities<TestEntityComponent>(_entitiesDB.FindGroups<TestEntityComponent>());
             var filter = _entitiesDB.GetFilters()
                                     .GetOrCreatePersistentFilter<TestEntityComponent>(
                                          (_persistentFilter1, testFilterContext));
@@ -434,7 +433,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
 
             // Add new entity to filter.
             filter.Add(EgidA0, mmap);
-            mmap.Dispose();
+            
             var iterator = filter.GetEnumerator();
             iterator.MoveNext();
 
@@ -449,6 +448,44 @@ namespace Svelto.ECS.Tests.ECS.Filters
 #endif                          
             Assert.AreEqual(EgidA0.entityID, entities[indices[3]]
               , "Last entity index must point to the last entity added.");
+        }
+        
+         [Test]
+        public void TestPersistentWitnIndices()
+        {
+            // Create filters.
+            var filter = _entitiesDB.GetFilters()
+                                    .GetOrCreatePersistentFilter<TestEntityComponent>(
+                                         (_persistentFilter1, testFilterContext));
+            filter.Add(EgidA0, 0);
+            filter.Add(EgidA1, 1);
+            filter.Add(EgidA2, 2);
+            
+            var iterator = filter.GetEnumerator();
+            iterator.MoveNext();
+
+            var (indices, _) = iterator.Current;
+            Assert.AreEqual(3, indices.count, "Filter count must have changed by one");
+
+            var (components, entities, _) = _entitiesDB.QueryEntities<TestEntityComponent>(Groups.GroupA);
+            Assert.AreEqual(2, indices[2], "Last index must point to the last entity added.");
+#if SLOW_SVELTO_SUBMISSION            
+            Assert.AreEqual(EgidA0, components[indices[0]].ID
+                          , "Last entity index must point to the last entity added.");
+#endif                          
+            Assert.AreEqual(EgidA0.entityID, entities[indices[0]]
+              , "Last entity index must point to the last entity added.");
+        }
+        
+        [Test]
+        public void TestAddingEntityInFilterTwice()
+        {
+            // Create filters.
+            var filter = _entitiesDB.GetFilters()
+                   .GetOrCreatePersistentFilter<TestEntityComponent>(
+                        (_persistentFilter1, testFilterContext));
+            filter.Add(EgidA0, 0);
+            filter.Add(EgidA0, 0);
         }
 
         [Test]

@@ -12,9 +12,7 @@ public partial class DisableEnableEntitiesFilterTests
 
         public void Step()
         {
-            var query = entitiesDB.QueryEntities<TestEntityComponent>(TestGroups.TestGroupTag.Groups);
-
-            foreach (var ((buffer, count), _) in query)
+            foreach (var ((buffer, count), _) in entitiesDB.QueryEntities<TestEntityComponent>(TestGroups.TestGroupTag.Groups))
             {
                 for (var i = 0; i < count; i++)
                 {

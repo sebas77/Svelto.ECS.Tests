@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using NUnit.Framework;
 using Svelto.DataStructures;
 using Svelto.ECS.Schedulers;
@@ -33,7 +33,7 @@ namespace Svelto.ECS.Tests.ECS
         IEntitySerialization              _entitySerializer;
 
         readonly ushort _groupCount = EntityCollectionGroups.numberOfGroups;
-        static ExclusiveGroup _group = EntityCollectionGroups._group;
+        static ExclusiveGroup _rangedGroup = EntityCollectionGroups._group;
 
         [SetUp]
         public void Init()
@@ -52,10 +52,10 @@ namespace Svelto.ECS.Tests.ECS
                 for (int j = 0; j < _entityCountPerGroup; j++)
                 {
                     _entityFactory.BuildEntity<EntityDescriptorWithComponentAndViewComponent>(
-                        new EGID(id++, _group + i), new object[] { new TestFloatValue(1f), new TestIntValue(1) });
+                        new EGID(id++, _rangedGroup + i), new object[] { new TestFloatValue(1f), new TestIntValue(1) });
 
                     _entityFactory.BuildEntity<EntityDescriptorViewComponentWithString>(
-                        new EGID(id++, _group + i), new object[] { new TestStringValue("test") });
+                        new EGID(id++, _rangedGroup + i), new object[] { new TestStringValue("test") });
                 }
             }
 
@@ -105,7 +105,7 @@ namespace Svelto.ECS.Tests.ECS
             void TestNotAcceptedEntityComponent()
             {
                 _entityFactory.BuildEntity<EntityDescriptorViewComponentWithCustomStruct>(
-                    new EGID(0, _group), new object[] { new TestCustomStructWithString("test") });
+                    new EGID(0, _rangedGroup), new object[] { new TestCustomStructWithString("test") });
             }
 
             Assert.Throws<TypeInitializationException>(TestNotAcceptedEntityComponent);
@@ -117,7 +117,7 @@ namespace Svelto.ECS.Tests.ECS
             for (uint i = 0; i < _groupCount; i++)
             {
                 (MB<TestEntityViewComponent> entityViewsManagedArray, int count) =
-                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponent>(_group + i);
+                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponent>(_rangedGroup + i);
 
                 for (int j = 0; j < count; j++)
                 {
@@ -128,6 +128,7 @@ namespace Svelto.ECS.Tests.ECS
                 }
             }
         }
+        
 
         [TestCase(Description = "Test EntityCollection<T> ToBuffer ToNativeArray")]
         public void TestEntityCollection1ToBufferToNativeArray()
@@ -136,7 +137,7 @@ namespace Svelto.ECS.Tests.ECS
             for (uint i = 0; i < _groupCount; i++)
             {
                 var (entityComponents, count) =
-                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(_group + i);
+                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(_rangedGroup + i);
 
                 for (int j = 0; j < count; j++)
                 {
@@ -149,7 +150,7 @@ namespace Svelto.ECS.Tests.ECS
             for (uint i = 0; i < _groupCount; i++)
             {
                 var (entityComponents, ids, count) =
-                        _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(_group + i);
+                        _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(_rangedGroup + i);
 
                 for (int j = 0; j < count; j++)
                 {
@@ -167,7 +168,7 @@ namespace Svelto.ECS.Tests.ECS
             for (uint i = 0; i < _groupCount; i++)
             {
                 var (entityComponents, entityIDs, count) =
-                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(_group + i);
+                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(_rangedGroup + i);
 
                 for (int j = 0; j < count; j++)
                 {
@@ -197,7 +198,7 @@ namespace Svelto.ECS.Tests.ECS
             for (uint i = 0; i < _groupCount; i++)
             {
                 var (entityViews, count) =
-                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponentString>(_group + i);
+                    _entitiesDB.entitiesForTesting.QueryEntities<TestEntityViewComponentString>(_rangedGroup + i);
 
                 for (int j = 0; j < count; j++)
                 {
@@ -209,7 +210,7 @@ namespace Svelto.ECS.Tests.ECS
         [TestCase(Description = "Test GroupHashMap Registration for first group")]
         public void TestGroupHashMap0Registration()
         {
-            ExclusiveGroupStruct group = _group;
+            ExclusiveGroupStruct group = _rangedGroup;
             var hash = _entitySerializer.GetHashFromGroup(group);
             var deserialized = _entitySerializer.GetGroupFromHash(hash);
             Assert.AreEqual(group, deserialized);
@@ -220,7 +221,7 @@ namespace Svelto.ECS.Tests.ECS
         {
             for (uint i = 0; i < _groupCount; i++)
             {
-                ExclusiveGroupStruct group = _group + i;
+                ExclusiveGroupStruct group = _rangedGroup + i;
                 var hash = _entitySerializer.GetHashFromGroup(group);
                 var deserialized = _entitySerializer.GetGroupFromHash(hash);
                 Assert.AreEqual(group, deserialized);
