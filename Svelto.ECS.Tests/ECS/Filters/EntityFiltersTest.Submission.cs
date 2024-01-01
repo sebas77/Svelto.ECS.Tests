@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using Svelto.Common;
 using Svelto.ECS.Native;
 
@@ -451,7 +451,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         }
         
          [Test]
-        public void TestPersistentWitnIndices()
+        public void TestPersistentWithIndices()
         {
             // Create filters.
             var filter = _entitiesDB.GetFilters()
