@@ -216,8 +216,12 @@ namespace Svelto.ECS.Tests.Serialization
             generateEntitySerializer.RegisterSerializationFactory<SerializableEntityDescriptorV0>(
                 new DefaultVersioningFactory<SerializableEntityDescriptorV1>());
 
-            generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData
+            var update = generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData
                                                         , (int) SerializationType.Storage);
+            update.Init(new EntityStructSerialized()
+            {
+                value = 6
+            });
 
             serializerSubmissionScheduler.SubmitEntities();
 
@@ -228,6 +232,10 @@ namespace Svelto.ECS.Tests.Serialization
                 _neverDoThisIsJustForTheTest
                    .entitiesDB.QueryEntity<EntityStructPartiallySerialized>(0, NamedGroup1.Group).value1
               , Is.EqualTo(3));
+            Assert.That(
+                _neverDoThisIsJustForTheTest
+                   .entitiesDB.QueryEntity<EntityStructSerialized>(0, NamedGroup1.Group).value
+              , Is.EqualTo(6));
 
             newEnginesRoot.Dispose();
         }
