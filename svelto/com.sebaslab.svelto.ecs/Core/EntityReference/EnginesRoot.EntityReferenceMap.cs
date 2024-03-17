@@ -6,7 +6,7 @@ using Svelto.ECS.Reference;
 
 namespace Svelto.ECS
 {
-    // The EntityLocatorMap provides a bidirectional map to help locate entities without using an EGID which might
+    // The EntityReferenceMap provides a bidirectional map to help locate entities without using an EGID which might
     // change at runtime. The Entity Locator map uses a reusable unique identifier struct called EntityLocator to
     // find the last known EGID from last entity submission.
     public partial class EnginesRoot

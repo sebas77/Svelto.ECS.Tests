@@ -26,7 +26,7 @@ public partial class DisableEnableEntitiesFilterTests
             {
                 uint entityId = entityIDs[i];
                 var filters = entitiesDB.GetFilters();
-                ref var filter = ref filters.GetOrCreatePersistentFilter<TestEntityComponent>(TestFilters.TestID);
+                var filter = filters.GetOrCreatePersistentFilter<TestEntityComponent>(TestFilters.TestID);
                 filter.Add(new(entityId, groupID), i);
             }
         }
@@ -40,7 +40,7 @@ public partial class DisableEnableEntitiesFilterTests
             var (buffer, entityIDs, count) = entities;
 
             var filters = entitiesDB.GetFilters();
-            ref var filter = ref filters.GetOrCreatePersistentFilter<TestEntityComponent>(TestFilters.TestID);
+            var filter = filters.GetOrCreatePersistentFilter<TestEntityComponent>(TestFilters.TestID);
 
             var map = entitiesDB.QueryMappedEntities<TestEntityComponent>(toGroup);
 

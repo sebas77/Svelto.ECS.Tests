@@ -64,6 +64,29 @@ namespace Svelto.ECS.Tests.ECS.Filters
             // No more groups to iterate.
             Assert.AreEqual(false, iterator.MoveNext());
         }
+        
+        [Test]
+        public void TestReportedBug()
+        {
+            var sveltoFilters = _entitiesDB.GetFilters();
+            EntityFilterCollection unitsFilter = sveltoFilters.GetOrCreatePersistentFilter<TestEntityComponent>((int)_persistentFilter1, testFilterContext);
+            var playerFilter = sveltoFilters.GetOrCreatePersistentFilter<TestEntityComponent>((int)_persistentFilter2, testFilterContext);
+
+            uint unitId = 0;
+
+            for (uint i = 0; i < 6; ++i)
+            {
+                var initUnit = _factory.BuildEntity<EntityDescriptorWithComponents>(i, Groups.GroupB);
+
+                unitsFilter.Add(unitId, Groups.GroupB, unitId);
+
+                ++unitId;
+            }
+            
+            var initUnit2 = _factory.BuildEntity<EntityDescriptorWithComponents>(0, Groups.GroupA);
+
+            playerFilter.Add(0, Groups.GroupA, 0);
+        }
 
         [Test]
         public void Test_AddingFilter_ManyEntities()
@@ -205,6 +228,7 @@ namespace Svelto.ECS.Tests.ECS.Filters
         EntitiesDB                        _entitiesDB;
 
         int _persistentFilter1 = 0;
+        int _persistentFilter2 = 1;
         int _transientFilter1  = 0;
         
         static readonly EGID EgidA0 = new EGID(45872, Groups.GroupA);

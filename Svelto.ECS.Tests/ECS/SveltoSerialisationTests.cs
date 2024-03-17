@@ -212,7 +212,7 @@ namespace Svelto.ECS.Tests.Serialization
             simpleSerializationData.Reset();
             generateEntitySerializer = newEnginesRoot.GenerateEntitySerializer();
 
-            //needed for the versioning to work
+            //needed for the versioning to work (update from v0 to v1)
             generateEntitySerializer.RegisterSerializationFactory<SerializableEntityDescriptorV0>(
                 new DefaultVersioningFactory<SerializableEntityDescriptorV1>());
 
@@ -222,7 +222,7 @@ namespace Svelto.ECS.Tests.Serialization
             {
                 value = 6
             });
-
+            
             serializerSubmissionScheduler.SubmitEntities();
 
             Assert.That(
@@ -266,8 +266,8 @@ namespace Svelto.ECS.Tests.Serialization
             generateEntitySerializer.SerializeEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData
                                                    , (int) SerializationType.Storage);
 
-            SimpleEntitiesSubmissionScheduler simpleSubmissionEntityViewScheduler = new SimpleEntitiesSubmissionScheduler();
-            var                         newEnginesRoot = new EnginesRoot(simpleSubmissionEntityViewScheduler);
+            EntitiesSubmissionScheduler entitySubmissionScheduler = new EntitiesSubmissionScheduler();
+            var                         newEnginesRoot = new EnginesRoot(entitySubmissionScheduler);
             _neverDoThisIsJustForTheTest = new TestEngine();
 
             newEnginesRoot.AddEngine(_neverDoThisIsJustForTheTest);
@@ -280,7 +280,7 @@ namespace Svelto.ECS.Tests.Serialization
             generateEntitySerializer.DeserializeNewEntity(new EGID(0, NamedGroup1.Group), simpleSerializationData
                                                         , (int) SerializationType.Storage);
 
-            simpleSubmissionEntityViewScheduler.SubmitEntities();
+            entitySubmissionScheduler.SubmitEntities();
 
             Assert.That(
                 _neverDoThisIsJustForTheTest.entitiesDB.QueryEntity<EntityStructSerialized>(0, NamedGroup1.Group).value
@@ -403,11 +403,9 @@ namespace Svelto.ECS.Tests.Serialization
                 static readonly IComponentBuilder[] ComponentsToBuild =
                 {
                     new ComponentBuilder<EntityStructNotSerialized>()
-                  , new SerializableComponentBuilder<EntityStructSerialized>()
-                  , new SerializableComponentBuilder<SerializationType, EntityStructSerialized2>(
-                        ((int) SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>()))
-                  , new SerializableComponentBuilder<SerializationType, EntityStructPartiallySerialized>(
-                        ((int) SerializationType.Storage, new PartialSerializer<EntityStructPartiallySerialized>()))
+                  , new SerializableComponentBuilder<SerializationType, EntityStructSerialized>(((int) SerializationType.Storage, new DefaultSerializer<EntityStructSerialized>()))
+                  , new SerializableComponentBuilder<SerializationType, EntityStructSerialized2>(((int) SerializationType.Storage, new DefaultSerializer<EntityStructSerialized2>()))
+                  , new SerializableComponentBuilder<SerializationType, EntityStructPartiallySerialized>(((int) SerializationType.Storage, new PartialSerializer<EntityStructPartiallySerialized>()))
                 };
             }
         }
@@ -415,6 +413,7 @@ namespace Svelto.ECS.Tests.Serialization
         class SerializableEntityDescriptorWithViews : SerializableEntityDescriptor<
             SerializableEntityDescriptorWithViews.DefaultPatternForEntityDescriptor>
         {
+            //The hash name is used to identify the entity descriptor during serialization 
             [HashName("DefaultPatternForEntityDescriptorWithView")]
             internal class DefaultPatternForEntityDescriptor : IEntityDescriptor
             {
