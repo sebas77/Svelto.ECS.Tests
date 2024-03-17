@@ -21,7 +21,9 @@ namespace Svelto.Common
         {
             _info = info;
         }
-        
+
+        public double elapsed => _stopwatch.Value.ElapsedTicks / 10000.0;
+
         public StandardDisposableSampler Sample()
         {
             return new StandardDisposableSampler(_info, _stopwatch.Value);
@@ -41,7 +43,7 @@ namespace Svelto.Common
         { }
     }
 
-    public class StandardDisposableSampler : IDisposable
+    public readonly struct StandardDisposableSampler : IDisposable
     {
         readonly Stopwatch _watch;
         readonly long      _startTime;
@@ -57,7 +59,9 @@ namespace Svelto.Common
         public void Dispose()
         {
             var stopwatchElapsedTicks = (_watch.ElapsedTicks - _startTime);
-            Svelto.Console.Log(_samplerName.FastConcat(" -> ").FastConcat(stopwatchElapsedTicks / 10000.0));
+#if UNITY_EDITOR            
+            Svelto.Console.Log(_samplerName.FastConcat(" -> ").FastConcat(stopwatchElapsedTicks / 10000.0).FastConcat(" ms"));
+#endif            
         }
     }
 }
