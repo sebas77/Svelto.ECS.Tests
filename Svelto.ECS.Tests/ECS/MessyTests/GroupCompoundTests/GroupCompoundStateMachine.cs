@@ -1,5 +1,8 @@
+
 using NUnit.Framework;
 
+//todo: initial idea on how I was picturing GroupCompound state machines
+//would also have replaced the current way to swap between abstracted group compounds
 namespace Svelto.ECS.Tests.GroupCompounds
 {
     // [TestFixture]

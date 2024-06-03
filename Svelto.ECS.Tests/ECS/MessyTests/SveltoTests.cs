@@ -20,7 +20,7 @@ namespace Svelto.ECS.Tests.Messy
     }
 
     [TestFixture]
-    public class TestSveltoECS
+    public partial class TestSveltoECS
     {
         [SetUp]
         public void Init()

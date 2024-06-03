@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 #endif
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Svelto.Utilities
@@ -19,6 +20,7 @@ namespace Svelto.Utilities
         /// the processor to any thread associated with the current core.
         /// Remember that sleep(1) does FORCE a context switch instead, while with sleep(0) is only if required.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Yield()
         {
 #if NETFX_CORE && !NET_STANDARD_2_0 && !NETSTANDARD2_0
@@ -27,6 +29,7 @@ namespace Svelto.Utilities
             Thread.Yield();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void TakeItEasy()
         {
 #if NETFX_CORE && !NET_STANDARD_2_0 && !NETSTANDARD2_0
@@ -35,6 +38,7 @@ namespace Svelto.Utilities
             Thread.Sleep(1);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Relax()
         {
 #if NETFX_CORE && !NET_STANDARD_2_0 && !NETSTANDARD2_0
@@ -51,17 +55,33 @@ namespace Svelto.Utilities
         /// </summary>
         /// <param name="quickIterations">will be increment by 1</param>
         /// <param name="frequency">must be power of 2</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Wait(ref int quickIterations, int frequency = 256)
         {
             if ((quickIterations++ & (frequency - 1)) == 0)
                 Yield();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void LongestWait(float timeMs, ref int quickIterations, in Stopwatch watch, int frequency = 256)
+        {
+            if (timeMs - watch.ElapsedTicks <= 16_000)
+            {
+                if ((quickIterations++ & (frequency - 1)) == 0)
+                    Relax();
+                else
+                    Yield();
+            }
+            else
+                TakeItEasy();
+        }
+
         /// DO NOT TOUCH THE NUMBERS, THEY ARE THE BEST BALANCE BETWEEN CPU OCCUPATION AND RESUME SPEED
         /// DO NOT ADD THREAD.SLEEP(1) it KILLS THE RESUME
-        public static void LongWait(ref int quickIterations, in Stopwatch watch, int frequency = 256)
+       [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void LongWait(float timeMs, ref int quickIterations, in Stopwatch watch, int frequency = 256)
         {
-            if (watch.ElapsedTicks < 16_000)
+            if (timeMs - watch.ElapsedTicks <= 16_000)
             {
                 if ((quickIterations++ & (frequency - 1)) == 0)
                     Yield();
@@ -75,13 +95,14 @@ namespace Svelto.Utilities
             }
         }
         
-        public static void SleepWithOneEyeOpen(uint waitTimeMs, Stopwatch stopwatch)
+        public static void SleepWithOneEyeOpen(float waitTimeMs, Stopwatch stopwatch, int frequency = 64)
         {
             int quickIterations = 0;
+            var timeInTicks = waitTimeMs * (Stopwatch.Frequency / 1000);
+            
             stopwatch.Restart();
-
-            while (stopwatch.ElapsedMilliseconds < waitTimeMs)
-                ThreadUtility.LongWait(ref quickIterations, stopwatch, 64);
+            while (stopwatch.ElapsedTicks < timeInTicks)
+                LongestWait(timeInTicks, ref quickIterations, stopwatch, frequency);
         }
         
         public static void MemoryBarrier() => Interlocked.MemoryBarrier();

@@ -22,7 +22,7 @@ namespace Svelto.Common
             _info = info;
         }
 
-        public double elapsed => _stopwatch.Value.ElapsedTicks / 10000.0;
+        public double elapsed => _stopwatch.Value.ElapsedTicks / Stopwatch.Frequency;
 
         public StandardDisposableSampler Sample()
         {
@@ -59,9 +59,8 @@ namespace Svelto.Common
         public void Dispose()
         {
             var stopwatchElapsedTicks = (_watch.ElapsedTicks - _startTime);
-#if UNITY_EDITOR            
+
             Svelto.Console.Log(_samplerName.FastConcat(" -> ").FastConcat(stopwatchElapsedTicks / 10000.0).FastConcat(" ms"));
-#endif            
         }
     }
 }
