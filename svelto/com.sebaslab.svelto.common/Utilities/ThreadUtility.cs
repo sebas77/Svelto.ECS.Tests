@@ -63,9 +63,9 @@ namespace Svelto.Utilities
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void LongestWait(float timeMs, ref int quickIterations, in Stopwatch watch, int frequency = 256)
+        public static void LongestWaitLeft(float timeInTicks, ref int quickIterations, in Stopwatch watch, int frequency = 256)
         {
-            if (timeMs - watch.ElapsedTicks <= 16_000)
+            if (timeInTicks - watch.ElapsedTicks <= 16_000)
             {
                 if ((quickIterations++ & (frequency - 1)) == 0)
                     Relax();
@@ -79,9 +79,28 @@ namespace Svelto.Utilities
         /// DO NOT TOUCH THE NUMBERS, THEY ARE THE BEST BALANCE BETWEEN CPU OCCUPATION AND RESUME SPEED
         /// DO NOT ADD THREAD.SLEEP(1) it KILLS THE RESUME
        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void LongWait(float timeMs, ref int quickIterations, in Stopwatch watch, int frequency = 256)
+        public static void LongWaitLeft(float timeInTicks, ref int quickIterations, in Stopwatch watch, int frequency = 256)
         {
-            if (timeMs - watch.ElapsedTicks <= 16_000)
+            if (timeInTicks - watch.ElapsedTicks <= 16_000)
+            {
+                if ((quickIterations++ & (frequency - 1)) == 0)
+                    Yield();
+            }
+            else
+            {
+                if ((quickIterations++ & ((frequency << 3) - 1)) == 0)
+                    Relax();
+                else
+                    Yield();
+            }
+        }
+        
+        /// DO NOT TOUCH THE NUMBERS, THEY ARE THE BEST BALANCE BETWEEN CPU OCCUPATION AND RESUME SPEED
+        /// DO NOT ADD THREAD.SLEEP(1) it KILLS THE RESUME
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void LongWait(ref int quickIterations, in Stopwatch watch, int frequency = 256)
+        {
+            if (watch.ElapsedTicks < 16_000)
             {
                 if ((quickIterations++ & (frequency - 1)) == 0)
                     Yield();
@@ -102,7 +121,7 @@ namespace Svelto.Utilities
             
             stopwatch.Restart();
             while (stopwatch.ElapsedTicks < timeInTicks)
-                LongestWait(timeInTicks, ref quickIterations, stopwatch, frequency);
+                LongestWaitLeft(timeInTicks, ref quickIterations, stopwatch, frequency);
         }
         
         public static void MemoryBarrier() => Interlocked.MemoryBarrier();

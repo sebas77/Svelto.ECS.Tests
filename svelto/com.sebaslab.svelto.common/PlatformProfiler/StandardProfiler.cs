@@ -31,12 +31,12 @@ namespace Svelto.Common
 
         public StandardDisposableSampler Sample(string samplerName)
         {
-            return new StandardDisposableSampler(samplerName.FastConcat("-",_info), _stopwatch.Value);
+            return new StandardDisposableSampler(_info.FastConcat(samplerName), _stopwatch.Value);
         }
 
         public StandardDisposableSampler Sample<T>(T samplerName)
         {
-            return new StandardDisposableSampler(samplerName.ToString().FastConcat("-",_info), _stopwatch.Value);
+            return new StandardDisposableSampler(_info.FastConcat(samplerName.ToString()), _stopwatch.Value);
         }
 
         public void Dispose()
