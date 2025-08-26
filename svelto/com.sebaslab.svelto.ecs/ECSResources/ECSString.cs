@@ -16,7 +16,7 @@ namespace Svelto.ECS.ResourceManager
 
         public ECSString(string newText):this()
         {
-            _id = ResourcesECSDB<string>.ToECS(newText);
+            _id = ECSResources<string>.ToECS(newText);
         }
 
         ECSString(uint id):this()
@@ -26,7 +26,7 @@ namespace Svelto.ECS.ResourceManager
 
         public static implicit operator string(ECSString ecsString)
         {
-            return ResourcesECSDB<string>.FromECS(ecsString._id);
+            return ECSResources<string>.FromECS(ecsString._id);
         }
 
         /// <summary>
@@ -39,29 +39,29 @@ namespace Svelto.ECS.ResourceManager
         {
             if (_id != 0)
             {
-                if (ResourcesECSDB<string>.resources(_id).Equals(newText) == false)
+                if (ECSResources<string>.resources(_id).Equals(newText) == false)
                 {
-                    ResourcesECSDB<string>.resources(_id) = newText;
+                    ECSResources<string>.resources(_id) = newText;
                         
                     _versioning++;                        
                 }
             }
             else
-                _id = ResourcesECSDB<string>.ToECS(newText);
+                _id = ECSResources<string>.ToECS(newText);
         }
 
         public ECSString Copy()
         {
             DBC.ECS.Check.Require(_id != 0, "copying not initialized string");
             
-            var id = ResourcesECSDB<string>.ToECS(ResourcesECSDB<string>.resources(_id));
+            var id = ECSResources<string>.ToECS(ECSResources<string>.resources(_id));
             
             return new ECSString(id);
         }
 
         public override string ToString()
         {
-            return ResourcesECSDB<string>.FromECS(_id);
+            return ECSResources<string>.FromECS(_id);
         }
 
         public bool Equals(ECSString other)

@@ -6,7 +6,7 @@ namespace Svelto.ECS.ResourceManager
     /// To do. Or we reuse the ID or we need to clear this
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    static class ResourcesECSDB<T>
+    static class ECSResources<T>
     {
         static readonly FasterList<T> _resources = new FasterList<T>();
 
