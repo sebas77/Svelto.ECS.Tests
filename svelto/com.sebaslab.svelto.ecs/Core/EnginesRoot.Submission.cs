@@ -443,6 +443,21 @@ namespace Svelto.ECS
                   , entityLocator
 #endif
                 );
+
+                if (fromDictionary.entityIDs is NativeEntityIDs nativeEntityIds)
+                {
+                    SwapEntitiesBetweenPersistentFilters(fromGroupId, toGroupId, refWrapperType, nativeEntityIds);
+                }
+                else if (fromDictionary.entityIDs is ManagedEntityIDs managedEntityIds)
+                {
+                    SwapEntitiesBetweenPersistentFilters(fromGroupId, toGroupId, refWrapperType, managedEntityIds);
+                }
+                else
+                {
+                    // Should never happen
+                    throw new InvalidOperationException();
+                }
+                
             }
 
             //Call all the callbacks

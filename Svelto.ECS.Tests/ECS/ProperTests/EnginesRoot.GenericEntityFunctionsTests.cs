@@ -2,6 +2,8 @@
 using Svelto.DataStructures;
 using Svelto.ECS.Experimental;
 using Svelto.ECS.Internal;
+using Svelto.ECS.Native;
+using System.Collections.Generic;
 
 namespace Svelto.ECS.Tests.ECS
 {
@@ -101,6 +103,41 @@ namespace Svelto.ECS.Tests.ECS
             Assert.AreEqual(2, componentsB[2].intValue, "Values in components should be copied after swap");
 
             // todo: What is the expected behaviour when source entity id is already used in target group?
+        }
+
+
+        [Test]
+        public void TestSwapEntitiesGroupUpdatesFilters(bool swapInBulk)
+        {
+            CombinedFilterID testFilterId = new CombinedFilterID(0, FilterContextID.GetNewContextID());
+
+            CreateTestEntity(0, Groups.GroupA, 1337);
+            _scheduler.SubmitEntities();
+
+            // Add entity to filter
+            _entitiesDB.entitiesForTesting.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(testFilterId)
+                .Add(new EGID(0, Groups.GroupA), _entitiesDB.entitiesForTesting.QueryNativeMappedEntities<TestEntityComponent>(Groups.GroupA));
+            _scheduler.SubmitEntities();
+
+            // Swap entity group
+            _functions.SwapEntitiesInGroup(Groups.GroupA, Groups.GroupB);
+            _scheduler.SubmitEntities();
+
+            // Check filter
+            var filter = _entitiesDB.entitiesForTesting.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(testFilterId);
+            Dictionary<ExclusiveGroupStruct, int> filterGroupIndiceCount = new()
+            {
+                { Groups.GroupA, 0 },
+                { Groups.GroupB, 0 }
+            };
+
+            foreach ((EntityFilterIndices indices, ExclusiveGroupStruct group) in filter)
+            {
+                filterGroupIndiceCount[group] = indices.count;
+            }
+
+            Assert.AreEqual(0, filterGroupIndiceCount[Groups.GroupA], "Source group should be empty within filter after swap");
+            Assert.AreEqual(1, filterGroupIndiceCount[Groups.GroupB], "Source group should have entity within filter after swap");
         }
 
         [Test]

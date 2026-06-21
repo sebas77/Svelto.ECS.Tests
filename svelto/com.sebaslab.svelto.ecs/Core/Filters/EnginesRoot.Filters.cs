@@ -1,5 +1,6 @@
 ﻿using Svelto.DataStructures;
 using Svelto.DataStructures.Native;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
@@ -150,6 +151,45 @@ namespace Svelto.ECS
                             var resultEntityIdToDenseIndex = fromGroupFilter._entityIDToDenseIndex;
                             if (resultEntityIdToDenseIndex.TryFindIndex(entity.key, out var index))
                                 resultEntityIdToDenseIndex.unsafeValues[index] = (uint)entity.value;
+                        }
+                    }
+                }
+            }
+        }
+
+        //this method is called by the framework only if listOfFilters.count > 0
+        void SwapEntitiesBetweenPersistentFilters<TEntityIds>
+        (ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup
+       , ComponentID refWrapperType, TEntityIds fromGroupEntityIds)
+            where TEntityIds : struct, IEntityIDs
+        {
+            //is there any filter used by this component?
+            if (_indicesOfPersistentFiltersUsedByThisComponent.TryGetValue(refWrapperType, out NativeDynamicArrayCast<int> listOfFilters) == true)
+            {
+                DBC.ECS.Check.Require(listOfFilters.count > 0, "why are you calling this with an empty list?");
+                var numberOfFilters = listOfFilters.count;
+
+                //foreach filter linked to this component
+                for (int filterIndex = 0; filterIndex < numberOfFilters; ++filterIndex)
+                {
+                    EntityFilterCollection persistentFilter = _persistentEntityFilters.unsafeValues[listOfFilters[filterIndex]];
+
+                    //if the group has a filter linked:
+                    if (persistentFilter._filtersPerGroup.TryGetValue(fromGroup, out var fromGroupFilter))
+                    {
+                        var fromGroupFilterEntityIndices = fromGroupFilter.indices;
+                        if (fromGroupFilterEntityIndices.count > 0)
+                        {
+                            EntityFilterCollection.GroupFilters groupFilterTo = persistentFilter.GetOrCreateGroupFilter(toGroup);
+
+                            for (uint index = 0; index < fromGroupFilterEntityIndices.count; index++)
+                            {
+                                uint fromGroupFilterEntityIndex = fromGroupFilterEntityIndices[index];
+                                uint entityId = fromGroupEntityIds[fromGroupFilterEntityIndex];
+                                groupFilterTo.Add(entityId, 0); // default toIndex 0 as seen in SwapInfo.toIndex
+                            }
+
+                            fromGroupFilter.Clear();
                         }
                     }
                 }
