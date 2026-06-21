@@ -107,7 +107,7 @@ namespace Svelto.ECS.Tests.ECS
 
 
         [Test]
-        public void TestSwapEntitiesGroupUpdatesFilters(bool swapInBulk)
+        public void TestSwapEntitiesGroupUpdatesFilters()
         {
             CombinedFilterID testFilterId = new CombinedFilterID(0, FilterContextID.GetNewContextID());
 
