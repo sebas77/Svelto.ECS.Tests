@@ -4,6 +4,8 @@ using Svelto.ECS.Experimental;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Native;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.Metrics;
 
 namespace Svelto.ECS.Tests.ECS
 {
@@ -111,12 +113,19 @@ namespace Svelto.ECS.Tests.ECS
         {
             CombinedFilterID testFilterId = new CombinedFilterID(0, FilterContextID.GetNewContextID());
 
-            CreateTestEntity(0, Groups.GroupA, 1337);
+            CreateTestEntity(0, Groups.GroupA, 100);
+            CreateTestEntity(1, Groups.GroupA, 200);
+            CreateTestEntity(2, Groups.GroupB, 300);
+            CreateTestEntity(3, Groups.GroupB, 400);
             _scheduler.SubmitEntities();
 
             // Add entity to filter
             _entitiesDB.entitiesForTesting.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(testFilterId)
                 .Add(new EGID(0, Groups.GroupA), _entitiesDB.entitiesForTesting.QueryNativeMappedEntities<TestEntityComponent>(Groups.GroupA));
+            _entitiesDB.entitiesForTesting.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(testFilterId)
+                .Add(new EGID(1, Groups.GroupA), _entitiesDB.entitiesForTesting.QueryNativeMappedEntities<TestEntityComponent>(Groups.GroupA));
+            _entitiesDB.entitiesForTesting.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(testFilterId)
+                .Add(new EGID(2, Groups.GroupB), _entitiesDB.entitiesForTesting.QueryNativeMappedEntities<TestEntityComponent>(Groups.GroupB));
             _scheduler.SubmitEntities();
 
             // Swap entity group
@@ -125,19 +134,22 @@ namespace Svelto.ECS.Tests.ECS
 
             // Check filter
             var filter = _entitiesDB.entitiesForTesting.GetFilters().GetOrCreatePersistentFilter<TestEntityComponent>(testFilterId);
-            Dictionary<ExclusiveGroupStruct, int> filterGroupIndiceCount = new()
-            {
-                { Groups.GroupA, 0 },
-                { Groups.GroupB, 0 }
-            };
-
             foreach ((EntityFilterIndices indices, ExclusiveGroupStruct group) in filter)
             {
-                filterGroupIndiceCount[group] = indices.count;
-            }
+                var (components, count) = _entitiesDB.entitiesForTesting.QueryEntities<TestEntityComponent>(group);
+                if (group == Groups.GroupA)
+                {
+                    Assert.AreEqual(0, indices.count, "Source group should be empty within filter after swap");
+                }
+                else if(group == Groups.GroupB)
+                {
+                    Assert.AreEqual(3, indices.count, "Target group should have entity within filter after swap");
 
-            Assert.AreEqual(0, filterGroupIndiceCount[Groups.GroupA], "Source group should be empty within filter after swap");
-            Assert.AreEqual(1, filterGroupIndiceCount[Groups.GroupB], "Source group should have entity within filter after swap");
+                    Assert.AreEqual(300, components[indices[0]].intValue, "Values in components should be copied after swap");
+                    Assert.AreEqual(100, components[indices[1]].intValue, "Values in components should be copied after swap");
+                    Assert.AreEqual(200, components[indices[2]].intValue, "Values in components should be copied after swap");
+                }
+            }
         }
 
         [Test]
