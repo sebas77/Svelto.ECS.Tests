@@ -189,8 +189,9 @@ namespace Svelto.ECS
                                 uint entityId = fromGroupEntityIds[fromGroupFilterEntityIndex];
                                 groupFilterTo.Add(entityId, toIndices[index]);
                             }
-
+                            
                             fromGroupFilter.Clear();
+                            persistentFilter._filtersPerGroup.Remove(fromGroup); // May as well remove the empty filterGroup
                         }
                     }
                 }
