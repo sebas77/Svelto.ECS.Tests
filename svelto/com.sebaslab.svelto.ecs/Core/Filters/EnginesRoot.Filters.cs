@@ -1,4 +1,5 @@
-﻿using Svelto.DataStructures;
+﻿using System;
+using Svelto.DataStructures;
 using Svelto.DataStructures.Native;
 using Svelto.ECS.Internal;
 
@@ -159,7 +160,7 @@ namespace Svelto.ECS
 
         //this method is called by the framework only if listOfFilters.count > 0
         void SwapEntitiesBetweenPersistentFilters<TEntityIds>
-        (ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup
+        (ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup, Span<uint> toIndices
        , ComponentID refWrapperType, TEntityIds fromGroupEntityIds)
             where TEntityIds : struct, IEntityIDs
         {
@@ -182,11 +183,11 @@ namespace Svelto.ECS
                         {
                             EntityFilterCollection.GroupFilters groupFilterTo = persistentFilter.GetOrCreateGroupFilter(toGroup);
 
-                            for (uint index = 0; index < fromGroupFilterEntityIndices.count; index++)
+                            for (int index = 0; index < fromGroupFilterEntityIndices.count; index++)
                             {
                                 uint fromGroupFilterEntityIndex = fromGroupFilterEntityIndices[index];
                                 uint entityId = fromGroupEntityIds[fromGroupFilterEntityIndex];
-                                groupFilterTo.Add(entityId, 0); // default toIndex 0 as seen in SwapInfo.toIndex
+                                groupFilterTo.Add(entityId, toIndices[index]);
                             }
 
                             fromGroupFilter.Clear();

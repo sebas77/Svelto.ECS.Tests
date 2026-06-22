@@ -15,12 +15,13 @@ namespace Svelto.ECS.Internal
 #if SLOW_SVELTO_SUBMISSION
           , in EnginesRoot.EntityReferenceMap entityLocator
 #endif
-          , ExclusiveGroupStruct toGroupID)
+          , ExclusiveGroupStruct toGroupID, ref Span<uint> toIndices)
                 where Strategy1 : struct, IBufferStrategy<SveltoDictionaryNode<uint>>
                 where Strategy2 : struct, IBufferStrategy<TValue>
                 where Strategy3 : struct, IBufferStrategy<int>
                 where TValue : struct, _IInternalEntityComponent
         {
+            int index = 0;
             foreach (var tuple in fromDictionary)
             {
 #if SLOW_SVELTO_SUBMISSION
@@ -38,7 +39,7 @@ namespace Svelto.ECS.Internal
                 try
                 {
 #endif                    
-                    toDic.Add(tuple.key, tuple.value);
+                    toIndices[index++] = toDic.Add(tuple.key, tuple.value);
 #if DEBUG && !PROFILE_SVELTO                    
                 }
                 catch (Exception e)

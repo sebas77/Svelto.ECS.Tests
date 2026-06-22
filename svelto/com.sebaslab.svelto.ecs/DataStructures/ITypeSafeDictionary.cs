@@ -25,7 +25,7 @@ namespace Svelto.ECS.Internal
         ITypeSafeDictionary Create();
 
         void AddEntitiesToDictionary
-        (ITypeSafeDictionary toDictionary, ExclusiveGroupStruct groupId
+        (ITypeSafeDictionary toDictionary, ExclusiveGroupStruct groupId, ref Span<uint> toIndices
 #if SLOW_SVELTO_SUBMISSION                             
        , in EnginesRoot.EntityReferenceMap entityLocator
 #endif         
