@@ -159,7 +159,7 @@ namespace Svelto.ECS.Internal
         /// *********************************
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddEntitiesToDictionary
-        (ITypeSafeDictionary toDictionary, ExclusiveGroupStruct groupId
+        (ITypeSafeDictionary toDictionary, ExclusiveGroupStruct groupId, ref Span<uint> toIndices
 #if SLOW_SVELTO_SUBMISSION
        , in EnginesRoot.EntityReferenceMap entityLocator
 #endif
@@ -171,7 +171,7 @@ namespace Svelto.ECS.Internal
 #if SLOW_SVELTO_SUBMISSION
                                                             , entityLocator
 #endif
-                                                            , groupId);
+                                                            , groupId, ref toIndices);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

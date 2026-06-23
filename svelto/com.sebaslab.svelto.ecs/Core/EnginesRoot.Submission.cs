@@ -323,8 +323,10 @@ namespace Svelto.ECS
                                     //just iterate the list using the indices ranges added in the _cachedIndices
                                     _cachedRangeOfSubmittedIndices.Add(((uint, uint))(toDictionary.count, toDictionary.count + fromDictionary.count));
                                     //Fill the DB with the entity components generated this frame.
+
+                                    Span<uint> toIndices = stackalloc uint[fromDictionary.count];
                                     fromDictionary.AddEntitiesToDictionary(
-                                        toDictionary, groupID
+                                        toDictionary, groupID, ref toIndices
 #if SLOW_SVELTO_SUBMISSION
                                       , entityLocator
 #endif
@@ -437,12 +439,28 @@ namespace Svelto.ECS
                 ITypeSafeDictionary fromDictionary = dictionaryOfEntities.value;
                 ITypeSafeDictionary toDictionary = GetOrAddTypeSafeDictionary(toGroupId, toGroup, refWrapperType, fromDictionary);
 
+                Span<uint> toIndices = stackalloc uint[fromDictionary.count];
+
                 fromDictionary.AddEntitiesToDictionary(
-                    toDictionary, toGroupId
+                    toDictionary, toGroupId, ref toIndices
 #if SLOW_SVELTO_SUBMISSION
                   , entityLocator
 #endif
                 );
+
+                if (fromDictionary.entityIDs is NativeEntityIDs nativeEntityIds)
+                {
+                    SwapEntitiesBetweenPersistentFilters(fromGroupId, toGroupId, toIndices, refWrapperType, nativeEntityIds);
+                }
+                else if (fromDictionary.entityIDs is ManagedEntityIDs managedEntityIds)
+                {
+                    SwapEntitiesBetweenPersistentFilters(fromGroupId, toGroupId, toIndices, refWrapperType, managedEntityIds);
+                }
+                else
+                {
+                    // Should never happen
+                    throw new InvalidOperationException();
+                }
             }
 
             //Call all the callbacks

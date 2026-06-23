@@ -14,17 +14,18 @@ namespace Svelto.ECS.Internal
         IBuffer<TValue> GetValues(out uint count);
         ref TValue      GetDirectValueByRef(uint key);
         ref TValue      GetValueByRef(uint key);
-        IEntityIDs      entityIDs { get; }
     }
 
     public interface ITypeSafeDictionary : IDisposable
     {
         int                 count { get; }
-        
+
+        IEntityIDs entityIDs { get; }
+
         ITypeSafeDictionary Create();
 
         void AddEntitiesToDictionary
-        (ITypeSafeDictionary toDictionary, ExclusiveGroupStruct groupId
+        (ITypeSafeDictionary toDictionary, ExclusiveGroupStruct groupId, ref Span<uint> toIndices
 #if SLOW_SVELTO_SUBMISSION                             
        , in EnginesRoot.EntityReferenceMap entityLocator
 #endif         
