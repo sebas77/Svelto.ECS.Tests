@@ -41,7 +41,8 @@ namespace Svelto.ECS.SveltoOnDOTS
             if (_submissionScheduler.paused == true || World.EntityManager == default)
                 return;
 
-            using (var profiler = new PlatformProfiler("SveltoDOTSEntitiesSubmissionGroup"))
+            var profiler = new PlatformProfiler("SveltoDOTSEntitiesSubmissionGroup");
+            using (profiler.Sample())
             {
                 using (profiler.Sample("Complete All Pending Jobs"))
                 {

@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using Svelto.DataStructures;
-using Svelto.DataStructures.Experimental;
 using Svelto.DataStructures.Native;
 
 namespace Svelto.ECS.ResourceManager
@@ -12,7 +11,7 @@ namespace Svelto.ECS.ResourceManager
     {
         protected ECSResourceManager()
         {
-            _sparse = new ValueContainer<T, ManagedStrategy<T>, NativeStrategy<SparseIndex>>(16);
+            _sparse = new SlotMap<T, ManagedStrategy<T>, NativeStrategy<SparseIndex>>(16);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -44,6 +43,6 @@ namespace Svelto.ECS.ResourceManager
             _sparse.Dispose();
         }
 
-        ValueContainer<T, ManagedStrategy<T>, NativeStrategy<SparseIndex>> _sparse;
+        SlotMap<T, ManagedStrategy<T>, NativeStrategy<SparseIndex>> _sparse;
     }
 }

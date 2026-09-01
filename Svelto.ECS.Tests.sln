@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Svelto.ECS.Tests", "Svelto.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Svelto.ECS", "svelto\com.sebaslab.svelto.ecs\Svelto.ECS.csproj", "{24B539C4-9EC7-4E0F-A9ED-85D588379292}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Svelto.Common", "svelto\com.sebaslab.svelto.common\Svelto.Common.csproj", "{794683B6-72D0-4A5B-8339-891D1EFB3CC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Svelto.Common", "svelto\com.sebaslab.svelto.common\Svelto.Common\Svelto.Common.csproj", "{794683B6-72D0-4A5B-8339-891D1EFB3CC5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Svelto.Common.Tests", "svelto\com.sebaslab.svelto.common\Svelto.Common.Tests~\Svelto.Common.Tests.csproj", "{F0C43B90-4BDB-49A7-A19C-4558D4D2B783}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,8 @@ Global
 		{794683B6-72D0-4A5B-8339-891D1EFB3CC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{794683B6-72D0-4A5B-8339-891D1EFB3CC5}.SlowSubmissionDebug|Any CPU.ActiveCfg = SlowSubmissionDebug|Any CPU
 		{794683B6-72D0-4A5B-8339-891D1EFB3CC5}.SlowSubmissionDebug|Any CPU.Build.0 = SlowSubmissionDebug|Any CPU
+		{F0C43B90-4BDB-49A7-A19C-4558D4D2B783}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0C43B90-4BDB-49A7-A19C-4558D4D2B783}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

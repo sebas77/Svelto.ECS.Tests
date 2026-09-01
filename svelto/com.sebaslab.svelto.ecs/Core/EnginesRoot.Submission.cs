@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
@@ -31,7 +31,8 @@ namespace Svelto.ECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void RemoveGroup(ExclusiveGroupStruct groupID, EnginesRoot enginesRoot)
         {
-            using (var sampler = new PlatformProfiler("remove whole group"))
+            var sampler = new PlatformProfiler("remove whole group");
+            using (sampler.Sample())
             {
                 enginesRoot.RemoveEntitiesFromGroup(groupID, sampler);
             }
@@ -40,7 +41,8 @@ namespace Svelto.ECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void SwapGroup(ExclusiveGroupStruct fromGroupID, ExclusiveGroupStruct toGroupID, EnginesRoot enginesRoot)
         {
-            using (var sampler = new PlatformProfiler("swap whole group"))
+            var sampler = new PlatformProfiler("swap whole group");
+            using (sampler.Sample())
             {
                 enginesRoot.SwapEntitiesBetweenGroups(fromGroupID, toGroupID, sampler);
             }
@@ -49,7 +51,8 @@ namespace Svelto.ECS
         static void RemoveEntities(FasterDictionary<ExclusiveGroupStruct, FasterDictionary<ComponentID, FasterList<(uint, string)>>>
                 removeOperations, FasterList<EGID> entitiesRemoved, EnginesRoot enginesRoot)
         {
-            using (var sampler = new PlatformProfiler("remove Entities"))
+            var sampler = new PlatformProfiler("remove Entities");
+            using (sampler.Sample())
             {
                 using (sampler.Sample("Execute obsolete remove callbacks"))
                 {
@@ -165,7 +168,8 @@ namespace Svelto.ECS
                 FasterDictionary<ExclusiveGroupStruct, FasterDictionary<uint, SwapInfo>>>> swapEntitiesOperations,
             FasterDictionary<EGID, (EGID, EGID)> entitiesIDSwaps, EnginesRoot enginesRoot)
         {
-            using (var sampler = new PlatformProfiler("Swap entities between groups"))
+            var sampler = new PlatformProfiler("Swap entities between groups");
+            using (sampler.Sample())
             {
                 using (sampler.Sample("Update Entity References"))
                 {

@@ -32,13 +32,27 @@ namespace Svelto.ECS
 
         public void Step()
         {
-            using (var profiler = new PlatformProfiler(_name))
+            var profiler = new PlatformProfiler(_name);
+            using (profiler.Sample())
             {
-                var instancedSequenceCount = _instancedSequence.count;
-                for (var index = 0; index < instancedSequenceCount; index++)
+                for (int index = 0; index < _instancedSequence.count;)
                 {
                     var engine = _instancedSequence[index];
-                    using (profiler.Sample(engine.name)) engine.Step();
+                    using (profiler.Sample(engine.name))
+                    {
+                        if (engine is IRemovableStepEngine removableEngine)
+                        {
+                            if (!removableEngine.Step())
+                            {
+                                _instancedSequence.UnorderedRemoveAt((uint)index);
+                                continue;
+                            }
+                        }
+                        else
+                            engine.Step();
+                    }
+
+                    index++;
                 }
             }
         }
@@ -86,13 +100,27 @@ namespace Svelto.ECS
 
         public void Step(in Parameter time)
         {
-            using (var profiler = new PlatformProfiler(_name))
+            var profiler = new PlatformProfiler(_name);
+            using (profiler.Sample())
             {
-                var instancedSequenceCount = _instancedSequence.count;
-                for (var index = 0; index < instancedSequenceCount; index++)
+                for (int index = 0; index < _instancedSequence.count;)
                 {
                     var engine = _instancedSequence[index];
-                    using (profiler.Sample(engine.name)) engine.Step(time);
+                    using (profiler.Sample(engine.name))
+                    {
+                        if (engine is IRemovableStepEngine<Parameter> removableEngine)
+                        {
+                            if (!removableEngine.Step(time))
+                            {
+                                _instancedSequence.UnorderedRemoveAt((uint)index);
+                                continue;
+                            }
+                        }
+                        else
+                            engine.Step(time);
+                    }
+
+                    index++;
                 }
             }
         }

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0-windows</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
 
         <IsPackable>false</IsPackable>
 
@@ -26,18 +26,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="coverlet.msbuild" Version="3.1.2">
+        <PackageReference Include="coverlet.msbuild" Version="10.0.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
-        <PackageReference Include="NUnit.Console" Version="3.15.0" />
-        <PackageReference Include="NUnitLite" Version="3.13.2" />
-        <PackageReference Include="ReportGenerator" Version="5.0.4" />
+        <PackageReference Include="Microsoft.CodeCoverage" Version="18.9.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
+        <PackageReference Include="NUnit.Console" Version="3.22.0" />
+        <PackageReference Include="NUnitLite" Version="4.6.1" />
+        <PackageReference Include="ReportGenerator" Version="5.5.11" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\svelto\com.sebaslab.svelto.common\Svelto.Common.csproj" />
+        <ProjectReference Include="..\svelto\com.sebaslab.svelto.common\Svelto.Common\Svelto.Common.csproj" />
         <ProjectReference Include="..\svelto\com.sebaslab.svelto.ecs\Svelto.ECS.csproj" />
     </ItemGroup>
 

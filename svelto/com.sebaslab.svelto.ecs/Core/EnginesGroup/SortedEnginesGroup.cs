@@ -66,12 +66,32 @@ namespace Svelto.ECS
         public void Step()
         {
             var sequenceItems = _instancedSequence.items;
-            using (var profiler = new PlatformProfiler(_name))
+            var profiler = new PlatformProfiler(_name);
+            using (profiler.Sample())
             {
                 for (var index = 0; index < sequenceItems.count; index++)
                 {
                     var engine = sequenceItems[index];
-                    using (profiler.Sample(engine.name)) engine.Step();
+                    if (engine != null) // Skip null entries in sequence
+                    {
+                        bool result;
+
+                        using (profiler.Sample(engine.name))
+                        {
+                            if (engine is IRemovableStepEngine removableEngine)
+                            {
+                                result = removableEngine.Step();
+
+                                if (!result)
+                                {
+                                    // Remove the engine that returned false
+                                    _instancedSequence.Remove(index);
+                                }
+                            }
+                            else
+                                engine.Step();
+                        }
+                    }
                 }
             }
         }
@@ -107,12 +127,25 @@ namespace Svelto.ECS
         public void Step(in Parameter time)
         {
             var sequenceItems = _instancedSequence.items;
-            using (var profiler = new PlatformProfiler(_name))
+            var profiler = new PlatformProfiler(_name);
+            using (profiler.Sample())
             {
                 for (var index = 0; index < sequenceItems.count; index++)
                 {
                     var engine = sequenceItems[index];
-                    using (profiler.Sample(engine.name)) engine.Step(time);
+                    if (engine != null) // Skip null entries in sequence
+                    {
+                        using (profiler.Sample(engine.name))
+                        {
+                            if (engine is IRemovableStepEngine<Parameter> removableEngine)
+                            {
+                                if (!removableEngine.Step(time))
+                                    _instancedSequence.Remove(index);
+                            }
+                            else
+                                engine.Step(time);
+                        }
+                    }
                 }
             }
         }

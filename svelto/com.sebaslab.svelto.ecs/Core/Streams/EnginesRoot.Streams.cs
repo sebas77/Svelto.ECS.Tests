@@ -6,16 +6,16 @@ namespace Svelto.ECS
     public partial class EnginesRoot
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Consumer<T> GenerateConsumer<T>(string name, uint capacity) where T : unmanaged, _IInternalEntityComponent
+        internal Consumer<T> GenerateConsumer<T>(string name) where T : unmanaged, _IInternalEntityComponent
         {
-            return _entityStreams.GenerateConsumer<T>(name, capacity);
+            return _entityStreams.GenerateConsumer<T>(name);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Consumer<T> GenerateConsumer<T>(ExclusiveGroupStruct group, string name, uint capacity)
+        internal Consumer<T> GenerateConsumer<T>(ExclusiveGroupStruct group, string name)
             where T : unmanaged, _IInternalEntityComponent
         {
-            return _entityStreams.GenerateConsumer<T>(@group, name, capacity);
+            return _entityStreams.GenerateConsumer<T>(@group, name);
         }
 
         internal readonly EntitiesStreams _entityStreams;

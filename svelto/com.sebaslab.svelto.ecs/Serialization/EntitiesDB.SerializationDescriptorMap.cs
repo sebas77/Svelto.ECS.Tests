@@ -75,7 +75,7 @@ namespace Svelto.ECS
 
             internal static void Init()
             {
-                using (new StandardProfiler("Assemblies Scan"))
+                using (new StandardProfiler("Assemblies Scan").Sample())
                 {
                     List<Assembly> assemblies = AssemblyUtility.GetCompatibleAssemblies();
 

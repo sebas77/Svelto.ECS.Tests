@@ -1074,22 +1074,9 @@ namespace Svelto.ECS.Tests.Messy
     
     //test the warmup of the following doesn't fail
     public interface IGUIEntityDescriptor: IEntityDescriptor { }
-
-    public class GUIExtendibleEntityDescriptor: ExtendibleEntityDescriptor<GUIExtendibleEntityDescriptor.GuiEntityDescriptor>, IGUIEntityDescriptor
-    {
-        public GUIExtendibleEntityDescriptor(IComponentBuilder[] extraEntities): base(extraEntities) { }
-
-        public class
-                GuiEntityDescriptor: GenericEntityDescriptor<EGIDComponent> { }
-    }
     
-    public class BaseWidgetDescriptor : GUIExtendibleEntityDescriptor
-    {
-        public BaseWidgetDescriptor() : base(new IComponentBuilder[]
-        {
-            new ComponentBuilder<GUIWidgetEventsComponent>()
-        }) { }
-    }
+    public class BaseWidgetDescriptor : GenericEntityDescriptor<GUIWidgetEventsComponent>, IGUIEntityDescriptor
+    { }
 
     public struct GUIWidgetEventsComponent: _IInternalEntityComponent { }
     public struct GUIWidgetEventsComponent1: _IInternalEntityComponent { }

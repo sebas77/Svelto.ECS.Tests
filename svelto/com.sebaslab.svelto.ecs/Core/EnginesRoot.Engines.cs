@@ -255,7 +255,8 @@ namespace Svelto.ECS
             if (_isDisposed)
                 return;
             
-            using (var profiler = new PlatformProfiler("Final Dispose"))
+            var profiler = new PlatformProfiler("Final Dispose");
+            using (profiler.Sample())
             {
                 //Note: The engines are disposed before the the remove callback to give the chance to behave
                 //differently if a remove happens as a consequence of a dispose
@@ -361,7 +362,8 @@ namespace Svelto.ECS
                         "A submission started while the previous one was still flushing");
                     entitiesSubmissionScheduler.isRunning = true;
 
-                    using (var profiler = new PlatformProfiler("Svelto.ECS - Entities Submission"))
+                    var profiler = new PlatformProfiler("Svelto.ECS - Entities Submission");
+                    using (profiler.Sample())
                     {
                         var iterations = 0;
                         var hasEverSubmitted = false;

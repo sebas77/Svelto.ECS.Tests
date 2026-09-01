@@ -12,17 +12,17 @@ namespace Svelto.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Consumer<T> GenerateConsumer<T>(string name, uint capacity)
+        public Consumer<T> GenerateConsumer<T>(string name)
             where T : unmanaged, _IInternalEntityComponent
         {
-            return _enginesRoot.Target.GenerateConsumer<T>(name, capacity);
+            return _enginesRoot.Target.GenerateConsumer<T>(name);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Consumer<T> GenerateConsumer<T>(ExclusiveGroupStruct @group, string name, uint capacity)
+        public Consumer<T> GenerateConsumer<T>(ExclusiveGroupStruct @group, string name)
             where T : unmanaged, _IInternalEntityComponent
         {
-            return _enginesRoot.Target.GenerateConsumer<T>(group, name, capacity);
+            return _enginesRoot.Target.GenerateConsumer<T>(@group, name);
         }
 
 //enginesRoot is a weakreference because GenericEntityStreamConsumerFactory can be injected inside
@@ -32,9 +32,9 @@ namespace Svelto.ECS
 
     public interface IEntityStreamConsumerFactory
     {
-        Consumer<T> GenerateConsumer<T>(string name, uint capacity) where T : unmanaged, _IInternalEntityComponent;
+        Consumer<T> GenerateConsumer<T>(string name) where T : unmanaged, _IInternalEntityComponent;
 
-        Consumer<T> GenerateConsumer<T>(ExclusiveGroupStruct @group, string name, uint capacity)
+        Consumer<T> GenerateConsumer<T>(ExclusiveGroupStruct @group, string name)
             where T : unmanaged, _IInternalEntityComponent;
     }
 }

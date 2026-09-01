@@ -28,7 +28,8 @@ namespace Svelto.ECS.SveltoOnDOTS
         {
             var       engines         = _engines;
             JobHandle combinedHandles = inputHandles;
-            using (var profiler = new PlatformProfiler(_name))
+            var profiler = new PlatformProfiler(_name);
+            using (profiler.Sample())
             {
                 for (var index = 0; index < engines.count; index++)
                 {
@@ -66,7 +67,8 @@ namespace Svelto.ECS.SveltoOnDOTS
         public JobHandle Execute(JobHandle combinedHandles, ref Param _param)
         {
             var engines = _engines;
-            using (var profiler = new PlatformProfiler(_name))
+            var profiler = new PlatformProfiler(_name);
+            using (profiler.Sample())
             {
                 for (var index = 0; index < engines.count; index++)
                 {

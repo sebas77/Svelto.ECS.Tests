@@ -51,18 +51,18 @@ namespace Svelto.ECS
                 }
         }
 
-        internal Consumer<T> GenerateConsumer(string name, uint capacity)
+        internal Consumer<T> GenerateConsumer(string name)
         {
-            var consumer = new Consumer<T>(name, capacity);
+            var consumer = new Consumer<T>(name);
 
             _consumers.Add(consumer);
 
             return consumer;
         }
 
-        internal Consumer<T> GenerateConsumer(ExclusiveGroupStruct group, string name, uint capacity)
+        internal Consumer<T> GenerateConsumer(ExclusiveGroupStruct group, string name)
         {
-            var consumer = new Consumer<T>(group, name, capacity);
+            var consumer = new Consumer<T>(group, name);
 
             _consumers.Add(consumer);
 

@@ -1,26 +1,21 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using Svelto.Common;
-using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
+    /// <summary>
+    ///     Thread-safe, unbounded FIFO consumer for entity stream notifications. Messages are stored as the strongly
+    ///     typed ValueTuple payload, so publishing and consuming unmanaged components does not box.
+    /// </summary>
     public struct Consumer<T> : IDisposable where T : unmanaged, _IInternalEntityComponent
     {
-        internal Consumer(string name, uint capacity) : this()
+        internal Consumer(string name) : this()
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
-                _name = name;
-#endif
-                _ringBuffer = new RingBuffer<ValueTuple<T, EGID>>((int) capacity,
-#if DEBUG && !PROFILE_SVELTO
-                                                                  _name
-#else
-                string.Empty
-#endif
-                );
+                _queue = new ConcurrentQueue<ValueTuple<T, EGID>>();
                 mustBeDisposed          = MemoryUtilities.NativeAlloc<bool>(1, Allocator.Persistent);
                 *(bool*) mustBeDisposed = false;
 
@@ -29,7 +24,7 @@ namespace Svelto.ECS
             }
         }
 
-        internal Consumer(ExclusiveGroupStruct group, string name, uint capacity) : this(name, capacity)
+        internal Consumer(ExclusiveGroupStruct group, string name) : this(name)
         {
             this.group = group;
             hasGroup   = true;
@@ -40,13 +35,13 @@ namespace Svelto.ECS
             unsafe
             {
                 if (*(bool*)isActive)
-                    _ringBuffer.Enqueue((entity, egid));
+                    _queue.Enqueue((entity, egid));
             }
         }
 
         public bool TryDequeue(out T entity)
         {
-            var tryDequeue = _ringBuffer.TryDequeue(out var values);
+            var tryDequeue = _queue.TryDequeue(out var values);
 
             entity = values.Item1;
 
@@ -58,7 +53,7 @@ namespace Svelto.ECS
         //moment of the consumption, but it's instead to store a copy of the entity at the moment of the publishing
         public bool TryDequeue(out T entity, out EGID id)
         {
-            var tryDequeue = _ringBuffer.TryDequeue(out var values);
+            var tryDequeue = _queue.TryDequeue(out var values);
 
             entity = values.Item1;
             id     = values.Item2;
@@ -66,7 +61,7 @@ namespace Svelto.ECS
             return tryDequeue;
         }
 
-        public void Flush() { _ringBuffer.Reset(); }
+        public void Flush() { _queue.Clear(); }
 
         public void Dispose()
         {
@@ -76,7 +71,7 @@ namespace Svelto.ECS
             }
         }
 
-        public uint Count() { return (uint) _ringBuffer.Count; }
+        public uint Count() { return (uint) _queue.Count; }
 
         public void Free()
         {
@@ -100,15 +95,12 @@ namespace Svelto.ECS
             }
         }
 
-        readonly RingBuffer<ValueTuple<T, EGID>> _ringBuffer;
+        readonly ConcurrentQueue<ValueTuple<T, EGID>> _queue;
 
         internal readonly ExclusiveGroupStruct group;
         internal readonly bool                 hasGroup;
         internal          IntPtr               isActive;
         internal          IntPtr               mustBeDisposed;
 
-#if DEBUG && !PROFILE_SVELTO
-        readonly string _name;
-#endif
     }
 }
