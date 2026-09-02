@@ -3,7 +3,18 @@ All notable changes to this project will be documented in this file. Changes are
 
 ## [3.7.1] - 08-2026
 
+### Breaking changes
+
+* `SveltoDictionaryKeyValueEnumerator<...>` is now the nested `SveltoDictionary<...>.SveltoDictionaryKeyValueEnumerator` type. Update explicit enumerator declarations accordingly.
+
+### Added
+
 * Add cached full type names through `TypeCache<T>.fullName`
+
+### Fixed
+
+* Debug SveltoDictionary enumerators now track a shared structural revision and reject mutations made through copied dictionary values.
+* SlotMap handles cannot become valid again after generation exhaustion or a clear operation.
 
 ## [3.7.0] - 08-2026
 

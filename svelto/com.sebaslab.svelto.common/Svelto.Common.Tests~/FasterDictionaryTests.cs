@@ -11,7 +11,12 @@ namespace Svelto.Common.Tests
             var dictionary = new FasterDictionary<int, string>();
             dictionary.Add(1, "one");
 
+#if DEBUG
             Assert.That(() => dictionary.Add(1, "another one"), Throws.TypeOf<SveltoDictionaryException>());
+#else
+            dictionary.Add(1, "another one");
+            Assert.That(dictionary[1], Is.EqualTo("another one"));
+#endif
         }
 
         [Test]

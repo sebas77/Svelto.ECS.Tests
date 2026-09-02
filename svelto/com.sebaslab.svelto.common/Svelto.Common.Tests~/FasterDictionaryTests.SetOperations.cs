@@ -14,7 +14,12 @@ namespace Svelto.Common.Tests
             test.Add(1, "one.a");
             void TestAddDup() { test.Add(1, "one.b"); }
 
+#if DEBUG
             Assert.Throws(typeof(SveltoDictionaryException), TestAddDup);
+#else
+            TestAddDup();
+            Assert.AreEqual("one.b", test[1]);
+#endif
         }
 
         [TestCase]

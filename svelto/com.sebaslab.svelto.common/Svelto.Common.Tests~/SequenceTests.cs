@@ -61,7 +61,11 @@ namespace Svelto.Common.Tests
         {
             Assert.That(() => CreateSequence(new Untagged()), Throws.Exception);
             Assert.That(() => CreateSequence(new Unknown()), Throws.Exception);
+#if DEBUG
             Assert.That(() => CreateSequence(new First(), new First()), Throws.Exception);
+#else
+            Assert.That(() => CreateSequence(new First(), new First()), Throws.Nothing);
+#endif
         }
 
         [Test]

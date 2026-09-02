@@ -316,7 +316,11 @@ namespace Svelto.Common.Tests
                 bag.Dequeue<byte>();
                 bag.Dequeue<byte>();
 
+#if DEBUG
                 Assert.That(() => bag.Dequeue<byte>(), Throws.Exception);
+#else
+                Assert.That(bag.count, Is.Zero);
+#endif
             }
             finally
             {

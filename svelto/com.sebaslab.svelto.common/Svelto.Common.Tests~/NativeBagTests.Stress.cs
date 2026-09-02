@@ -120,6 +120,7 @@ namespace Svelto.Common.Tests
         [Test]
         public void TestCantDequeMoreThanQueue()
         {
+#if DEBUG
             Assert.Throws<Exception>(() =>
             {
                 using (var _simpleNativeBag = new NativeBag(Allocator.Persistent))
@@ -137,6 +138,9 @@ namespace Svelto.Common.Tests
                     Assert.That(_simpleNativeBag.count, Is.EqualTo(32));
                 }
             });
+#else
+            Assert.Pass("NativeBag bounds checks are intentionally compiled out of Release builds");
+#endif
         }
 
         [Test]

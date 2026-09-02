@@ -75,7 +75,11 @@ namespace Svelto.Common.Tests
         {
             using (var _simpleNativeArray = NativeDynamicArray.Alloc<uint>())
             {
+#if DEBUG
                 Assert.Throws<Exception>(() => _simpleNativeArray.Set<uint>(10, 10));
+#else
+                Assert.That(_simpleNativeArray.Count<uint>(), Is.Zero);
+#endif
             }
         }
 
