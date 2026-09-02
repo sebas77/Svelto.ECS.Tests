@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file. Changes are
 
 * Debug SveltoDictionary enumerators now track a shared structural revision and reject mutations made through copied dictionary values.
 * SlotMap handles cannot become valid again after generation exhaustion or a clear operation.
+* Map managed-allocation metadata to Unity's persistent allocator, avoiding Unity's reserved audio-kernel allocator.
 
 ## [3.7.0] - 08-2026
 
